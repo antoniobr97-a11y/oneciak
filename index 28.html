@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="only light">
+<title>OneCiak — Film Market Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --cream: #f9f7f4;
+  --white: #ffffff;
+  --border: #e8e5e0;
+  --border-light: #f0ede8;
+  --text: #1a1814;
+  --muted: #8a8480;
+  --muted-light: #b8b4b0;
+  --accent: #9b8c7a;
+  --danger: #9b2c2c;
+  --success: #1a5c3a;
+  --radius: 4px;
+  --radius-lg: 8px;
+}
+html { color-scheme: only light; }
+body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+/* ── SECTIONS ── */
+#sec-landing { display: block; }
+#sec-form    { display: none; }
+#sec-loading { display: none; }
+#sec-results { display: none; }
+
+/* ══════════════════════
+   LANDING
+══════════════════════ */
+
+/* NAV */
+.l-nav {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 28px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.l-logo { font-family: 'Bodoni Moda', serif; font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+
+/* HERO */
+.l-hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  background: var(--cream);
+}
+.l-hero-inner {
+  flex: 1; display: flex; flex-direction: column; justify-content: center;
+  max-width: 680px; margin: 0 auto; padding: 80px 32px 60px; width: 100%;
+}
+.l-eyebrow {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 28px; display: flex; align-items: center; gap: 14px;
+}
+.l-eyebrow::before { content: ''; display: inline-block; width: 32px; height: 1px; background: var(--accent); }
+.l-headline {
+  font-family: 'Bodoni Moda', serif;
+  font-size: clamp(40px, 9vw, 68px);
+  font-weight: 400; line-height: 1.04; letter-spacing: -2px;
+  color: var(--text); margin-bottom: 28px;
+}
+.l-headline em { font-style: italic; color: var(--accent); }
+.l-desc {
+  font-size: 16px; color: var(--muted); line-height: 1.75;
+  max-width: 420px; font-weight: 300; margin-bottom: 44px;
+  border-left: 2px solid var(--border); padding-left: 20px;
+}
+.l-terms { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+.l-terms input[type="checkbox"] { width: 15px; height: 15px; margin-top: 3px; flex-shrink: 0; accent-color: var(--text); cursor: pointer; }
+.l-terms label { font-size: 12px; color: var(--muted); line-height: 1.6; cursor: pointer; font-weight: 300; }
+.l-terms-error { display: none; font-size: 12px; color: var(--danger); font-weight: 500; margin-bottom: 12px; }
+.l-btn {
+  display: inline-flex; align-items: center; gap: 14px;
+  padding: 16px 32px; background: var(--text); color: #fff;
+  border: none; border-radius: var(--radius); font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+  width: fit-content; letter-spacing: 0.02em;
+}
+.l-btn:hover { opacity: 0.88; }
+.l-subnote { margin-top: 14px; font-size: 12px; color: var(--muted-light); font-weight: 300; }
+
+/* STATS BAR */
+.l-stats-bar {
+  border-top: 1px solid var(--border);
+  background: var(--white);
+  padding: 0 32px;
+  max-width: 680px; margin: 0 auto; width: 100%;
+  display: flex; align-items: stretch;
+}
+.l-stat {
+  flex: 1; padding: 24px 0;
+  border-right: 1px solid var(--border);
+  padding-right: 28px; margin-right: 28px;
+}
+.l-stat:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+.l-stat-num { font-family: 'Bodoni Moda', serif; font-size: 28px; font-weight: 400; color: var(--text); letter-spacing: -1px; line-height: 1; margin-bottom: 4px; }
+.l-stat-label { font-size: 11px; color: var(--muted); font-weight: 400; letter-spacing: 0.04em; }
+
+/* ABOUT SECTION */
+.l-about {
+  padding: 80px 32px;
+  max-width: 680px; margin: 0 auto; width: 100%;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start;
+}
+.l-about-eyebrow { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; font-weight: 400; }
+.l-about-title { font-family: 'Bodoni Moda', serif; font-size: clamp(20px,4vw,28px); font-weight: 400; line-height: 1.2; letter-spacing: -0.5px; margin-bottom: 16px; }
+.l-about-text { font-size: 13px; color: var(--muted); line-height: 1.75; font-weight: 300; }
+.l-about-dims { display: flex; flex-direction: column; gap: 0; }
+.l-about-dim {
+  padding: 16px 0; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 14px;
+  font-size: 13px; font-weight: 500; color: var(--text);
+}
+.l-about-dim:first-child { border-top: 1px solid var(--border); }
+.l-about-dim-num { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 300; color: var(--muted-light); min-width: 24px; }
+
+/* MENU OVERLAY */
+.menu-overlay { position: fixed; inset: 0; z-index: 200; background: var(--white); display: none; flex-direction: column; padding: 0; overflow-y: auto; }
+.menu-overlay.open { display: flex; }
+.menu-header { padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+.menu-logo { font-family: 'Bodoni Moda', serif; font-size: 20px; font-weight: 700; color: var(--text); }
+.menu-close { background: none; border: none; font-size: 22px; color: var(--muted); cursor: pointer; line-height: 1; padding: 4px; }
+.menu-body { padding: 40px 32px 48px; max-width: 640px; }
+.menu-sec { margin-bottom: 40px; }
+.menu-sec-title { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-light); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.menu-steps { display: flex; flex-direction: column; gap: 20px; }
+.menu-step { display: flex; gap: 18px; }
+.menu-step-n { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; color: var(--border); line-height: 1; min-width: 24px; }
+.menu-step-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.menu-step-desc { font-size: 13px; color: var(--muted); line-height: 1.65; font-weight: 300; }
+.menu-audience { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.menu-aud { padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.menu-aud-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.menu-aud-desc { font-size: 12px; color: var(--muted); line-height: 1.5; font-weight: 300; }
+.menu-faq-item { padding: 14px 0; border-bottom: 1px solid var(--border); }
+.menu-faq-item:last-child { border-bottom: none; }
+.menu-faq-q { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.menu-faq-a { font-size: 13px; color: var(--muted); line-height: 1.65; font-weight: 300; }
+.menu-cta { width: 100%; padding: 16px; background: var(--text); color: #fff; border: none; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: 0.02em; }
+
+/* HAMBURGER */
+.hamburger { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; gap: 5px; padding: 4px; }
+.hamburger span { display: block; width: 20px; height: 1.5px; background: var(--text); border-radius: 2px; transition: all 0.2s; }
+
+/* ══════════════════════
+   FORM
+══════════════════════ */
+.f-header {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 0 28px; height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+}
+.f-logo { font-family: 'Bodoni Moda', serif; font-size: 20px; font-weight: 700; color: var(--text); }
+.back-btn { font-size: 13px; color: var(--muted); background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 400; transition: color 0.15s; }
+.back-btn:hover { color: var(--text); }
+
+.f-main { max-width: 640px; margin: 0 auto; padding: 40px 24px 100px; }
+.f-title { font-family: 'Bodoni Moda', serif; font-size: 28px; font-weight: 400; margin-bottom: 6px; letter-spacing: -0.5px; }
+.f-subtitle { font-size: 14px; color: var(--muted); margin-bottom: 32px; font-weight: 300; }
+
+.card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px 20px; margin-bottom: 14px; }
+.card-title { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-light); margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+.card-title::after { content: ''; flex: 1; height: 1px; background: var(--border-light); }
+.field { margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text); }
+label .hint { font-weight: 300; color: var(--muted); font-size: 12px; }
+input[type="text"], input[type="email"], select, textarea {
+  width: 100%; padding: 11px 14px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); background: var(--cream);
+  transition: border-color 0.2s; appearance: none; -webkit-appearance: none; color-scheme: only light;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); background: var(--white); }
+textarea { resize: vertical; min-height: 82px; line-height: 1.5; }
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a8480' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer; }
+.btn-primary { width: 100%; padding: 15px; background: var(--text); color: #fff; border: none; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; letter-spacing: 0.02em; }
+.btn-primary:hover { opacity: 0.88; }
+.btn-secondary { width: 100%; padding: 13px; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; margin-top: 10px; letter-spacing: 0.02em; }
+.btn-secondary:hover { border-color: var(--text); color: var(--text); }
+.btn-unlock { width: 100%; padding: 15px; background: var(--text); color: #fff; border: none; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; letter-spacing: 0.02em; }
+.btn-unlock:hover { opacity: 0.88; }
+.error-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius); padding: 12px 14px; font-size: 13px; color: var(--danger); margin-top: 10px; display: none; }
+.disclaimer-box { background: var(--cream); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 14px; }
+.disclaimer-text { font-size: 11px; color: var(--muted); line-height: 1.7; }
+.disclaimer-text strong { color: var(--text); font-weight: 600; }
+.checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+.checkbox-row input[type="checkbox"] { width: 15px; height: 15px; margin-top: 2px; flex-shrink: 0; accent-color: var(--text); cursor: pointer; }
+.checkbox-label { font-size: 12px; color: var(--muted); line-height: 1.6; cursor: pointer; }
+.inline-error { display: none; font-size: 12px; color: var(--danger); font-weight: 500; margin-bottom: 10px; }
+
+/* ══════════════════════
+   LOADING
+══════════════════════ */
+#sec-loading { background: var(--cream); min-height: 100vh; align-items: center; justify-content: center; }
+.loading-wrap { text-align: center; padding: 40px 24px; }
+.spinner { width: 32px; height: 32px; border: 1.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.9s linear infinite; margin: 0 auto 28px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-title { font-family: 'Bodoni Moda', serif; font-size: 22px; font-weight: 400; color: var(--text); margin-bottom: 10px; letter-spacing: -0.3px; }
+.loading-desc { font-size: 13px; color: var(--muted); font-weight: 300; line-height: 1.7; max-width: 300px; margin: 0 auto; }
+
+/* ══════════════════════
+   RESULTS
+══════════════════════ */
+.r-header {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 0 28px; height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+}
+.r-logo { font-family: 'Bodoni Moda', serif; font-size: 20px; font-weight: 700; color: var(--text); }
+
+.r-hero {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 28px 36px;
+}
+.r-hero-inner { max-width: 640px; margin: 0 auto; }
+.r-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+.r-title {
+  font-family: 'Bodoni Moda', serif;
+  font-size: clamp(22px, 5vw, 34px);
+  font-weight: 400; letter-spacing: -0.5px;
+  color: var(--text); line-height: 1.15; margin-bottom: 12px;
+}
+.r-summary { font-size: 14px; color: var(--muted); line-height: 1.7; font-weight: 300; }
+.r-main { max-width: 640px; margin: 0 auto; padding: 24px 20px 80px; }
+
+/* OVERALL SCORE */
+.overall-card {
+  background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 20px 22px; margin-bottom: 14px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.overall-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-light); margin-bottom: 5px; }
+.overall-sublabel { font-size: 14px; color: var(--text); font-weight: 500; }
+.overall-num { font-family: 'DM Sans', sans-serif; font-size: 32px; font-weight: 300; line-height: 1; color: var(--text); letter-spacing: -1px; white-space: nowrap; }
+.overall-num .denom { font-size: 16px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-weight: 300; }
+
+/* EXEC SUMMARY */
+.exec-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 24px 22px; margin-bottom: 14px;
+  border-left: 3px solid var(--accent);
+}
+.exec-label { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+.exec-text {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-style: normal; font-weight: 300;
+  color: var(--text); line-height: 1.8; margin-bottom: 18px;
+}
+.exec-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.exec-box { padding: 14px 16px; border-radius: var(--radius); border: 1px solid var(--border); }
+.exec-box.risk { background: #fef7f7; border-color: #f5d0d0; }
+.exec-box.opp  { background: #f4faf6; border-color: #c3e6cd; }
+.exec-box-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+.exec-box.risk .exec-box-label { color: var(--danger); }
+.exec-box.opp  .exec-box-label { color: var(--success); }
+.exec-box-text { font-size: 12px; color: var(--text); line-height: 1.6; font-weight: 300; }
+
+/* STICKY TABS */
+.tabs-sticky {
+  position: sticky; top: 60px; z-index: 90;
+  background: var(--cream); padding: 12px 0 10px;
+}
+.tabs-nav {
+  display: flex; border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; background: var(--white);
+}
+.tab-btn {
+  flex: 1; padding: 11px 2px; text-align: center;
+  font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+  background: none; border: none; cursor: pointer;
+  border-right: 1px solid var(--border); transition: all 0.15s; line-height: 1.3;
+}
+.tab-btn:last-child { border-right: none; }
+.tab-btn.active { background: var(--text); color: #fff; }
+
+/* TAB PANELS */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+.tab-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 22px 20px; margin-bottom: 14px; margin-top: 10px;
+}
+.tab-score-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light);
+  gap: 12px;
+}
+.tab-score-left { flex: 1; }
+.tab-score-label { font-family: 'Bodoni Moda', serif; font-size: 18px; font-weight: 400; letter-spacing: -0.3px; margin-bottom: 6px; }
+.tab-score-badge {
+  display: inline-block; font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 2px 9px; border-radius: 999px;
+}
+.score-badge-high { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; }
+.score-badge-mid  { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+.score-badge-low  { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
+.tab-score-num { font-family: 'Bodoni Moda', serif; font-size: 32px; font-weight: 400; line-height: 1; letter-spacing: -1px; white-space: nowrap; }
+.tab-score-num .denom { font-size: 15px; color: var(--muted); font-family: 'Bodoni Moda', serif; font-weight: 400; }
+
+/* Dynamic colors */
+.score-high { color: var(--success); }
+.score-mid  { color: #92400e; }
+.score-low  { color: var(--danger); }
+.bar-high { background: #16a34a; }
+.bar-mid  { background: #d97706; }
+.bar-low  { background: #dc2626; }
+
+.score-bar-bg { height: 3px; background: var(--border); border-radius: 999px; margin-bottom: 16px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 999px; background: var(--accent); transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
+.score-verdict { font-size: 14px; font-weight: 600; margin-bottom: 8px; line-height: 1.4; color: var(--text); }
+.score-detail { font-size: 13px; color: var(--muted); line-height: 1.75; font-weight: 300; }
+
+/* FLAGS */
+.flags-block { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-light); }
+.flags-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+.flags-label.red { color: var(--danger); }
+.flags-label.green { color: var(--success); }
+.flag-item { font-size: 13px; line-height: 1.55; padding: 8px 12px; border-radius: var(--radius); margin-bottom: 6px; border-left: 2px solid; }
+.flag-item.red { background: #fef7f7; color: #7a2020; border-color: var(--danger); }
+.flag-item.green { background: #f4faf6; color: #1a5c3a; border-color: var(--success); }
+
+/* TIPS */
+.tips-block { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-light); }
+.tips-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-light); margin-bottom: 12px; display: block; }
+.tip-item { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); }
+.tip-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.tip-text { font-size: 13px; color: var(--text); line-height: 1.65; padding-left: 16px; position: relative; margin-bottom: 6px; }
+.tip-text::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-weight: 600; }
+.tip-links { padding-left: 16px; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.tip-link { font-size: 11px; font-weight: 500; color: var(--text); text-decoration: none; border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; transition: all 0.15s; white-space: nowrap; background: var(--cream); }
+.tip-link:hover { background: var(--text); color: #fff; border-color: var(--text); }
+
+/* ACTION PLAN */
+.action-block { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-light); }
+.action-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-light); margin-bottom: 12px; display: block; }
+.action-item { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
+.action-item:last-child { margin-bottom: 0; }
+.action-tag { font-size: 10px; font-weight: 600; color: var(--white); background: var(--accent); padding: 3px 9px; border-radius: 999px; white-space: nowrap; letter-spacing: 0.04em; flex-shrink: 0; margin-top: 2px; }
+.action-text { font-size: 13px; color: var(--text); line-height: 1.6; font-weight: 300; }
+
+/* EXTRA CARDS */
+.extra-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px 20px; margin-bottom: 14px; }
+.extra-title { font-family: 'Bodoni Moda', serif; font-size: 16px; font-weight: 400; letter-spacing: -0.2px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); color: var(--text); }
+.comp-item { padding: 12px 0; border-bottom: 1px solid var(--border-light); }
+.comp-item:last-child { border-bottom: none; padding-bottom: 0; }
+.comp-name { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+.comp-detail { font-size: 12px; color: var(--muted); line-height: 1.5; font-weight: 300; }
+.comp-lesson { font-size: 12px; color: var(--text); font-weight: 400; margin-top: 5px; font-style: italic; padding-left: 12px; border-left: 2px solid var(--border); }
+.market-item { padding: 11px 0; border-bottom: 1px solid var(--border-light); }
+.market-item:last-child { border-bottom: none; padding-bottom: 0; }
+.market-name { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+.market-reason { font-size: 13px; color: var(--muted); line-height: 1.55; font-weight: 300; }
+.roadmap-step { display: flex; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border-light); }
+.roadmap-step:last-child { border-bottom: none; }
+.roadmap-num { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--text); color: var(--text); font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.roadmap-phase { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-light); margin-bottom: 3px; }
+.roadmap-action { font-size: 13px; color: var(--text); line-height: 1.65; font-weight: 300; }
+
+/* LOCKED */
+.locked-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px 22px; text-align: center; margin-bottom: 14px; margin-top: 10px; }
+.locked-title { font-family: 'Bodoni Moda', serif; font-size: 20px; font-weight: 400; margin-bottom: 8px; letter-spacing: -0.3px; }
+.locked-desc { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.7; font-weight: 300; }
+.locked-features { list-style: none; margin-bottom: 20px; text-align: left; display: inline-block; }
+.locked-features li { font-size: 13px; padding: 4px 0; color: var(--text); }
+.locked-features li::before { content: '— '; color: var(--accent); font-weight: 400; }
+
+/* ACCORDION */
+.accordion-wrap { margin-top: 20px; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--white); }
+.accordion-item { border-bottom: 1px solid var(--border); }
+.accordion-item:last-child { border-bottom: none; }
+.accordion-trigger {
+  width: 100%; padding: 16px 18px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: none; border: none; cursor: pointer; text-align: left;
+  font-family: 'DM Sans', sans-serif; transition: background 0.15s;
+}
+.accordion-trigger:hover { background: var(--cream); }
+.accordion-trigger.open { background: var(--cream); }
+.accordion-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+.accordion-icon { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: 'Bodoni Moda', serif; font-size: 11px; font-weight: 400; color: var(--muted); transition: all 0.15s; }
+.accordion-trigger.open .accordion-icon { background: var(--text); border-color: var(--text); color: #fff; }
+.accordion-label { font-size: 14px; font-weight: 600; color: var(--text); }
+.accordion-sublabel { font-size: 12px; color: var(--muted); font-weight: 300; margin-top: 1px; }
+.accordion-score { font-family: 'Bodoni Moda', serif; font-size: 18px; font-weight: 400; flex-shrink: 0; }
+.accordion-score .denom { font-size: 12px; color: var(--muted); }
+.accordion-chevron { font-size: 14px; color: var(--muted-light); flex-shrink: 0; transition: transform 0.2s; }
+.accordion-trigger.open .accordion-chevron { transform: rotate(180deg); }
+.accordion-body { display: none; padding: 0 18px 18px; }
+.accordion-body.open { display: block; }
+.accordion-divider { height: 1px; background: var(--border-light); margin-bottom: 16px; }
+.strategy-header {
+  margin: 32px 0 20px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+}
+.strategy-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+.strategy-title { font-family: 'Bodoni Moda', serif; font-size: 22px; font-weight: 400; letter-spacing: -0.3px; color: var(--text); }
+.strategy-subtitle { font-size: 13px; color: var(--muted); margin-top: 6px; font-weight: 300; line-height: 1.6; }
+
+/* BLURRED PREVIEW */
+.preview-blur-wrap { position: relative; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-light); overflow: hidden; }
+.preview-blur-content { filter: blur(3px); user-select: none; pointer-events: none; opacity: 0.5; }
+.preview-blur-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 0%, var(--white) 60%); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px; }
+.preview-blur-label { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; background: var(--white); padding: 4px 14px; border: 1px solid var(--border); border-radius: 999px; }
+
+/* TRANSLATE BANNER */
+.translate-banner { display: none; background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius); padding: 10px 14px; margin-bottom: 14px; font-size: 12px; color: #92400e; font-weight: 500; align-items: center; justify-content: space-between; gap: 10px; }
+.translate-banner button { background: none; border: none; font-size: 14px; color: #92400e; cursor: pointer; flex-shrink: 0; padding: 0; }
+
+/* UPGRADE DIVIDER */
+.upgrade-divider { display: flex; align-items: center; gap: 14px; margin: 28px 0 20px; }
+.upgrade-divider::before, .upgrade-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.upgrade-divider span { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-light); white-space: nowrap; }
+
+/* PDF */
+.pdf-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 20px; margin-bottom: 14px; margin-top: 24px; }
+.pdf-label { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--text); }
+.pdf-row { display: flex; gap: 8px; }
+.pdf-row input { flex: 1; }
+.pdf-row button { padding: 11px 16px; background: var(--text); color: #fff; border: none; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: opacity 0.2s; }
+.pdf-row button:hover { opacity: 0.85; }
+.success-msg { background: #f4faf6; border: 1px solid #c3e6cd; border-radius: var(--radius); padding: 10px 14px; font-size: 13px; color: var(--success); margin-top: 10px; display: none; text-align: center; }
+.footer-note { text-align: center; font-size: 11px; color: var(--muted-light); padding-top: 20px; line-height: 1.7; font-weight: 300; }
+</style>
+</head>
+<body>
+
+<!-- ══ LANDING ══ -->
+<div id="sec-landing">
+
+  <!-- Menu Overlay -->
+  <div class="menu-overlay" id="menuOverlay">
+    <div class="menu-header">
+      <div class="menu-logo">OneCiak</div>
+      <button class="menu-close" onclick="closeMenu()">✕</button>
+    </div>
+    <div class="menu-body">
+      <div class="menu-sec">
+        <div class="menu-sec-title">How it works</div>
+        <div class="menu-steps">
+          <div class="menu-step"><div class="menu-step-n">01</div><div><div class="menu-step-title">Describe your project</div><div class="menu-step-desc">Fill in your film's logline, genre, budget and distribution goals. Under 3 minutes.</div></div></div>
+          <div class="menu-step"><div class="menu-step-n">02</div><div><div class="menu-step-title">Get your analysis</div><div class="menu-step-desc">AI evaluates your project across five key industry dimensions with real benchmarks.</div></div></div>
+          <div class="menu-step"><div class="menu-step-n">03</div><div><div class="menu-step-title">Act on the insights</div><div class="menu-step-desc">Free report validates your direction. Full report gives you a complete actionable plan.</div></div></div>
+        </div>
+      </div>
+      <div class="menu-sec">
+        <div class="menu-sec-title">Who is it for</div>
+        <div class="menu-audience">
+          <div class="menu-aud"><div class="menu-aud-title">First-time directors</div><div class="menu-aud-desc">Understand your market position before committing resources.</div></div>
+          <div class="menu-aud"><div class="menu-aud-title">Screenwriters</div><div class="menu-aud-desc">Validate your concept before writing the full script.</div></div>
+          <div class="menu-aud"><div class="menu-aud-title">Independent producers</div><div class="menu-aud-desc">Fast second opinion before presenting to investors.</div></div>
+          <div class="menu-aud"><div class="menu-aud-title">Film school graduates</div><div class="menu-aud-desc">Bridge academic training and the real film market.</div></div>
+        </div>
+      </div>
+      <div class="menu-sec">
+        <div class="menu-sec-title">FAQ</div>
+        <div class="menu-faq-item"><div class="menu-faq-q">Is this a real consultant?</div><div class="menu-faq-a">Advanced AI trained on film market data. Structured analysis most filmmakers never access.</div></div>
+        <div class="menu-faq-item"><div class="menu-faq-q">What does the free report cover?</div><div class="menu-faq-a">All five dimensions with a general assessment and one key recommendation each.</div></div>
+        <div class="menu-faq-item"><div class="menu-faq-q">What does the full report add?</div><div class="menu-faq-a">Deep analysis, red flags, strengths, 3 recommendations with real links, action plans, funding sources, comparable films, international markets and a 5-step roadmap.</div></div>
+        <div class="menu-faq-item"><div class="menu-faq-q">Can I get a refund?</div><div class="menu-faq-a">No refunds once the report is generated. Please read the disclaimer before purchasing.</div></div>
+        <div class="menu-faq-item"><div class="menu-faq-q">Is my project data private?</div><div class="menu-faq-a">Data is used only to generate the report and is not stored or shared.</div></div>
+      </div>
+      <button class="menu-cta" onclick="closeMenuGoForm()">Start Free Analysis →</button>
+    </div>
+  </div>
+
+  <!-- Top Nav -->
+  <nav class="l-nav">
+    <div class="l-logo">OneCiak</div>
+    <button class="hamburger" id="hamburgerBtn" onclick="openMenu()"><span></span><span></span><span></span></button>
+  </nav>
+
+  <!-- Hero -->
+  <div class="l-hero">
+    <div class="l-hero-inner">
+      <div class="l-eyebrow">AI-Powered Analysis</div>
+      <h1 class="l-headline">Does your film<br>have a <em>real market?</em></h1>
+      <p class="l-desc">A professional market assessment across five industry dimensions — before you invest time and money into your project.</p>
+      <div class="l-terms">
+        <input type="checkbox" id="termsCheck">
+        <label for="termsCheck">I understand that OneCiak provides AI-generated analysis for informational purposes only. It does not constitute professional advice. No refunds once the report is generated.</label>
+      </div>
+      <div class="l-terms-error" id="termsError">Please accept the disclaimer to continue.</div>
+      <button class="l-btn" onclick="onStartClick()">Start Free Analysis →</button>
+      <p class="l-subnote">Free report · No account required</p>
+    </div>
+
+    <!-- Stats bar -->
+    <div style="border-top:1px solid var(--border);background:var(--white)">
+      <div class="l-stats-bar">
+        <div class="l-stat"><div class="l-stat-num">5</div><div class="l-stat-label">Analysis Dimensions</div></div>
+        <div class="l-stat"><div class="l-stat-num">€29</div><div class="l-stat-label">Full Report</div></div>
+        <div class="l-stat"><div class="l-stat-num">PDF</div><div class="l-stat-label">Export Included</div></div>
+      </div>
+    </div>
+
+    <!-- About section -->
+    <div style="border-top:1px solid var(--border);background:var(--cream)">
+      <div class="l-about">
+        <div>
+          <div class="l-about-eyebrow">About OneCiak</div>
+          <h2 class="l-about-title">Professional intelligence for independent filmmakers.</h2>
+          <p class="l-about-text">OneCiak uses advanced AI trained on real film market data to give you the kind of honest, structured analysis that most independent filmmakers never have access to — before committing resources to a project.</p>
+        </div>
+        <div class="l-about-dims">
+          <div class="l-about-dim"><span class="l-about-dim-num">01</span> Creative Package</div>
+          <div class="l-about-dim"><span class="l-about-dim-num">02</span> Financial Plan</div>
+          <div class="l-about-dim"><span class="l-about-dim-num">03</span> Market &amp; Audience</div>
+          <div class="l-about-dim"><span class="l-about-dim-num">04</span> Festival Strategy</div>
+          <div class="l-about-dim"><span class="l-about-dim-num">05</span> Distribution &amp; Revenue</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end sec-landing -->
+
+
+<!-- ══ FORM ══ -->
+<div id="sec-form">
+  <div class="f-header">
+    <div class="f-logo">OneCiak</div>
+    <button class="back-btn" onclick="goLanding()">← Back</button>
+  </div>
+  <div class="f-main">
+    <div class="f-title">Tell us about your project</div>
+    <div class="f-subtitle">Free report covers all 5 dimensions. Full report unlocks for €29.</div>
+    <div class="card">
+      <div class="card-title">Your Project</div>
+      <div class="field">
+        <label>Film Title <span class="hint">(or working title)</span></label>
+        <input type="text" id="title" placeholder="e.g. The Last Harvest">
+      </div>
+      <div class="field">
+        <label>Logline</label>
+        <textarea id="logline" placeholder="Who is the protagonist, what do they want, what stands in the way?"></textarea>
+      </div>
+      <div class="field">
+        <label>Genre <span class="hint">(select up to 2)</span></label>
+        <select id="genre1" onchange="checkOther()">
+          <option value="">First genre…</option>
+          <option>Drama</option><option>Documentary</option><option>Thriller</option>
+          <option>Comedy</option><option>Horror</option><option>Sci-Fi</option>
+          <option>Action</option><option>Romance</option><option>Animation</option><option>Other</option>
+        </select>
+        <select id="genre2" style="margin-top:8px" onchange="checkOther()">
+          <option value="">Second genre (optional)…</option>
+          <option>Drama</option><option>Documentary</option><option>Thriller</option>
+          <option>Comedy</option><option>Horror</option><option>Sci-Fi</option>
+          <option>Action</option><option>Romance</option><option>Animation</option><option>Other</option>
+        </select>
+        <input type="text" id="genreOther" placeholder="Specify other genre…" style="margin-top:8px;display:none">
+      </div>
+      <div class="field">
+        <label>Format</label>
+        <select id="format">
+          <option value="">Select format…</option>
+          <option>Feature Film</option><option>Short Film</option>
+          <option>Series / Mini-series</option><option>Documentary Feature</option><option>Documentary Short</option>
+        </select>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Budget &amp; Distribution</div>
+      <div class="field">
+        <label>Estimated Budget</label>
+        <select id="budgetSelect">
+          <option value="">Select budget…</option>
+          <option>Under €5K</option><option>€5K – €15K</option><option>€15K – €30K</option>
+          <option>€50K</option><option>€100K</option><option>€200K</option>
+          <option>€500K</option><option>€1M</option><option>€2M</option><option>€5M</option><option>€10M+</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Target Audience</label>
+        <select id="audience">
+          <option value="">Select audience…</option>
+          <option>General / Mainstream</option><option>Art house / Cinephiles</option>
+          <option>Young adults (18–30)</option><option>Family</option>
+          <option>Niche / Community-specific</option><option>International</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Distribution Goal</label>
+        <select id="distrib">
+          <option value="">Select goal…</option>
+          <option>Major streaming platforms (Netflix, Amazon…)</option>
+          <option>Independent streaming / VOD</option><option>Theatrical release</option>
+          <option>Festival circuit only</option><option>Self-distribution</option><option>Not sure yet</option>
+        </select>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Context</div>
+      <div class="field">
+        <label>Production Country</label>
+        <input type="text" id="country" placeholder="e.g. Italy, France, USA">
+      </div>
+      <div class="field">
+        <label>Director Experience <span class="hint">(optional)</span></label>
+        <select id="experience">
+          <option value="">Select level…</option>
+          <option>First film</option><option>1–2 short films</option>
+          <option>1–2 feature films</option><option>3+ feature films</option>
+          <option>Experience in TV / advertising</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Anything else? <span class="hint">(optional)</span></label>
+        <textarea id="extra" placeholder="Co-production? Attached talent? Funding secured? Based on a true story?" style="min-height:66px"></textarea>
+      </div>
+    </div>
+    <div class="disclaimer-box">
+      <div class="disclaimer-text"><strong>Disclaimer:</strong> Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. Results are estimates and do not guarantee any outcome.</div>
+    </div>
+    <button class="btn-primary" onclick="runAnalysis(false)">Get Free Analysis →</button>
+    <div class="error-box" id="errorBox"></div>
+  </div>
+</div>
+
+
+<!-- ══ LOADING ══ -->
+<div id="sec-loading">
+  <div class="loading-wrap">
+    <div class="spinner"></div>
+    <div class="loading-title" id="loadingTitle">Analyzing your project…</div>
+    <div class="loading-desc" id="loadingDesc">Evaluating your project across five market dimensions with real industry data.</div>
+  </div>
+</div>
+
+
+<!-- ══ RESULTS ══ -->
+<div id="sec-results">
+  <div class="r-header">
+    <div class="r-logo">OneCiak</div>
+    <button class="back-btn" onclick="goForm()">← New Analysis</button>
+  </div>
+  <div class="r-hero">
+    <div class="r-hero-inner">
+      <div class="r-eyebrow">Film Market Intelligence Report</div>
+      <div class="r-title" id="resultTitle"></div>
+      <div class="r-summary" id="resultSubtitle"></div>
+    </div>
+  </div>
+  <div class="r-main">
+    <div class="translate-banner" id="translateBanner">
+      <span>⚠️ Safari auto-translation detected. Please disable it for accurate results.</span>
+      <button onclick="document.getElementById('translateBanner').style.display='none'">✕</button>
+    </div>
+    <div id="overallScore"></div>
+    <div id="execSummary"></div>
+    <div id="accordionMenu" style="display:none"></div>
+    <div id="upgradeSection"></div>
+    <div class="pdf-card">
+      <div class="pdf-label">Save report as PDF</div>
+      <div class="pdf-row">
+        <input type="email" id="pdfEmail" placeholder="Your email address">
+        <button onclick="savePDF()">Save PDF</button>
+      </div>
+      <div class="success-msg" id="pdfSuccess">PDF saved — check your downloads.</div>
+    </div>
+    <button class="btn-secondary" onclick="goForm()">← New Analysis</button>
+    <div class="disclaimer-box" style="margin-top:14px">
+      <div class="disclaimer-text"><strong>Legal Disclaimer:</strong> Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. OneCiak assumes no liability. Results are estimates and do not guarantee any outcome. OneCiak is not a licensed consulting firm.</div>
+    </div>
+    <p class="footer-note">OneCiak — Film Market Intelligence · oneciak.com</p>
+  </div>
+</div>
+
+<script>
+
+var API_KEY = "";
+var lastResult = null;
+var lastProject = null;
+var isFullReport = false;
+
+/* ── NAV ── */
+function showOnly(id) {
+  ['sec-landing','sec-form','sec-loading','sec-results'].forEach(function(s) {
+    var el = document.getElementById(s);
+    if (el) el.style.display = 'none';
+  });
+  var t = document.getElementById(id);
+  if (t) t.style.display = (id === 'sec-loading') ? 'flex' : 'block';
+  window.scrollTo(0,0);
+}
+function goLanding() { showOnly('sec-landing'); }
+function goForm() {
+  showOnly('sec-form');
+  if (lastProject) {
+    document.getElementById('title').value       = lastProject.title || '';
+    document.getElementById('logline').value     = lastProject.logline || '';
+    document.getElementById('format').value      = lastProject.format || '';
+    document.getElementById('budgetSelect').value= lastProject.budget || '';
+    document.getElementById('audience').value    = lastProject.audience || '';
+    document.getElementById('distrib').value     = lastProject.distrib || '';
+    document.getElementById('country').value     = lastProject.country !== 'Not specified' ? lastProject.country : '';
+    document.getElementById('experience').value  = lastProject.experience !== 'Not specified' ? lastProject.experience : '';
+    document.getElementById('extra').value       = lastProject.extra || '';
+    // restore genre
+    var genres = (lastProject.genre||'').split(' / ');
+    if (genres[0]) document.getElementById('genre1').value = genres[0];
+    if (genres[1]) document.getElementById('genre2').value = genres[1];
+  }
+}
+
+/* ── MENU ── */
+function openMenu() {
+  document.getElementById('menuOverlay').classList.add('open');
+  document.getElementById('hamburgerBtn').classList.add('open');
+}
+function closeMenu() {
+  document.getElementById('menuOverlay').classList.remove('open');
+  document.getElementById('hamburgerBtn').classList.remove('open');
+}
+function closeMenuGoForm() { closeMenu(); goForm(); }
+
+/* ── LANDING CTA ── */
+function onStartClick() {
+  var cb = document.getElementById('termsCheck');
+  var err = document.getElementById('termsError');
+  if (!cb || !cb.checked) { err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  goForm();
+}
+
+/* ── GENRE ── */
+function checkOther() {
+  var g1 = document.getElementById('genre1').value;
+  var g2 = document.getElementById('genre2').value;
+  document.getElementById('genreOther').style.display = (g1==='Other'||g2==='Other') ? 'block' : 'none';
+}
+function getGenre() {
+  var g1 = document.getElementById('genre1').value;
+  var g2 = document.getElementById('genre2').value;
+  var ot = document.getElementById('genreOther').value.trim();
+  var out = [];
+  if (g1) out.push(g1==='Other'?(ot||'Other'):g1);
+  if (g2 && g2!==g1) out.push(g2==='Other'?(ot||'Other'):g2);
+  return out.join(' / ');
+}
+
+/* ── PROJECT ── */
+function getProject() {
+  return {
+    title:      document.getElementById('title').value.trim(),
+    logline:    document.getElementById('logline').value.trim(),
+    genre:      getGenre(),
+    format:     document.getElementById('format').value,
+    budget:     document.getElementById('budgetSelect').value,
+    audience:   document.getElementById('audience').value,
+    distrib:    document.getElementById('distrib').value,
+    country:    document.getElementById('country').value.trim() || 'Not specified',
+    experience: document.getElementById('experience').value || 'Not specified',
+    extra:      document.getElementById('extra').value.trim()
+  };
+}
+
+/* ── FREE PROMPT ── */
+function freePrompt(p) {
+  return 'You are a film market consultant. Respond ONLY with valid JSON. All text in English. No markdown. Be honest and specific — a filmmaker needs real information, not generic advice.\n\nProject: Title="'+p.title+'", Logline="'+p.logline+'", Genre="'+p.genre+'", Format="'+p.format+'", Budget="'+p.budget+'", Audience="'+p.audience+'", Distribution="'+p.distrib+'", Country="'+p.country+'", Experience="'+p.experience+'", Notes="'+(p.extra||'None')+'"\n\nAnalyze across 5 dimensions. Each dimension has a strictly defined scope — do NOT repeat information across them.\n\n1. CREATIVE PACKAGE: narrative strength, logline clarity, originality, pitch power only.\n2. FINANCIAL PLAN: budget realism, funding sources only.\n3. MARKET & AUDIENCE: external demand, genre trends, audience size only.\n4. FESTIVAL STRATEGY: festival circuit, specific festivals, timing only.\n5. DISTRIBUTION & REVENUE: platforms, revenue projections only.\n\nRespond with exactly this JSON:\n{"overall_score":7.5,"overall_label":"3-5 words","overall_summary":"2 honest sentences about this project\'s market position","biggest_risk":"one specific sentence — the single most critical risk for this project right now","biggest_opportunity":"one specific sentence — the single most actionable opportunity right now","next_step":"the single most important concrete action this filmmaker should take this week","logline_verdict":"one sentence: does the logline work as a pitch tool and why or why not","one_comp":{"title":"one real comparable film","year":"year","result":"what it achieved at this budget level","lesson":"one concrete lesson for this project"},"one_festival":{"name":"one realistic festival to target","tier":"A/B/C","why":"why this specific festival fits this project","url":"https://real.submission.url"},"creative_score":7,"creative_verdict":"one sentence","creative_detail":"2-3 sentences","creative_tip":"one concrete actionable suggestion","creative_flag":"one specific red flag","creative_strength":"one specific strength","financial_score":6,"financial_verdict":"one sentence","financial_detail":"2-3 sentences","financial_tip":"one concrete actionable suggestion","financial_flag":"one specific red flag","financial_strength":"one specific strength","market_score":7,"market_verdict":"one sentence","market_detail":"2-3 sentences","market_tip":"one concrete actionable suggestion","market_flag":"one specific red flag","market_strength":"one specific strength","festival_score":8,"festival_verdict":"one sentence","festival_detail":"2-3 sentences","festival_tip":"one concrete actionable suggestion","festival_flag":"one specific red flag","festival_strength":"one specific strength","distribution_score":5,"distribution_verdict":"one sentence","distribution_detail":"2-3 sentences","distribution_tip":"one concrete actionable suggestion","distribution_flag":"one specific red flag","distribution_strength":"one specific strength"}';
+}
+
+/* ── FULL PROMPT ── */
+function fullPrompt(p) {
+  return 'You are a senior film market consultant with 20 years of experience advising independent filmmakers at Sundance, Cannes, Berlinale and major sales markets (AFM, EFM, Marché du Film). You have helped hundreds of films get financed, sold and distributed. Write in clear professional English. No asterisks, no markdown, no emoji. Be brutally honest, specific and actionable. Every recommendation must be something the filmmaker can act on this week. Use only real working URLs.\n\nProject: Title="'+p.title+'", Logline="'+p.logline+'", Genre="'+p.genre+'", Format="'+p.format+'", Budget="'+p.budget+'", Audience="'+p.audience+'", Distribution="'+p.distrib+'", Country="'+p.country+'", Experience="'+p.experience+'", Notes="'+(p.extra||'None')+'"\n\nCRITICAL RULES:\n- Each of the 5 dimensions has an EXCLUSIVE scope. NEVER repeat information across dimensions.\n- All recommendations must name real, specific resources (funds, festivals, platforms, agents) with real URLs.\n- Revenue numbers must be realistic for this budget level and genre — not optimistic.\n- Be honest about weaknesses. A filmmaker needs truth, not flattery.\n\nDIMENSION SCOPES (strict):\n1. CREATIVE PACKAGE: narrative strength, logline as 30-second pitch tool, story structure, character appeal, originality vs current market, genre execution, director vision, attached elements, pitch document quality. NOTHING about budget, funding, festivals, platforms.\n2. FINANCIAL PLAN: budget realism for this scope, production cost benchmarks, specific real funding sources with amounts and deadlines, co-production treaties, tax credits, gap financing, recoupment structure. NOTHING about audience demand, festivals, platforms.\n3. MARKET & AUDIENCE: external demand for this genre today, target audience size and behavior, comparable films with real performance data, genre trend analysis, competition, why audiences will pay to see this. NOTHING about budget, funding, festivals, platforms.\n4. FESTIVAL STRATEGY: specific realistic festivals to target (Tier 1/2/3), submission strategy and timing, how to position for programmers, press strategy, awards circuit potential. NOTHING about streaming, revenue, budget, funding.\n5. DISTRIBUTION & REVENUE: specific platforms and VOD services with realistic acquisition price ranges for this budget/genre, theatrical viability, territory strategy, sales agent recommendations, realistic P&L per window, marketing spend required. NOTHING about festivals, budget, production, funding.\n\nRespond ONLY with valid JSON. No text outside the JSON:\n{\n"overall_score":7.5,\n"overall_label":"3-5 words",\n"overall_summary":"2 sentences",\n"biggest_risk":"one specific sentence — the single make-or-break risk",\n"biggest_opportunity":"one specific sentence — the single biggest opportunity to exploit now",\n"executive_summary":"4 sentences: market position, key challenge, recommended path, realistic outcome",\n"creative_score":7,\n"creative_verdict":"one sentence",\n"creative_detail":"4 sentences: logline effectiveness as pitch tool, story structure quality, originality vs market, what makes it sellable or not",\n"creative_flags":["specific flag about story or pitch","specific flag"],\n"creative_strengths":["specific strength","specific strength"],\n"creative_tips":[{"advice":"specific advice on pitch/story/packaging","links":[{"label":"Resource Name","url":"https://real.url"}]},{"advice":"specific advice","links":[{"label":"Name","url":"https://real.url"}]},{"advice":"specific advice","links":[{"label":"Name","url":"https://real.url"}]}],\n"pitch_assessment":{"thirty_second_pitch":"Write the ideal 30-second verbal pitch for this project as if presenting to an investor at a festival","logline_score":7,"logline_issues":"what specifically is wrong with the current logline if anything","logline_improved":"a stronger version of the logline","pitch_deck_checklist":["specific element this project needs in its pitch deck","specific element","specific element","specific element","specific element"]},\n"financial_score":6,\n"financial_verdict":"one sentence",\n"financial_detail":"4 sentences: budget vs scope reality, what the money buys, financing gap, most realistic path to full financing",\n"financial_flags":["specific flag about budget or financing"],\n"financial_strengths":["specific strength"],\n"financial_tips":[{"advice":"name real fund with amount and eligibility","links":[{"label":"Fund Name","url":"https://real.url"}]},{"advice":"co-production or tax credit advice","links":[{"label":"Name","url":"https://real.url"}]},{"advice":"gap financing advice","links":[{"label":"Name","url":"https://real.url"}]}],\n"financial_action_plan":["30 days: specific financing action","60 days: action","90 days: action"],\n"financial_sources":[{"name":"Real Fund Name","type":"Public","amount":"specific amount","deadline":"deadline period","eligibility":"specific eligibility criteria","url":"https://real.url"},{"name":"Real Fund","type":"type","amount":"amount","deadline":"deadline","eligibility":"eligibility","url":"https://real.url"},{"name":"Real Fund","type":"type","amount":"amount","deadline":"deadline","eligibility":"eligibility","url":"https://real.url"},{"name":"Real Fund","type":"type","amount":"amount","deadline":"deadline","eligibility":"eligibility","url":"https://real.url"}],\n"market_score":7,\n"market_verdict":"one sentence",\n"market_detail":"4 sentences: current demand for this genre, audience size and behavior data, how this competes today, what makes it stand out or get lost",\n"market_flags":["specific market risk"],\n"market_strengths":["specific market advantage"],\n"market_tips":[{"advice":"audience positioning advice","links":[{"label":"Name","url":"https://real.url"}]},{"advice":"market research advice","links":[{"label":"Name","url":"https://real.url"}]},{"advice":"audience building advice","links":[{"label":"Name","url":"https://real.url"}]}],\n"market_comps":[{"title":"Real Film Title","year":"2023","budget":"actual budget","result":"specific streaming/theatrical result with numbers","lesson":"one concrete lesson for this specific project"},{"title":"Real Film Title","year":"2022","budget":"amount","result":"result","lesson":"lesson"},{"title":"Real Film Title","year":"2021","budget":"amount","result":"result","lesson":"lesson"}],\n"marketing_strategy":{"overview":"2-3 sentences on the marketing approach for this specific project","pre_release":["specific pre-release action 1","action 2","action 3"],"social_strategy":"which specific platforms and content approach work for this genre and audience","community":"how to build a community around this project before release","press":"what type of press and journalists to target"},\n"festival_score":7,\n"festival_verdict":"one sentence",\n"festival_detail":"4 sentences: realistic festival tier for this project, best positioning angle for programmers, timing strategy, awards circuit potential",\n"festival_flags":["specific festival positioning risk"],\n"festival_strengths":["specific festival appeal"],\n"festival_tips":[{"advice":"name Tier 1 festivals worth attempting and why","links":[{"label":"Festival","url":"https://real.submission.url"}]},{"advice":"name Tier 2 festivals that are realistic targets","links":[{"label":"Festival","url":"https://real.submission.url"}]},{"advice":"festival positioning advice for programmers","links":[{"label":"Name","url":"https://real.url"}]}],\n"festival_action_plan":["30 days: specific festival prep action","60 days: action","90 days: action"],\n"festival_calendar":[{"festival":"Real Festival Name","tier":"A/B/C","deadline":"typical submission window","fit":"why this festival specifically fits this film","url":"https://real.url"},{"festival":"Festival","tier":"tier","deadline":"deadline","fit":"fit","url":"https://real.url"},{"festival":"Festival","tier":"tier","deadline":"deadline","fit":"fit","url":"https://real.url"},{"festival":"Festival","tier":"tier","deadline":"deadline","fit":"fit","url":"https://real.url"},{"festival":"Festival","tier":"tier","deadline":"deadline","fit":"fit","url":"https://real.url"}],\n"distribution_score":5,\n"distribution_verdict":"one sentence",\n"distribution_detail":"4 sentences: realistic distribution path for this budget/genre, acquisition price reality, theatrical vs streaming reality, what needs to happen first",\n"distribution_flags":["specific distribution risk"],\n"distribution_strengths":["specific distribution advantage"],\n"distribution_tips":[{"advice":"name specific platforms with realistic acquisition price range for this project","links":[{"label":"Platform","url":"https://real.url"}]},{"advice":"territory strategy advice","links":[{"label":"Name","url":"https://real.url"}]},{"advice":"sales agent recommendations for this type of project","links":[{"label":"Agent/Company","url":"https://real.url"}]}],\n"distribution_action_plan":["30 days: specific distribution action","60 days: action","90 days: action"],\n"distribution_platforms":[{"name":"Platform Name","priority":"First","reason":"specific reason with realistic acquisition price range for this project","url":"https://real.url"},{"name":"Platform","priority":"Second","reason":"reason with price range","url":"https://real.url"},{"name":"Platform","priority":"Third","reason":"reason","url":"https://real.url"},{"name":"Platform","priority":"Fourth","reason":"reason","url":"https://real.url"}],\n"revenue_projection":{"total_realistic":"realistic total revenue range","theatrical":"realistic theatrical revenue or N/A with reason","streaming_svod":"realistic SVOD acquisition range","vod_avod":"realistic VOD/AVOD revenue","tv_rights":"realistic TV licensing","international":"realistic international sales total","breakeven_note":"honest assessment of whether this project can break even and under what conditions"},\n"sales_agents":[{"name":"Real Company Name","focus":"what type of films they represent","why":"why specifically right for this project","url":"https://real.url"},{"name":"Real Company","focus":"focus","why":"why","url":"https://real.url"},{"name":"Real Company","focus":"focus","why":"why","url":"https://real.url"}],\n"international_markets":[{"country":"Country","reason":"specific reason with real market data"},{"country":"Country","reason":"reason"},{"country":"Country","reason":"reason"}],\n"risk_assessment":{"top_risks":["specific risk 1","specific risk 2","specific risk 3"],"mitigation":["how to mitigate risk 1","how to mitigate risk 2","how to mitigate risk 3"]},\n"roadmap":[{"phase":"Phase 1 — Script & Pitch","action":"specific action with timeline"},{"phase":"Phase 2 — Financing","action":"specific action naming real funds"},{"phase":"Phase 3 — Pre-Production & Packaging","action":"specific action"},{"phase":"Phase 4 — Production & Post","action":"specific action with delivery requirements"},{"phase":"Phase 5 — Festival & Sales","action":"specific action naming real festivals and sales markets"}]\n}';
+}
+
+/* ── API ── */
+async function callAPI(prompt) {
+  var res = await fetch("/.netlify/functions/analyze", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt: prompt })
+  });
+  var text = await res.text();
+  if (!res.ok) {
+    try { var e = JSON.parse(text); throw new Error(e.error || 'API error ' + res.status); }
+    catch(e2) { if (e2.message && e2.message !== '[object Object]') throw e2; throw new Error('HTTP ' + res.status); }
+  }
+  var data = JSON.parse(text);
+  var raw = (data.content && data.content[0] ? data.content[0].text : '').replace(/```json/gi,'').replace(/```/g,'').trim();
+  var a = raw.indexOf('{'), b = raw.lastIndexOf('}');
+  if (a !== -1 && b !== -1) raw = raw.substring(a, b+1);
+  try { return JSON.parse(raw); }
+  catch(e) { throw new Error("Could not parse AI response. Please try again."); }
+}
+
+/* ── STRIPE PAYMENT LINK ── */
+var STRIPE_PAYMENT_LINK = "https://buy.stripe.com/fZu14o1nm00zg3P77HfMA00";
+
+async function startStripeCheckout() {
+  var p = lastProject;
+  if (!p) { alert("Dati progetto mancanti. Riavvia l'analisi gratuita."); return; }
+  // Save project to both sessionStorage and localStorage (localStorage survives new tabs)
+  var projectJson = JSON.stringify(p);
+  try { sessionStorage.setItem('oneciak_project', projectJson); } catch(e) {}
+  try { localStorage.setItem('oneciak_project', projectJson); localStorage.setItem('oneciak_pending_ts', Date.now().toString()); } catch(e) {}
+  // Redirect to Stripe Payment Link (return URL must be configured in Stripe Dashboard)
+  window.location.href = STRIPE_PAYMENT_LINK;
+}
+
+/* ── HANDLE STRIPE RETURN ── */
+function handleStripeReturn() {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('paid') !== '1') return;
+  // Clean URL
+  window.history.replaceState({}, document.title, window.location.pathname);
+  // Retrieve project — sessionStorage first, localStorage as fallback
+  var projectJson = null;
+  try { projectJson = sessionStorage.getItem('oneciak_project'); } catch(e) {}
+  if (!projectJson) { try { projectJson = localStorage.getItem('oneciak_project'); } catch(e) {} }
+  // Clean up localStorage
+  try { localStorage.removeItem('oneciak_project'); localStorage.removeItem('oneciak_pending_ts'); } catch(e) {}
+  if (!projectJson) {
+    // Store paid flag so the next unlock goes directly to report, not Stripe
+    try { localStorage.setItem('oneciak_paid', '1'); } catch(e) {}
+    showOnly('sec-form');
+    alert('Pagamento ricevuto! Reinserisci i dati del progetto per generare il report completo.');
+    return;
+  }
+  var p = JSON.parse(projectJson);
+  lastProject = p;
+  showOnly('sec-loading');
+  document.getElementById('loadingTitle').textContent = 'Building your full report…';
+  document.getElementById('loadingDesc').textContent = 'Deep analysis in progress across all 5 dimensions — creative, financial, market, festival and distribution.';
+  callAPI(fullPrompt(p)).then(function(result) {
+    lastResult = result;
+    showOnly('sec-results');
+    renderFull(result, p.title);
+    checkTranslation();
+  }).catch(function(err) {
+    showOnly('sec-form');
+    showError("Errore: " + err.message);
+  });
+}
+
+/* ── TAB PANEL BUILDER ── */
+function scoreColor(s) { return s >= 7 ? 'high' : s >= 5 ? 'mid' : 'low'; }
+
+function buildTabPanel(el, label, score, verdict, detail, flags, strengths, tips, plan, extra) {
+  var pct = (score/10)*100;
+  var bid = 'bar_' + label.replace(/\s+/g,'_').toLowerCase();
+  var col = scoreColor(score);
+
+  var fl = '';
+  (flags||[]).forEach(function(f){ fl += '<div class="flag-item red">'+f+'</div>'; });
+  if (fl) fl = '<div class="flags-block"><div class="flags-label red">Red Flags</div>'+fl+'</div>';
+
+  var st = '';
+  (strengths||[]).forEach(function(s){ st += '<div class="flag-item green">'+s+'</div>'; });
+  if (st) st = '<div class="flags-block"><div class="flags-label green">Strengths</div>'+st+'</div>';
+
+  var tp = '';
+  if ((tips||[]).length) {
+    tp = '<div class="tips-block"><span class="tips-label">Recommendations</span>';
+    tips.forEach(function(t){
+      var txt = typeof t==='string' ? t : t.advice;
+      tp += '<div class="tip-item"><div class="tip-text">'+txt+'</div>';
+      if (typeof t==='object' && t.links && t.links.length) {
+        tp += '<div class="tip-links">';
+        t.links.forEach(function(l){ tp += '<a class="tip-link" href="'+l.url+'" target="_blank" rel="noopener">'+l.label+'</a>'; });
+        tp += '</div>';
+      }
+      tp += '</div>';
+    });
+    tp += '</div>';
+  }
+
+  var ap = '';
+  if ((plan||[]).length) {
+    ap = '<div class="action-block"><span class="action-label">Action Plan</span>';
+    var tags = ['30 days','60 days','90 days'];
+    plan.forEach(function(a, i){
+      var clean = a.replace(/^(30|60|90)\s*days?:?\s*/i,'');
+      ap += '<div class="action-item"><span class="action-tag">'+(tags[i]||'')+'</span><span class="action-text">'+clean+'</span></div>';
+    });
+    ap += '</div>';
+  }
+
+  var col = scoreColor(score);
+  var badgeText = col==='high' ? 'Strong' : col==='mid' ? 'Moderate' : 'Weak';
+
+  el.innerHTML =
+    '<div class="tab-card">'+
+    '<div class="tab-score-header">'+
+    '<div class="tab-score-label">'+label+'<span class="score-badge '+col+'">'+badgeText+'</span></div>'+
+    '<div class="tab-score-badge">'+
+    '<div class="tab-score-num score-'+col+'">'+score+'<span class="denom">/10</span></div>'+
+    '</div>'+
+    '</div>'+
+    '<div class="score-bar-bg"><div class="score-bar-fill bar-'+col+'" id="'+bid+'" style="width:0%"></div></div>'+
+    '<div class="score-verdict">'+verdict+'</div>'+
+    '<div class="score-detail">'+detail+'</div>'+
+    fl+st+tp+ap+(extra||'')+
+    '</div>';
+
+  setTimeout(function(bid,pct){ return function(){ var b=document.getElementById(bid); if(b) b.style.width=pct+'%'; }; }(bid,pct), 150);
+}
+
+/* ── RENDER FREE ── */
+function renderFree(r, title) {
+  isFullReport = false;
+  document.getElementById('resultTitle').textContent = '"'+title+'"';
+  document.getElementById('resultSubtitle').textContent = r.overall_summary||'';
+
+  // Overall score
+  var col = scoreColor(Number(r.overall_score||5));
+  document.getElementById('overallScore').innerHTML =
+    '<div class="overall-card">'+
+    '<div><div class="overall-label">OneCiak Score</div><div class="overall-sublabel">'+(r.overall_label||'')+'</div></div>'+
+    '<div class="overall-num score-'+col+'">'+Number(r.overall_score||5).toFixed(1)+'<span class="denom">/10</span></div>'+
+    '</div>';
+
+  // Summary card
+  document.getElementById('execSummary').innerHTML =
+    '<div class="exec-card">'+
+    '<div class="exec-label">Summary</div>'+
+    '<div class="exec-text">'+(r.overall_summary||'')+'</div>'+
+    '</div>';
+
+  // Free accordion — same structure, limited content + blurred preview
+  var freeSections = [
+    { num:'01', label:'Creative Package',     sublabel:'Narrative · Logline · Pitch',    score:r.creative_score,     verdict:r.creative_verdict,     detail:r.creative_detail,     tip:r.creative_tip,     flag:r.creative_flag,     strength:r.creative_strength },
+    { num:'02', label:'Financial Plan',       sublabel:'Budget · Funding · Financing',   score:r.financial_score,    verdict:r.financial_verdict,    detail:r.financial_detail,    tip:r.financial_tip,    flag:r.financial_flag,    strength:r.financial_strength },
+    { num:'03', label:'Market & Audience',    sublabel:'Demand · Trends · Comparables',  score:r.market_score,       verdict:r.market_verdict,       detail:r.market_detail,       tip:r.market_tip,       flag:r.market_flag,       strength:r.market_strength },
+    { num:'04', label:'Festival Strategy',    sublabel:'Circuit · Festivals · Timing',   score:r.festival_score,     verdict:r.festival_verdict,     detail:r.festival_detail,     tip:r.festival_tip,     flag:r.festival_flag,     strength:r.festival_strength },
+    { num:'05', label:'Distribution & Revenue', sublabel:'Platforms · Pricing · Sales',  score:r.distribution_score, verdict:r.distribution_verdict, detail:r.distribution_detail, tip:r.distribution_tip, flag:r.distribution_flag, strength:r.distribution_strength }
+  ];
+
+  var html = '<div class="accordion-wrap">';
+  freeSections.forEach(function(sec, idx) {
+    var c = scoreColor(sec.score||0);
+    var badgeText = c==='high' ? 'Strong' : c==='mid' ? 'Moderate' : 'Weak';
+
+    // Body content
+    var bid = 'fbar_'+idx+'_'+Math.random().toString(36).substr(2,4);
+    var pct = ((sec.score||0)/10)*100;
+    var body = '<div class="accordion-divider"></div>';
+    body += '<div class="score-bar-bg" style="margin-bottom:14px"><div class="score-bar-fill bar-'+c+'" id="'+bid+'" style="width:0%"></div></div>';
+    setTimeout(function(b,p){ return function(){ var el=document.getElementById(b); if(el) el.style.width=p+'%'; }; }(bid,pct), 80);
+    body += '<div class="score-verdict">'+(sec.verdict||'')+'</div>';
+    body += '<div class="score-detail" style="margin-bottom:8px">'+(sec.detail||'')+'</div>';
+    if (sec.tip) body += '<div class="tips-block"><span class="tips-label">Key Recommendation</span><div class="tip-item"><div class="tip-text">'+sec.tip+'</div></div></div>';
+
+    // Blurred preview of flag + strength
+    if (sec.flag || sec.strength) {
+      var ph = '';
+      if (sec.flag) ph += '<div class="flag-item red" style="margin-bottom:6px">'+sec.flag+'</div>';
+      if (sec.strength) ph += '<div class="flag-item green">'+sec.strength+'</div>';
+      body += '<div class="preview-blur-wrap"><div class="preview-blur-content">'+ph+'</div>'+
+        '<div class="preview-blur-overlay"><span class="preview-blur-label">Unlock Full Report</span></div></div>';
+    }
+
+    html +=
+      '<div class="accordion-item">'+
+      '<button class="accordion-trigger" onclick="toggleAccordion('+idx+')" id="acc-trigger-'+idx+'">'+
+      '<div class="accordion-left">'+
+      '<div class="accordion-icon">'+sec.num+'</div>'+
+      '<div><div class="accordion-label">'+sec.label+'</div><div class="accordion-sublabel">'+sec.sublabel+'</div></div>'+
+      '</div>'+
+      '<span class="accordion-score score-'+c+'">'+(sec.score||0)+'<span class="denom">/10</span></span>'+
+      '<span class="accordion-chevron">▾</span>'+
+      '</button>'+
+      '<div class="accordion-body" id="acc-body-'+idx+'">'+body+'</div>'+
+      '</div>';
+  });
+  html += '</div>';
+
+  document.getElementById('accordionMenu').innerHTML = html;
+  document.getElementById('accordionMenu').style.display = 'block';
+
+  document.getElementById('upgradeSection').innerHTML =
+    '<div class="upgrade-divider"><span>Full Report</span></div>'+
+    '<div class="locked-card">'+
+    '<div class="locked-title">Unlock the Full Report</div>'+
+    '<div class="locked-desc">Same structure, much deeper. Red flags, strengths, 3 recommendations with real links, action plans, funding sources, festival calendar, sales agents, revenue projection and 5-phase roadmap.</div>'+
+    '<div class="checkbox-row"><input type="checkbox" id="fullTerms"><label class="checkbox-label" for="fullTerms">I understand this is AI-generated analysis for informational purposes only. No refunds once generated. OneCiak is not a licensed consulting firm.</label></div>'+
+    '<div class="inline-error" id="unlockError">Please accept the terms to continue.</div>'+
+    '<button class="btn-unlock" onclick="onUnlockClick()">Unlock Full Report — €29</button>'+
+    '</div>';
+}
+
+/* ── RENDER FULL ── */
+function renderFull(r, title) {
+  isFullReport = true;
+  document.getElementById('resultTitle').textContent = '"'+title+'"';
+  document.getElementById('resultSubtitle').textContent = r.overall_summary||'';
+
+  // Overall score
+  var col = scoreColor(Number(r.overall_score||5));
+  document.getElementById('overallScore').innerHTML =
+    '<div class="overall-card">'+
+    '<div><div class="overall-label">OneCiak Score</div><div class="overall-sublabel">'+(r.overall_label||'')+'</div></div>'+
+    '<div style="text-align:right">'+
+    '<div class="overall-num score-'+col+'">'+Number(r.overall_score||5).toFixed(1)+'<span class="denom">/10</span></div>'+
+    '</div></div>';
+
+  // Exec summary — synthesis always visible
+  document.getElementById('execSummary').innerHTML =
+    '<div class="exec-card">'+
+    '<div class="exec-label">Summary</div>'+
+    '<div class="exec-text">'+(r.executive_summary||r.overall_summary||'')+'</div>'+
+    '<div class="exec-row">'+
+    '<div class="exec-box risk"><div class="exec-box-label">Main Risk</div><div class="exec-box-text">'+(r.biggest_risk||'')+'</div></div>'+
+    '<div class="exec-box opp"><div class="exec-box-label">Main Opportunity</div><div class="exec-box-text">'+(r.biggest_opportunity||'')+'</div></div>'+
+    '</div></div>';
+
+  // Build accordion
+  var sections = [
+    {
+      num:'01', label:'Creative Package', sublabel:'Narrative · Logline · Pitch',
+      score: r.creative_score,
+      body: buildAccordionBody(r.creative_score, r.creative_verdict, r.creative_detail,
+        r.creative_flags, r.creative_strengths, r.creative_tips, null, '')
+    },
+    {
+      num:'02', label:'Financial Plan', sublabel:'Budget · Funding · Financing',
+      score: r.financial_score,
+      body: buildAccordionBody(r.financial_score, r.financial_verdict, r.financial_detail,
+        r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan,
+        buildFundingSources(r.financial_sources))
+    },
+    {
+      num:'03', label:'Market & Audience', sublabel:'Demand · Trends · Comparables',
+      score: r.market_score,
+      body: buildAccordionBody(r.market_score, r.market_verdict, r.market_detail,
+        r.market_flags, r.market_strengths, r.market_tips, null,
+        buildComparables(r.market_comps))
+    },
+    {
+      num:'04', label:'Festival Strategy', sublabel:'Circuit · Festivals · Timing',
+      score: r.festival_score,
+      body: buildAccordionBody(r.festival_score, r.festival_verdict, r.festival_detail,
+        r.festival_flags, r.festival_strengths, r.festival_tips, r.festival_action_plan, '')
+    },
+    {
+      num:'05', label:'Distribution & Revenue', sublabel:'Platforms · Pricing · Sales',
+      score: r.distribution_score,
+      body: buildAccordionBody(r.distribution_score, r.distribution_verdict, r.distribution_detail,
+        r.distribution_flags, r.distribution_strengths, r.distribution_tips, r.distribution_action_plan,
+        buildPlatforms(r.distribution_platforms))
+    },
+    {
+      num:'06', label:'Action Plan', sublabel:'Roadmap · Markets · Revenue',
+      score: null,
+      body: buildActionPlanBody(r)
+    }
+  ];
+
+  var html = '<div class="accordion-wrap">';
+  sections.forEach(function(sec, idx) {
+    var c = sec.score !== null ? scoreColor(sec.score) : null;
+    var scoreHtml = sec.score !== null
+      ? '<span class="accordion-score score-'+c+'">'+sec.score+'<span class="denom">/10</span></span>'
+      : '<span style="font-size:12px;color:var(--accent);font-weight:600;letter-spacing:0.04em">→</span>';
+    html +=
+      '<div class="accordion-item">'+
+      '<button class="accordion-trigger" onclick="toggleAccordion('+idx+')" id="acc-trigger-'+idx+'">'+
+      '<div class="accordion-left">'+
+      '<div class="accordion-icon">'+sec.num+'</div>'+
+      '<div><div class="accordion-label">'+sec.label+'</div><div class="accordion-sublabel">'+sec.sublabel+'</div></div>'+
+      '</div>'+
+      scoreHtml+
+      '<span class="accordion-chevron">▾</span>'+
+      '</button>'+
+      '<div class="accordion-body" id="acc-body-'+idx+'">'+
+      '<div class="accordion-divider"></div>'+
+      sec.body+
+      '</div>'+
+      '</div>';
+  });
+  html += '</div>';
+
+  document.getElementById('accordionMenu').innerHTML = html;
+  document.getElementById('accordionMenu').style.display = 'block';
+  document.getElementById('upgradeSection').innerHTML = '';
+}
+
+/* ── ACCORDION BODY BUILDER ── */
+function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan, extra) {
+  var col = scoreColor(score||0);
+  var badgeText = col==='high' ? 'Strong' : col==='mid' ? 'Moderate' : 'Weak';
+  var out = '';
+
+  // Score bar
+  var bid = 'abar_'+Math.random().toString(36).substr(2,6);
+  var pct = ((score||0)/10)*100;
+  out += '<div class="score-bar-bg" style="margin-bottom:14px"><div class="score-bar-fill bar-'+col+'" id="'+bid+'" style="width:0%"></div></div>';
+  setTimeout(function(b,p){ return function(){ var el=document.getElementById(b); if(el) el.style.width=p+'%'; }; }(bid,pct), 80);
+
+  // Verdict + detail
+  out += '<div class="score-verdict">'+( verdict||'')+'</div>';
+  out += '<div class="score-detail" style="margin-bottom:4px">'+(detail||'')+'</div>';
+
+  // Flags
+  var fl = '';
+  (flags||[]).forEach(function(f){ fl += '<div class="flag-item red">'+f+'</div>'; });
+  if (fl) out += '<div class="flags-block"><div class="flags-label red">Red Flags</div>'+fl+'</div>';
+
+  // Strengths
+  var st = '';
+  (strengths||[]).forEach(function(s){ st += '<div class="flag-item green">'+s+'</div>'; });
+  if (st) out += '<div class="flags-block"><div class="flags-label green">Strengths</div>'+st+'</div>';
+
+  // Tips
+  if ((tips||[]).length) {
+    out += '<div class="tips-block"><span class="tips-label">Recommendations</span>';
+    tips.forEach(function(t){
+      var txt = typeof t==='string' ? t : t.advice;
+      out += '<div class="tip-item"><div class="tip-text">'+txt+'</div>';
+      if (typeof t==='object' && t.links && t.links.length) {
+        out += '<div class="tip-links">';
+        t.links.forEach(function(l){ out += '<a class="tip-link" href="'+l.url+'" target="_blank" rel="noopener">'+l.label+'</a>'; });
+        out += '</div>';
+      }
+      out += '</div>';
+    });
+    out += '</div>';
+  }
+
+  // Action plan
+  if ((plan||[]).length) {
+    out += '<div class="action-block"><span class="action-label">Action Plan</span>';
+    var tags = ['30 days','60 days','90 days'];
+    plan.forEach(function(a,i){
+      var clean = a.replace(/^(30|60|90)\s*days?:?\s*/i,'');
+      out += '<div class="action-item"><span class="action-tag">'+(tags[i]||'')+'</span><span class="action-text">'+clean+'</span></div>';
+    });
+    out += '</div>';
+  }
+
+  // Extra (funding sources, comparables, platforms)
+  if (extra) out += extra;
+
+  return out;
+}
+
+/* ── ACTION PLAN BODY ── */
+function buildActionPlanBody(r) {
+  var out = '';
+
+  // Roadmap
+  if (r.roadmap && r.roadmap.length) {
+    out += '<div style="margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Roadmap</div>';
+    r.roadmap.forEach(function(s,i){
+      out += '<div class="roadmap-step"><div class="roadmap-num">'+(i+1)+'</div><div><div class="roadmap-phase">'+s.phase+'</div><div class="roadmap-action">'+s.action+'</div></div></div>';
+    });
+    out += '</div>';
+  }
+
+  // International Markets
+  if (r.international_markets && r.international_markets.length) {
+    out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">International Markets</div>';
+    r.international_markets.forEach(function(m){
+      out += '<div class="market-item"><div class="market-name">'+m.country+'</div><div class="market-reason">'+m.reason+'</div></div>';
+    });
+    out += '</div>';
+  }
+
+  // Festival Calendar
+  if (r.festival_calendar && r.festival_calendar.length) {
+    out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Festival Calendar</div>';
+    r.festival_calendar.forEach(function(f){
+      var tc = f.tier==='A' ? 'var(--text)' : f.tier==='B' ? 'var(--accent)' : 'var(--muted)';
+      out += '<div style="padding:10px 0;border-bottom:1px solid var(--border-light)">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'+
+        '<div style="font-size:13px;font-weight:600">'+f.festival+'</div>'+
+        '<span style="font-size:10px;font-weight:700;color:'+tc+';padding:1px 7px;border-radius:999px;border:1px solid var(--border);background:var(--cream)">'+f.tier+'</span>'+
+        '</div>'+
+        '<div style="font-size:12px;color:var(--muted);font-weight:300;margin-bottom:3px">'+f.deadline+'</div>'+
+        '<div style="font-size:12px;color:var(--text);font-weight:300;margin-bottom:5px">'+f.fit+'</div>'+
+        '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+f.url+'" target="_blank" rel="noopener">Submit →</a>'+
+        '</div>';
+    });
+    out += '</div>';
+  }
+
+  // Sales Agents
+  if (r.sales_agents && r.sales_agents.length) {
+    out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Sales Agents</div>';
+    r.sales_agents.forEach(function(a){
+      out += '<div style="padding:10px 0;border-bottom:1px solid var(--border-light)">'+
+        '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+a.name+'</div>'+
+        '<div style="font-size:11px;color:var(--muted-light);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">'+a.focus+'</div>'+
+        '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:5px">'+a.why+'</div>'+
+        '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+a.url+'" target="_blank" rel="noopener">Visit →</a>'+
+        '</div>';
+    });
+    out += '</div>';
+  }
+
+  // Revenue Projection
+  if (r.revenue_projection) {
+    var rp = r.revenue_projection;
+    out += '<div style="padding-top:16px;border-top:1px solid var(--border-light)"><div class="tips-label" style="display:block;margin-bottom:12px">Revenue Projection</div>';
+    [{l:'Theatrical',v:rp.theatrical},{l:'Streaming (SVOD)',v:rp.streaming_svod},{l:'VOD / AVOD',v:rp.vod_avod},{l:'TV Rights',v:rp.tv_rights},{l:'International',v:rp.international}]
+      .forEach(function(w){ if(w.v) out += '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-light)"><span style="font-size:13px;font-weight:400">'+w.l+'</span><span style="font-size:13px;color:var(--muted);font-weight:300">'+w.v+'</span></div>'; });
+    if (rp.total_realistic) out += '<div style="display:flex;justify-content:space-between;padding:12px 0 4px"><span style="font-size:13px;font-weight:700">Total Realistic</span><span style="font-size:14px;font-weight:700;color:var(--accent)">'+rp.total_realistic+'</span></div>';
+    if (rp.breakeven_note) out += '<div style="font-size:12px;color:var(--muted);line-height:1.65;margin-top:8px">'+rp.breakeven_note+'</div>';
+    out += '</div>';
+  }
+
+  return out || '<div style="font-size:13px;color:var(--muted);font-weight:300">No action plan data available.</div>';
+}
+
+/* ── TOGGLE ACCORDION ── */
+function toggleAccordion(idx) {
+  var trigger = document.getElementById('acc-trigger-'+idx);
+  var body = document.getElementById('acc-body-'+idx);
+  if (!trigger || !body) return;
+  var isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  trigger.classList.toggle('open', !isOpen);
+}
+
+
+/* ── INLINE EXTRA BUILDERS ── */
+function buildInternationalMarkets(markets) {
+  if (!markets || !markets.length) return '';
+  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-light)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted-light);margin-bottom:10px">International Markets</div>';
+  markets.forEach(function(m){
+    h += '<div class="market-item"><div class="market-name">'+m.country+'</div><div class="market-reason">'+m.reason+'</div></div>';
+  });
+  h += '</div>';
+  return h;
+}
+
+function buildFundingSources(sources) {
+  if (!sources || !sources.length) return '';
+  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Funding Sources</div>';
+  sources.forEach(function(f){
+    h += '<div style="padding:11px 0;border-bottom:1px solid var(--border)">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:3px">'+
+      '<div style="font-size:13px;font-weight:700">'+f.name+'</div>'+
+      '<div style="font-size:10px;font-weight:700;color:var(--muted);background:var(--cream);padding:2px 7px;border-radius:3px;white-space:nowrap;flex-shrink:0">'+f.type+'</div>'+
+      '</div>'+
+      '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:3px">'+f.amount+'</div>'+
+      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:5px">Deadline: '+f.deadline+' · '+f.eligibility+'</div>'+
+      '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px" href="'+f.url+'" target="_blank" rel="noopener">Apply →</a>'+
+      '</div>';
+  });
+  h += '</div>';
+  return h;
+}
+
+function buildComparables(comps) {
+  if (!comps || !comps.length) return '';
+  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Comparable Films</div>';
+  comps.forEach(function(c){
+    h += '<div class="comp-item"><div class="comp-name">'+c.title+' ('+c.year+')</div><div class="comp-detail">Budget: '+c.budget+' — '+c.result+'</div><div class="comp-lesson">'+c.lesson+'</div></div>';
+  });
+  h += '</div>';
+  return h;
+}
+
+function buildPlatforms(platforms) {
+  if (!platforms || !platforms.length) return '';
+  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Platform Priority</div>';
+  platforms.forEach(function(pl){
+    h += '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px;background:var(--cream);border-radius:7px;margin-bottom:7px">'+
+      '<div style="font-size:9px;font-weight:700;color:#fff;background:var(--text);padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px;letter-spacing:0.04em">'+pl.priority+'</div>'+
+      '<div><div style="font-size:13px;font-weight:700;margin-bottom:2px">'+pl.name+'</div>'+
+      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:4px">'+pl.reason+'</div>'+
+      '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px;display:inline-block" href="'+pl.url+'" target="_blank" rel="noopener">Visit →</a>'+
+      '</div></div>';
+  });
+  h += '</div>';
+  return h;
+}
+
+/* ── SWITCH TAB ── */
+function switchTab(idx) {
+  document.querySelectorAll('.tab-btn').forEach(function(b,i){ b.classList.toggle('active', i===idx); });
+  for (var i=1; i<=5; i++) {
+    var el = document.getElementById('card'+i);
+    if (el) el.classList.toggle('active', i===idx+1);
+  }
+  // Wait for DOM to update then scroll to sticky bar
+  setTimeout(function() {
+    var sticky = document.getElementById('tabsSticky');
+    if (!sticky) return;
+    var top = sticky.getBoundingClientRect().top + window.pageYOffset - 58;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  }, 10);
+}
+
+/* ── RUN ANALYSIS ── */
+async function runAnalysis(isFull) {
+  var p = getProject();
+  if (!p.title||!p.logline||!p.genre||!p.format||!p.budget||!p.audience||!p.distrib) {
+    showError("Please fill in all required fields and select at least one genre.");
+    return;
+  }
+  hideError();
+  lastProject = p;
+  showOnly('sec-loading');
+  document.getElementById('loadingTitle').textContent = isFull ? 'Building your full report…' : 'Analyzing your project…';
+  document.getElementById('loadingDesc').textContent = isFull
+    ? 'Deep analysis in progress across all 5 dimensions — creative, financial, market, festival and distribution.'
+    : 'Evaluating your project across five market dimensions with real industry data.';
+  try {
+    var result = await callAPI(isFull ? fullPrompt(p) : freePrompt(p));
+    lastResult = result;
+    showOnly('sec-results');
+    if (isFull) renderFull(result, p.title);
+    else renderFree(result, p.title);
+    checkTranslation();
+  } catch(err) {
+    showOnly('sec-form');
+    showError("Error: " + err.message);
+  }
+}
+
+/* ── UNLOCK → STRIPE ── */
+function onUnlockClick() {
+  var cb = document.getElementById('fullTerms');
+  var err = document.getElementById('unlockError');
+  if (!cb||!cb.checked) { if(err) err.style.display='block'; return; }
+  if (err) err.style.display='none';
+  // Check if user already paid (returned from Stripe but had to re-enter data)
+  var alreadyPaid = false;
+  try { alreadyPaid = localStorage.getItem('oneciak_paid') === '1'; } catch(e) {}
+  if (alreadyPaid) {
+    try { localStorage.removeItem('oneciak_paid'); } catch(e) {}
+    // Go directly to full report generation
+    if (!lastProject) { startStripeCheckout(); return; }
+    showOnly('sec-loading');
+    document.getElementById('loadingTitle').textContent = 'Building your full report…';
+    document.getElementById('loadingDesc').textContent = 'Deep analysis in progress across all 5 dimensions — creative, financial, market, festival and distribution.';
+    callAPI(fullPrompt(lastProject)).then(function(result) {
+      lastResult = result;
+      showOnly('sec-results');
+      renderFull(result, lastProject.title);
+      checkTranslation();
+    }).catch(function(err) {
+      showOnly('sec-form');
+      showError("Errore: " + err.message);
+    });
+    return;
+  }
+  startStripeCheckout();
+}
+
+/* ── PDF ── */
+function savePDF() {
+  var email = document.getElementById('pdfEmail').value.trim();
+  if (!email||!email.includes('@')) { alert('Please enter a valid email address.'); return; }
+  if (!lastResult||!lastProject) { alert('No report to save yet.'); return; }
+  try {
+    var doc = new jspdf.jsPDF();
+    var y=22, margin=22, maxW=doc.internal.pageSize.getWidth()-margin*2;
+    function ln(txt,sz,bold,r,g,b) {
+      doc.setFontSize(sz||11); doc.setFont('helvetica',bold?'bold':'normal');
+      doc.setTextColor(r!==undefined?r:26, g!==undefined?g:25, b!==undefined?b:22);
+      doc.splitTextToSize(String(txt||''),maxW).forEach(function(l){ if(y>272){doc.addPage();y=22;} doc.text(l,margin,y); y+=(sz||11)*0.52; }); y+=2;
+    }
+    function hr() { y+=3; doc.setDrawColor(226,224,219); doc.line(margin,y,doc.internal.pageSize.getWidth()-margin,y); y+=7; }
+
+    ln('ONECIAK — Film Market Intelligence',10,true,122,118,112);
+    ln('"'+lastProject.title+'"',18);
+    ln(lastResult.overall_summary||'',10,false,122,118,112);
+    y+=2;
+    ln('OneCiak Score: '+Number(lastResult.overall_score||0).toFixed(1)+'/10 — '+(lastResult.overall_label||''),12,true);
+    hr();
+
+    if (isFullReport && lastResult.executive_summary) {
+      ln('EXECUTIVE SUMMARY',10,true);
+      ln(lastResult.executive_summary,10,false,122,118,112);
+      y+=2;
+      if(lastResult.biggest_risk) ln('Biggest Risk: '+lastResult.biggest_risk,10,true,185,28,28);
+      if(lastResult.biggest_opportunity) ln('Biggest Opportunity: '+lastResult.biggest_opportunity,10,true,22,101,52);
+      hr();
+    }
+
+    var dims = [
+      {k:'creative',   l:'CREATIVE PACKAGE'},
+      {k:'financial',  l:'FINANCIAL PLAN'},
+      {k:'market',     l:'MARKET & AUDIENCE'},
+      {k:'festival',   l:'FESTIVAL STRATEGY'},
+      {k:'distribution',l:'DISTRIBUTION & REVENUE'}
+    ];
+    dims.forEach(function(d){
+      ln(d.l+' — '+(lastResult[d.k+'_score']||'')+'/10',10,true);
+      ln(lastResult[d.k+'_verdict']||'',11,true,50,50,50);
+      ln(lastResult[d.k+'_detail']||'',10,false,122,118,112);
+      if (isFullReport) {
+        var flags = lastResult[d.k+'_flags']||[];
+        if(flags.length){ ln('Red Flags:',9,true,185,28,28); flags.forEach(function(f){ ln('• '+f,9,false,185,28,28); }); }
+        var strengths = lastResult[d.k+'_strengths']||[];
+        if(strengths.length){ ln('Strengths:',9,true,22,101,52); strengths.forEach(function(s){ ln('• '+s,9,false,22,101,52); }); }
+        var tips = lastResult[d.k+'_tips']||[];
+        if(tips.length){ ln('Recommendations:',9,true); tips.forEach(function(t,i){ var txt=typeof t==='string'?t:t.advice; ln((i+1)+'. '+txt,9); }); }
+        var plan = lastResult[d.k+'_action_plan']||[];
+        if(plan.length){ ln('Action Plan:',9,true); var tags=['30 days','60 days','90 days']; plan.forEach(function(a,i){ ln(tags[i]+': '+a.replace(/^(30|60|90)\s*days?:?\s*/i,''),9); }); }
+      } else {
+        var tip = lastResult[d.k+'_tip'];
+        if(tip) ln('Recommendation: '+tip,9);
+      }
+      hr();
+    });
+
+    if (isFullReport && lastResult.roadmap && lastResult.roadmap.length) {
+      ln('YOUR ROADMAP',10,true);
+      lastResult.roadmap.forEach(function(s,i){ ln((i+1)+'. '+s.phase,10,true); ln(s.action,10); y+=2; });
+      hr();
+    }
+
+    if (isFullReport && lastResult.financial_sources && lastResult.financial_sources.length) {
+      ln('FUNDING SOURCES',10,true);
+      lastResult.financial_sources.forEach(function(f){
+        ln(f.name+' ('+f.type+') — '+f.amount,10,true);
+        ln('Deadline: '+f.deadline+' · '+f.eligibility,9,false,122,118,112);
+        y+=1;
+      });
+      hr();
+    }
+
+    if (isFullReport && lastResult.distribution_platforms && lastResult.distribution_platforms.length) {
+      ln('DISTRIBUTION PLATFORMS',10,true);
+      lastResult.distribution_platforms.forEach(function(pl){
+        ln(pl.priority+': '+pl.name,10,true);
+        ln(pl.reason,9,false,122,118,112);
+        y+=1;
+      });
+      hr();
+    }
+
+    ln('Report by OneCiak — oneciak.com',9,false,122,118,112);
+    ln('Prepared for: '+email,9,false,122,118,112);
+    y+=4; hr();
+    ln('LEGAL DISCLAIMER',9,true,122,118,112);
+    ln('Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. OneCiak assumes no liability. Results are estimates and do not guarantee any outcome. OneCiak is not a licensed consulting firm.',8,false,150,148,145);
+
+    doc.save('OneCiak-'+lastProject.title.replace(/\s+/g,'-')+'.pdf');
+    document.getElementById('pdfSuccess').style.display = 'block';
+    setTimeout(function(){ document.getElementById('pdfSuccess').style.display='none'; }, 4000);
+  } catch(e) { alert('PDF generation failed. Please try again.'); }
+}
+
+function toggleOverview() {
+  var el = document.getElementById('extraSections');
+  var btn = document.querySelector('#overviewToggle button');
+  if (!el || !btn) return;
+  if (el.style.display === 'none') {
+    el.style.display = 'block';
+    btn.textContent = '↑ Hide Overview';
+    setTimeout(function(){
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  } else {
+    el.style.display = 'none';
+    btn.textContent = '↓ View Full Overview';
+  }
+}
+
+function showError(msg) { var b=document.getElementById('errorBox'); b.textContent=msg; b.style.display='block'; }
+function hideError() { document.getElementById('errorBox').style.display='none'; }
+
+// Check for Stripe return on page load
+window.addEventListener('DOMContentLoaded', function() {
+  handleStripeReturn();
+});
+
+function checkTranslation() {
+  setTimeout(function() {
+    var el = document.getElementById('translateBanner');
+    if (!el) return;
+    var lang = document.documentElement.lang || '';
+    var translated = document.documentElement.getAttribute('translate') === 'yes' ||
+      document.querySelector('[lang]:not([lang="en"])') !== null ||
+      (navigator.language && !navigator.language.startsWith('en') && document.title !== 'OneCiak — Film Market Intelligence');
+    if (translated) el.style.display = 'flex';
+  }, 800);
+}
+
+</script>
+</body>
+</html>
