@@ -1,3 +1,3 @@
 [build]
-  publish = "."
-  functions = "netlify/functions"
+  publish = "oneciak"
+  functions = "oneciak/netlify/functions"
