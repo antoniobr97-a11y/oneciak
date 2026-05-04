@@ -5,7 +5,7 @@ exports.handler = async (event) => {
     const body = JSON.parse(event.body);
     const prompt = body.prompt;
     const apiKey = (process.env.ANTHROPIC_API_KEY || '').trim();
-    if (!apiKey) return { statusCode: 500, headers: {'Content-Type':'application/json'}, body: JSON.stringify({error:'No API key'}) };
+    if (!apiKey) return { statusCode: 500, headers: {'Content-Type':'application/json','Access-Control-Allow-Origin':'*'}, body: JSON.stringify({error:'No API key'}) };
     const payload = JSON.stringify({ model: 'claude-opus-4-5', max_tokens: 8000, messages: [{ role: 'user', content: prompt }] });
     const data = await new Promise((resolve, reject) => {
       const req = https.request({ hostname: 'api.anthropic.com', path: '/v1/messages', method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'Content-Length': Buffer.byteLength(payload) } }, (res) => {
@@ -17,8 +17,9 @@ exports.handler = async (event) => {
       req.write(payload);
       req.end();
     });
+    if (data.status !== 200) return { statusCode: data.status, headers: {'Content-Type':'application/json','Access-Control-Allow-Origin':'*'}, body: JSON.stringify({ error: data.body.error && data.body.error.message ? data.body.error.message : 'API error' }) };
     return { statusCode: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(data.body) };
   } catch(err) {
-    return { statusCode: 500, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: err.message }) };
+    return { statusCode: 500, headers: {'Content-Type':'application/json','Access-Control-Allow-Origin':'*'}, body: JSON.stringify({ error: err.message }) };
   }
 };
