@@ -7,7 +7,7 @@ const ALLOWED_ORIGIN = process.env.SITE_URL || 'https://oneciak.com';
 const FREE_MODEL = 'claude-haiku-4-5-20251001';
 const FREE_MAX_TOKENS = 2000;
 const FULL_MODEL = 'claude-haiku-4-5-20251001';
-const FULL_MAX_TOKENS = 6000;
+const FULL_MAX_TOKENS = 4000; // per individual parallel call, not shared across them
 const MAX_PROMPT_LENGTH = 12000;
 const MAX_PARALLEL_PROMPTS = 4;
 
@@ -62,8 +62,7 @@ exports.handler = async (event) => {
       if (!prompts.length || prompts.length > MAX_PARALLEL_PROMPTS || prompts.some(p => typeof p !== 'string' || !p || p.length > MAX_PROMPT_LENGTH)) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid request.' }) };
       }
-      const perCallTokens = Math.ceil(FULL_MAX_TOKENS / prompts.length);
-      const results = await Promise.all(prompts.map(p => callAnthropic(apiKey, p, FULL_MODEL, perCallTokens)));
+      const results = await Promise.all(prompts.map(p => callAnthropic(apiKey, p, FULL_MODEL, FULL_MAX_TOKENS)));
       const failed = results.find(r => r.status !== 200);
       if (failed) return { statusCode: failed.status, headers, body: JSON.stringify({ error: failed.body.error && failed.body.error.message ? failed.body.error.message : 'API error' }) };
       let merged;
