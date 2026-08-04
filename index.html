@@ -1169,7 +1169,7 @@ function renderFull(r, title) {
       num:'01', label:'Creative Package', sublabel:'Narrative · Logline · Pitch',
       score: r.creative_score,
       body: buildAccordionBody(r.creative_score, r.creative_verdict, r.creative_detail,
-        r.creative_flags, r.creative_strengths, r.creative_tips, null, '')
+        r.creative_flags, r.creative_strengths, r.creative_tips, null, buildPitchAssessment(r.pitch_assessment))
     },
     {
       num:'02', label:'Financial Plan', sublabel:'Budget · Funding · Financing',
@@ -1183,7 +1183,7 @@ function renderFull(r, title) {
       score: r.market_score,
       body: buildAccordionBody(r.market_score, r.market_verdict, r.market_detail,
         r.market_flags, r.market_strengths, r.market_tips, null,
-        buildComparables(r.market_comps))
+        buildComparables(r.market_comps) + buildMarketingStrategy(r.marketing_strategy))
     },
     {
       num:'04', label:'Festival Strategy', sublabel:'Circuit · Festivals · Timing',
@@ -1405,6 +1405,41 @@ function buildFundingSources(sources) {
   return h;
 }
 
+function buildPitchAssessment(pa) {
+  if (!pa) return '';
+  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">';
+  if (pa.thirty_second_pitch) {
+    h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">30-Second Pitch</div>'+
+      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;font-style:italic;margin-bottom:14px">"'+pa.thirty_second_pitch+'"</div>';
+  }
+  if (pa.logline_improved) {
+    h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Logline Assessment'+(pa.logline_score?' — '+pa.logline_score+'/10':'')+'</div>';
+    if (pa.logline_issues) h += '<div style="font-size:13px;color:var(--muted);line-height:1.6;font-weight:300;margin-bottom:6px">'+pa.logline_issues+'</div>';
+    h += '<div style="font-size:13px;color:var(--success);line-height:1.6;font-weight:600;margin-bottom:14px">Improved: '+pa.logline_improved+'</div>';
+  }
+  if (pa.pitch_deck_checklist && pa.pitch_deck_checklist.length) {
+    h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Pitch Deck Checklist</div>';
+    pa.pitch_deck_checklist.forEach(function(item){ if (item) h += '<div style="font-size:13px;color:var(--text);font-weight:300;margin-bottom:4px">☐ '+item+'</div>'; });
+  }
+  h += '</div>';
+  return h;
+}
+
+function buildMarketingStrategy(ms) {
+  if (!ms) return '';
+  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Marketing Strategy</div>';
+  if (ms.overview) h += '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:10px">'+ms.overview+'</div>';
+  if (ms.pre_release && ms.pre_release.length) {
+    h += '<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px">Pre-Release Actions</div>';
+    ms.pre_release.forEach(function(a){ if (a) h += '<div style="font-size:13px;color:var(--muted);font-weight:300;margin-bottom:4px">• '+a+'</div>'; });
+  }
+  if (ms.social_strategy) h += '<div style="font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;margin-top:8px"><b style="color:var(--text)">Social:</b> '+ms.social_strategy+'</div>';
+  if (ms.community) h += '<div style="font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;margin-top:6px"><b style="color:var(--text)">Community:</b> '+ms.community+'</div>';
+  if (ms.press) h += '<div style="font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;margin-top:6px"><b style="color:var(--text)">Press:</b> '+ms.press+'</div>';
+  h += '</div>';
+  return h;
+}
+
 function buildTalentAndTax(talentLeverage, taxIncentive) {
   if (!talentLeverage && !(taxIncentive && taxIncentive.estimate)) return '';
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">';
@@ -1495,6 +1530,13 @@ function showSampleReport() {
       { advice: 'Commission a comparison-title deck (Manchester by the Sea, The Lighthouse, Céline Sciamma\'s work) to sharpen the pitch\'s visual reference points before approaching financiers.', links: [{ label: 'Stage 32 Pitch Resources', url: 'https://www.stage32.com' }] },
       { advice: 'Attach a cinematographer with a strong coastal/landscape portfolio early — it materially strengthens festival submissions.', links: [{ label: 'Shooting People', url: 'https://shootingpeople.org' }] }
     ],
+    pitch_assessment: {
+      thirty_second_pitch: 'A widowed lighthouse keeper and her estranged teenage son get one last summer together before automation replaces the station — and them.',
+      logline_score: 8,
+      logline_issues: 'Doesn\'t explicitly signal the tone (quiet drama vs. something more plot-driven)',
+      logline_improved: 'When automation renders her lighthouse keeper post obsolete, a grieving mother has one final summer to reconnect with the son she\'s spent years pushing away.',
+      pitch_deck_checklist: ['Comp-title page (The Quiet Girl, Aftersun)', 'Visual mood board emphasizing the coastal/automation contrast', 'Casting wishlist with 2-3 tiers per role', 'One-page financing structure with fund targets']
+    },
     financial_score: 7, financial_verdict: 'Realistic and financeable at the stated budget, with a clear public-funding path.',
     financial_detail: 'A two-hander with one primary location keeps the budget disciplined relative to comparable festival dramas, which often run 20-40% higher due to larger casts or multiple locations. The financing gap is bridgeable primarily through public regional funds plus a modest pre-sale to a domestic distributor. Expect a 9-12 month financing timeline if regional fund deadlines are hit on the first attempt rather than a resubmission cycle.',
     financial_flags: ['Single-location dependency means a weather-disrupted shoot has outsized schedule risk', 'No pre-attached cast yet, which regional funds often weight heavily'],
@@ -1521,6 +1563,13 @@ function showSampleReport() {
       { title: 'The Quiet Girl', year: '2022', budget: '~€1.3M', result: 'Oscar-nominated, strong European festival run, solid VOD afterlife', lesson: 'Restrained, specific character dramas can outperform starrier competition on festival prestige alone' },
       { title: 'Aftersun', year: '2022', budget: '~$2M', result: 'A24 acquisition off festival buzz, major critical breakout', lesson: 'A distinctive visual identity and a clear emotional hook drove acquisition interest more than plot novelty' }
     ],
+    marketing_strategy: {
+      overview: 'Lead with the automation/obsolescence hook rather than the reconciliation plot alone — it is the more distinctive angle and differentiates the film from genre peers.',
+      pre_release: ['Behind-the-scenes coastal location content to build visual identity pre-premiere', 'A short mood-board teaser timed to the first festival submission cycle', 'Targeted outreach to regional press ahead of the local festival circuit'],
+      social_strategy: 'Prioritize visual platforms (Instagram, Letterboxd) with location and process-driven content over broad-reach paid campaigns — the audience is niche and discovery-driven, not mass-market.',
+      community: 'Engage regional film communities and coastal-heritage groups who have organic affinity for the setting and can drive grassroots local screening interest.',
+      press: 'Target genre-specific and arthouse critics early with festival-cut screeners rather than a broad trade-press blast — reviews from the right niche outlets carry more weight with programmers and distributors than volume.'
+    },
     festival_score: 8, festival_verdict: 'A strong, realistic festival trajectory if positioned correctly from the first submission.',
     festival_detail: 'This is a classic A-tier-adjacent festival profile: not a guaranteed top-5 selection, but a strong candidate for major festivals\' second-tier sidebars and a near-certain fit for the broader A-minus/B-tier circuit. Sequencing matters — premiering too early at a smaller festival can close doors at bigger ones with premiere-status requirements, so the top-tier submissions should go out first even with lower odds.',
     festival_flags: ['Premiere-status rules mean submitting to smaller festivals first could disqualify from bigger ones later'],
@@ -1658,6 +1707,33 @@ function savePDF() {
         ln('Deadline: '+(f.deadline||'')+' · '+(f.eligibility||''),9,false,122,118,112);
         y+=1;
       });
+      hr();
+    }
+
+    if (isFullReport && lastResult.pitch_assessment) {
+      var pa = lastResult.pitch_assessment;
+      ln('PITCH ASSESSMENT',10,true);
+      if (pa.thirty_second_pitch) { ln('30-Second Pitch:',9,true); ln('"'+pa.thirty_second_pitch+'"',9,false,122,118,112); }
+      if (pa.logline_improved) {
+        ln('Logline Assessment'+(pa.logline_score?' — '+pa.logline_score+'/10':''),9,true);
+        if (pa.logline_issues) ln(pa.logline_issues,9,false,122,118,112);
+        ln('Improved: '+pa.logline_improved,9,true,22,101,52);
+      }
+      if (pa.pitch_deck_checklist && pa.pitch_deck_checklist.length) {
+        ln('Pitch Deck Checklist:',9,true);
+        pa.pitch_deck_checklist.forEach(function(item){ if(item) ln('☐ '+item,9); });
+      }
+      hr();
+    }
+
+    if (isFullReport && lastResult.marketing_strategy) {
+      var ms = lastResult.marketing_strategy;
+      ln('MARKETING STRATEGY',10,true);
+      if (ms.overview) ln(ms.overview,10,false,122,118,112);
+      if (ms.pre_release && ms.pre_release.length) { ln('Pre-Release Actions:',9,true); ms.pre_release.forEach(function(a){ if(a) ln('• '+a,9); }); }
+      if (ms.social_strategy) ln('Social: '+ms.social_strategy,9,false,122,118,112);
+      if (ms.community) ln('Community: '+ms.community,9,false,122,118,112);
+      if (ms.press) ln('Press: '+ms.press,9,false,122,118,112);
       hr();
     }
 
