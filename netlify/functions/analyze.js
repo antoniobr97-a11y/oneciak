@@ -53,16 +53,19 @@ exports.handler = async (event) => {
     const apiKey = (process.env.ANTHROPIC_API_KEY || '').trim();
     if (!apiKey) return { statusCode: 500, headers, body: JSON.stringify({ error: 'No API key' }) };
 
-    // Full report: several smaller prompts run in parallel and get merged,
-    // instead of one giant prompt that reliably exceeds the platform's
-    // response-time limit. Only available once payment is verified.
+    // Both tiers send several smaller, independently-scoped prompts that run
+    // in parallel and get merged, instead of one giant prompt that reliably
+    // exceeds the platform's response-time limit. Which model/token budget
+    // is used still depends solely on verified payment (isPaid) — a "free"
+    // tier request is never able to claim the paid model this way.
     if (Array.isArray(body.prompts)) {
-      if (!isPaid) return { statusCode: 403, headers, body: JSON.stringify({ error: 'Payment required.' }) };
       const prompts = body.prompts;
       if (!prompts.length || prompts.length > MAX_PARALLEL_PROMPTS || prompts.some(p => typeof p !== 'string' || !p || p.length > MAX_PROMPT_LENGTH)) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid request.' }) };
       }
-      const results = await Promise.all(prompts.map(p => callAnthropic(apiKey, p, FULL_MODEL, FULL_MAX_TOKENS)));
+      const model = isPaid ? FULL_MODEL : FREE_MODEL;
+      const maxTokens = isPaid ? FULL_MAX_TOKENS : FREE_MAX_TOKENS;
+      const results = await Promise.all(prompts.map(p => callAnthropic(apiKey, p, model, maxTokens)));
       const failed = results.find(r => r.status !== 200);
       if (failed) return { statusCode: failed.status, headers, body: JSON.stringify({ error: failed.body.error && failed.body.error.message ? failed.body.error.message : 'API error' }) };
       let merged;

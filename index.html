@@ -781,9 +781,17 @@ function getProject() {
   };
 }
 
-/* ── FREE PROMPT ── */
-function freePrompt(p) {
-  return 'You are a film market consultant. Respond ONLY with valid JSON. All text in English. No markdown. Be honest and specific — a filmmaker needs real information, not generic advice.\n\nProject: Title="'+p.title+'", Logline="'+p.logline+'", Genre="'+p.genre+'", Format="'+p.format+'", Budget="'+p.budget+'", Audience="'+p.audience+'", Distribution="'+p.distrib+'", Country="'+p.country+'", Experience="'+p.experience+'", Notes="'+(p.extra||'None')+'"\n\nAnalyze across 5 dimensions. Each dimension has a strictly defined scope — do NOT repeat information across them.\n\n1. CREATIVE PACKAGE: narrative strength, logline clarity, originality, pitch power only.\n2. FINANCIAL PLAN: budget realism, funding sources only.\n3. MARKET & AUDIENCE: external demand, genre trends, audience size only.\n4. FESTIVAL STRATEGY: festival circuit, specific festivals, timing only.\n5. DISTRIBUTION & REVENUE: platforms, revenue projections only.\n\nRespond with exactly this JSON:\n{"overall_score":7.5,"overall_label":"3-5 words","overall_summary":"2 honest sentences about this project\'s market position","biggest_risk":"one specific sentence — the single most critical risk for this project right now","biggest_opportunity":"one specific sentence — the single most actionable opportunity right now","next_step":"the single most important concrete action this filmmaker should take this week","logline_verdict":"one sentence: does the logline work as a pitch tool and why or why not","one_comp":{"title":"one real comparable film","year":"year","result":"what it achieved at this budget level","lesson":"one concrete lesson for this project"},"one_festival":{"name":"one realistic festival to target","tier":"A/B/C","why":"why this specific festival fits this project","url":"https://real.submission.url"},"creative_score":7,"creative_verdict":"one sentence","creative_detail":"2-3 sentences","creative_tip":"one concrete actionable suggestion","creative_flag":"one specific red flag","creative_strength":"one specific strength","financial_score":6,"financial_verdict":"one sentence","financial_detail":"2-3 sentences","financial_tip":"one concrete actionable suggestion","financial_flag":"one specific red flag","financial_strength":"one specific strength","market_score":7,"market_verdict":"one sentence","market_detail":"2-3 sentences","market_tip":"one concrete actionable suggestion","market_flag":"one specific red flag","market_strength":"one specific strength","festival_score":8,"festival_verdict":"one sentence","festival_detail":"2-3 sentences","festival_tip":"one concrete actionable suggestion","festival_flag":"one specific red flag","festival_strength":"one specific strength","distribution_score":5,"distribution_verdict":"one sentence","distribution_detail":"2-3 sentences","distribution_tip":"one concrete actionable suggestion","distribution_flag":"one specific red flag","distribution_strength":"one specific strength"}';
+/* ── FREE PROMPT (split into 3 small parallel calls for reliability) ── */
+function freePromptA(p) {
+  return 'You are a film market consultant. Write in clear English, no markdown. Be honest and specific — a filmmaker needs real information, not generic advice. Respond ONLY with valid JSON, no text outside the JSON.\n\nProject: Title=\"'+p.title+'\", Logline=\"'+p.logline+'\", Genre=\"'+p.genre+'\", Format=\"'+p.format+'\", Budget=\"'+p.budget+'\", Audience=\"'+p.audience+'\", Distribution=\"'+p.distrib+'\", Country=\"'+p.country+'\", Experience=\"'+p.experience+'\", Notes=\"'+(p.extra||'None')+'\"\n\nCover ONLY: overall assessment, one comparable film, one festival fit, and the creative package (narrative, logline, pitch). NOTHING about budget, market, distribution.\n\nRespond with exactly this JSON:\n{\n"overall_score":7.5,\n"overall_label":"3-5 words",\n"overall_summary":"2 honest sentences about this project market position",\n"biggest_risk":"one specific sentence",\n"biggest_opportunity":"one specific sentence",\n"next_step":"the single most important concrete action this week",\n"logline_verdict":"one sentence: does the logline work as a pitch tool",\n"one_comp":{"title":"one real comparable film","year":"year","result":"what it achieved at this budget level","lesson":"one concrete lesson"},\n"one_festival":{"name":"one realistic festival to target","tier":"A/B/C","why":"why it fits","url":"https://real.submission.url"},\n"creative_score":7,\n"creative_verdict":"one sentence",\n"creative_detail":"2-3 sentences",\n"creative_tip":"one concrete suggestion",\n"creative_flag":"one specific red flag",\n"creative_strength":"one specific strength"\n}';
+}
+
+function freePromptB(p) {
+  return 'You are a film market consultant. Write in clear English, no markdown. Be honest and specific — a filmmaker needs real information, not generic advice. Respond ONLY with valid JSON, no text outside the JSON.\n\nProject: Title=\"'+p.title+'\", Logline=\"'+p.logline+'\", Genre=\"'+p.genre+'\", Format=\"'+p.format+'\", Budget=\"'+p.budget+'\", Audience=\"'+p.audience+'\", Distribution=\"'+p.distrib+'\", Country=\"'+p.country+'\", Experience=\"'+p.experience+'\", Notes=\"'+(p.extra||'None')+'\"\n\nCover ONLY: the financial plan (budget realism, funding) and market & audience (demand, trends). NOTHING about creative, festivals, distribution.\n\nRespond with exactly this JSON:\n{\n"financial_score":6,\n"financial_verdict":"one sentence",\n"financial_detail":"2-3 sentences",\n"financial_tip":"one concrete suggestion",\n"financial_flag":"one specific red flag",\n"financial_strength":"one specific strength",\n"market_score":7,\n"market_verdict":"one sentence",\n"market_detail":"2-3 sentences",\n"market_tip":"one concrete suggestion",\n"market_flag":"one specific red flag",\n"market_strength":"one specific strength"\n}';
+}
+
+function freePromptC(p) {
+  return 'You are a film market consultant. Write in clear English, no markdown. Be honest and specific — a filmmaker needs real information, not generic advice. Respond ONLY with valid JSON, no text outside the JSON.\n\nProject: Title=\"'+p.title+'\", Logline=\"'+p.logline+'\", Genre=\"'+p.genre+'\", Format=\"'+p.format+'\", Budget=\"'+p.budget+'\", Audience=\"'+p.audience+'\", Distribution=\"'+p.distrib+'\", Country=\"'+p.country+'\", Experience=\"'+p.experience+'\", Notes=\"'+(p.extra||'None')+'\"\n\nCover ONLY: festival strategy (circuit, timing) and distribution & revenue (platforms, projections). NOTHING about creative, budget, market.\n\nRespond with exactly this JSON:\n{\n"festival_score":8,\n"festival_verdict":"one sentence",\n"festival_detail":"2-3 sentences",\n"festival_tip":"one concrete suggestion",\n"festival_flag":"one specific red flag",\n"festival_strength":"one specific strength",\n"distribution_score":5,\n"distribution_verdict":"one sentence",\n"distribution_detail":"2-3 sentences",\n"distribution_tip":"one concrete suggestion",\n"distribution_flag":"one specific red flag",\n"distribution_strength":"one specific strength"\n}';
 }
 
 /* ── FULL PROMPT (split into 6 small parallel calls to comfortably clear the platform's response-time limit) ── */
@@ -834,11 +842,11 @@ async function callAPI(prompt, tier, auth) {
 }
 
 /* ── FULL REPORT API (3 smaller prompts run in parallel server-side, merged into one report) ── */
-async function callFullAPI(prompts, auth) {
+async function callFullAPI(prompts, tier, auth) {
   var res = await fetch("/.netlify/functions/analyze", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompts: prompts, tier: 'full', token: auth && auth.token, session_id: auth && auth.session_id })
+    body: JSON.stringify({ prompts: prompts, tier: tier || 'free', token: auth && auth.token, session_id: auth && auth.session_id })
   });
   var text = await res.text();
   if (!res.ok) {
@@ -903,7 +911,7 @@ async function handleStripeReturn() {
     lastProject = p;
     document.getElementById('loadingTitle').textContent = 'Building your full report…';
     document.getElementById('loadingDesc').textContent = 'Deep analysis in progress across all 5 dimensions.';
-    var result = await callFullAPI([fullPromptA(p), fullPromptB(p), fullPromptC(p), fullPromptD(p), fullPromptE(p), fullPromptF(p)], { token: data.reportToken, session_id: data.session_id || sessionId });
+    var result = await callFullAPI([fullPromptA(p), fullPromptB(p), fullPromptC(p), fullPromptD(p), fullPromptE(p), fullPromptF(p)], 'full', { token: data.reportToken, session_id: data.session_id || sessionId });
     lastResult = result;
     showOnly('sec-results');
     renderFull(result, p.title);
@@ -1292,7 +1300,9 @@ async function runAnalysis(isFull) {
     ? 'Deep analysis in progress across all 5 dimensions — creative, financial, market, festival and distribution.'
     : 'Evaluating your project across five market dimensions with real industry data.';
   try {
-    var result = isFull ? await callFullAPI([fullPromptA(p), fullPromptB(p), fullPromptC(p), fullPromptD(p), fullPromptE(p), fullPromptF(p)], {}) : await callAPI(freePrompt(p), 'free');
+    var result = isFull
+      ? await callFullAPI([fullPromptA(p), fullPromptB(p), fullPromptC(p), fullPromptD(p), fullPromptE(p), fullPromptF(p)], 'full', {})
+      : await callFullAPI([freePromptA(p), freePromptB(p), freePromptC(p)], 'free', {});
     lastResult = result;
     showOnly('sec-results');
     if (isFull) renderFull(result, p.title);
