@@ -182,7 +182,7 @@ function buildReportEmailHtml(project, r, sessionId) {
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:32px 0">' +
     '<tr><td align="center">' +
     '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:18px;overflow:hidden;max-width:600px;width:100%">' +
-    '<tr><td style="padding:32px 32px 0;text-align:center"><span style="font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#6f6f6f">OneCiak — Film Market Intelligence</span></td></tr>' +
+    '<tr><td style="padding:32px 32px 0;text-align:center"><svg width="16" height="16" viewBox="0 0 124 124" style="vertical-align:middle;margin-right:6px" xmlns="http://www.w3.org/2000/svg"><path d="M6 0L117 0A6 6 0 0 1 123 6L123 19Q123 25 117.11 26.15L5.89 47.85Q0 49 0 43L0 6A6 6 0 0 1 6 0Z" fill="#000"/><rect x="0" y="62" width="123" height="62" rx="6" fill="#000"/></svg><span style="font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#6f6f6f;vertical-align:middle">OneCiak — Film Market Intelligence</span></td></tr>' +
     '<tr><td style="padding:16px 32px 24px;text-align:center">' +
     '<div style="font-size:22px;font-weight:700;color:#000;margin-bottom:8px">"' + esc(title) + '"</div>' +
     '<div style="display:inline-block;border:1px solid #000;border-radius:999px;padding:6px 18px;font-size:15px;font-weight:700;color:#000">Score ' + esc(score) + '/10</div>' +
