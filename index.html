@@ -1252,23 +1252,24 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
 
   // Flags
   var fl = '';
-  (flags||[]).forEach(function(f){ fl += '<div class="flag-item red">'+f+'</div>'; });
+  (flags||[]).forEach(function(f){ if (f) fl += '<div class="flag-item red">'+f+'</div>'; });
   if (fl) out += '<div class="flags-block"><div class="flags-label red">Red Flags</div>'+fl+'</div>';
 
   // Strengths
   var st = '';
-  (strengths||[]).forEach(function(s){ st += '<div class="flag-item green">'+s+'</div>'; });
+  (strengths||[]).forEach(function(s){ if (s) st += '<div class="flag-item green">'+s+'</div>'; });
   if (st) out += '<div class="flags-block"><div class="flags-label green">Strengths</div>'+st+'</div>';
 
   // Tips
   if ((tips||[]).length) {
     out += '<div class="tips-block"><span class="tips-label">Recommendations</span>';
     tips.forEach(function(t){
-      var txt = typeof t==='string' ? t : t.advice;
+      if (!t) return;
+      var txt = typeof t==='string' ? t : (t.advice||'');
       out += '<div class="tip-item"><div class="tip-text">'+txt+'</div>';
       if (typeof t==='object' && t.links && t.links.length) {
         out += '<div class="tip-links">';
-        t.links.forEach(function(l){ out += '<a class="tip-link" href="'+l.url+'" target="_blank" rel="noopener">'+l.label+'</a>'; });
+        t.links.forEach(function(l){ if (l) out += '<a class="tip-link" href="'+(l.url||'#')+'" target="_blank" rel="noopener">'+(l.label||'')+'</a>'; });
         out += '</div>';
       }
       out += '</div>';
@@ -1281,7 +1282,7 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
     out += '<div class="action-block"><span class="action-label">Action Plan</span>';
     var tags = ['30 days','60 days','90 days'];
     plan.forEach(function(a,i){
-      var clean = a.replace(/^(30|60|90)\s*days?:?\s*/i,'');
+      var clean = String(a||'').replace(/^(30|60|90)\s*days?:?\s*/i,'');
       out += '<div class="action-item"><span class="action-tag">'+(tags[i]||'')+'</span><span class="action-text">'+clean+'</span></div>';
     });
     out += '</div>';
@@ -1301,7 +1302,8 @@ function buildActionPlanBody(r) {
   if (r.roadmap && r.roadmap.length) {
     out += '<div style="margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Roadmap</div>';
     r.roadmap.forEach(function(s,i){
-      out += '<div class="roadmap-step"><div class="roadmap-num">'+(i+1)+'</div><div><div class="roadmap-phase">'+s.phase+'</div><div class="roadmap-action">'+s.action+'</div></div></div>';
+      if (!s) return;
+      out += '<div class="roadmap-step"><div class="roadmap-num">'+(i+1)+'</div><div><div class="roadmap-phase">'+(s.phase||'')+'</div><div class="roadmap-action">'+(s.action||'')+'</div></div></div>';
     });
     out += '</div>';
   }
@@ -1310,7 +1312,8 @@ function buildActionPlanBody(r) {
   if (r.international_markets && r.international_markets.length) {
     out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">International Markets</div>';
     r.international_markets.forEach(function(m){
-      out += '<div class="market-item"><div class="market-name">'+m.country+'</div><div class="market-reason">'+m.reason+'</div></div>';
+      if (!m) return;
+      out += '<div class="market-item"><div class="market-name">'+(m.country||'')+'</div><div class="market-reason">'+(m.reason||'')+'</div></div>';
     });
     out += '</div>';
   }
@@ -1319,15 +1322,16 @@ function buildActionPlanBody(r) {
   if (r.festival_calendar && r.festival_calendar.length) {
     out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Festival Calendar</div>';
     r.festival_calendar.forEach(function(f){
+      if (!f) return;
       var tc = f.tier==='A' ? 'var(--text)' : f.tier==='B' ? 'var(--accent)' : 'var(--muted)';
       out += '<div style="padding:10px 0;border-bottom:1px solid var(--border-light)">'+
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'+
-        '<div style="font-size:13px;font-weight:600">'+f.festival+'</div>'+
-        '<span style="font-size:10px;font-weight:700;color:'+tc+';padding:1px 7px;border-radius:999px;border:1px solid var(--border);background:var(--cream)">'+f.tier+'</span>'+
+        '<div style="font-size:13px;font-weight:600">'+(f.festival||'')+'</div>'+
+        '<span style="font-size:10px;font-weight:700;color:'+tc+';padding:1px 7px;border-radius:999px;border:1px solid var(--border);background:var(--cream)">'+(f.tier||'')+'</span>'+
         '</div>'+
-        '<div style="font-size:12px;color:var(--muted);font-weight:300;margin-bottom:3px">'+f.deadline+'</div>'+
-        '<div style="font-size:12px;color:var(--text);font-weight:300;margin-bottom:5px">'+f.fit+'</div>'+
-        '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+f.url+'" target="_blank" rel="noopener">Submit →</a>'+
+        '<div style="font-size:12px;color:var(--muted);font-weight:300;margin-bottom:3px">'+(f.deadline||'')+'</div>'+
+        '<div style="font-size:12px;color:var(--text);font-weight:300;margin-bottom:5px">'+(f.fit||'')+'</div>'+
+        '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+(f.url||'#')+'" target="_blank" rel="noopener">Submit →</a>'+
         '</div>';
     });
     out += '</div>';
@@ -1337,11 +1341,12 @@ function buildActionPlanBody(r) {
   if (r.sales_agents && r.sales_agents.length) {
     out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Sales Agents</div>';
     r.sales_agents.forEach(function(a){
+      if (!a) return;
       out += '<div style="padding:10px 0;border-bottom:1px solid var(--border-light)">'+
-        '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+a.name+'</div>'+
-        '<div style="font-size:11px;color:var(--muted-light);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">'+a.focus+'</div>'+
-        '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:5px">'+a.why+'</div>'+
-        '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+a.url+'" target="_blank" rel="noopener">Visit →</a>'+
+        '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+(a.name||'')+'</div>'+
+        '<div style="font-size:11px;color:var(--muted-light);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">'+(a.focus||'')+'</div>'+
+        '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:5px">'+(a.why||'')+'</div>'+
+        '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+(a.url||'#')+'" target="_blank" rel="noopener">Visit →</a>'+
         '</div>';
     });
     out += '</div>';
@@ -1377,14 +1382,15 @@ function buildFundingSources(sources) {
   if (!sources || !sources.length) return '';
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Funding Sources</div>';
   sources.forEach(function(f){
+    if (!f) return;
     h += '<div style="padding:11px 0;border-bottom:1px solid var(--border)">'+
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:3px">'+
-      '<div style="font-size:13px;font-weight:700">'+f.name+'</div>'+
-      '<div style="font-size:10px;font-weight:700;color:var(--muted);background:var(--cream);padding:2px 7px;border-radius:3px;white-space:nowrap;flex-shrink:0">'+f.type+'</div>'+
+      '<div style="font-size:13px;font-weight:700">'+(f.name||'')+'</div>'+
+      '<div style="font-size:10px;font-weight:700;color:var(--muted);background:var(--cream);padding:2px 7px;border-radius:3px;white-space:nowrap;flex-shrink:0">'+(f.type||'')+'</div>'+
       '</div>'+
-      '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:3px">'+f.amount+'</div>'+
-      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:5px">Deadline: '+f.deadline+' · '+f.eligibility+'</div>'+
-      '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px" href="'+f.url+'" target="_blank" rel="noopener">Apply →</a>'+
+      '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:3px">'+(f.amount||'')+'</div>'+
+      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:5px">Deadline: '+(f.deadline||'')+' · '+(f.eligibility||'')+'</div>'+
+      '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px" href="'+(f.url||'#')+'" target="_blank" rel="noopener">Apply →</a>'+
       '</div>';
   });
   h += '</div>';
@@ -1411,7 +1417,8 @@ function buildComparables(comps) {
   if (!comps || !comps.length) return '';
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Comparable Films</div>';
   comps.forEach(function(c){
-    h += '<div class="comp-item"><div class="comp-name">'+c.title+' ('+c.year+')</div><div class="comp-detail">Budget: '+c.budget+' — '+c.result+'</div><div class="comp-lesson">'+c.lesson+'</div></div>';
+    if (!c) return;
+    h += '<div class="comp-item"><div class="comp-name">'+(c.title||'')+' ('+(c.year||'')+')</div><div class="comp-detail">Budget: '+(c.budget||'')+' — '+(c.result||'')+'</div><div class="comp-lesson">'+(c.lesson||'')+'</div></div>';
   });
   h += '</div>';
   return h;
@@ -1421,11 +1428,12 @@ function buildPlatforms(platforms) {
   if (!platforms || !platforms.length) return '';
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Platform Priority</div>';
   platforms.forEach(function(pl){
+    if (!pl) return;
     h += '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px;background:var(--cream);border-radius:7px;margin-bottom:7px">'+
-      '<div style="font-size:9px;font-weight:700;color:#fff;background:var(--text);padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px;letter-spacing:0.04em">'+pl.priority+'</div>'+
-      '<div><div style="font-size:13px;font-weight:700;margin-bottom:2px">'+pl.name+'</div>'+
-      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:4px">'+pl.reason+'</div>'+
-      '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px;display:inline-block" href="'+pl.url+'" target="_blank" rel="noopener">Visit →</a>'+
+      '<div style="font-size:9px;font-weight:700;color:#fff;background:var(--text);padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px;letter-spacing:0.04em">'+(pl.priority||'')+'</div>'+
+      '<div><div style="font-size:13px;font-weight:700;margin-bottom:2px">'+(pl.name||'')+'</div>'+
+      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:4px">'+(pl.reason||'')+'</div>'+
+      '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px;display:inline-block" href="'+(pl.url||'#')+'" target="_blank" rel="noopener">Visit →</a>'+
       '</div></div>';
   });
   h += '</div>';
@@ -1618,9 +1626,9 @@ function savePDF() {
         var strengths = lastResult[d.k+'_strengths']||[];
         if(strengths.length){ ln('Strengths:',9,true,22,101,52); strengths.forEach(function(s){ ln('• '+s,9,false,22,101,52); }); }
         var tips = lastResult[d.k+'_tips']||[];
-        if(tips.length){ ln('Recommendations:',9,true); tips.forEach(function(t,i){ var txt=typeof t==='string'?t:t.advice; ln((i+1)+'. '+txt,9); }); }
+        if(tips.length){ ln('Recommendations:',9,true); tips.forEach(function(t,i){ if(!t) return; var txt=typeof t==='string'?t:(t.advice||''); ln((i+1)+'. '+txt,9); }); }
         var plan = lastResult[d.k+'_action_plan']||[];
-        if(plan.length){ ln('Action Plan:',9,true); var tags=['30 days','60 days','90 days']; plan.forEach(function(a,i){ ln(tags[i]+': '+a.replace(/^(30|60|90)\s*days?:?\s*/i,''),9); }); }
+        if(plan.length){ ln('Action Plan:',9,true); var tags=['30 days','60 days','90 days']; plan.forEach(function(a,i){ ln(tags[i]+': '+String(a||'').replace(/^(30|60|90)\s*days?:?\s*/i,''),9); }); }
       } else {
         var tip = lastResult[d.k+'_tip'];
         if(tip) ln('Recommendation: '+tip,9);
@@ -1630,15 +1638,16 @@ function savePDF() {
 
     if (isFullReport && lastResult.roadmap && lastResult.roadmap.length) {
       ln('YOUR ROADMAP',10,true);
-      lastResult.roadmap.forEach(function(s,i){ ln((i+1)+'. '+s.phase,10,true); ln(s.action,10); y+=2; });
+      lastResult.roadmap.forEach(function(s,i){ if(!s) return; ln((i+1)+'. '+(s.phase||''),10,true); ln(s.action||'',10); y+=2; });
       hr();
     }
 
     if (isFullReport && lastResult.financial_sources && lastResult.financial_sources.length) {
       ln('FUNDING SOURCES',10,true);
       lastResult.financial_sources.forEach(function(f){
-        ln(f.name+' ('+f.type+') — '+f.amount,10,true);
-        ln('Deadline: '+f.deadline+' · '+f.eligibility,9,false,122,118,112);
+        if (!f) return;
+        ln((f.name||'')+' ('+(f.type||'')+') — '+(f.amount||''),10,true);
+        ln('Deadline: '+(f.deadline||'')+' · '+(f.eligibility||''),9,false,122,118,112);
         y+=1;
       });
       hr();
@@ -1647,8 +1656,9 @@ function savePDF() {
     if (isFullReport && lastResult.distribution_platforms && lastResult.distribution_platforms.length) {
       ln('DISTRIBUTION PLATFORMS',10,true);
       lastResult.distribution_platforms.forEach(function(pl){
-        ln(pl.priority+': '+pl.name,10,true);
-        ln(pl.reason,9,false,122,118,112);
+        if (!pl) return;
+        ln((pl.priority||'')+': '+(pl.name||''),10,true);
+        ln(pl.reason||'',9,false,122,118,112);
         y+=1;
       });
       hr();
