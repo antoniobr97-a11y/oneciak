@@ -8,6 +8,29 @@ const { incrementUsageCount } = require('./_util/stats');
 const FULL_MODEL = 'claude-haiku-4-5-20251001';
 const FULL_MAX_TOKENS = 8000; // background function isn't bound by a sync response-time ceiling, so the deeper prompts get real room
 const PROCESSING_STALE_MS = 8 * 60 * 1000; // generation can now legitimately take a few minutes; give it plenty of room before a retry is treated as abandoned
+const PROMPT_ATTEMPTS = 3; // each of the 6 parallel prompts gets its own retries — an occasional malformed-JSON response from the model shouldn't fail the whole report
+const OVERALL_ATTEMPTS = 2; // a second full pass in case something broader (Resend, a transient network error) fails
+
+// Background functions always ack Stripe with 202 immediately, regardless
+// of what happens afterward — so unlike a normal function, a failure here
+// does NOT get Stripe's automatic webhook retry. All retry logic has to
+// live inside this one invocation.
+async function callAndParseWithRetry(apiKey, prompt, model, maxTokens) {
+  let lastErr;
+  for (let i = 0; i < PROMPT_ATTEMPTS; i++) {
+    const result = await callAnthropic(apiKey, prompt, model, maxTokens);
+    if (result.status !== 200) {
+      lastErr = new Error('Anthropic API error: ' + (result.body.error && result.body.error.message));
+      continue;
+    }
+    try {
+      return extractJSON(result.body.content && result.body.content[0] ? result.body.content[0].text : '');
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr;
+}
 
 // Netlify Background Function (note the -background suffix): Netlify acks
 // this immediately with a 202 and lets it keep running for up to 15
@@ -80,30 +103,32 @@ exports.handler = async (event) => {
     await store.setJSON(key, { status: 'processing', startedAt: Date.now() });
   } catch (e) { /* fail open — proceed even if we can't record state */ }
 
-  try {
-    const prompts = allFullPrompts(project);
-    const results = await Promise.all(prompts.map(p => callAnthropic(anthropicKey, p, FULL_MODEL, FULL_MAX_TOKENS)));
-    const failed = results.find(r => r.status !== 200);
-    if (failed) throw new Error('Anthropic API error: ' + (failed.body.error && failed.body.error.message));
+  const prompts = allFullPrompts(project);
+  let lastErr;
+  for (let attempt = 1; attempt <= OVERALL_ATTEMPTS; attempt++) {
+    try {
+      const parsedResults = await Promise.all(prompts.map(p => callAndParseWithRetry(anthropicKey, p, FULL_MODEL, FULL_MAX_TOKENS)));
+      const merged = {};
+      parsedResults.forEach(r => Object.assign(merged, r));
 
-    const merged = {};
-    results.forEach(r => Object.assign(merged, extractJSON(r.body.content && r.body.content[0] ? r.body.content[0].text : '')));
+      const html = buildReportEmailHtml(project, merged, session.id);
+      await sendReportEmail({
+        apiKey: resendKey,
+        from: process.env.REPORT_FROM_EMAIL || 'OneCiak <onboarding@resend.dev>',
+        to: email,
+        subject: 'Your OneCiak Full Report — "' + project.title + '"',
+        html
+      });
 
-    const html = buildReportEmailHtml(project, merged, session.id);
-    await sendReportEmail({
-      apiKey: resendKey,
-      from: process.env.REPORT_FROM_EMAIL || 'OneCiak <onboarding@resend.dev>',
-      to: email,
-      subject: 'Your OneCiak Full Report — "' + project.title + '"',
-      html
-    });
-
-    await store.setJSON(key, { status: 'sent', sentAt: Date.now(), report: merged, project });
-    await incrementUsageCount();
-    return { statusCode: 200, body: 'OK' };
-  } catch (err) {
-    console.error('stripe-webhook-background: generation/email failed for session', session.id, err.message);
-    try { await store.setJSON(key, { status: 'failed', error: err.message, at: Date.now() }); } catch (e) {}
-    return { statusCode: 500, body: 'Failed, will retry' };
+      await store.setJSON(key, { status: 'sent', sentAt: Date.now(), report: merged, project });
+      await incrementUsageCount();
+      return { statusCode: 200, body: 'OK' };
+    } catch (err) {
+      lastErr = err;
+      console.error('stripe-webhook-background: attempt ' + attempt + ' failed for session', session.id, err.message);
+    }
   }
+
+  try { await store.setJSON(key, { status: 'failed', error: lastErr.message, at: Date.now() }); } catch (e) {}
+  return { statusCode: 500, body: 'Failed after retries' };
 };
