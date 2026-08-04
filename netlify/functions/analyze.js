@@ -5,7 +5,7 @@ const { verify: verifyReportToken } = require('./_util/reportToken');
 
 const ALLOWED_ORIGIN = process.env.SITE_URL || 'https://oneciak.com';
 const FREE_MODEL = 'claude-haiku-4-5-20251001';
-const FREE_MAX_TOKENS = 2000;
+const FREE_MAX_TOKENS = 3200;
 const FULL_MODEL = 'claude-haiku-4-5-20251001';
 const FULL_MAX_TOKENS = 4000; // per individual parallel call, not shared across them
 const MAX_PROMPT_LENGTH = 12000;
