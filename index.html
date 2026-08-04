@@ -903,6 +903,21 @@ async function callFullAPI(prompts, tier, auth) {
   return data.merged;
 }
 
+/* ── CHECK IF THE WEBHOOK ALREADY GENERATED THE REPORT SERVER-SIDE ── */
+async function checkReportReady(sessionId, token) {
+  try {
+    var res = await fetch('/.netlify/functions/get-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: sessionId, token: token })
+    });
+    if (!res.ok) return { ready: false };
+    return await res.json();
+  } catch (e) {
+    return { ready: false };
+  }
+}
+
 /* ── STRIPE PAYMENT LINK ── */
 async function startStripeCheckout() {
   var p = lastProject;
@@ -967,9 +982,28 @@ async function generateFullReport() {
   lastProject = p;
   document.getElementById('loadingRetryBtn').style.display = 'none';
   document.getElementById('loadingSpinner').style.display = 'block';
-  document.getElementById('loadingTitle').textContent = 'Building your full report…';
-  document.getElementById('loadingDesc').textContent = 'Deep analysis in progress across all 5 dimensions. This can take up to 30 seconds — please don\'t close this page.';
+  document.getElementById('loadingTitle').textContent = 'Checking your report…';
+  document.getElementById('loadingDesc').textContent = 'One moment while we check if your report is already available.';
   showOnly('sec-loading');
+  try {
+    // The payment webhook generates the same report server-side, independent
+    // of this browser. If it already finished (e.g. this is a retry, or the
+    // customer came back later via the emailed link), reuse it instead of
+    // paying for a brand-new AI generation.
+    var existing = await checkReportReady(pendingFullReportAuth.session_id, pendingFullReportAuth.token);
+    if (existing && existing.ready) {
+      lastResult = existing.report;
+      if (existing.project) { lastProject = existing.project; p = existing.project; }
+      pendingFullReportAuth = null;
+      showOnly('sec-results');
+      renderFull(lastResult, p.title);
+      checkTranslation();
+      initScrollReveal();
+      return;
+    }
+  } catch (e) { /* lookup failed, fall through to normal generation */ }
+  document.getElementById('loadingTitle').textContent = 'Building your full report…';
+  document.getElementById('loadingDesc').textContent = 'Deep analysis in progress across all 5 dimensions. This can take up to 30 seconds — please don\'t close this page. Even if you do, we\'ll also email you the full report automatically, and you can always come back here to view it.';
   try {
     var result = await callFullAPI([fullPromptA(p), fullPromptB(p), fullPromptC(p), fullPromptD(p), fullPromptE(p), fullPromptF(p)], 'full', { token: pendingFullReportAuth.token, session_id: pendingFullReportAuth.session_id });
     lastResult = result;

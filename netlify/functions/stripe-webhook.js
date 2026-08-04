@@ -85,7 +85,7 @@ exports.handler = async (event) => {
     const merged = {};
     results.forEach(r => Object.assign(merged, extractJSON(r.body.content && r.body.content[0] ? r.body.content[0].text : '')));
 
-    const html = buildReportEmailHtml(project, merged);
+    const html = buildReportEmailHtml(project, merged, session.id);
     await sendReportEmail({
       apiKey: resendKey,
       from: process.env.REPORT_FROM_EMAIL || 'OneCiak <onboarding@resend.dev>',
@@ -94,7 +94,7 @@ exports.handler = async (event) => {
       html
     });
 
-    await store.setJSON(key, { status: 'sent', sentAt: Date.now() });
+    await store.setJSON(key, { status: 'sent', sentAt: Date.now(), report: merged, project });
     return { statusCode: 200, body: 'OK' };
   } catch (err) {
     console.error('stripe-webhook: generation/email failed for session', session.id, err.message);
