@@ -24,10 +24,11 @@ function section(title, score, verdict, detail, flags, strengths, tips, plan, ex
   if (tips && tips.length) {
     html += '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#6f6f6f">Recommendations</span>';
     tips.forEach(t => {
-      const txt = typeof t === 'string' ? t : t.advice;
+      if (!t) return;
+      const txt = typeof t === 'string' ? t : (t.advice || '');
       html += '<p style="margin:6px 0 0;font-size:13px;color:#161616">• ' + esc(txt) + '</p>';
       if (typeof t === 'object' && t.links && t.links.length) {
-        t.links.forEach(l => { html += '<p style="margin:2px 0 0 14px;font-size:12px"><a href="' + esc(l.url) + '" style="color:#000">' + esc(l.label) + ' →</a></p>'; });
+        t.links.forEach(l => { if (l) html += '<p style="margin:2px 0 0 14px;font-size:12px"><a href="' + esc(l.url) + '" style="color:#000">' + esc(l.label) + ' →</a></p>'; });
       }
     });
     html += '</div>';
@@ -35,7 +36,7 @@ function section(title, score, verdict, detail, flags, strengths, tips, plan, ex
   if (plan && plan.length) {
     html += '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#6f6f6f">Action Plan</span>';
     const tags = ['30 days', '60 days', '90 days'];
-    plan.forEach((a, i) => { html += '<p style="margin:4px 0 0;font-size:13px;color:#161616"><b>' + (tags[i] || '') + ':</b> ' + esc(String(a).replace(/^(30|60|90)\s*days?:?\s*/i, '')) + '</p>'; });
+    plan.forEach((a, i) => { html += '<p style="margin:4px 0 0;font-size:13px;color:#161616"><b>' + (tags[i] || '') + ':</b> ' + esc(String(a || '').replace(/^(30|60|90)\s*days?:?\s*/i, '')) + '</p>'; });
     html += '</div>';
   }
   if (extra) html += extra;
@@ -73,7 +74,7 @@ function buildReportEmailHtml(project, r, sessionId) {
 
   if (r.roadmap && r.roadmap.length) {
     let rm = '<tr><td style="padding:28px 0;border-top:1px solid #e5e5e5"><span style="font-size:16px;font-weight:700;color:#000">Roadmap</span>';
-    r.roadmap.forEach((s, i) => { rm += '<p style="margin:10px 0 0;font-size:13px;color:#161616"><b>' + (i + 1) + '. ' + esc(s.phase) + ':</b> ' + esc(s.action) + '</p>'; });
+    r.roadmap.forEach((s, i) => { if (!s) return; rm += '<p style="margin:10px 0 0;font-size:13px;color:#161616"><b>' + (i + 1) + '. ' + esc(s.phase) + ':</b> ' + esc(s.action) + '</p>'; });
     rm += '</td></tr>';
     body += rm;
   }
