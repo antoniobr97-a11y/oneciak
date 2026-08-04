@@ -645,9 +645,10 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <!-- ══ LOADING ══ -->
 <div id="sec-loading">
   <div class="loading-wrap">
-    <div class="spinner"></div>
+    <div class="spinner" id="loadingSpinner"></div>
     <div class="loading-title" id="loadingTitle">Analyzing your project…</div>
     <div class="loading-desc" id="loadingDesc">Evaluating your project across five market dimensions with real industry data.</div>
+    <button class="btn-primary" id="loadingRetryBtn" style="display:none;margin-top:20px;max-width:280px" onclick="retryLastAction()">Try again →</button>
   </div>
 </div>
 
@@ -889,6 +890,8 @@ async function startStripeCheckout() {
 }
 
 /* ── HANDLE STRIPE RETURN ── */
+var pendingFullReportAuth = null; // { project, token, session_id } — kept so a failed generation can be retried without paying again
+
 async function handleStripeReturn() {
   var params = new URLSearchParams(window.location.search);
   var sessionId = params.get('session_id');
@@ -907,19 +910,41 @@ async function handleStripeReturn() {
     var data;
     try { data = JSON.parse(text); } catch(e) { showOnly('sec-landing'); alert('Payment verification failed. Please contact info@oneciak.com'); return; }
     if (!data.paid) { showOnly('sec-landing'); alert('Payment not confirmed. Please contact info@oneciak.com'); return; }
-    var p = data.project;
-    lastProject = p;
-    document.getElementById('loadingTitle').textContent = 'Building your full report…';
-    document.getElementById('loadingDesc').textContent = 'Deep analysis in progress across all 5 dimensions.';
-    var result = await callFullAPI([fullPromptA(p), fullPromptB(p), fullPromptC(p), fullPromptD(p), fullPromptE(p), fullPromptF(p)], 'full', { token: data.reportToken, session_id: data.session_id || sessionId });
-    lastResult = result;
-    showOnly('sec-results');
-    renderFull(result, p.title);
-    checkTranslation();
+    pendingFullReportAuth = { project: data.project, token: data.reportToken, session_id: data.session_id || sessionId };
+    await generateFullReport();
   } catch(err) {
     showOnly('sec-landing');
     alert('Error: ' + err.message);
   }
+}
+
+/* ── GENERATE FULL REPORT (kept separate so it can be retried after payment without re-charging) ── */
+async function generateFullReport() {
+  if (!pendingFullReportAuth) return;
+  var p = pendingFullReportAuth.project;
+  lastProject = p;
+  document.getElementById('loadingRetryBtn').style.display = 'none';
+  document.getElementById('loadingSpinner').style.display = 'block';
+  document.getElementById('loadingTitle').textContent = 'Building your full report…';
+  document.getElementById('loadingDesc').textContent = 'Deep analysis in progress across all 5 dimensions. This can take up to 30 seconds — please don\'t close this page.';
+  showOnly('sec-loading');
+  try {
+    var result = await callFullAPI([fullPromptA(p), fullPromptB(p), fullPromptC(p), fullPromptD(p), fullPromptE(p), fullPromptF(p)], 'full', { token: pendingFullReportAuth.token, session_id: pendingFullReportAuth.session_id });
+    lastResult = result;
+    pendingFullReportAuth = null;
+    showOnly('sec-results');
+    renderFull(result, p.title);
+    checkTranslation();
+  } catch(err) {
+    document.getElementById('loadingSpinner').style.display = 'none';
+    document.getElementById('loadingTitle').textContent = 'Your report hit a snag';
+    document.getElementById('loadingDesc').textContent = 'Your payment is confirmed and safe — this was just a hiccup generating the report. Tap below to try again, no need to pay again.';
+    document.getElementById('loadingRetryBtn').style.display = 'inline-flex';
+  }
+}
+
+function retryLastAction() {
+  generateFullReport();
 }
 
 function scoreColor(s) { return s >= 7 ? 'high' : s >= 5 ? 'mid' : 'low'; }
