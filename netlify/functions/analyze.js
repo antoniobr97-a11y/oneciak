@@ -4,10 +4,10 @@ const { checkRateLimit } = require('./_util/rateLimit');
 const { verify: verifyReportToken } = require('./_util/reportToken');
 
 const ALLOWED_ORIGIN = process.env.SITE_URL || 'https://oneciak.com';
-const FREE_MODEL = 'claude-sonnet-5';
-const FREE_MAX_TOKENS = 3000;
-const FULL_MODEL = 'claude-opus-4-5';
-const FULL_MAX_TOKENS = 8000;
+const FREE_MODEL = 'claude-haiku-4-5-20251001';
+const FREE_MAX_TOKENS = 2000;
+const FULL_MODEL = 'claude-sonnet-5';
+const FULL_MAX_TOKENS = 6000;
 const MAX_PROMPT_LENGTH = 12000;
 
 exports.handler = async (event) => {
