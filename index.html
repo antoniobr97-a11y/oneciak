@@ -148,6 +148,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   animation: riseIn 0.7s 0.15s var(--ease) both;
 }
 .l-subnote { margin-top: 16px; font-size: 13px; color: var(--muted-light); font-weight: 400; }
+.l-sample-link { display: inline-block; margin-top: 10px; font-size: 13px; color: var(--text); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; background: none; border: none; padding: 0; font-family: var(--sf); }
+.l-sample-link:hover { opacity: 0.7; }
+.sample-banner { background: var(--ink); color: #fff; text-align: center; font-size: 13px; font-weight: 500; padding: 10px 16px; }
 
 /* STATS BAR */
 .l-stats-bar {
@@ -521,10 +524,11 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         <div class="menu-faq-item"><div class="menu-faq-q">Is this a real consultant?</div><div class="menu-faq-a">Advanced AI trained on film market data. Structured analysis most filmmakers never access.</div></div>
         <div class="menu-faq-item"><div class="menu-faq-q">What does the free report cover?</div><div class="menu-faq-a">All five dimensions with a general assessment and one key recommendation each.</div></div>
         <div class="menu-faq-item"><div class="menu-faq-q">What does the full report add?</div><div class="menu-faq-a">Deep analysis, red flags, strengths, 3 recommendations with real links, action plans, funding sources, comparable films, international markets and a 5-step roadmap.</div></div>
-        <div class="menu-faq-item"><div class="menu-faq-q">Can I get a refund?</div><div class="menu-faq-a">No refunds once the report is generated. Please read the disclaimer before purchasing.</div></div>
-        <div class="menu-faq-item"><div class="menu-faq-q">Is my project data private?</div><div class="menu-faq-a">Data is used only to generate the report and is not stored or shared.</div></div>
+        <div class="menu-faq-item"><div class="menu-faq-q">Can I get a refund?</div><div class="menu-faq-a">No refunds once the report is generated, since it's delivered immediately. If generation fails on our end, we regenerate it at no extra charge.</div></div>
+        <div class="menu-faq-item"><div class="menu-faq-q">Is my project data private?</div><div class="menu-faq-a">Your project details are sent only to the providers needed to generate and deliver your report (see our Privacy Policy) — never sold, never used to train AI models.</div></div>
       </div>
       <button class="menu-cta" onclick="closeMenuGoForm()">Start Free Analysis →</button>
+      <p style="text-align:center;font-size:12px;color:var(--muted-light);margin-top:16px"><a href="/privacy.html" style="text-decoration:underline;text-underline-offset:2px">Privacy Policy</a> · <a href="/terms.html" style="text-decoration:underline;text-underline-offset:2px">Terms of Service</a></p>
     </div>
   </div>
 
@@ -547,6 +551,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
       <div class="l-terms-error" id="termsError" role="alert">Please accept the disclaimer to continue.</div>
       <button class="l-btn" onclick="onStartClick()">Start Free Analysis →</button>
       <p class="l-subnote">Free report · No account required</p>
+      <button class="l-sample-link" onclick="showSampleReport()">See a sample full report →</button>
     </div>
 
     <!-- Stats bar -->
@@ -555,6 +560,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         <div class="l-stat reveal"><div class="l-stat-num">5</div><div class="l-stat-label">Analysis Dimensions</div></div>
         <div class="l-stat reveal" style="transition-delay:0.08s"><div class="l-stat-num">€29</div><div class="l-stat-label">Full Report</div></div>
         <div class="l-stat reveal" style="transition-delay:0.16s"><div class="l-stat-num">PDF</div><div class="l-stat-label">Export Included</div></div>
+        <div class="l-stat reveal" style="transition-delay:0.24s" id="usageStat"><div class="l-stat-num" id="usageStatNum">—</div><div class="l-stat-label">Reports Generated</div></div>
       </div>
     </div>
 
@@ -575,6 +581,8 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         </div>
       </div>
     </div>
+
+    <p class="footer-note" style="padding:28px 24px">OneCiak — Film Market Intelligence · oneciak.com · <a href="/privacy.html" style="text-decoration:underline;text-underline-offset:2px">Privacy Policy</a> · <a href="/terms.html" style="text-decoration:underline;text-underline-offset:2px">Terms of Service</a></p>
   </div>
 
 </div><!-- end sec-landing -->
@@ -696,6 +704,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
 <!-- ══ RESULTS ══ -->
 <div id="sec-results">
+  <div class="sample-banner" id="sampleBanner" style="display:none">This is a sample report for an illustrative project — not a real analysis. <a href="#" onclick="goLanding();return false" style="color:#fff;text-decoration:underline">Analyze your own project →</a></div>
   <div class="r-header">
     <div class="r-logo">OneCiak</div>
     <button class="back-btn" onclick="goForm()">← New Analysis</button>
@@ -727,7 +736,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div class="disclaimer-box" style="margin-top:14px">
       <div class="disclaimer-text"><strong>Legal Disclaimer:</strong> Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. OneCiak assumes no liability. Results are estimates and do not guarantee any outcome. OneCiak is not a licensed consulting firm.</div>
     </div>
-    <p class="footer-note">OneCiak — Film Market Intelligence · oneciak.com</p>
+    <p class="footer-note">OneCiak — Film Market Intelligence · oneciak.com · <a href="/privacy.html" style="text-decoration:underline;text-underline-offset:2px">Privacy Policy</a> · <a href="/terms.html" style="text-decoration:underline;text-underline-offset:2px">Terms of Service</a></p>
   </div>
 </div>
 
@@ -965,6 +974,7 @@ async function generateFullReport() {
   var sessionId = pendingFullReportAuth.session_id;
   var token = pendingFullReportAuth.token;
   lastProject = p;
+  document.getElementById('sampleBanner').style.display = 'none';
   document.getElementById('loadingRetryBtn').style.display = 'none';
   document.getElementById('loadingSpinner').style.display = 'block';
   document.getElementById('loadingTitle').textContent = 'Building your full report…';
@@ -1094,7 +1104,8 @@ function renderFull(r, title) {
     '<div><div class="overall-label">OneCiak Score</div><div class="overall-sublabel">'+(r.overall_label||'')+'</div></div>'+
     '<div style="text-align:right">'+
     '<div class="overall-num score-'+col+'">'+Number(r.overall_score||5).toFixed(1)+'<span class="denom">/10</span></div>'+
-    '</div></div>';
+    '</div></div>'+
+    (r.score_benchmark ? '<div style="font-size:12.5px;color:var(--muted);line-height:1.5;font-weight:300;margin-top:10px;padding:0 4px">'+r.score_benchmark+'</div>' : '');
 
   // Exec summary — synthesis always visible
   document.getElementById('execSummary').innerHTML =
@@ -1119,7 +1130,7 @@ function renderFull(r, title) {
       score: r.financial_score,
       body: buildAccordionBody(r.financial_score, r.financial_verdict, r.financial_detail,
         r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan,
-        buildFundingSources(r.financial_sources))
+        buildFundingSources(r.financial_sources) + buildTalentAndTax(r.talent_leverage, r.tax_incentive))
     },
     {
       num:'03', label:'Market & Audience', sublabel:'Demand · Trends · Comparables',
@@ -1334,6 +1345,22 @@ function buildFundingSources(sources) {
   return h;
 }
 
+function buildTalentAndTax(talentLeverage, taxIncentive) {
+  if (!talentLeverage && !(taxIncentive && taxIncentive.estimate)) return '';
+  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">';
+  if (talentLeverage) {
+    h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Talent Leverage</div>'+
+      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:14px">'+talentLeverage+'</div>';
+  }
+  if (taxIncentive && taxIncentive.estimate) {
+    h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Tax Incentive'+(taxIncentive.region?' — '+taxIncentive.region:'')+'</div>'+
+      '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:4px">'+taxIncentive.estimate+'</div>'+
+      (taxIncentive.note ? '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300">'+taxIncentive.note+'</div>' : '');
+  }
+  h += '</div>';
+  return h;
+}
+
 function buildComparables(comps) {
   if (!comps || !comps.length) return '';
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Comparable Films</div>';
@@ -1368,6 +1395,7 @@ async function runAnalysis() {
   }
   hideError();
   lastProject = p;
+  document.getElementById('sampleBanner').style.display = 'none';
   showOnly('sec-loading');
   document.getElementById('loadingTitle').textContent = 'Analyzing your project…';
   document.getElementById('loadingDesc').textContent = 'Evaluating your project across five market dimensions with real industry data.';
@@ -1382,6 +1410,105 @@ async function runAnalysis() {
     showOnly('sec-form');
     showError("Error: " + err.message);
   }
+}
+
+/* ── SAMPLE REPORT (fictional project, clearly labeled — not a real analysis) ── */
+function showSampleReport() {
+  var sampleProject = { title: 'Northbound', logline: 'A recently widowed lighthouse keeper and her estranged teenage son spend one final summer together before the automated station replaces them both.' };
+  var sample = {
+    overall_score: 7.2, overall_label: 'Strong festival prospect',
+    overall_summary: 'A well-positioned character drama with clear festival appeal, modest financing needs, and a marketable emotional hook — the main risk is standing out in a crowded coming-of-age subgenre.',
+    score_benchmark: 'Most first-time independent dramas at this budget level score between 5.5 and 7.0 — this project sits comfortably above that range.',
+    executive_summary: 'Northbound has the ingredients festival programmers look for: a specific setting, a two-hander at its emotional core, and a low enough budget to be genuinely financeable. The biggest challenge is differentiation within an oversaturated parent-child reconciliation genre. With a distinctive visual identity and the right festival sequencing, this project has a realistic path to a strong festival run and a modest but real VOD/streaming afterlife.',
+    biggest_risk: 'The premise overlaps heavily with recent festival favorites in the same subgenre, risking a "seen this before" reaction from programmers.',
+    biggest_opportunity: 'The lighthouse-automation angle gives the film a distinctive visual and thematic hook that most reconciliation dramas lack.',
+    creative_score: 8, creative_verdict: 'A strong, specific logline with a clear emotional engine and a built-in ticking clock.',
+    creative_detail: 'The logline does real work: it establishes relationship, setting, stakes, and a deadline in one sentence. The "final summer" framing gives natural three-act structure. Character arcs should avoid melodrama by keeping the reconciliation earned rather than sudden. Tonally this sits closer to a restrained European arthouse register than an American indie one, which should be reflected in the pitch materials.',
+    creative_flags: ['The "one last summer" structure is common enough that marketing needs a distinct visual hook to stand out', 'Risk of the son\'s arc feeling underwritten relative to the mother\'s'],
+    creative_strengths: ['Strong, filmable central metaphor (automation replacing human presence)', 'Built-in visual identity via the coastal/lighthouse setting', 'Clear two-character structure keeps the budget disciplined'],
+    creative_tips: [
+      { advice: 'Commission a comparison-title deck (Manchester by the Sea, The Lighthouse, Céline Sciamma\'s work) to sharpen the pitch\'s visual reference points before approaching financiers.', links: [{ label: 'Stage 32 Pitch Resources', url: 'https://www.stage32.com' }] },
+      { advice: 'Attach a cinematographer with a strong coastal/landscape portfolio early — it materially strengthens festival submissions.', links: [{ label: 'Shooting People', url: 'https://shootingpeople.org' }] }
+    ],
+    financial_score: 7, financial_verdict: 'Realistic and financeable at the stated budget, with a clear public-funding path.',
+    financial_detail: 'A two-hander with one primary location keeps the budget disciplined relative to comparable festival dramas, which often run 20-40% higher due to larger casts or multiple locations. The financing gap is bridgeable primarily through public regional funds plus a modest pre-sale to a domestic distributor. Expect a 9-12 month financing timeline if regional fund deadlines are hit on the first attempt rather than a resubmission cycle.',
+    financial_flags: ['Single-location dependency means a weather-disrupted shoot has outsized schedule risk', 'No pre-attached cast yet, which regional funds often weight heavily'],
+    financial_strengths: ['Low location/cast count keeps the budget realistic and reduces financing risk', 'Strong regional-fund fit given the specific coastal setting'],
+    financial_tips: [
+      { advice: 'Target regional/national film funds that specifically prioritize location-distinct stories — many funds weight this heavily in scoring.', links: [{ label: 'Eurimages', url: 'https://www.coe.int/en/web/eurimages' }] },
+      { advice: 'Explore a co-production structure to access a second territory\'s tax credit alongside the primary one.', links: [{ label: 'European Co-production Guide', url: 'https://www.efp-online.com' }] }
+    ],
+    financial_action_plan: ['30 days: finalize a locked budget and submit to the nearest regional fund deadline', '60 days: approach 2-3 sales agents with a work-in-progress deck for pre-sale interest', '90 days: confirm below-the-line crew and lock location agreements pending weather contingency'],
+    financial_sources: [
+      { name: 'Regional Film Fund (Coastal/Regional Development stream)', type: 'Public', amount: '€80,000–€150,000', deadline: 'Typically two rounds per year — check local fund calendar', eligibility: 'Majority local shoot, local crew hiring quota', url: 'https://www.efp-online.com' },
+      { name: 'National Film Institute Development & Production Grant', type: 'Public', amount: '€50,000–€200,000', deadline: 'Rolling, cycle-dependent', eligibility: 'First or second feature, national creative team majority', url: 'https://www.efad.eu' }
+    ],
+    talent_leverage: 'A first-time director with 1-2 prior shorts is within the normal range for regional fund eligibility, but pairing with a producer who has one prior feature credit materially improves financing odds — most public funds weight producer track record as heavily as director experience.',
+    tax_incentive: { region: 'Italy', estimate: '25-30% tax credit for qualifying Italian production spend', note: 'Administered by the Ministry of Culture (MiC) — application must be filed before principal photography begins; this is an AI estimate, verify current rates locally.' },
+    market_score: 7, market_verdict: 'Solid niche demand with clear festival-to-streaming pipeline precedent.',
+    market_detail: 'Character-driven coastal dramas have a reliable, if modest, arthouse and streaming afterlife — buyers in this category prioritize festival laurels over stars. Audience demand skews older and more international than typical indie output, which favors European co-financing and sales. Timing is reasonably favorable: platforms have shown renewed appetite for quiet, character-first dramas over the last two festival cycles.',
+    market_flags: ['Genre is well-served, so festival placement quality matters more than usual for distributor interest'],
+    market_strengths: ['Clear precedent of comparable films finding distribution off festival play alone', 'International appeal reduces reliance on any single territory'],
+    market_tips: [
+      { advice: 'Position marketing around the automation/obsolescence theme rather than the reconciliation plot alone — it is the more distinctive hook.', links: [{ label: 'The Numbers — Comps Data', url: 'https://www.the-numbers.com' }] }
+    ],
+    market_comps: [
+      { title: 'The Quiet Girl', year: '2022', budget: '~€1.3M', result: 'Oscar-nominated, strong European festival run, solid VOD afterlife', lesson: 'Restrained, specific character dramas can outperform starrier competition on festival prestige alone' },
+      { title: 'Aftersun', year: '2022', budget: '~$2M', result: 'A24 acquisition off festival buzz, major critical breakout', lesson: 'A distinctive visual identity and a clear emotional hook drove acquisition interest more than plot novelty' }
+    ],
+    festival_score: 8, festival_verdict: 'A strong, realistic festival trajectory if positioned correctly from the first submission.',
+    festival_detail: 'This is a classic A-tier-adjacent festival profile: not a guaranteed top-5 selection, but a strong candidate for major festivals\' second-tier sidebars and a near-certain fit for the broader A-minus/B-tier circuit. Sequencing matters — premiering too early at a smaller festival can close doors at bigger ones with premiere-status requirements, so the top-tier submissions should go out first even with lower odds.',
+    festival_flags: ['Premiere-status rules mean submitting to smaller festivals first could disqualify from bigger ones later'],
+    festival_strengths: ['Genre and running time fit most festival sidebar programming needs well', 'Clear producer/regional ties support local festival support and press'],
+    festival_tips: [
+      { advice: 'Submit to 2-3 top-tier festivals\' main sidebars first, before any smaller festival, to preserve premiere status.', links: [{ label: 'FilmFreeway', url: 'https://filmfreewaycom' }] },
+      { advice: 'Build a targeted list of regional/genre-specific festivals as a fallback tier if top-tier submissions don\'t land.', links: [{ label: 'Withoutabox archive / FilmFreeway search', url: 'https://filmfreeway.com' }] }
+    ],
+    festival_action_plan: ['30 days: finalize a festival strategy document ranking target festivals by tier and deadline', '60 days: submit to top-tier festival deadlines as the cut is locked', '90 days: prepare a fallback B-tier submission list in case top-tier results are pending or negative'],
+    festival_calendar: [
+      { festival: 'Sundance Film Festival', tier: 'A', deadline: 'Submissions typically open ~August, close ~September', fit: 'Strong fit for the World or NEXT sections given the character-driven, low-budget profile', url: 'https://festival.sundance.org' },
+      { festival: 'San Sebastián International Film Festival', tier: 'A', deadline: 'Spring submission window', fit: 'European co-production angle and coastal setting align well with this festival\'s programming identity', url: 'https://www.sansebastianfestival.com' },
+      { festival: 'Karlovy Vary IFF', tier: 'B', deadline: 'Spring submission window', fit: 'Strong track record supporting first/second European features', url: 'https://www.kviff.com' }
+    ],
+    distribution_score: 6, distribution_verdict: 'A realistic path via festival-driven acquisition rather than a pre-sale.',
+    distribution_detail: 'Without attached names, a pre-sale is unlikely — the realistic path is a festival premiere followed by an acquisition offer, which is the standard route for this profile of film. Territory-by-territory, expect stronger initial interest from European broadcasters/streamers than from US theatrical distributors, given the film\'s tone and scale. A hybrid VOD + limited theatrical release is the most probable outcome rather than a wide release.',
+    distribution_flags: ['No attached cast makes a pre-sale unlikely — financing should not depend on one'],
+    distribution_strengths: ['Genre has a well-established festival-to-acquisition pipeline', 'Modest budget lowers the bar for a distributor to recoup'],
+    distribution_tips: [
+      { advice: 'Prioritize platforms with a track record acquiring festival dramas in this budget tier rather than chasing a wide theatrical deal.', links: [{ label: 'MUBI Acquisitions', url: 'https://mubi.com' }] }
+    ],
+    distribution_action_plan: ['30 days: prepare a sales one-sheet and work-in-progress trailer for market screenings', '60 days: attend or submit to a co-production/sales market alongside festival premiere', '90 days: negotiate territory-by-territory offers as they come in post-premiere'],
+    distribution_platforms: [
+      { name: 'MUBI', priority: 'First', reason: 'Strong track record acquiring festival-driven character dramas at this budget, typical acquisition range €30,000–€80,000', url: 'https://mubi.com' },
+      { name: 'Regional public broadcaster VOD arm', priority: 'Second', reason: 'Reliable domestic revenue floor via broadcast pre-sale or post-festival acquisition', url: 'https://www.ebu.ch' }
+    ],
+    sales_agents: [
+      { name: 'Films Boutique', focus: 'European festival dramas and arthouse titles', why: 'Strong track record placing similarly-scaled character dramas at A-tier festivals and securing European broadcaster deals', url: 'https://www.filmsboutique.com' }
+    ],
+    revenue_projection: { total_realistic: '€120,000–€280,000 across all revenue streams', theatrical: 'Limited theatrical, largely symbolic — €5,000–€15,000', streaming_svod: '€60,000–€150,000 via platform acquisition', vod_avod: '€15,000–€35,000', tv_rights: '€20,000–€50,000 via broadcaster pre-sale or post-festival deal', international: '€20,000–€40,000 across secondary territories', breakeven_note: 'At a €200,000–€300,000 budget, breakeven is plausible within 2-3 years if festival placement lands as projected — this is a portfolio/prestige play more than a high-margin investment, typical for this category of film.' },
+    international_markets: [
+      { country: 'France', reason: 'Strong arthouse distribution infrastructure and audience appetite for restrained character dramas' },
+      { country: 'Germany', reason: 'Broadcaster pre-sale market (ARTE, ZDF) is a realistic fit for this tone and scale' }
+    ],
+    risk_assessment: {
+      top_risks: ['Genre oversaturation reduces festival differentiation if visual execution doesn\'t deliver on the premise', 'Single-location weather dependency could extend the shoot schedule and budget'],
+      mitigation: ['Invest disproportionately in cinematography/visual identity relative to budget to stand out from genre peers', 'Build a weather contingency budget line and flexible shoot-day buffer into scheduling']
+    },
+    roadmap: [
+      { phase: 'Phase 1 — Script & Pitch', action: 'Lock a final draft and build a comp-title pitch deck within 6-8 weeks' },
+      { phase: 'Phase 2 — Financing', action: 'Submit to 2-3 regional/national funds across their next application cycles' },
+      { phase: 'Phase 3 — Pre-Production & Packaging', action: 'Attach a cinematographer and lock location agreements with weather contingency' },
+      { phase: 'Phase 4 — Production & Post', action: 'Shoot on a disciplined 4-week schedule; prioritize festival-cut delivery timeline' },
+      { phase: 'Phase 5 — Festival & Sales', action: 'Premiere at the highest-tier festival that accepts, then run the B-tier fallback list in parallel with sales agent outreach' }
+    ]
+  };
+  lastResult = sample;
+  lastProject = sampleProject;
+  showOnly('sec-results');
+  document.getElementById('sampleBanner').style.display = 'block';
+  renderFull(sample, sampleProject.title);
+  checkTranslation();
+  initScrollReveal();
 }
 
 /* ── UNLOCK → STRIPE ── */
@@ -1493,7 +1620,19 @@ function hideError() { document.getElementById('errorBox').style.display='none';
 window.addEventListener('DOMContentLoaded', function() {
   handleStripeReturn();
   initScrollReveal();
+  loadUsageStat();
 });
+
+/* ── LIVE USAGE COUNTER (real count, not a placeholder) ── */
+async function loadUsageStat() {
+  try {
+    var res = await fetch('/.netlify/functions/stats');
+    if (!res.ok) return;
+    var data = await res.json();
+    var el = document.getElementById('usageStatNum');
+    if (el && typeof data.count === 'number') el.textContent = data.count.toLocaleString('en-US');
+  } catch (e) { /* leave the placeholder if this fails */ }
+}
 
 /* ── SCROLL REVEAL ── */
 var scrollRevealObserver = null;
