@@ -70,6 +70,9 @@ exports.handler = async (event) => {
         merged = {};
         results.forEach(r => { Object.assign(merged, extractJSON(r.body.content && r.body.content[0] ? r.body.content[0].text : '')); });
       } catch (e) {
+        if (body.debug) {
+          return { statusCode: 502, headers, body: JSON.stringify({ error: 'Could not parse AI response. Please try again.', debug: e.message, texts: results.map(r => r.body.content && r.body.content[0] ? r.body.content[0].text : null), stops: results.map(r => r.body.stop_reason) }) };
+        }
         return { statusCode: 502, headers, body: JSON.stringify({ error: 'Could not parse AI response. Please try again.' }) };
       }
       return { statusCode: 200, headers, body: JSON.stringify({ merged }) };
