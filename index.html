@@ -1073,15 +1073,25 @@ function renderFree(r, title) {
     '<div class="exec-card">'+
     '<div class="exec-label">Summary</div>'+
     '<div class="exec-text">'+(r.overall_summary||'')+'</div>'+
+    ((r.biggest_risk||r.biggest_opportunity) ? '<div class="exec-row">'+
+      '<div class="exec-box risk"><div class="exec-box-label">Main Risk</div><div class="exec-box-text">'+(r.biggest_risk||'')+'</div></div>'+
+      '<div class="exec-box opp"><div class="exec-box-label">Main Opportunity</div><div class="exec-box-text">'+(r.biggest_opportunity||'')+'</div></div>'+
+      '</div>' : '')+
+    (r.next_step ? '<div style="margin-top:16px;padding:14px 16px;background:var(--accent-wash);border-radius:var(--radius);font-size:13px;color:var(--text);line-height:1.55"><b>Your Next Step:</b> '+r.next_step+'</div>' : '')+
     '</div>';
 
   // Free accordion — same structure, limited content + blurred preview
+  var oneComp = r.one_comp || {};
+  var oneFestival = r.one_festival || {};
   var freeSections = [
-    { num:'01', label:'Creative Package',     sublabel:'Narrative · Logline · Pitch',    score:r.creative_score,     verdict:r.creative_verdict,     detail:r.creative_detail,     tip:r.creative_tip,     flag:r.creative_flag,     strength:r.creative_strength },
-    { num:'02', label:'Financial Plan',       sublabel:'Budget · Funding · Financing',   score:r.financial_score,    verdict:r.financial_verdict,    detail:r.financial_detail,    tip:r.financial_tip,    flag:r.financial_flag,    strength:r.financial_strength },
-    { num:'03', label:'Market & Audience',    sublabel:'Demand · Trends · Comparables',  score:r.market_score,       verdict:r.market_verdict,       detail:r.market_detail,       tip:r.market_tip,       flag:r.market_flag,       strength:r.market_strength },
-    { num:'04', label:'Festival Strategy',    sublabel:'Circuit · Festivals · Timing',   score:r.festival_score,     verdict:r.festival_verdict,     detail:r.festival_detail,     tip:r.festival_tip,     flag:r.festival_flag,     strength:r.festival_strength },
-    { num:'05', label:'Distribution & Revenue', sublabel:'Platforms · Pricing · Sales',  score:r.distribution_score, verdict:r.distribution_verdict, detail:r.distribution_detail, tip:r.distribution_tip, flag:r.distribution_flag, strength:r.distribution_strength }
+    { num:'01', label:'Creative Package',     sublabel:'Narrative · Logline · Pitch',    score:r.creative_score,     verdict:r.creative_verdict,     detail:r.creative_detail,     tip:r.creative_tip,     flag:r.creative_flag,     strength:r.creative_strength,
+      extra: r.logline_verdict ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light);font-size:13px;color:var(--text);line-height:1.6"><b>Logline verdict:</b> '+r.logline_verdict+'</div>' : '' },
+    { num:'02', label:'Financial Plan',       sublabel:'Budget · Funding · Financing',   score:r.financial_score,    verdict:r.financial_verdict,    detail:r.financial_detail,    tip:r.financial_tip,    flag:r.financial_flag,    strength:r.financial_strength, extra:'' },
+    { num:'03', label:'Market & Audience',    sublabel:'Demand · Trends · Comparables',  score:r.market_score,       verdict:r.market_verdict,       detail:r.market_detail,       tip:r.market_tip,       flag:r.market_flag,       strength:r.market_strength,
+      extra: oneComp.title ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)"><div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px">Comparable Film</div><div style="font-size:13px;color:var(--text)"><b>'+(oneComp.title||'')+'</b> ('+(oneComp.year||'')+') — '+(oneComp.result||'')+'</div>'+(oneComp.lesson?'<div style="font-size:12px;color:var(--muted);margin-top:4px">'+oneComp.lesson+'</div>':'')+'</div>' : '' },
+    { num:'04', label:'Festival Strategy',    sublabel:'Circuit · Festivals · Timing',   score:r.festival_score,     verdict:r.festival_verdict,     detail:r.festival_detail,     tip:r.festival_tip,     flag:r.festival_flag,     strength:r.festival_strength,
+      extra: oneFestival.name ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)"><div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px">Suggested Festival</div><div style="font-size:13px;color:var(--text)"><b>'+(oneFestival.name||'')+'</b>'+(oneFestival.tier?' (Tier '+oneFestival.tier+')':'')+' — '+(oneFestival.why||'')+'</div></div>' : '' },
+    { num:'05', label:'Distribution & Revenue', sublabel:'Platforms · Pricing · Sales',  score:r.distribution_score, verdict:r.distribution_verdict, detail:r.distribution_detail, tip:r.distribution_tip, flag:r.distribution_flag, strength:r.distribution_strength, extra:'' }
   ];
 
   var html = '<div class="accordion-wrap">';
@@ -1098,6 +1108,7 @@ function renderFree(r, title) {
     body += '<div class="score-verdict">'+(sec.verdict||'')+'</div>';
     body += '<div class="score-detail" style="margin-bottom:8px">'+(sec.detail||'')+'</div>';
     if (sec.tip) body += '<div class="tips-block"><span class="tips-label">Key Recommendation</span><div class="tip-item"><div class="tip-text">'+sec.tip+'</div></div></div>';
+    if (sec.extra) body += sec.extra;
 
     // Blurred preview of flag + strength
     if (sec.flag || sec.strength) {
