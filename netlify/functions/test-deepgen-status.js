@@ -1,9 +1,0 @@
-const { connectLambda, getStore } = require('@netlify/blobs');
-
-exports.handler = async (event) => {
-  connectLambda(event);
-  const store = getStore('test-deepgen');
-  let record;
-  try { record = await store.get('latest', { type: 'json' }); } catch (e) { record = null; }
-  return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(record || { status: 'none' }) };
-};
