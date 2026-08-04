@@ -773,23 +773,24 @@ function goForm() {
   fullReportGenerationId++;
   stopFullReportTimer();
   document.getElementById('sampleBanner').style.display = 'none';
-  if (isSampleReport) { lastProject = null; lastResult = null; isSampleReport = false; }
+  lastProject = null;
+  lastResult = null;
+  isSampleReport = false;
   showOnly('sec-form');
-  if (lastProject) {
-    document.getElementById('title').value       = lastProject.title || '';
-    document.getElementById('logline').value     = lastProject.logline || '';
-    document.getElementById('format').value      = lastProject.format || '';
-    document.getElementById('budgetSelect').value= lastProject.budget || '';
-    document.getElementById('audience').value    = lastProject.audience || '';
-    document.getElementById('distrib').value     = lastProject.distrib || '';
-    document.getElementById('country').value     = lastProject.country !== 'Not specified' ? lastProject.country : '';
-    document.getElementById('experience').value  = lastProject.experience !== 'Not specified' ? lastProject.experience : '';
-    document.getElementById('extra').value       = lastProject.extra || '';
-    // restore genre
-    var genres = (lastProject.genre||'').split(' / ');
-    if (genres[0]) document.getElementById('genre1').value = genres[0];
-    if (genres[1]) document.getElementById('genre2').value = genres[1];
-  }
+  // Always start a fresh, blank form — never carry over the previous project's data
+  document.getElementById('title').value = '';
+  document.getElementById('logline').value = '';
+  document.getElementById('genre1').value = '';
+  document.getElementById('genre2').value = '';
+  document.getElementById('genreOther').value = '';
+  document.getElementById('genreOther').style.display = 'none';
+  document.getElementById('format').value = '';
+  document.getElementById('budgetSelect').value = '';
+  document.getElementById('audience').value = '';
+  document.getElementById('distrib').value = '';
+  document.getElementById('country').value = '';
+  document.getElementById('experience').value = '';
+  document.getElementById('extra').value = '';
 }
 
 /* ── MENU ── */
