@@ -44,6 +44,30 @@ function section(title, score, verdict, detail, flags, strengths, tips, plan, ex
   return html;
 }
 
+function fundingSourcesHtml(sources) {
+  if (!sources || !sources.length) return '';
+  let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#6f6f6f">Funding Sources</span>';
+  sources.forEach(f => { if (!f) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.name) + '</b> (' + esc(f.type) + ') — ' + esc(f.amount) + '<br><span style="font-size:12px;color:#6f6f6f">Deadline: ' + esc(f.deadline) + ' · ' + esc(f.eligibility) + '</span></p>'; });
+  h += '</div>';
+  return h;
+}
+
+function comparablesHtml(comps) {
+  if (!comps || !comps.length) return '';
+  let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#6f6f6f">Comparable Films</span>';
+  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b> (' + esc(c.year) + ') — Budget: ' + esc(c.budget) + ' — ' + esc(c.result) + '<br><span style="font-size:12px;color:#6f6f6f">' + esc(c.lesson) + '</span></p>'; });
+  h += '</div>';
+  return h;
+}
+
+function platformsHtml(platforms) {
+  if (!platforms || !platforms.length) return '';
+  let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#6f6f6f">Platform Priority</span>';
+  platforms.forEach(pl => { if (!pl) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(pl.priority) + ':</b> ' + esc(pl.name) + '<br><span style="font-size:12px;color:#6f6f6f">' + esc(pl.reason) + '</span></p>'; });
+  h += '</div>';
+  return h;
+}
+
 function talentAndTaxHtml(talentLeverage, taxIncentive) {
   if (!talentLeverage && !(taxIncentive && taxIncentive.estimate)) return '';
   let h = '<div style="margin-top:10px">';
@@ -65,18 +89,48 @@ function buildReportEmailHtml(project, r, sessionId) {
   const score = Number(r.overall_score || 5).toFixed(1);
   const viewUrl = sessionId ? 'https://oneciak.com/?session_id=' + encodeURIComponent(sessionId) : 'https://oneciak.com';
 
+  const financialExtra = fundingSourcesHtml(r.financial_sources) + talentAndTaxHtml(r.talent_leverage, r.tax_incentive);
   let body = '';
   body += section('Creative Package', r.creative_score, r.creative_verdict, r.creative_detail, r.creative_flags, r.creative_strengths, r.creative_tips, null);
-  body += section('Financial Plan', r.financial_score, r.financial_verdict, r.financial_detail, r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan, talentAndTaxHtml(r.talent_leverage, r.tax_incentive));
-  body += section('Market & Audience', r.market_score, r.market_verdict, r.market_detail, r.market_flags, r.market_strengths, r.market_tips, null);
+  body += section('Financial Plan', r.financial_score, r.financial_verdict, r.financial_detail, r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan, financialExtra);
+  body += section('Market & Audience', r.market_score, r.market_verdict, r.market_detail, r.market_flags, r.market_strengths, r.market_tips, null, comparablesHtml(r.market_comps));
   body += section('Festival Strategy', r.festival_score, r.festival_verdict, r.festival_detail, r.festival_flags, r.festival_strengths, r.festival_tips, r.festival_action_plan);
-  body += section('Distribution & Revenue', r.distribution_score, r.distribution_verdict, r.distribution_detail, r.distribution_flags, r.distribution_strengths, r.distribution_tips, r.distribution_action_plan);
+  body += section('Distribution & Revenue', r.distribution_score, r.distribution_verdict, r.distribution_detail, r.distribution_flags, r.distribution_strengths, r.distribution_tips, r.distribution_action_plan, platformsHtml(r.distribution_platforms));
 
   if (r.roadmap && r.roadmap.length) {
     let rm = '<tr><td style="padding:28px 0;border-top:1px solid #e5e5e5"><span style="font-size:16px;font-weight:700;color:#000">Roadmap</span>';
     r.roadmap.forEach((s, i) => { if (!s) return; rm += '<p style="margin:10px 0 0;font-size:13px;color:#161616"><b>' + (i + 1) + '. ' + esc(s.phase) + ':</b> ' + esc(s.action) + '</p>'; });
     rm += '</td></tr>';
     body += rm;
+  }
+
+  if (r.international_markets && r.international_markets.length) {
+    let im = '<tr><td style="padding:28px 0;border-top:1px solid #e5e5e5"><span style="font-size:16px;font-weight:700;color:#000">International Markets</span>';
+    r.international_markets.forEach(m => { if (!m) return; im += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(m.country) + ':</b> ' + esc(m.reason) + '</p>'; });
+    im += '</td></tr>';
+    body += im;
+  }
+
+  if (r.festival_calendar && r.festival_calendar.length) {
+    let fc = '<tr><td style="padding:28px 0;border-top:1px solid #e5e5e5"><span style="font-size:16px;font-weight:700;color:#000">Festival Calendar</span>';
+    r.festival_calendar.forEach(f => { if (!f) return; fc += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.festival) + '</b> (Tier ' + esc(f.tier) + ') — ' + esc(f.deadline) + '<br><span style="font-size:12px;color:#6f6f6f">' + esc(f.fit) + '</span></p>'; });
+    fc += '</td></tr>';
+    body += fc;
+  }
+
+  if (r.sales_agents && r.sales_agents.length) {
+    let sa = '<tr><td style="padding:28px 0;border-top:1px solid #e5e5e5"><span style="font-size:16px;font-weight:700;color:#000">Sales Agents</span>';
+    r.sales_agents.forEach(a => { if (!a) return; sa += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(a.name) + '</b><br><span style="font-size:12px;color:#6f6f6f">' + esc(a.why) + '</span></p>'; });
+    sa += '</td></tr>';
+    body += sa;
+  }
+
+  if (r.risk_assessment && ((r.risk_assessment.top_risks && r.risk_assessment.top_risks.length) || (r.risk_assessment.mitigation && r.risk_assessment.mitigation.length))) {
+    let ra = '<tr><td style="padding:28px 0;border-top:1px solid #e5e5e5"><span style="font-size:16px;font-weight:700;color:#000">Risk Assessment</span>';
+    (r.risk_assessment.top_risks || []).forEach(risk => { if (risk) ra += '<p style="margin:8px 0 0;font-size:13px;color:#c5382a">⚑ ' + esc(risk) + '</p>'; });
+    (r.risk_assessment.mitigation || []).forEach(m => { if (m) ra += '<p style="margin:8px 0 0;font-size:13px;color:#0f7a3d">✓ ' + esc(m) + '</p>'; });
+    ra += '</td></tr>';
+    body += ra;
   }
 
   if (r.revenue_projection && r.revenue_projection.total_realistic) {
