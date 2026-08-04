@@ -5,6 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="only light">
 <title>OneCiak — Film Market Intelligence</title>
+<meta name="description" content="Get a professional AI-powered market assessment for your film across five industry dimensions — creative package, financing, audience, festivals and distribution — before you invest time and money.">
+<meta name="theme-color" content="#f9f7f4">
+<link rel="canonical" href="https://oneciak.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="OneCiak">
+<meta property="og:title" content="OneCiak — Film Market Intelligence">
+<meta property="og:description" content="Does your film have a real market? A professional AI market assessment across five industry dimensions.">
+<meta property="og:url" content="https://oneciak.com/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="OneCiak — Film Market Intelligence">
+<meta name="twitter:description" content="Does your film have a real market? A professional AI market assessment across five industry dimensions.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%231a1814'/%3E%3Cpath d='M20 38h60l-4 12H24z' fill='%23f9f7f4'/%3E%3Crect x='22' y='50' width='56' height='30' rx='2' fill='%23f9f7f4'/%3E%3Cpath d='M28 38l6-14h9l-6 14zM50 38l6-14h9l-6 14z' fill='%231a1814'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -24,8 +38,31 @@
   --radius: 4px;
   --radius-lg: 8px;
 }
-html { color-scheme: only light; }
+html { color-scheme: only light; scroll-behavior: smooth; }
 body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+::selection { background: var(--text); color: var(--cream); }
+a { color: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+.card, .overall-card, .exec-card, .extra-card, .locked-card, .pdf-card, .accordion-wrap, .menu-aud {
+  box-shadow: 0 1px 2px rgba(26,24,20,0.04), 0 6px 16px rgba(26,24,20,0.03);
+}
+.l-btn, .btn-primary, .btn-unlock, .menu-cta {
+  transition: opacity 0.2s, transform 0.15s ease, box-shadow 0.2s ease;
+}
+.l-btn:hover, .btn-primary:hover, .btn-unlock:hover, .menu-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(26,24,20,0.16);
+}
+.l-btn:active, .btn-primary:active, .btn-unlock:active, .menu-cta:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
 
 /* ── SECTIONS ── */
 #sec-landing { display: block; }
@@ -266,48 +303,6 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .exec-box.opp  .exec-box-label { color: var(--success); }
 .exec-box-text { font-size: 12px; color: var(--text); line-height: 1.6; font-weight: 300; }
 
-/* STICKY TABS */
-.tabs-sticky {
-  position: sticky; top: 60px; z-index: 90;
-  background: var(--cream); padding: 12px 0 10px;
-}
-.tabs-nav {
-  display: flex; border: 1px solid var(--border); border-radius: var(--radius);
-  overflow: hidden; background: var(--white);
-}
-.tab-btn {
-  flex: 1; padding: 11px 2px; text-align: center;
-  font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 600;
-  letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
-  background: none; border: none; cursor: pointer;
-  border-right: 1px solid var(--border); transition: all 0.15s; line-height: 1.3;
-}
-.tab-btn:last-child { border-right: none; }
-.tab-btn.active { background: var(--text); color: #fff; }
-
-/* TAB PANELS */
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
-.tab-card {
-  background: var(--white); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 22px 20px; margin-bottom: 14px; margin-top: 10px;
-}
-.tab-score-header {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light);
-  gap: 12px;
-}
-.tab-score-left { flex: 1; }
-.tab-score-label { font-family: 'Bodoni Moda', serif; font-size: 18px; font-weight: 400; letter-spacing: -0.3px; margin-bottom: 6px; }
-.tab-score-badge {
-  display: inline-block; font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
-  text-transform: uppercase; padding: 2px 9px; border-radius: 999px;
-}
-.score-badge-high { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; }
-.score-badge-mid  { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
-.score-badge-low  { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
-.tab-score-num { font-family: 'Bodoni Moda', serif; font-size: 32px; font-weight: 400; line-height: 1; letter-spacing: -1px; white-space: nowrap; }
-.tab-score-num .denom { font-size: 15px; color: var(--muted); font-family: 'Bodoni Moda', serif; font-weight: 400; }
 
 /* Dynamic colors */
 .score-high { color: var(--success); }
@@ -433,6 +428,22 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .pdf-row button:hover { opacity: 0.85; }
 .success-msg { background: #f4faf6; border: 1px solid #c3e6cd; border-radius: var(--radius); padding: 10px 14px; font-size: 13px; color: var(--success); margin-top: 10px; display: none; text-align: center; }
 .footer-note { text-align: center; font-size: 11px; color: var(--muted-light); padding-top: 20px; line-height: 1.7; font-weight: 300; }
+
+/* ══════════════════════
+   RESPONSIVE
+══════════════════════ */
+@media (max-width: 560px) {
+  .l-nav { padding: 20px 20px; }
+  .l-hero-inner { padding: 72px 20px 44px; }
+  .l-stats-bar, .l-about { padding-left: 20px; padding-right: 20px; }
+  .l-about { grid-template-columns: 1fr; gap: 28px; padding-top: 56px; padding-bottom: 56px; }
+  .l-stat { padding-right: 14px; margin-right: 14px; }
+  .menu-audience { grid-template-columns: 1fr; }
+  .exec-row { grid-template-columns: 1fr; }
+  .pdf-row { flex-direction: column; }
+  .f-header, .r-header { padding: 0 20px; }
+  .f-main, .r-main, .menu-body { padding-left: 16px; padding-right: 16px; }
+}
 </style>
 </head>
 <body>
@@ -444,7 +455,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="menu-overlay" id="menuOverlay">
     <div class="menu-header">
       <div class="menu-logo">OneCiak</div>
-      <button class="menu-close" onclick="closeMenu()">✕</button>
+      <button class="menu-close" onclick="closeMenu()" aria-label="Close menu">✕</button>
     </div>
     <div class="menu-body">
       <div class="menu-sec">
@@ -479,7 +490,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <!-- Top Nav -->
   <nav class="l-nav">
     <div class="l-logo">OneCiak</div>
-    <button class="hamburger" id="hamburgerBtn" onclick="openMenu()"><span></span><span></span><span></span></button>
+    <button class="hamburger" id="hamburgerBtn" onclick="openMenu()" aria-label="Open menu" aria-expanded="false" aria-controls="menuOverlay"><span></span><span></span><span></span></button>
   </nav>
 
   <!-- Hero -->
@@ -492,7 +503,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         <input type="checkbox" id="termsCheck">
         <label for="termsCheck">I understand that OneCiak provides AI-generated analysis for informational purposes only. It does not constitute professional advice. No refunds once the report is generated.</label>
       </div>
-      <div class="l-terms-error" id="termsError">Please accept the disclaimer to continue.</div>
+      <div class="l-terms-error" id="termsError" role="alert">Please accept the disclaimer to continue.</div>
       <button class="l-btn" onclick="onStartClick()">Start Free Analysis →</button>
       <p class="l-subnote">Free report · No account required</p>
     </div>
@@ -540,22 +551,22 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div class="card">
       <div class="card-title">Your Project</div>
       <div class="field">
-        <label>Film Title <span class="hint">(or working title)</span></label>
+        <label for="title">Film Title <span class="hint">(or working title)</span></label>
         <input type="text" id="title" placeholder="e.g. The Last Harvest">
       </div>
       <div class="field">
-        <label>Logline</label>
+        <label for="logline">Logline</label>
         <textarea id="logline" placeholder="Who is the protagonist, what do they want, what stands in the way?"></textarea>
       </div>
       <div class="field">
         <label>Genre <span class="hint">(select up to 2)</span></label>
-        <select id="genre1" onchange="checkOther()">
+        <select id="genre1" onchange="checkOther()" aria-label="First genre">
           <option value="">First genre…</option>
           <option>Drama</option><option>Documentary</option><option>Thriller</option>
           <option>Comedy</option><option>Horror</option><option>Sci-Fi</option>
           <option>Action</option><option>Romance</option><option>Animation</option><option>Other</option>
         </select>
-        <select id="genre2" style="margin-top:8px" onchange="checkOther()">
+        <select id="genre2" style="margin-top:8px" onchange="checkOther()" aria-label="Second genre (optional)">
           <option value="">Second genre (optional)…</option>
           <option>Drama</option><option>Documentary</option><option>Thriller</option>
           <option>Comedy</option><option>Horror</option><option>Sci-Fi</option>
@@ -564,7 +575,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         <input type="text" id="genreOther" placeholder="Specify other genre…" style="margin-top:8px;display:none">
       </div>
       <div class="field">
-        <label>Format</label>
+        <label for="format">Format</label>
         <select id="format">
           <option value="">Select format…</option>
           <option>Feature Film</option><option>Short Film</option>
@@ -575,7 +586,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div class="card">
       <div class="card-title">Budget &amp; Distribution</div>
       <div class="field">
-        <label>Estimated Budget</label>
+        <label for="budgetSelect">Estimated Budget</label>
         <select id="budgetSelect">
           <option value="">Select budget…</option>
           <option>Under €5K</option><option>€5K – €15K</option><option>€15K – €30K</option>
@@ -584,7 +595,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         </select>
       </div>
       <div class="field">
-        <label>Target Audience</label>
+        <label for="audience">Target Audience</label>
         <select id="audience">
           <option value="">Select audience…</option>
           <option>General / Mainstream</option><option>Art house / Cinephiles</option>
@@ -593,7 +604,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         </select>
       </div>
       <div class="field">
-        <label>Distribution Goal</label>
+        <label for="distrib">Distribution Goal</label>
         <select id="distrib">
           <option value="">Select goal…</option>
           <option>Major streaming platforms (Netflix, Amazon…)</option>
@@ -605,11 +616,11 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div class="card">
       <div class="card-title">Context</div>
       <div class="field">
-        <label>Production Country</label>
+        <label for="country">Production Country</label>
         <input type="text" id="country" placeholder="e.g. Italy, France, USA">
       </div>
       <div class="field">
-        <label>Director Experience <span class="hint">(optional)</span></label>
+        <label for="experience">Director Experience <span class="hint">(optional)</span></label>
         <select id="experience">
           <option value="">Select level…</option>
           <option>First film</option><option>1–2 short films</option>
@@ -618,7 +629,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         </select>
       </div>
       <div class="field">
-        <label>Anything else? <span class="hint">(optional)</span></label>
+        <label for="extra">Anything else? <span class="hint">(optional)</span></label>
         <textarea id="extra" placeholder="Co-production? Attached talent? Funding secured? Based on a true story?" style="min-height:66px"></textarea>
       </div>
     </div>
@@ -626,7 +637,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
       <div class="disclaimer-text"><strong>Disclaimer:</strong> Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. Results are estimates and do not guarantee any outcome.</div>
     </div>
     <button class="btn-primary" onclick="runAnalysis(false)">Get Free Analysis →</button>
-    <div class="error-box" id="errorBox"></div>
+    <div class="error-box" id="errorBox" role="alert"></div>
   </div>
 </div>
 
@@ -656,7 +667,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   </div>
   <div class="r-main">
     <div class="translate-banner" id="translateBanner">
-      <span>⚠️ Safari auto-translation detected. Please disable it for accurate results.</span>
+      <span>⚠️ Automatic page translation detected. Please disable it in your browser for accurate results.</span>
       <button onclick="document.getElementById('translateBanner').style.display='none'">✕</button>
     </div>
     <div id="overallScore"></div>
@@ -666,7 +677,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div class="pdf-card">
       <div class="pdf-label">Save report as PDF</div>
       <div class="pdf-row">
-        <input type="email" id="pdfEmail" placeholder="Your email address">
+        <input type="email" id="pdfEmail" placeholder="Your email address" aria-label="Your email address">
         <button onclick="savePDF()">Save PDF</button>
       </div>
       <div class="success-msg" id="pdfSuccess">PDF saved — check your downloads.</div>
@@ -720,10 +731,12 @@ function goForm() {
 function openMenu() {
   document.getElementById('menuOverlay').classList.add('open');
   document.getElementById('hamburgerBtn').classList.add('open');
+  document.getElementById('hamburgerBtn').setAttribute('aria-expanded', 'true');
 }
 function closeMenu() {
   document.getElementById('menuOverlay').classList.remove('open');
   document.getElementById('hamburgerBtn').classList.remove('open');
+  document.getElementById('hamburgerBtn').setAttribute('aria-expanded', 'false');
 }
 function closeMenuGoForm() { closeMenu(); goForm(); }
 
@@ -861,68 +874,7 @@ async function handleStripeReturn() {
   }
 }
 
-/* ── TAB PANEL BUILDER ── */
 function scoreColor(s) { return s >= 7 ? 'high' : s >= 5 ? 'mid' : 'low'; }
-
-function buildTabPanel(el, label, score, verdict, detail, flags, strengths, tips, plan, extra) {
-  var pct = (score/10)*100;
-  var bid = 'bar_' + label.replace(/\s+/g,'_').toLowerCase();
-  var col = scoreColor(score);
-
-  var fl = '';
-  (flags||[]).forEach(function(f){ fl += '<div class="flag-item red">'+f+'</div>'; });
-  if (fl) fl = '<div class="flags-block"><div class="flags-label red">Red Flags</div>'+fl+'</div>';
-
-  var st = '';
-  (strengths||[]).forEach(function(s){ st += '<div class="flag-item green">'+s+'</div>'; });
-  if (st) st = '<div class="flags-block"><div class="flags-label green">Strengths</div>'+st+'</div>';
-
-  var tp = '';
-  if ((tips||[]).length) {
-    tp = '<div class="tips-block"><span class="tips-label">Recommendations</span>';
-    tips.forEach(function(t){
-      var txt = typeof t==='string' ? t : t.advice;
-      tp += '<div class="tip-item"><div class="tip-text">'+txt+'</div>';
-      if (typeof t==='object' && t.links && t.links.length) {
-        tp += '<div class="tip-links">';
-        t.links.forEach(function(l){ tp += '<a class="tip-link" href="'+l.url+'" target="_blank" rel="noopener">'+l.label+'</a>'; });
-        tp += '</div>';
-      }
-      tp += '</div>';
-    });
-    tp += '</div>';
-  }
-
-  var ap = '';
-  if ((plan||[]).length) {
-    ap = '<div class="action-block"><span class="action-label">Action Plan</span>';
-    var tags = ['30 days','60 days','90 days'];
-    plan.forEach(function(a, i){
-      var clean = a.replace(/^(30|60|90)\s*days?:?\s*/i,'');
-      ap += '<div class="action-item"><span class="action-tag">'+(tags[i]||'')+'</span><span class="action-text">'+clean+'</span></div>';
-    });
-    ap += '</div>';
-  }
-
-  var col = scoreColor(score);
-  var badgeText = col==='high' ? 'Strong' : col==='mid' ? 'Moderate' : 'Weak';
-
-  el.innerHTML =
-    '<div class="tab-card">'+
-    '<div class="tab-score-header">'+
-    '<div class="tab-score-label">'+label+'<span class="score-badge '+col+'">'+badgeText+'</span></div>'+
-    '<div class="tab-score-badge">'+
-    '<div class="tab-score-num score-'+col+'">'+score+'<span class="denom">/10</span></div>'+
-    '</div>'+
-    '</div>'+
-    '<div class="score-bar-bg"><div class="score-bar-fill bar-'+col+'" id="'+bid+'" style="width:0%"></div></div>'+
-    '<div class="score-verdict">'+verdict+'</div>'+
-    '<div class="score-detail">'+detail+'</div>'+
-    fl+st+tp+ap+(extra||'')+
-    '</div>';
-
-  setTimeout(function(bid,pct){ return function(){ var b=document.getElementById(bid); if(b) b.style.width=pct+'%'; }; }(bid,pct), 150);
-}
 
 /* ── RENDER FREE ── */
 function renderFree(r, title) {
@@ -1242,16 +1194,6 @@ function toggleAccordion(idx) {
 
 
 /* ── INLINE EXTRA BUILDERS ── */
-function buildInternationalMarkets(markets) {
-  if (!markets || !markets.length) return '';
-  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-light)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted-light);margin-bottom:10px">International Markets</div>';
-  markets.forEach(function(m){
-    h += '<div class="market-item"><div class="market-name">'+m.country+'</div><div class="market-reason">'+m.reason+'</div></div>';
-  });
-  h += '</div>';
-  return h;
-}
-
 function buildFundingSources(sources) {
   if (!sources || !sources.length) return '';
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Funding Sources</div>';
@@ -1293,22 +1235,6 @@ function buildPlatforms(platforms) {
   });
   h += '</div>';
   return h;
-}
-
-/* ── SWITCH TAB ── */
-function switchTab(idx) {
-  document.querySelectorAll('.tab-btn').forEach(function(b,i){ b.classList.toggle('active', i===idx); });
-  for (var i=1; i<=5; i++) {
-    var el = document.getElementById('card'+i);
-    if (el) el.classList.toggle('active', i===idx+1);
-  }
-  // Wait for DOM to update then scroll to sticky bar
-  setTimeout(function() {
-    var sticky = document.getElementById('tabsSticky');
-    if (!sticky) return;
-    var top = sticky.getBoundingClientRect().top + window.pageYOffset - 58;
-    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-  }, 10);
 }
 
 /* ── RUN ANALYSIS ── */
@@ -1443,22 +1369,6 @@ function savePDF() {
   } catch(e) { alert('PDF generation failed. Please try again.'); }
 }
 
-function toggleOverview() {
-  var el = document.getElementById('extraSections');
-  var btn = document.querySelector('#overviewToggle button');
-  if (!el || !btn) return;
-  if (el.style.display === 'none') {
-    el.style.display = 'block';
-    btn.textContent = '↑ Hide Overview';
-    setTimeout(function(){
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 50);
-  } else {
-    el.style.display = 'none';
-    btn.textContent = '↓ View Full Overview';
-  }
-}
-
 function showError(msg) { var b=document.getElementById('errorBox'); b.textContent=msg; b.style.display='block'; }
 function hideError() { document.getElementById('errorBox').style.display='none'; }
 
@@ -1471,10 +1381,9 @@ function checkTranslation() {
   setTimeout(function() {
     var el = document.getElementById('translateBanner');
     if (!el) return;
-    var lang = document.documentElement.lang || '';
-    var translated = document.documentElement.getAttribute('translate') === 'yes' ||
-      document.querySelector('[lang]:not([lang="en"])') !== null ||
-      (navigator.language && !navigator.language.startsWith('en') && document.title !== 'OneCiak — Film Market Intelligence');
+    var translated = document.documentElement.classList.contains('translated-ltr') ||
+      document.documentElement.classList.contains('translated-rtl') ||
+      document.documentElement.getAttribute('translate') === 'yes';
     if (translated) el.style.display = 'flex';
   }, 800);
 }
