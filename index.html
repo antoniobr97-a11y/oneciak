@@ -1352,6 +1352,14 @@ function buildActionPlanBody(r) {
     out += '</div>';
   }
 
+  // Risk Assessment
+  if (r.risk_assessment && ((r.risk_assessment.top_risks && r.risk_assessment.top_risks.length) || (r.risk_assessment.mitigation && r.risk_assessment.mitigation.length))) {
+    out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Risk Assessment</div>';
+    (r.risk_assessment.top_risks||[]).forEach(function(risk){ if (risk) out += '<div class="flag-item red" style="margin-bottom:6px">'+risk+'</div>'; });
+    (r.risk_assessment.mitigation||[]).forEach(function(m){ if (m) out += '<div class="flag-item green" style="margin-bottom:6px">'+m+'</div>'; });
+    out += '</div>';
+  }
+
   // Revenue Projection
   if (r.revenue_projection) {
     var rp = r.revenue_projection;
@@ -1661,6 +1669,63 @@ function savePDF() {
         ln(pl.reason||'',9,false,122,118,112);
         y+=1;
       });
+      hr();
+    }
+
+    if (isFullReport && lastResult.market_comps && lastResult.market_comps.length) {
+      ln('COMPARABLE FILMS',10,true);
+      lastResult.market_comps.forEach(function(c){
+        if (!c) return;
+        ln((c.title||'')+' ('+(c.year||'')+') — Budget: '+(c.budget||'')+' — '+(c.result||''),10,true);
+        ln(c.lesson||'',9,false,122,118,112);
+        y+=1;
+      });
+      hr();
+    }
+
+    if (isFullReport && lastResult.festival_calendar && lastResult.festival_calendar.length) {
+      ln('FESTIVAL CALENDAR',10,true);
+      lastResult.festival_calendar.forEach(function(f){
+        if (!f) return;
+        ln((f.festival||'')+' (Tier '+(f.tier||'')+') — '+(f.deadline||''),10,true);
+        ln(f.fit||'',9,false,122,118,112);
+        y+=1;
+      });
+      hr();
+    }
+
+    if (isFullReport && lastResult.sales_agents && lastResult.sales_agents.length) {
+      ln('SALES AGENTS',10,true);
+      lastResult.sales_agents.forEach(function(a){
+        if (!a) return;
+        ln(a.name||'',10,true);
+        ln(a.why||'',9,false,122,118,112);
+        y+=1;
+      });
+      hr();
+    }
+
+    if (isFullReport && lastResult.international_markets && lastResult.international_markets.length) {
+      ln('INTERNATIONAL MARKETS',10,true);
+      lastResult.international_markets.forEach(function(m){
+        if (!m) return;
+        ln((m.country||'')+': '+(m.reason||''),9,false,122,118,112);
+      });
+      hr();
+    }
+
+    if (isFullReport && lastResult.risk_assessment && ((lastResult.risk_assessment.top_risks||[]).length || (lastResult.risk_assessment.mitigation||[]).length)) {
+      ln('RISK ASSESSMENT',10,true);
+      (lastResult.risk_assessment.top_risks||[]).forEach(function(risk){ if(risk) ln('• '+risk,9,false,185,28,28); });
+      (lastResult.risk_assessment.mitigation||[]).forEach(function(m){ if(m) ln('• '+m,9,false,22,101,52); });
+      hr();
+    }
+
+    if (isFullReport && lastResult.revenue_projection && lastResult.revenue_projection.total_realistic) {
+      var rp = lastResult.revenue_projection;
+      ln('REVENUE PROJECTION',10,true);
+      ln('Total Realistic: '+rp.total_realistic,10,true,22,101,52);
+      if (rp.breakeven_note) ln(rp.breakeven_note,9,false,122,118,112);
       hr();
     }
 
