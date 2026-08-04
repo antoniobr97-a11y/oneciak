@@ -555,6 +555,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         <div class="l-stat reveal"><div class="l-stat-num">5</div><div class="l-stat-label">Analysis Dimensions</div></div>
         <div class="l-stat reveal" style="transition-delay:0.08s"><div class="l-stat-num">€29</div><div class="l-stat-label">Full Report</div></div>
         <div class="l-stat reveal" style="transition-delay:0.16s"><div class="l-stat-num">PDF</div><div class="l-stat-label">Export Included</div></div>
+        <div class="l-stat reveal" style="transition-delay:0.24s" id="usageStat"><div class="l-stat-num" id="usageStatNum">—</div><div class="l-stat-label">Reports Generated</div></div>
       </div>
     </div>
 
@@ -1094,7 +1095,8 @@ function renderFull(r, title) {
     '<div><div class="overall-label">OneCiak Score</div><div class="overall-sublabel">'+(r.overall_label||'')+'</div></div>'+
     '<div style="text-align:right">'+
     '<div class="overall-num score-'+col+'">'+Number(r.overall_score||5).toFixed(1)+'<span class="denom">/10</span></div>'+
-    '</div></div>';
+    '</div></div>'+
+    (r.score_benchmark ? '<div style="font-size:12.5px;color:var(--muted);line-height:1.5;font-weight:300;margin-top:10px;padding:0 4px">'+r.score_benchmark+'</div>' : '');
 
   // Exec summary — synthesis always visible
   document.getElementById('execSummary').innerHTML =
@@ -1119,7 +1121,7 @@ function renderFull(r, title) {
       score: r.financial_score,
       body: buildAccordionBody(r.financial_score, r.financial_verdict, r.financial_detail,
         r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan,
-        buildFundingSources(r.financial_sources))
+        buildFundingSources(r.financial_sources) + buildTalentAndTax(r.talent_leverage, r.tax_incentive))
     },
     {
       num:'03', label:'Market & Audience', sublabel:'Demand · Trends · Comparables',
@@ -1334,6 +1336,22 @@ function buildFundingSources(sources) {
   return h;
 }
 
+function buildTalentAndTax(talentLeverage, taxIncentive) {
+  if (!talentLeverage && !(taxIncentive && taxIncentive.estimate)) return '';
+  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">';
+  if (talentLeverage) {
+    h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Talent Leverage</div>'+
+      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:14px">'+talentLeverage+'</div>';
+  }
+  if (taxIncentive && taxIncentive.estimate) {
+    h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Tax Incentive'+(taxIncentive.region?' — '+taxIncentive.region:'')+'</div>'+
+      '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:4px">'+taxIncentive.estimate+'</div>'+
+      (taxIncentive.note ? '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300">'+taxIncentive.note+'</div>' : '');
+  }
+  h += '</div>';
+  return h;
+}
+
 function buildComparables(comps) {
   if (!comps || !comps.length) return '';
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Comparable Films</div>';
@@ -1493,7 +1511,19 @@ function hideError() { document.getElementById('errorBox').style.display='none';
 window.addEventListener('DOMContentLoaded', function() {
   handleStripeReturn();
   initScrollReveal();
+  loadUsageStat();
 });
+
+/* ── LIVE USAGE COUNTER (real count, not a placeholder) ── */
+async function loadUsageStat() {
+  try {
+    var res = await fetch('/.netlify/functions/stats');
+    if (!res.ok) return;
+    var data = await res.json();
+    var el = document.getElementById('usageStatNum');
+    if (el && typeof data.count === 'number') el.textContent = data.count.toLocaleString('en-US');
+  } catch (e) { /* leave the placeholder if this fails */ }
+}
 
 /* ── SCROLL REVEAL ── */
 var scrollRevealObserver = null;

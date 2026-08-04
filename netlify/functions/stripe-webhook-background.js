@@ -3,6 +3,7 @@ const { connectLambda, getStore } = require('@netlify/blobs');
 const { callAnthropic, extractJSON } = require('./_util/anthropic');
 const { allFullPrompts } = require('./_util/reportPrompts');
 const { buildReportEmailHtml, sendReportEmail } = require('./_util/email');
+const { incrementUsageCount } = require('./_util/stats');
 
 const FULL_MODEL = 'claude-haiku-4-5-20251001';
 const FULL_MAX_TOKENS = 8000; // background function isn't bound by a sync response-time ceiling, so the deeper prompts get real room
@@ -98,6 +99,7 @@ exports.handler = async (event) => {
     });
 
     await store.setJSON(key, { status: 'sent', sentAt: Date.now(), report: merged, project });
+    await incrementUsageCount();
     return { statusCode: 200, body: 'OK' };
   } catch (err) {
     console.error('stripe-webhook-background: generation/email failed for session', session.id, err.message);

@@ -9,7 +9,7 @@ function scoreLabel(s) {
   return n >= 7 ? 'Strong' : n >= 5 ? 'Moderate' : 'Weak';
 }
 
-function section(title, score, verdict, detail, flags, strengths, tips, plan) {
+function section(title, score, verdict, detail, flags, strengths, tips, plan, extra) {
   let html = '<tr><td style="padding:28px 0;border-top:1px solid #e5e5e5">';
   html += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">';
   html += '<span style="font-size:16px;font-weight:700;color:#000">' + esc(title) + '</span>';
@@ -38,8 +38,25 @@ function section(title, score, verdict, detail, flags, strengths, tips, plan) {
     plan.forEach((a, i) => { html += '<p style="margin:4px 0 0;font-size:13px;color:#161616"><b>' + (tags[i] || '') + ':</b> ' + esc(String(a).replace(/^(30|60|90)\s*days?:?\s*/i, '')) + '</p>'; });
     html += '</div>';
   }
+  if (extra) html += extra;
   html += '</td></tr>';
   return html;
+}
+
+function talentAndTaxHtml(talentLeverage, taxIncentive) {
+  if (!talentLeverage && !(taxIncentive && taxIncentive.estimate)) return '';
+  let h = '<div style="margin-top:10px">';
+  if (talentLeverage) {
+    h += '<span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#6f6f6f">Talent Leverage</span>' +
+      '<p style="margin:6px 0 12px;font-size:13px;color:#161616;line-height:1.6">' + esc(talentLeverage) + '</p>';
+  }
+  if (taxIncentive && taxIncentive.estimate) {
+    h += '<span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#6f6f6f">Tax Incentive' + (taxIncentive.region ? ' — ' + esc(taxIncentive.region) : '') + '</span>' +
+      '<p style="margin:6px 0 0;font-size:13px;font-weight:700;color:#0f7a3d">' + esc(taxIncentive.estimate) + '</p>' +
+      (taxIncentive.note ? '<p style="margin:2px 0 0;font-size:12px;color:#6f6f6f">' + esc(taxIncentive.note) + '</p>' : '');
+  }
+  h += '</div>';
+  return h;
 }
 
 function buildReportEmailHtml(project, r, sessionId) {
@@ -49,7 +66,7 @@ function buildReportEmailHtml(project, r, sessionId) {
 
   let body = '';
   body += section('Creative Package', r.creative_score, r.creative_verdict, r.creative_detail, r.creative_flags, r.creative_strengths, r.creative_tips, null);
-  body += section('Financial Plan', r.financial_score, r.financial_verdict, r.financial_detail, r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan);
+  body += section('Financial Plan', r.financial_score, r.financial_verdict, r.financial_detail, r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan, talentAndTaxHtml(r.talent_leverage, r.tax_incentive));
   body += section('Market & Audience', r.market_score, r.market_verdict, r.market_detail, r.market_flags, r.market_strengths, r.market_tips, null);
   body += section('Festival Strategy', r.festival_score, r.festival_verdict, r.festival_detail, r.festival_flags, r.festival_strengths, r.festival_tips, r.festival_action_plan);
   body += section('Distribution & Revenue', r.distribution_score, r.distribution_verdict, r.distribution_detail, r.distribution_flags, r.distribution_strengths, r.distribution_tips, r.distribution_action_plan);
@@ -76,6 +93,7 @@ function buildReportEmailHtml(project, r, sessionId) {
     '<tr><td style="padding:16px 32px 24px;text-align:center">' +
     '<div style="font-size:22px;font-weight:700;color:#000;margin-bottom:8px">"' + esc(title) + '"</div>' +
     '<div style="display:inline-block;border:1px solid #000;border-radius:999px;padding:6px 18px;font-size:15px;font-weight:700;color:#000">Score ' + esc(score) + '/10</div>' +
+    (r.score_benchmark ? '<p style="margin:10px 0 0;font-size:12.5px;color:#6f6f6f;line-height:1.5">' + esc(r.score_benchmark) + '</p>' : '') +
     '<p style="margin:14px 0 0;font-size:14px;line-height:1.7;color:#444">' + esc(r.executive_summary || r.overall_summary || '') + '</p>' +
     '</td></tr>' +
     '<tr><td style="padding:0 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">' + body + '</table></td></tr>' +

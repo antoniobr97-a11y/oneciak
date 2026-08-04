@@ -2,6 +2,7 @@ const { connectLambda } = require('@netlify/blobs');
 const { checkRateLimit } = require('./_util/rateLimit');
 const { verify: verifyReportToken } = require('./_util/reportToken');
 const { callAnthropic, extractJSON } = require('./_util/anthropic');
+const { incrementUsageCount } = require('./_util/stats');
 
 const ALLOWED_ORIGIN = process.env.SITE_URL || 'https://oneciak.com';
 const FREE_MODEL = 'claude-haiku-4-5-20251001';
@@ -54,6 +55,7 @@ exports.handler = async (event) => {
       } catch (e) {
         return { statusCode: 502, headers, body: JSON.stringify({ error: 'Could not parse AI response. Please try again.' }) };
       }
+      await incrementUsageCount();
       return { statusCode: 200, headers, body: JSON.stringify({ merged }) };
     }
 
