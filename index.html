@@ -800,8 +800,9 @@ async function callAPI(prompt, tier, auth) {
   });
   var text = await res.text();
   if (!res.ok) {
-    try { var e = JSON.parse(text); throw new Error(e.error || 'API error ' + res.status); }
-    catch(e2) { if (e2.message && e2.message !== '[object Object]') throw e2; throw new Error('Service error. Please try again.'); }
+    var msg = 'Service error. Please try again.';
+    try { var e = JSON.parse(text); if (e && e.error) msg = e.error; } catch(e2) {}
+    throw new Error(msg);
   }
   var data;
   try { data = JSON.parse(text); } catch(e) { throw new Error('Service error. Please try again.'); }
