@@ -792,11 +792,11 @@ function fullPrompt(p) {
 }
 
 /* ── API ── */
-async function callAPI(prompt) {
+async function callAPI(prompt, tier, auth) {
   var res = await fetch("/.netlify/functions/analyze", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt: prompt })
+    body: JSON.stringify({ prompt: prompt, tier: tier || 'free', token: auth && auth.token, session_id: auth && auth.session_id })
   });
   var text = await res.text();
   if (!res.ok) {
@@ -863,7 +863,7 @@ async function handleStripeReturn() {
     lastProject = p;
     document.getElementById('loadingTitle').textContent = 'Building your full report…';
     document.getElementById('loadingDesc').textContent = 'Deep analysis in progress across all 5 dimensions.';
-    var result = await callAPI(fullPrompt(p));
+    var result = await callAPI(fullPrompt(p), 'full', { token: data.reportToken, session_id: data.session_id || sessionId });
     lastResult = result;
     showOnly('sec-results');
     renderFull(result, p.title);
@@ -1252,7 +1252,7 @@ async function runAnalysis(isFull) {
     ? 'Deep analysis in progress across all 5 dimensions — creative, financial, market, festival and distribution.'
     : 'Evaluating your project across five market dimensions with real industry data.';
   try {
-    var result = await callAPI(isFull ? fullPrompt(p) : freePrompt(p));
+    var result = await callAPI(isFull ? fullPrompt(p) : freePrompt(p), 'free');
     lastResult = result;
     showOnly('sec-results');
     if (isFull) renderFull(result, p.title);
