@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="only light">
 <title>OneCiak — Film Market Intelligence</title>
 <meta name="description" content="Get a professional AI-powered market assessment for your film across five industry dimensions — creative package, financing, audience, festivals and distribution — before you invest time and money.">
-<meta name="theme-color" content="#f9f7f4">
+<meta name="theme-color" content="#ffffff">
 <link rel="canonical" href="https://oneciak.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="OneCiak">
@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OneCiak — Film Market Intelligence">
 <meta name="twitter:description" content="Does your film have a real market? A professional AI market assessment across five industry dimensions.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%231a1814'/%3E%3Cpath d='M20 38h60l-4 12H24z' fill='%23f9f7f4'/%3E%3Crect x='22' y='50' width='56' height='30' rx='2' fill='%23f9f7f4'/%3E%3Cpath d='M28 38l6-14h9l-6 14zM50 38l6-14h9l-6 14z' fill='%231a1814'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23000000'/%3E%3Cpath d='M20 38h60l-4 12H24z' fill='%23ffffff'/%3E%3Crect x='22' y='50' width='56' height='30' rx='2' fill='%23ffffff'/%3E%3Cpath d='M28 38l6-14h9l-6 14zM50 38l6-14h9l-6 14z' fill='%23000000'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -64,6 +64,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
 @keyframes riseIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+/* Scroll reveal: only hides content once JS confirms it can reveal it again (progressive enhancement — no JS/no observer support means everything just stays visible). */
+.js-ready .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
+.js-ready .reveal.in-view { opacity: 1; transform: translateY(0); }
 .card, .overall-card, .exec-card, .extra-card, .locked-card, .pdf-card, .accordion-wrap, .menu-aud {
   box-shadow: var(--shadow-md);
   border: 1px solid rgba(0,0,0,0.08);
@@ -550,26 +553,26 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <!-- Stats bar -->
     <div style="border-top:1px solid var(--border);background:var(--white)">
       <div class="l-stats-bar">
-        <div class="l-stat"><div class="l-stat-num">5</div><div class="l-stat-label">Analysis Dimensions</div></div>
-        <div class="l-stat"><div class="l-stat-num">€29</div><div class="l-stat-label">Full Report</div></div>
-        <div class="l-stat"><div class="l-stat-num">PDF</div><div class="l-stat-label">Export Included</div></div>
+        <div class="l-stat reveal"><div class="l-stat-num">5</div><div class="l-stat-label">Analysis Dimensions</div></div>
+        <div class="l-stat reveal" style="transition-delay:0.08s"><div class="l-stat-num">€29</div><div class="l-stat-label">Full Report</div></div>
+        <div class="l-stat reveal" style="transition-delay:0.16s"><div class="l-stat-num">PDF</div><div class="l-stat-label">Export Included</div></div>
       </div>
     </div>
 
     <!-- About section -->
     <div style="border-top:1px solid var(--border);background:var(--cream)">
       <div class="l-about">
-        <div>
+        <div class="reveal">
           <div class="l-about-eyebrow">About OneCiak</div>
           <h2 class="l-about-title">Professional intelligence for independent filmmakers.</h2>
           <p class="l-about-text">OneCiak uses advanced AI trained on real film market data to give you the kind of honest, structured analysis that most independent filmmakers never have access to — before committing resources to a project.</p>
         </div>
         <div class="l-about-dims">
-          <div class="l-about-dim"><span class="l-about-dim-num">01</span> Creative Package</div>
-          <div class="l-about-dim"><span class="l-about-dim-num">02</span> Financial Plan</div>
-          <div class="l-about-dim"><span class="l-about-dim-num">03</span> Market &amp; Audience</div>
-          <div class="l-about-dim"><span class="l-about-dim-num">04</span> Festival Strategy</div>
-          <div class="l-about-dim"><span class="l-about-dim-num">05</span> Distribution &amp; Revenue</div>
+          <div class="l-about-dim reveal"><span class="l-about-dim-num">01</span> Creative Package</div>
+          <div class="l-about-dim reveal" style="transition-delay:0.06s"><span class="l-about-dim-num">02</span> Financial Plan</div>
+          <div class="l-about-dim reveal" style="transition-delay:0.12s"><span class="l-about-dim-num">03</span> Market &amp; Audience</div>
+          <div class="l-about-dim reveal" style="transition-delay:0.18s"><span class="l-about-dim-num">04</span> Festival Strategy</div>
+          <div class="l-about-dim reveal" style="transition-delay:0.24s"><span class="l-about-dim-num">05</span> Distribution &amp; Revenue</div>
         </div>
       </div>
     </div>
@@ -587,7 +590,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="f-main">
     <div class="f-title">Tell us about your project</div>
     <div class="f-subtitle">Free report covers all 5 dimensions. Full report unlocks for €29.</div>
-    <div class="card">
+    <div class="card reveal" style="transition-delay:0s">
       <div class="card-title">Your Project</div>
       <div class="field">
         <label for="title">Film Title <span class="hint">(or working title)</span></label>
@@ -622,7 +625,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         </select>
       </div>
     </div>
-    <div class="card">
+    <div class="card reveal" style="transition-delay:0.06s">
       <div class="card-title">Budget &amp; Distribution</div>
       <div class="field">
         <label for="budgetSelect">Estimated Budget</label>
@@ -652,7 +655,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         </select>
       </div>
     </div>
-    <div class="card">
+    <div class="card reveal" style="transition-delay:0.12s">
       <div class="card-title">Context</div>
       <div class="field">
         <label for="country">Production Country</label>
@@ -699,7 +702,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <button class="back-btn" onclick="goForm()">← New Analysis</button>
   </div>
   <div class="r-hero">
-    <div class="r-hero-inner">
+    <div class="r-hero-inner reveal">
       <div class="r-eyebrow">Film Market Intelligence Report</div>
       <div class="r-title" id="resultTitle"></div>
       <div class="r-summary" id="resultSubtitle"></div>
@@ -710,11 +713,11 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
       <span>⚠️ Automatic page translation detected. Please disable it in your browser for accurate results.</span>
       <button onclick="document.getElementById('translateBanner').style.display='none'">✕</button>
     </div>
-    <div id="overallScore"></div>
-    <div id="execSummary"></div>
-    <div id="accordionMenu" style="display:none"></div>
+    <div id="overallScore" class="reveal"></div>
+    <div id="execSummary" class="reveal" style="transition-delay:0.06s"></div>
+    <div id="accordionMenu" class="reveal" style="display:none"></div>
     <div id="upgradeSection"></div>
-    <div class="pdf-card">
+    <div class="pdf-card reveal">
       <div class="pdf-label">Save report as PDF</div>
       <div class="pdf-row">
         <input type="email" id="pdfEmail" placeholder="Your email address" aria-label="Your email address">
@@ -974,6 +977,7 @@ async function generateFullReport() {
     showOnly('sec-results');
     renderFull(result, p.title);
     checkTranslation();
+    initScrollReveal();
   } catch(err) {
     document.getElementById('loadingSpinner').style.display = 'none';
     document.getElementById('loadingTitle').textContent = 'Your report hit a snag';
@@ -1372,6 +1376,7 @@ async function runAnalysis(isFull) {
     if (isFull) renderFull(result, p.title);
     else renderFree(result, p.title);
     checkTranslation();
+    initScrollReveal();
   } catch(err) {
     showOnly('sec-form');
     showError("Error: " + err.message);
@@ -1489,7 +1494,29 @@ function hideError() { document.getElementById('errorBox').style.display='none';
 // Check for Stripe return on page load
 window.addEventListener('DOMContentLoaded', function() {
   handleStripeReturn();
+  initScrollReveal();
 });
+
+/* ── SCROLL REVEAL ── */
+var scrollRevealObserver = null;
+function initScrollReveal() {
+  if (!('IntersectionObserver' in window)) return;
+  document.body.classList.add('js-ready');
+  if (!scrollRevealObserver) {
+    scrollRevealObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          scrollRevealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+  }
+  document.querySelectorAll('.reveal:not(.reveal-observed)').forEach(function(el) {
+    el.classList.add('reveal-observed');
+    scrollRevealObserver.observe(el);
+  });
+}
 
 function checkTranslation() {
   setTimeout(function() {
