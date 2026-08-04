@@ -281,6 +281,9 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-title { font-family: var(--sf); font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 12px; letter-spacing: -0.02em; }
 .loading-desc { font-size: 14.5px; color: var(--muted); font-weight: 400; line-height: 1.6; max-width: 320px; margin: 0 auto; }
+.loading-timer { margin-top: 18px; font-size: 13px; color: var(--muted-light); font-weight: 500; font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border-light); border-radius: 999px; padding: 6px 14px; }
+.loading-timer-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: loadingPulse 1.4s ease-in-out infinite; }
+@keyframes loadingPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 
 /* ══════════════════════
    RESULTS
@@ -697,6 +700,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div class="spinner" id="loadingSpinner"></div>
     <div class="loading-title" id="loadingTitle">Analyzing your project…</div>
     <div class="loading-desc" id="loadingDesc">Evaluating your project across five market dimensions with real industry data.</div>
+    <div class="loading-timer" id="loadingTimer" style="display:none"></div>
     <button class="btn-primary" id="loadingRetryBtn" style="display:none;margin-top:20px;max-width:280px" onclick="retryLastAction()">Try again →</button>
   </div>
 </div>
@@ -757,8 +761,10 @@ function showOnly(id) {
   if (t) t.style.display = (id === 'sec-loading') ? 'flex' : 'block';
   window.scrollTo(0,0);
 }
-function goLanding() { showOnly('sec-landing'); }
+function goLanding() { fullReportGenerationId++; stopFullReportTimer(); showOnly('sec-landing'); }
 function goForm() {
+  fullReportGenerationId++;
+  stopFullReportTimer();
   showOnly('sec-form');
   if (lastProject) {
     document.getElementById('title').value       = lastProject.title || '';
@@ -930,6 +936,7 @@ async function startStripeCheckout() {
 
 /* ── HANDLE STRIPE RETURN ── */
 var pendingFullReportAuth = null; // { project, token, session_id } — kept so a failed generation can be retried without paying again
+var fullReportGenerationId = 0; // bumped whenever the user navigates away or starts a new report, so a stale poll loop from a previous attempt can't overwrite what's on screen now
 
 async function handleStripeReturn() {
   var params = new URLSearchParams(window.location.search);
@@ -968,8 +975,31 @@ var POLL_MAX_ATTEMPTS = 40; // ~2.5 minutes
 
 function wait(ms) { return new Promise(function(resolve){ setTimeout(resolve, ms); }); }
 
+/* ── ELAPSED-TIME INDICATOR ── shows the wait is real progress, not a stall */
+var fullReportTimerHandle = null;
+function startFullReportTimer() {
+  stopFullReportTimer();
+  var el = document.getElementById('loadingTimer');
+  var startedAt = Date.now();
+  function render() {
+    var secs = Math.floor((Date.now() - startedAt) / 1000);
+    var m = Math.floor(secs / 60), s = secs % 60;
+    var label = secs < 20 ? 'Just started' : 'This can take a couple of minutes for a deeply detailed report';
+    el.innerHTML = '<span class="loading-timer-dot"></span>' + m + ':' + (s < 10 ? '0' : '') + s + ' elapsed — ' + label;
+  }
+  render();
+  el.style.display = 'inline-flex';
+  fullReportTimerHandle = setInterval(render, 1000);
+}
+function stopFullReportTimer() {
+  if (fullReportTimerHandle) { clearInterval(fullReportTimerHandle); fullReportTimerHandle = null; }
+  var el = document.getElementById('loadingTimer');
+  if (el) el.style.display = 'none';
+}
+
 async function generateFullReport() {
   if (!pendingFullReportAuth) return;
+  var myGenId = ++fullReportGenerationId;
   var p = pendingFullReportAuth.project;
   var sessionId = pendingFullReportAuth.session_id;
   var token = pendingFullReportAuth.token;
@@ -980,10 +1010,13 @@ async function generateFullReport() {
   document.getElementById('loadingTitle').textContent = 'Building your full report…';
   document.getElementById('loadingDesc').textContent = 'Preparing a deeply detailed analysis — this can take up to a couple of minutes. Feel free to close this page: we\'ll email your full report the moment it\'s ready, and you can always come back here to view it.';
   showOnly('sec-loading');
+  startFullReportTimer();
 
   for (var i = 0; i < POLL_MAX_ATTEMPTS; i++) {
     var existing = await checkReportReady(sessionId, token);
+    if (myGenId !== fullReportGenerationId) return; // user navigated away or started something else — abandon silently
     if (existing && existing.ready) {
+      stopFullReportTimer();
       lastResult = existing.report;
       if (existing.project) { lastProject = existing.project; p = existing.project; }
       pendingFullReportAuth = null;
@@ -994,8 +1027,11 @@ async function generateFullReport() {
       return;
     }
     await wait(POLL_INTERVAL_MS);
+    if (myGenId !== fullReportGenerationId) return;
   }
 
+  if (myGenId !== fullReportGenerationId) return;
+  stopFullReportTimer();
   document.getElementById('loadingSpinner').style.display = 'none';
   document.getElementById('loadingTitle').textContent = 'Almost there';
   document.getElementById('loadingDesc').textContent = 'Your report is taking a bit longer than usual to prepare. Your payment is confirmed and safe — we\'ll email it to you as soon as it\'s ready. Tap below to keep checking.';
@@ -1395,6 +1431,8 @@ async function runAnalysis() {
   }
   hideError();
   lastProject = p;
+  fullReportGenerationId++;
+  stopFullReportTimer();
   document.getElementById('sampleBanner').style.display = 'none';
   showOnly('sec-loading');
   document.getElementById('loadingTitle').textContent = 'Analyzing your project…';
@@ -1502,6 +1540,8 @@ function showSampleReport() {
       { phase: 'Phase 5 — Festival & Sales', action: 'Premiere at the highest-tier festival that accepts, then run the B-tier fallback list in parallel with sales agent outreach' }
     ]
   };
+  fullReportGenerationId++;
+  stopFullReportTimer();
   lastResult = sample;
   lastProject = sampleProject;
   showOnly('sec-results');
