@@ -27,17 +27,18 @@
 :root {
   --sf: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Helvetica, Arial, sans-serif;
   --white: #ffffff;
-  --cream: #f5f5f7;
-  --paper: #fbfbfd;
-  --border: #d2d2d7;
-  --border-light: #e8e8ed;
-  --text: #1d1d1f;
+  --cream: #f6f3ec;
+  --paper: #fbf9f5;
+  --border: #ddd7c9;
+  --border-light: #ece7db;
+  --text: #1c1a15;
   --ink: #000000;
-  --muted: #6e6e73;
-  --muted-light: #a1a1a6;
-  --accent: #0071e3;
-  --accent-hover: #0077ed;
-  --accent-press: #0068d1;
+  --muted: #726c60;
+  --muted-light: #a39c8c;
+  --accent: #b0782e;
+  --accent-hover: #c28839;
+  --accent-press: #966525;
+  --accent-wash: #f6ead6;
   --danger: #c5382a;
   --danger-wash: #fdf1ef;
   --success: #0f7a3d;
@@ -45,9 +46,9 @@
   --radius: 12px;
   --radius-lg: 18px;
   --radius-xl: 28px;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 1px rgba(0,0,0,0.03);
-  --shadow-md: 0 8px 24px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.04);
-  --shadow-lg: 0 24px 60px rgba(0,0,0,0.14), 0 6px 16px rgba(0,0,0,0.06);
+  --shadow-sm: 0 1px 3px rgba(28,26,21,0.06), 0 1px 2px rgba(28,26,21,0.05);
+  --shadow-md: 0 10px 28px rgba(28,26,21,0.10), 0 3px 8px rgba(28,26,21,0.06);
+  --shadow-lg: 0 28px 64px rgba(28,26,21,0.18), 0 8px 20px rgba(28,26,21,0.08);
   --ease: cubic-bezier(0.28, 0.11, 0.32, 1);
 }
 html { color-scheme: only light; scroll-behavior: smooth; }
@@ -64,8 +65,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 @keyframes riseIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 .card, .overall-card, .exec-card, .extra-card, .locked-card, .pdf-card, .accordion-wrap, .menu-aud {
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(28,26,21,0.05);
 }
+.l-stat, .l-about-dim {
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.l-stat:hover, .l-about-dim:hover { box-shadow: var(--shadow-md); }
 .l-btn, .btn-primary, .btn-unlock, .menu-cta {
   transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s;
 }
@@ -97,7 +104,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-hero {
   min-height: 100vh;
   display: flex; flex-direction: column;
-  background: var(--white);
+  background:
+    radial-gradient(ellipse 1000px 560px at 50% -8%, rgba(176,120,46,0.09), transparent 60%),
+    var(--white);
 }
 .l-hero-inner {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
