@@ -1,0 +1,107 @@
+const https = require('https');
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function scoreLabel(s) {
+  const n = Number(s || 0);
+  return n >= 7 ? 'Strong' : n >= 5 ? 'Moderate' : 'Weak';
+}
+
+function section(title, score, verdict, detail, flags, strengths, tips, plan) {
+  let html = '<tr><td style="padding:28px 0;border-top:1px solid #e5e5e5">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">';
+  html += '<span style="font-size:16px;font-weight:700;color:#000">' + esc(title) + '</span>';
+  if (score !== null && score !== undefined) {
+    html += '<span style="font-size:13px;font-weight:700;color:#000;border:1px solid #000;border-radius:999px;padding:2px 10px">' + esc(score) + '/10 · ' + scoreLabel(score) + '</span>';
+  }
+  html += '</div>';
+  if (verdict) html += '<p style="margin:0 0 8px;font-size:14px;color:#161616;font-weight:600">' + esc(verdict) + '</p>';
+  if (detail) html += '<p style="margin:0 0 12px;font-size:13px;line-height:1.7;color:#444">' + esc(detail) + '</p>';
+  (flags || []).forEach(f => { html += '<p style="margin:0 0 4px;font-size:13px;color:#c5382a">⚑ ' + esc(f) + '</p>'; });
+  (strengths || []).forEach(s => { html += '<p style="margin:0 0 4px;font-size:13px;color:#0f7a3d">✓ ' + esc(s) + '</p>'; });
+  if (tips && tips.length) {
+    html += '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#6f6f6f">Recommendations</span>';
+    tips.forEach(t => {
+      const txt = typeof t === 'string' ? t : t.advice;
+      html += '<p style="margin:6px 0 0;font-size:13px;color:#161616">• ' + esc(txt) + '</p>';
+      if (typeof t === 'object' && t.links && t.links.length) {
+        t.links.forEach(l => { html += '<p style="margin:2px 0 0 14px;font-size:12px"><a href="' + esc(l.url) + '" style="color:#000">' + esc(l.label) + ' →</a></p>'; });
+      }
+    });
+    html += '</div>';
+  }
+  if (plan && plan.length) {
+    html += '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#6f6f6f">Action Plan</span>';
+    const tags = ['30 days', '60 days', '90 days'];
+    plan.forEach((a, i) => { html += '<p style="margin:4px 0 0;font-size:13px;color:#161616"><b>' + (tags[i] || '') + ':</b> ' + esc(String(a).replace(/^(30|60|90)\s*days?:?\s*/i, '')) + '</p>'; });
+    html += '</div>';
+  }
+  html += '</td></tr>';
+  return html;
+}
+
+function buildReportEmailHtml(project, r) {
+  const title = project.title || 'Your project';
+  const score = Number(r.overall_score || 5).toFixed(1);
+
+  let body = '';
+  body += section('Creative Package', r.creative_score, r.creative_verdict, r.creative_detail, r.creative_flags, r.creative_strengths, r.creative_tips, null);
+  body += section('Financial Plan', r.financial_score, r.financial_verdict, r.financial_detail, r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan);
+  body += section('Market & Audience', r.market_score, r.market_verdict, r.market_detail, r.market_flags, r.market_strengths, r.market_tips, null);
+  body += section('Festival Strategy', r.festival_score, r.festival_verdict, r.festival_detail, r.festival_flags, r.festival_strengths, r.festival_tips, r.festival_action_plan);
+  body += section('Distribution & Revenue', r.distribution_score, r.distribution_verdict, r.distribution_detail, r.distribution_flags, r.distribution_strengths, r.distribution_tips, r.distribution_action_plan);
+
+  if (r.roadmap && r.roadmap.length) {
+    let rm = '<tr><td style="padding:28px 0;border-top:1px solid #e5e5e5"><span style="font-size:16px;font-weight:700;color:#000">Roadmap</span>';
+    r.roadmap.forEach((s, i) => { rm += '<p style="margin:10px 0 0;font-size:13px;color:#161616"><b>' + (i + 1) + '. ' + esc(s.phase) + ':</b> ' + esc(s.action) + '</p>'; });
+    rm += '</td></tr>';
+    body += rm;
+  }
+
+  if (r.revenue_projection && r.revenue_projection.total_realistic) {
+    body += '<tr><td style="padding:28px 0;border-top:1px solid #e5e5e5"><span style="font-size:16px;font-weight:700;color:#000">Revenue Projection</span>' +
+      '<p style="margin:10px 0 0;font-size:14px;font-weight:700;color:#000">Total realistic: ' + esc(r.revenue_projection.total_realistic) + '</p>' +
+      (r.revenue_projection.breakeven_note ? '<p style="margin:6px 0 0;font-size:13px;color:#444">' + esc(r.revenue_projection.breakeven_note) + '</p>' : '') +
+      '</td></tr>';
+  }
+
+  return '<!doctype html><html><body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif">' +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:32px 0">' +
+    '<tr><td align="center">' +
+    '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:18px;overflow:hidden;max-width:600px;width:100%">' +
+    '<tr><td style="padding:32px 32px 0;text-align:center"><span style="font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#6f6f6f">OneCiak — Film Market Intelligence</span></td></tr>' +
+    '<tr><td style="padding:16px 32px 24px;text-align:center">' +
+    '<div style="font-size:22px;font-weight:700;color:#000;margin-bottom:8px">"' + esc(title) + '"</div>' +
+    '<div style="display:inline-block;border:1px solid #000;border-radius:999px;padding:6px 18px;font-size:15px;font-weight:700;color:#000">Score ' + esc(score) + '/10</div>' +
+    '<p style="margin:14px 0 0;font-size:14px;line-height:1.7;color:#444">' + esc(r.executive_summary || r.overall_summary || '') + '</p>' +
+    '</td></tr>' +
+    '<tr><td style="padding:0 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">' + body + '</table></td></tr>' +
+    '<tr><td style="padding:24px 32px 32px;text-align:center;border-top:1px solid #e5e5e5">' +
+    '<a href="https://oneciak.com" style="display:inline-block;background:#000;color:#fff;text-decoration:none;font-size:14px;font-weight:600;border-radius:999px;padding:12px 28px">View on oneciak.com →</a>' +
+    '<p style="margin:20px 0 0;font-size:11px;line-height:1.6;color:#a3a3a3">Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. OneCiak assumes no liability. Results are estimates and do not guarantee any outcome.</p>' +
+    '</td></tr>' +
+    '</table></td></tr></table></body></html>';
+}
+
+function sendReportEmail({ apiKey, from, to, subject, html }) {
+  const payload = JSON.stringify({ from, to: [to], subject, html });
+  return new Promise((resolve, reject) => {
+    const req = https.request({ hostname: 'api.resend.com', path: '/emails', method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey, 'Content-Length': Buffer.byteLength(payload) } }, (res) => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => {
+        let parsed = null;
+        try { parsed = JSON.parse(d); } catch (e) {}
+        if (res.statusCode >= 200 && res.statusCode < 300) resolve(parsed);
+        else reject(new Error('Resend error ' + res.statusCode + ': ' + d));
+      });
+    });
+    req.on('error', reject);
+    req.write(payload);
+    req.end();
+  });
+}
+
+module.exports = { buildReportEmailHtml, sendReportEmail };
