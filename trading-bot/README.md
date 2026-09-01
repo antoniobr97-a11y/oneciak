@@ -94,6 +94,57 @@ di scenari sintetici multi-regime (vedi STRATEGY.md, "Calibrazione delle
 soglie non specificate dal corso") per cercare bug non coperti dai singoli
 test unitari.
 
+## Deploy automatico (server sempre acceso)
+
+Per far girare il bot ogni giorno senza intervento manuale serve un
+computer sempre acceso. Un piccolo server cloud (VPS) da pochi euro/mese
+va benissimo: il bot è leggero, non serve niente di potente.
+
+**Provider adatti** (scegline uno, sono equivalenti per questo scopo):
+Hetzner Cloud (CX22, ~4€/mese), DigitalOcean (Basic Droplet, ~6$/mese),
+o qualunque altro VPS con Ubuntu 22.04/24.04.
+
+### 1. Crea il server
+Dal pannello del provider, crea una VM con Ubuntu 22.04 o 24.04 (l'opzione
+più economica va bene). Annota l'indirizzo IP che ti assegna.
+
+### 2. Collegati e installa Docker
+```bash
+ssh root@INDIRIZZO_IP
+curl -fsSL https://get.docker.com | sh
+```
+
+### 3. Porta il codice sul server
+```bash
+git clone -b claude/ai-trading-bot-1rs29b https://github.com/antoniobr97-a11y/oneciak.git
+cd oneciak/trading-bot
+cp .env.example .env
+nano .env   # incolla qui le tue chiavi Alpaca (vedi sezione Setup sopra)
+```
+
+### 4. Avvia il bot (resta acceso da solo)
+```bash
+docker compose up -d --build
+```
+Fatto: il container riparte da solo anche se il server si riavvia
+(`restart: unless-stopped`), e lancia `python bot.py schedule` — il ciclo
+di breve termine gira ogni giorno feriale all'orario configurato in
+`RUN_TIME` (fuso orario di mercato USA, gestito internamente).
+
+**Comandi utili una volta avviato:**
+```bash
+docker compose logs -f          # segui i log in tempo reale
+docker compose restart          # riavvia il bot (es. dopo aver cambiato .env)
+docker compose down             # ferma tutto
+git pull && docker compose up -d --build   # aggiorna il codice e riavvia
+```
+
+**Nota:** questo automatizza solo il ciclo di **breve termine** (screening
++ gestione posizioni ogni giorno). Il lungo termine (Harry Browne/Advanced,
+PAC) per sua natura si rivede al massimo una volta al mese/trimestre — ha
+più senso lanciarlo a mano (`python bot.py long-term-status` /
+`long-term-pac`) quando serve, che schedularlo.
+
 ## Cosa implementa (in breve)
 
 Vedi STRATEGY.md per i dettagli e le soglie esatte. Riassunto:
