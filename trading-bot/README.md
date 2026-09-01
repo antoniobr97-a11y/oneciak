@@ -1,30 +1,32 @@
 # Trading Bot (Paper Trading)
 
-Bot di trading azionario/ETF in **paper trading** (denaro simulato, zero
-rischio) su Alpaca. Strategia: crossover di medie mobili (SMA) con filtro
-RSI e stop-loss/take-profit basati su ATR.
+Bot di trading su azioni/ETF USA in **paper trading** (denaro simulato, zero
+rischio) su Alpaca. Implementa due strategie indipendenti descritte in
+dettaglio in **[STRATEGY.md](STRATEGY.md)** — leggilo prima di toccare il
+codice, è la specifica che il codice implementa:
 
-> **Non è consulenza finanziaria.** Questo è un punto di partenza tecnico
-> per sperimentare, non una strategia garantita. Testala a lungo in paper
-> trading prima di anche solo pensare al denaro reale — e anche allora,
-> fallo con capitale che puoi permetterti di perdere.
+- **`long_term/`** — portafogli di ETF (Harry Browne statico + Advanced
+  dinamico trend-following), orizzonte 10+ anni, revisione mensile o meno
+- **`short_term/`** — swing trading su azioni USA, pipeline a 4 stadi
+  (qualificazione trend → pattern → analisi settoriale → livelli/sizing),
+  posizioni tenute da giorni a mesi
 
-## Come funziona
+> **Non è consulenza finanziaria.** Il codice implementa regole imparate da
+> un corso di trading, con alcune assunzioni esplicite dove il corso non
+> dava un numero preciso (segnalate nei commenti e in STRATEGY.md). Testalo
+> a lungo in paper trading prima di anche solo pensare al denaro reale — e
+> anche allora, fallo con capitale che puoi permetterti di perdere.
 
-- **Strategia** (`strategy.py`): se la SMA veloce (default 20 giorni)
-  incrocia al rialzo la SMA lenta (default 50 giorni) e l'RSI(14) non è
-  ipercomprato (<70), genera un segnale **BUY**. Se la SMA veloce incrocia
-  al ribasso mentre si ha una posizione aperta, genera **SELL**.
-- **Rischio** (`risk.py`): ogni operazione rischia solo l'1% dell'equity
-  del conto (configurabile), con dimensione della posizione calcolata
-  sulla distanza dallo stop-loss (basato su ATR), e un tetto massimo per
-  posizione (default 20% dell'equity).
-- **Esecuzione** (`broker.py`): ordini "bracket" su Alpaca — entrata a
-  mercato + stop-loss + take-profit inviati insieme in un solo ordine.
-- **Backtest** (`backtest.py`): simula la strategia su dati storici
-  (yfinance, gratuito) per vedere come si sarebbe comportata in passato.
-- **Bot live/paper** (`bot.py`): gira una volta al giorno (poco prima
-  della chiusura di mercato) su ogni titolo della watchlist.
+## Struttura
+
+```
+common/       config, dati storici (yfinance), broker Alpaca, logging
+long_term/    Harry Browne, Advanced (profilo di rischio + segnale mensile), PAC
+short_term/   indicatori, qualificazione trend, 7 pattern, settori, livelli,
+              filtri di rischio, money management, screener end-to-end
+bot.py        CLI: report e (opzionale) esecuzione paper trading
+tests/        pytest
+```
 
 ## Setup
 
@@ -41,63 +43,90 @@ RSI e stop-loss/take-profit basati su ATR.
    pip install -r requirements.txt
    ```
 
-3. Copia `.env.example` in `.env` e inserisci le tue chiavi paper:
+3. Copia `.env.example` in `.env` e personalizzalo (chiavi Alpaca, capitale,
+   watchlist, profilo di rischio, parametri della strategia):
    ```bash
    cp .env.example .env
-   # poi modifica .env con un editor
    ```
-   Lascia `ALPACA_PAPER=true`. Personalizza `WATCHLIST` e i parametri di
-   rischio/strategia se vuoi.
+   Lascia `ALPACA_PAPER=true`.
 
 ## Uso
 
-**1. Backtest** (nessuna chiave richiesta, usa dati storici gratuiti):
-```bash
-python backtest.py                  # backtesta la watchlist di config.py, 2 anni
-python backtest.py AAPL MSFT -p 5y  # simboli e periodo specifici
-```
-Mostra rendimento totale, numero di trade, win rate, drawdown massimo e
-Sharpe ratio approssimato per ciascun simbolo. Ogni simbolo parte con
-$10.000 indipendenti (non modella un portafoglio condiviso).
+I comandi di solo report (`long-term-status`, `short-term-screen` senza
+`--execute`) non richiedono le chiavi Alpaca, usano solo dati yfinance.
 
-**2. Un singolo ciclo in paper trading** (richiede le chiavi Alpaca):
+**Lungo termine:**
 ```bash
-python bot.py --once
-```
-Controlla se il mercato è aperto, calcola il segnale per ogni titolo in
-watchlist e — se applicabile — invia un ordine bracket paper.
+python bot.py long-term-status
+# Allocazione target Harry Browne + pesi Advanced per il profilo di
+# rischio configurato + segnale mensile SMA10 corrente per ogni asset.
 
-**3. Bot schedulato** (gira ogni giorno feriale all'orario `RUN_TIME`):
+python bot.py long-term-pac --deposit 500 --strategy harry_browne
+python bot.py long-term-pac --deposit 500 --strategy advanced --execute
+# Ordini di acquisto per un versamento PAC (non vende mai). --execute li
+# invia davvero in paper trading, altrimenti stampa solo il report.
+```
+
+**Breve termine:**
 ```bash
-python bot.py
-```
-Lascialo in esecuzione (es. in uno screen/tmux o come servizio) durante
-l'orario di mercato USA (9:30–16:00 ET).
+python bot.py short-term-screen
+# Scansiona SHORT_TERM_WATCHLIST, stampa i candidati (trend + pattern +
+# settore + livelli + size), nessun ordine.
 
-**4. Test unitari** (verificano la logica di segnale e sizing):
+python bot.py short-term-once --execute
+# Un ciclo completo: gestisce le posizioni aperte (chiusura a metà su 1R,
+# stop al pareggio), poi screena ed entra sui nuovi candidati rispettando
+# il tetto di rischio aggregato.
+
+python bot.py schedule
+# Come sopra, schedulato ogni giorno feriale a RUN_TIME (America/New_York).
+```
+
+**Test:**
 ```bash
 pip install pytest
 pytest tests/
 ```
 
-## Passare a denaro reale (quando/se sarai pronto)
+## Cosa implementa (in breve)
 
-1. Prima esegui il paper trading per settimane/mesi e valuta i risultati
-   realmente, non solo il backtest.
-2. Genera chiavi **live** dalla dashboard Alpaca (non paper).
-3. Imposta `ALPACA_PAPER=false` in `.env`. Il bot loggherà un warning
-   esplicito all'avvio quando questo è attivo.
-4. Inizia con capitale minimo e `MAX_POSITION_PCT`/`RISK_PER_TRADE_PCT`
-   bassi.
+Vedi STRATEGY.md per i dettagli e le soglie esatte. Riassunto:
 
-## Limiti noti / prossimi passi possibili
+- `long_term/harry_browne.py`: 4 ETF al 25%, sizing e ordini di
+  ribilanciamento a date fisse
+- `long_term/advanced_portfolio.py`: segnale mensile SMA(10) per asset,
+  allocazione per profilo di rischio (`long_term/risk_profile.py`)
+- `long_term/pac.py`: piano di accumulo che non vende mai, con tracciamento
+  del prezzo medio di carico
+- `short_term/trend.py`: i 6 qualificatori di trend (performance, gap,
+  barre ad ampio range, armonia massimi/minimi, ADX, persistenza)
+- `short_term/patterns.py`: i 7 pattern (Pullback Semplice, TKO, Pullback
+  Persistente, Trend Pivot Pullback, Second Entry Pullback, Sacro Graal,
+  Bowai)
+- `short_term/sector.py`: forza relativa titolo/settore/mercato (ETF SPDR
+  come proxy dei sotto-indici del corso, non liberamente disponibili)
+- `short_term/levels.py`: formula di entrata/stop-loss basata sulla
+  volatilità, gestione 1R (chiusura a metà + stop a pareggio)
+- `short_term/risk_checks.py`: supporti/resistenze, trimestrali, livello di
+  prezzo, divergenze MACD settimanali
+- `short_term/money_management.py`: sizing, tetto di rischio aggregato,
+  matematica del drawdown, Profit Factor
+- `short_term/screener.py`: mette insieme tutto quanto sopra su una
+  watchlist, per entrambe le direzioni (long/short)
 
-- Strategia intenzionalmente semplice: nessun filtro su regime di
-  mercato, correlazione tra titoli, costi di transazione/slippage nel
-  backtest, o gestione di eventi (earnings, notizie).
-- Un layer opzionale con Claude potrebbe essere aggiunto per filtrare le
-  entrate (es. evitare BUY se ci sono notizie negative imminenti), ma non
-  è incluso in questa versione per mantenere il comportamento
-  deterministico e testabile.
-- Il backtest usa dati giornalieri di yfinance; il bot live usa i dati di
-  Alpaca — piccole differenze tra le due fonti sono normali.
+## Limiti noti
+
+- I due indicatori proprietari del corso (Domanda/Offerta, PD90 Sentiment)
+  e lo screener preconfigurato (Barchart/ProScreener) non sono replicabili
+  senza le loro formule esatte — vedi la sezione finale di STRATEGY.md per
+  le sostituzioni scelte.
+- Diverse soglie numeriche non erano specificate esattamente nel corso
+  (es. soglia % dei gap, soglia di prezzo "troppo costoso" per i long): sono
+  segnalate come assunzioni esplicite nel codice (`common/config.py`,
+  `short_term/trend.py`, `short_term/risk_checks.py`), configurabili via
+  `.env`.
+- Nessun backtest end-to-end della pipeline breve termine in questa
+  versione (i pattern/livelli sono testati unitariamente in `tests/`, ma
+  non ancora simulati bar-by-bar su storico); il backtest storico della
+  vecchia strategia SMA/RSI è stato rimosso insieme al resto del codice
+  Fase 1 ormai superato.

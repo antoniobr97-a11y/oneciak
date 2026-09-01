@@ -8,7 +8,7 @@ from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
 
-import config
+from common import config
 
 
 def get_recent_daily_bars(symbol: str, lookback_days: int = 400) -> pd.DataFrame:
@@ -23,7 +23,6 @@ def get_recent_daily_bars(symbol: str, lookback_days: int = 400) -> pd.DataFrame
     if isinstance(bars.index, pd.MultiIndex):
         bars = bars.xs(symbol, level="symbol")
 
-    df = bars.rename(columns={"open": "open", "high": "high", "low": "low", "close": "close", "volume": "volume"})
-    df = df[["open", "high", "low", "close", "volume"]]
+    df = bars[["open", "high", "low", "close", "volume"]]
     df.index.name = "date"
     return df
