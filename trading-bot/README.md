@@ -145,6 +145,34 @@ PAC) per sua natura si rivede al massimo una volta al mese/trimestre — ha
 più senso lanciarlo a mano (`python bot.py long-term-status` /
 `long-term-pac`) quando serve, che schedularlo.
 
+### Notifiche (sapere cosa fa il bot senza controllare i log a mano)
+
+Imposta `ALERT_WEBHOOK_URL` in `.env` per ricevere un messaggio quando il
+bot apre una posizione, sposta uno stop a pareggio, o incontra un errore.
+Funziona con qualunque servizio che accetti un POST JSON `{"text": "..."}`:
+
+- **Telegram**: crea un bot con [@BotFather](https://t.me/BotFather), poi usa
+  un servizio ponte tipo [ntfy.sh](https://ntfy.sh) o un piccolo webhook
+  proxy verso `https://api.telegram.org/bot<TOKEN>/sendMessage` (serve un
+  parametro `chat_id` in più, quindi Telegram richiede un proxy leggero,
+  non accetta l'URL diretto)
+- **Discord**: crea un webhook in Impostazioni canale → Integrazioni →
+  Webhook, incolla l'URL direttamente in `ALERT_WEBHOOK_URL`
+- **Slack**: crea un "Incoming Webhook" dall'app directory, stesso incolla-e-vai
+
+Senza questa variabile configurata il bot funziona esattamente come prima
+(nessuna notifica, solo log).
+
+### Isolamento errori
+
+Ogni titolo (gestione posizione aperta, invio nuovo ordine) è isolato in
+un `try/except`: se una singola operazione fallisce (blip di rete, ordine
+rifiutato dal broker), viene loggata e notificata, ma non blocca il resto
+del ciclo — gli altri titoli vengono comunque processati lo stesso giorno.
+Un guasto sistemico (es. Alpaca irraggiungibile) non uccide lo scheduler:
+viene loggato/notificato e il ciclo successivo (il giorno dopo) riparte
+normalmente.
+
 ## Cosa implementa (in breve)
 
 Vedi STRATEGY.md per i dettagli e le soglie esatte. Riassunto:

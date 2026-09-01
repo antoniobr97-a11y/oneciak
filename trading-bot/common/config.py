@@ -38,6 +38,11 @@ ALPACA_PAPER = _bool("ALPACA_PAPER", True)
 
 RUN_TIME = os.getenv("RUN_TIME", "15:50")
 
+# URL webhook opzionale (Telegram/Discord/Slack o endpoint generico che
+# accetta {"text": "..."}) per notifiche di ordini eseguiti ed errori.
+# Vuoto = notifiche disattivate (default), il bot funziona lo stesso.
+ALERT_WEBHOOK_URL = os.getenv("ALERT_WEBHOOK_URL", "")
+
 
 def require_alpaca_keys() -> None:
     if not ALPACA_API_KEY or not ALPACA_SECRET_KEY:

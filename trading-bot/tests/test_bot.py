@@ -179,3 +179,42 @@ def test_cmd_short_term_once_report_only_never_calls_enter_with_stop():
         bot.cmd_short_term_once(argparse.Namespace(execute=False))
 
     mock_broker_instance.enter_with_stop.assert_not_called()
+
+
+# --- isolamento errori: un simbolo che fallisce non blocca gli altri ------
+
+def test_manage_positions_one_symbol_error_does_not_block_others():
+    broker = MagicMock()
+    broker.list_open_positions.return_value = [
+        _position("BAD", 10, 100.0, 106.0),
+        _position("AAPL", 10, 100.0, 106.0),
+    ]
+    broker.get_open_stop_order.side_effect = lambda symbol: (
+        (_ for _ in ()).throw(ConnectionError("rete giu'")) if symbol == "BAD" else _stop_order(95.0)
+    )
+
+    bot.manage_open_short_term_positions(broker)  # non deve sollevare eccezioni
+
+    # AAPL, processato dopo il simbolo che fallisce, viene comunque gestito
+    broker.close_partial.assert_called_once_with("AAPL", 5, "long")
+    broker.move_stop_to_breakeven.assert_called_once_with("AAPL", 5, 100.0, "long")
+
+
+def test_cmd_short_term_once_failed_order_does_not_block_next_candidate_or_count_toward_cap():
+    candidates = [_candidate("BAD"), _candidate("MSFT")]
+
+    mock_broker_instance = MagicMock()
+    mock_broker_instance.is_market_open.return_value = True
+    mock_broker_instance.list_open_positions.return_value = []
+    mock_broker_instance.get_equity.return_value = 10_000.0
+    mock_broker_instance.get_open_position.return_value = None
+    mock_broker_instance.enter_with_stop.side_effect = [ConnectionError("ordine rifiutato"), None]
+
+    with patch("bot.Broker", return_value=mock_broker_instance), \
+         patch("bot.screen_universe", return_value=candidates), \
+         patch("bot._print_candidate"):
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))  # non deve sollevare eccezioni
+
+    assert mock_broker_instance.enter_with_stop.call_count == 2
+    second_call_symbol = mock_broker_instance.enter_with_stop.call_args_list[1][0][0]
+    assert second_call_symbol == "MSFT"

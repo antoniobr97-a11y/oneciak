@@ -19,7 +19,7 @@ import math
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from common import config
+from common import config, notify
 from common.broker import Broker
 from common.data import get_daily_bars, get_monthly_bars
 from common.logger_setup import setup_logging
@@ -120,31 +120,40 @@ def manage_open_short_term_positions(broker: Broker) -> None:
     """Applica STRATEGY.md 2.4 punto 1 alle posizioni aperte: al
     raggiungimento di 1R, vende metà posizione e sposta lo stop al
     pareggio sul resto. Una volta che lo stop è già al pareggio, la
-    posizione è considerata già gestita (nessuna azione ulteriore qui)."""
+    posizione è considerata già gestita (nessuna azione ulteriore qui).
+
+    Ogni posizione è isolata in un try/except: un errore su un singolo
+    titolo (blip di rete, ordine rifiutato) non deve impedire la gestione
+    delle altre posizioni aperte nello stesso ciclo."""
     for pos in broker.list_open_positions():
-        symbol, qty, entry_price, current_price = pos["symbol"], pos["qty"], pos["avg_entry_price"], pos["current_price"]
-        if current_price is None or qty == 0:
-            continue
-        direction = "long" if qty > 0 else "short"
+        symbol = pos["symbol"]
+        try:
+            qty, entry_price, current_price = pos["qty"], pos["avg_entry_price"], pos["current_price"]
+            if current_price is None or qty == 0:
+                continue
+            direction = "long" if qty > 0 else "short"
 
-        stop_order = broker.get_open_stop_order(symbol)
-        if stop_order is None or stop_order.stop_price is None:
-            continue
-        stop_price = float(stop_order.stop_price)
-        if abs(stop_price - entry_price) < 1e-6:
-            continue  # già al pareggio, metà posizione già chiusa
+            stop_order = broker.get_open_stop_order(symbol)
+            if stop_order is None or stop_order.stop_price is None:
+                continue
+            stop_price = float(stop_order.stop_price)
+            if abs(stop_price - entry_price) < 1e-6:
+                continue  # già al pareggio, metà posizione già chiusa
 
-        if levels_mod.reached_1r(current_price, entry_price, stop_price):
-            half_qty = math.floor(abs(qty) / 2)
-            if half_qty > 0:
-                broker.close_partial(symbol, half_qty, direction)
-            # Con 1 sola azione half_qty=0 (niente da vendere): lo stop si
-            # sposta comunque al pareggio sull'intera posizione, unico modo
-            # di applicare la regola "zero rischio dopo 1R" quando la size
-            # non è divisibile a metà.
-            remaining = abs(qty) - half_qty
-            if remaining > 0:
-                broker.move_stop_to_breakeven(symbol, remaining, entry_price, direction)
+            if levels_mod.reached_1r(current_price, entry_price, stop_price):
+                half_qty = math.floor(abs(qty) / 2)
+                if half_qty > 0:
+                    broker.close_partial(symbol, half_qty, direction)
+                # Con 1 sola azione half_qty=0 (niente da vendere): lo stop si
+                # sposta comunque al pareggio sull'intera posizione, unico modo
+                # di applicare la regola "zero rischio dopo 1R" quando la size
+                # non è divisibile a metà.
+                remaining = abs(qty) - half_qty
+                if remaining > 0:
+                    broker.move_stop_to_breakeven(symbol, remaining, entry_price, direction)
+        except Exception:
+            log.exception("Errore gestendo la posizione aperta su %s, salto al prossimo titolo.", symbol)
+            notify.alert(f"Errore gestendo la posizione {symbol}", level="error")
 
 
 def cmd_short_term_once(args: argparse.Namespace) -> None:
@@ -169,22 +178,47 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
             break
 
         _print_candidate(c)
+        opened = True
         if args.execute:
-            broker.enter_with_stop(c.symbol, c.qty, c.direction, c.levels.stop_loss)
-        # Si incrementa anche in modalità report-only: il candidato mostrato
-        # è quello che verrebbe aperto in sequenza rispettando il tetto di
-        # rischio aggregato, cosi' l'anteprima riflette cosa accadrebbe con
-        # --execute invece di ignorare l'accumulo tra un candidato e l'altro.
-        open_positions_count += 1
+            # Isolato: un ordine rifiutato/un errore di rete su UN titolo
+            # non deve impedire di provare i candidati successivi nello
+            # stesso ciclo.
+            try:
+                broker.enter_with_stop(c.symbol, c.qty, c.direction, c.levels.stop_loss)
+                notify.alert(f"Aperta posizione {c.direction.upper()} {c.symbol} x{c.qty} ({c.pattern})")
+            except Exception:
+                log.exception("Errore inviando l'ordine per %s, salto al prossimo candidato.", c.symbol)
+                notify.alert(f"Errore inviando l'ordine per {c.symbol}", level="error")
+                opened = False
+
+        # Si incrementa anche in modalità report-only (candidato che
+        # verrebbe aperto in sequenza rispettando il tetto di rischio
+        # aggregato, cosi' l'anteprima riflette cosa accadrebbe con
+        # --execute) -- ma NON se l'invio ordine e' effettivamente fallito,
+        # altrimenti il tetto di rischio conterebbe una posizione mai aperta.
+        if opened:
+            open_positions_count += 1
+
+
+def _run_cycle_safely() -> None:
+    """Un ciclo schedulato non deve mai propagare un'eccezione: un guasto
+    sistemico (broker irraggiungibile, errore imprevisto) va notificato e
+    registrato, non deve far morire lo scheduler o saltare i cicli futuri."""
+    try:
+        cmd_short_term_once(argparse.Namespace(execute=True))
+    except Exception:
+        log.exception("Ciclo breve termine fallito.")
+        notify.alert("Ciclo breve termine fallito, controlla i log", level="error")
 
 
 def cmd_schedule(args: argparse.Namespace) -> None:
-    cmd_short_term_once(argparse.Namespace(execute=True))
+    notify.alert("Bot avviato, scheduler attivo")
+    _run_cycle_safely()
 
     hour, minute = (int(x) for x in config.RUN_TIME.split(":"))
     scheduler = BlockingScheduler(timezone="America/New_York")
     scheduler.add_job(
-        lambda: cmd_short_term_once(argparse.Namespace(execute=True)),
+        _run_cycle_safely,
         CronTrigger(day_of_week="mon-fri", hour=hour, minute=minute),
     )
     log.info("Scheduler avviato: ciclo breve termine ogni giorno feriale alle %s America/New_York.", config.RUN_TIME)
