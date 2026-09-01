@@ -43,6 +43,11 @@ RUN_TIME = os.getenv("RUN_TIME", "15:50")
 # Vuoto = notifiche disattivate (default), il bot funziona lo stesso.
 ALERT_WEBHOOK_URL = os.getenv("ALERT_WEBHOOK_URL", "")
 
+# File di stato per la gestione a scaglioni delle posizioni di breve
+# termine (size originale, stadio 1R/3R raggiunto) -- vedi
+# common/position_state.py. Va su un volume persistente in Docker.
+POSITION_STATE_PATH = os.getenv("POSITION_STATE_PATH", "state/positions.json")
+
 
 def require_alpaca_keys() -> None:
     if not ALPACA_API_KEY or not ALPACA_SECRET_KEY:
@@ -75,9 +80,14 @@ REBALANCE_FREQUENCY = os.getenv("REBALANCE_FREQUENCY", "quarterly")  # quarterly
 
 # --- Breve termine (short_term/) -------------------------------------------
 SHORT_TERM_CAPITAL = _float("SHORT_TERM_CAPITAL", 10_000.0)
+# Universo validato nel backtest storico 2000-2026 (vedi STRATEGY.md):
+# blue chip stabili + titoli a maggiore crescita/volatilità, dove un
+# sistema trend-following storicamente rende meglio (vedi analisi in
+# STRATEGY.md, "Risultati del backtest storico").
 SHORT_TERM_WATCHLIST = _list(
     "SHORT_TERM_WATCHLIST",
-    "AAPL,MSFT,NVDA,AMZN,GOOGL,META,TSLA,AMD,NFLX,CRM",
+    "AAPL,MSFT,INTC,IBM,JPM,XOM,WMT,KO,JNJ,PG,HD,CAT,GE,DIS,CSCO,MCD,PFE,VZ,"
+    "CVX,MMM,AMZN,NVDA,NFLX,ADBE,CRM,GOOGL,NKE,COST,QCOM,AMAT,TSLA,META,V,MA",
 )
 SHORT_TERM_ACCOUNT_CURRENCY = os.getenv("SHORT_TERM_ACCOUNT_CURRENCY", "USD")
 SHORT_TERM_FX_RATE = _float("SHORT_TERM_FX_RATE", 1.0)  # unità valuta conto per 1 USD

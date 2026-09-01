@@ -191,7 +191,11 @@ Vedi STRATEGY.md per i dettagli e le soglie esatte. Riassunto:
 - `short_term/sector.py`: forza relativa titolo/settore/mercato (ETF SPDR
   come proxy dei sotto-indici del corso, non liberamente disponibili)
 - `short_term/levels.py`: formula di entrata/stop-loss basata sulla
-  volatilità, gestione 1R (chiusura a metà + stop a pareggio)
+  volatilità
+- `common/position_state.py` + `bot.py`: gestione della posizione a
+  scaglioni (1R → chiusura a metà + stop a pareggio; 3R → altra quota;
+  10-20% residuo lasciato correre fino all'inversione sulla SMA200) —
+  validata nel backtest storico, vedi STRATEGY.md
 - `short_term/risk_checks.py`: supporti/resistenze, trimestrali, livello di
   prezzo, divergenze MACD settimanali
 - `short_term/money_management.py`: sizing, tetto di rischio aggregato,

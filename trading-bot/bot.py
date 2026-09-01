@@ -16,16 +16,17 @@ import argparse
 import logging
 import math
 
+import pandas as pd
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from common import config, notify
+from common import config, notify, position_state
 from common.broker import Broker
 from common.data import get_daily_bars, get_monthly_bars
 from common.logger_setup import setup_logging
 from long_term import advanced_portfolio, harry_browne, pac, risk_profile
-from short_term import levels as levels_mod
 from short_term import money_management
+from short_term.indicators import sma
 from short_term.screener import Candidate, screen_universe
 
 log = logging.getLogger("bot")
@@ -116,44 +117,97 @@ def cmd_short_term_screen(args: argparse.Namespace) -> None:
         _print_candidate(c)
 
 
-def manage_open_short_term_positions(broker: Broker) -> None:
-    """Applica STRATEGY.md 2.4 punto 1 alle posizioni aperte: al
-    raggiungimento di 1R, vende metà posizione e sposta lo stop al
-    pareggio sul resto. Una volta che lo stop è già al pareggio, la
-    posizione è considerata già gestita (nessuna azione ulteriore qui).
+SECOND_SCALE_OUT_R = 3.0  # STRATEGY.md 2.4 punto 2: "valutare la chiusura intorno a 3R/4R"
+SECOND_SCALE_OUT_FRACTION = 0.30  # frazione della size ORIGINALE venduta a 3R
+RUNNER_FRACTION = 0.20  # quota residua lasciata correre fino al segnale di inversione
+LONG_TERM_MA_PERIOD = 200  # SMA lunga per l'uscita del "runner" (il corso cita "tipo 100/200")
 
-    Ogni posizione è isolata in un try/except: un errore su un singolo
-    titolo (blip di rete, ordine rifiutato) non deve impedire la gestione
-    delle altre posizioni aperte nello stesso ciclo."""
-    for pos in broker.list_open_positions():
+
+def _r_multiple(price: float, entry: float, risk_per_share: float, direction: str) -> float:
+    if risk_per_share <= 0:
+        return 0.0
+    return (price - entry) / risk_per_share if direction == "long" else (entry - price) / risk_per_share
+
+
+def manage_open_short_term_positions(broker: Broker) -> None:
+    """Applica STRATEGY.md 2.4 punto 2 (gestione a scaglioni) alle posizioni
+    aperte:
+      1R -> vende metà posizione, stop a pareggio sul resto
+      3R -> vende un'altra quota (30% della size ORIGINALE)
+      resto (~10-20% originale) -> lasciato correre finché il prezzo non
+        chiude sotto/sopra la media mobile di lungo periodo (100/200)
+
+    Il broker non conserva la size originale né lo stadio raggiunto tra un
+    ciclo e l'altro -- li traccia common/position_state.py. Ogni posizione
+    è isolata in un try/except: un errore su un singolo titolo (blip di
+    rete, ordine rifiutato) non deve impedire la gestione delle altre
+    posizioni aperte nello stesso ciclo."""
+    open_positions = broker.list_open_positions()
+    open_symbols = {pos["symbol"] for pos in open_positions}
+
+    for pos in open_positions:
         symbol = pos["symbol"]
         try:
             qty, entry_price, current_price = pos["qty"], pos["avg_entry_price"], pos["current_price"]
             if current_price is None or qty == 0:
                 continue
             direction = "long" if qty > 0 else "short"
+            abs_qty = abs(qty)
 
-            stop_order = broker.get_open_stop_order(symbol)
-            if stop_order is None or stop_order.stop_price is None:
+            state = position_state.get(symbol)
+            risk_per_share = state.get("risk_per_share")
+            original_qty = state.get("original_qty", abs_qty)
+            stage = state.get("stage", "entered")
+
+            if not risk_per_share:
+                # Nessuno stato salvato (posizione aperta prima di questa
+                # funzionalità, o file di stato perso): il rischio originale
+                # non è più ricostruibile in modo affidabile -- si segnala
+                # e si salta, non si inventa un numero su cui poi si
+                # baserebbero vendite reali.
+                log.warning("Nessuno stato di rischio salvato per %s, gestione a scaglioni saltata (va seguita a mano).", symbol)
                 continue
-            stop_price = float(stop_order.stop_price)
-            if abs(stop_price - entry_price) < 1e-6:
-                continue  # già al pareggio, metà posizione già chiusa
 
-            if levels_mod.reached_1r(current_price, entry_price, stop_price):
-                half_qty = math.floor(abs(qty) / 2)
+            r_now = _r_multiple(current_price, entry_price, risk_per_share, direction)
+
+            if stage == "entered" and r_now >= 1.0:
+                half_qty = math.floor(abs_qty / 2)
                 if half_qty > 0:
                     broker.close_partial(symbol, half_qty, direction)
                 # Con 1 sola azione half_qty=0 (niente da vendere): lo stop si
                 # sposta comunque al pareggio sull'intera posizione, unico modo
                 # di applicare la regola "zero rischio dopo 1R" quando la size
                 # non è divisibile a metà.
-                remaining = abs(qty) - half_qty
+                remaining = abs_qty - half_qty
                 if remaining > 0:
                     broker.move_stop_to_breakeven(symbol, remaining, entry_price, direction)
+                position_state.set_fields(symbol, stage="1R_done")
+
+            elif stage == "1R_done" and r_now >= SECOND_SCALE_OUT_R:
+                target = min(abs_qty - original_qty * RUNNER_FRACTION, original_qty * SECOND_SCALE_OUT_FRACTION)
+                qty_to_close = max(0, math.floor(target))
+                if qty_to_close > 0:
+                    broker.close_partial(symbol, qty_to_close, direction)
+                position_state.set_fields(symbol, stage="3R_done")
+
+            elif stage == "3R_done":
+                bars = get_daily_bars(symbol, period="1y")
+                long_ma = sma(bars["close"], LONG_TERM_MA_PERIOD)
+                if len(long_ma) and not pd.isna(long_ma.iloc[-1]):
+                    last_close = float(bars["close"].iloc[-1])
+                    reversed_trend = last_close < long_ma.iloc[-1] if direction == "long" else last_close > long_ma.iloc[-1]
+                    if reversed_trend:
+                        broker.flatten(symbol)
+                        position_state.clear(symbol)
         except Exception:
             log.exception("Errore gestendo la posizione aperta su %s, salto al prossimo titolo.", symbol)
             notify.alert(f"Errore gestendo la posizione {symbol}", level="error")
+
+    # Pulizia: stato orfano per simboli non più in posizione (chiusi dallo
+    # stop del broker, o dall'uscita finale sopra).
+    for symbol in position_state.tracked_symbols():
+        if symbol not in open_symbols:
+            position_state.clear(symbol)
 
 
 def cmd_short_term_once(args: argparse.Namespace) -> None:
@@ -185,6 +239,12 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
             # stesso ciclo.
             try:
                 broker.enter_with_stop(c.symbol, c.qty, c.direction, c.levels.stop_loss)
+                # Salvato per la gestione a scaglioni (1R/3R/runner) nei
+                # cicli successivi: il broker non conserva la size
+                # originale né il rischio per azione tra un ordine e l'altro.
+                position_state.set_fields(
+                    c.symbol, original_qty=c.qty, risk_per_share=c.levels.risk_per_share, stage="entered"
+                )
                 notify.alert(f"Aperta posizione {c.direction.upper()} {c.symbol} x{c.qty} ({c.pattern})")
             except Exception:
                 log.exception("Errore inviando l'ordine per %s, salto al prossimo candidato.", c.symbol)

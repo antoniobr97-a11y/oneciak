@@ -321,34 +321,42 @@ SPY per Harry Browne).
 
 ### Breve termine (swing trading azioni)
 
-Simulazione giorno per giorno, senza look-ahead, su 20 azioni USA liquide
-con storico dal 2000 (AAPL, MSFT, INTC, IBM, CSCO, JPM, XOM, CVX, WMT, KO,
-PG, MCD, HD, JNJ, PFE, CAT, GE, MMM, DIS, VZ), 2000-2026:
+Simulazione giorno per giorno, senza look-ahead, 2000-2026. Tre versioni
+successive, ciascuna un miglioramento validato sulla precedente:
 
-| Metrica | Solo Step 1 (trend+pattern) | Con Step 2 (settore) + filtri di rischio + slippage |
-|---|---|---|
-| CAGR | +0.92%/anno | **+1.31%/anno** |
-| Max drawdown | -38.6% | **-16.0%** |
-| Sharpe | 0.14 | **0.23** |
-| Profit Factor | 0.98 | **1.28** |
-| Win rate per operazione | 47.6% | 51.7% |
-| Operazioni (26.7 anni) | 1.138 | 271 |
+| Metrica | v1: solo Step 1 | v2: + settore/filtri | **v3: + universo ampio + uscita a scaglioni** |
+|---|---|---|---|
+| Universo | 20 blue chip | 20 blue chip | **34 titoli (+ 14 growth/volatili: AMZN, NVDA, NFLX, GOOGL, TSLA, META...)** |
+| Gestione uscita | 1R + SMA200 | 1R + SMA200 | **1R (50%) → 3R (30%) → runner 10-20% fino a SMA200** |
+| CAGR | +0.92%/anno | +1.31%/anno | **+2.69%/anno** |
+| Max drawdown | -38.6% | -16.0% | -18.7% |
+| Sharpe | 0.14 | 0.23 | **0.39** |
+| Profit Factor | 0.98 | 1.28 | **1.36** |
+| Win rate per operazione | 47.6% | 51.7% | 52.0% |
+| Operazioni (26.7 anni) | 1.138 | 271 | 446 |
 
-Applicare la disciplina completa (conferma settoriale, supporti/
-resistenze, divergenze) come filtro rigoroso migliora nettamente la
-qualità (Profit Factor sopra 1, drawdown più che dimezzato) al prezzo di
-operare molto meno spesso (-76% di operazioni). Anche nella versione
-migliore, però, il CAGR resta ben sotto un semplice buy-and-hold
-sull'indice nello stesso periodo — il long è profittevole, lo short resta
-in perdita netta (probabile effetto del trend secolare rialzista USA
-2000-2026, in cui operare short va strutturalmente controcorrente).
+**v2 → v3**: due cambi motivati, non tentativi a caso. (1) Un sistema
+trend-following è documentato rendere meglio su titoli che si muovono
+davvero (Turtle Traders operavano su future/commodity volatili, non blue
+chip stabili) — ampliare l'universo con titoli growth/alta-volatilità ha
+quasi raddoppiato il CAGR. (2) Il backtest v1/v2 semplificava la gestione
+della posizione a un solo stadio (1R); implementare la regola COMPLETA del
+corso (STRATEGY.md 2.4 punto 2: chiusura scaglionata a 1R/3R, piccola quota
+lasciata correre) ha migliorato ulteriormente Sharpe e Profit Factor. Il
+bot live implementa ora la stessa gestione a scaglioni v3 (vedi
+`common/position_state.py`, `bot.py`).
+
+Anche nella versione migliore, il CAGR resta ben sotto un semplice
+buy-and-hold sull'indice nello stesso periodo — il long è profittevole, lo
+short resta in perdita netta (probabile effetto del trend secolare
+rialzista USA 2000-2026, in cui operare short va strutturalmente
+controcorrente). Il 2025 e il 2026 (fine campione) mostrano performance
+negative, da monitorare.
 
 **Limiti dichiarati di questo backtest** (perché i numeri sopra vadano
 letti come indicativi, non come garanzia):
 - Nessun filtro trimestrali/earnings: non esiste un calendario storico
   gratuito affidabile per un backtest di questa ampiezza
-- Universo di 20 blue chip stabili, non l'ampio screening automatico del
-  bot live su migliaia di titoli
 - Conferma settoriale e filtri di rischio applicati come blocco rigido
   (scarta il trade), più severo del bot live che li tratta come nota
   informativa (tranne per il Bowai, dove restano quasi obbligatori)
@@ -356,14 +364,17 @@ letti come indicativi, non come garanzia):
   riclassificazioni GICS storiche nel tempo
 - Slippage stimato (0.05% per fill), non commissioni/slippage reali di un
   broker specifico
+- Universo comunque limitato a 34 titoli, non l'ampio screening automatico
+  che userebbe il bot live su migliaia di titoli
 
-Durante la costruzione di questo backtest sono stati trovati e corretti
-**3 bug aggiuntivi** specifici della simulazione storica (non nel codice
-del bot): un bias look-ahead nel segnale mensile (usava il mese in corso
-invece dell'ultimo chiuso), una leva impossibile nel money management
-(nessun tetto sul capitale davvero disponibile), e un disallineamento di
-calendario tra titoli che faceva sparire posizioni aperte dal calcolo
-dell'equity per un giorno.
+Durante la costruzione di questi backtest sono stati trovati e corretti
+**4 bug** specifici della simulazione storica (non nel codice del bot): un
+bias look-ahead nel segnale mensile (usava il mese in corso invece
+dell'ultimo chiuso), una leva impossibile nel money management (nessun
+tetto sul capitale davvero disponibile), un disallineamento di calendario
+tra titoli che faceva sparire posizioni aperte dal calcolo dell'equity per
+un giorno, e un crash sui titoli con storico più corto (quotati dopo il
+2000) quando la finestra di analisi cadeva prima della loro quotazione.
 
 ## Cosa NON è coperto da questo codice
 
