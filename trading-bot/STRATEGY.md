@@ -364,8 +364,12 @@ letti come indicativi, non come garanzia):
   riclassificazioni GICS storiche nel tempo
 - Slippage stimato (0.05% per fill), non commissioni/slippage reali di un
   broker specifico
-- Universo comunque limitato a 34 titoli, non l'ampio screening automatico
-  che userebbe il bot live su migliaia di titoli
+- Universo comunque limitato a 34 titoli. Il bot live supporta anche
+  l'universo full-market (`SHORT_TERM_USE_FULL_MARKET=true` in `.env`, vedi
+  README "Universo full-market") — scansiona tutti i titoli USA tradable su
+  Alpaca con un prefiltro di liquidità, invece della watchlist fissa — ma
+  **questa modalità non è stata backtestata storicamente**: i numeri sopra
+  restano validi solo per l'universo di 34 titoli usato nel backtest
 
 Durante la costruzione di questi backtest sono stati trovati e corretti
 **4 bug** specifici della simulazione storica (non nel codice del bot): un

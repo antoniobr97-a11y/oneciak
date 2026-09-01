@@ -105,11 +105,12 @@ def _print_candidate(c: Candidate) -> None:
 
 def cmd_short_term_screen(args: argparse.Namespace) -> None:
     open_positions_count = 0
+    broker = None
     if args.execute:
         broker = Broker()
         open_positions_count = len(broker.list_open_positions())
 
-    candidates = screen_universe(open_positions_count=open_positions_count)
+    candidates = screen_universe(open_positions_count=open_positions_count, broker=broker)
     if not candidates:
         print("Nessun candidato trovato.")
         return
@@ -220,7 +221,7 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
 
     equity = broker.get_equity()
     open_positions_count = len(broker.list_open_positions())
-    candidates = screen_universe(capital=equity, open_positions_count=open_positions_count)
+    candidates = screen_universe(capital=equity, open_positions_count=open_positions_count, broker=broker)
 
     for c in candidates:
         if not c.is_actionable:

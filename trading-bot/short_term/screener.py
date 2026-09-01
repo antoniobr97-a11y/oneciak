@@ -156,10 +156,48 @@ def _build_candidate(
     )
 
 
+def build_full_market_universe(broker) -> list[str]:
+    """Universo "tutto il mercato USA" (STRATEGY.md, richiesto per non
+    limitarsi ai soliti titoli famosi): parte da tutti i titoli tradable su
+    Alpaca, poi applica un prefiltro di liquidità (prezzo minimo, volume$
+    medio minimo) e tiene solo i migliori SHORT_TERM_FULL_MARKET_MAX_SYMBOLS
+    per volume$ -- mimando lo "Step 1: screening" del corso, necessario
+    perché far girare la pipeline completa (trend+pattern+settore) su
+    migliaia di titoli ogni giorno sarebbe troppo lento e colpirebbe i
+    rate-limit di yfinance/Alpaca."""
+    all_symbols = broker.list_tradable_symbols()
+    log.info("Full-market: %d titoli tradable su Alpaca (NYSE/NASDAQ/ARCA/AMEX/BATS).", len(all_symbols))
+
+    liquidity = broker.liquidity_snapshot(all_symbols)
+    filtered = [
+        s
+        for s, data in liquidity.items()
+        if data["price"] >= config.SHORT_TERM_MIN_PRICE_FULL_MARKET
+        and data["dollar_volume"] >= config.SHORT_TERM_MIN_DOLLAR_VOLUME
+    ]
+    filtered.sort(key=lambda s: liquidity[s]["dollar_volume"], reverse=True)
+    top = filtered[: config.SHORT_TERM_FULL_MARKET_MAX_SYMBOLS]
+    log.info(
+        "Full-market: %d titoli dopo il prefiltro di liquidità (prezzo>=%.0f, volume$>=%.0f), "
+        "tenuti i migliori %d per volume$.",
+        len(filtered), config.SHORT_TERM_MIN_PRICE_FULL_MARKET, config.SHORT_TERM_MIN_DOLLAR_VOLUME, len(top),
+    )
+    return top
+
+
 def screen_universe(
-    symbols: list[str] | None = None, capital: float | None = None, open_positions_count: int = 0
+    symbols: list[str] | None = None,
+    capital: float | None = None,
+    open_positions_count: int = 0,
+    broker=None,
 ) -> list[Candidate]:
-    symbols = symbols or config.SHORT_TERM_WATCHLIST
+    if symbols is None:
+        if config.SHORT_TERM_USE_FULL_MARKET:
+            from common.broker import Broker
+
+            symbols = build_full_market_universe(broker or Broker())
+        else:
+            symbols = config.SHORT_TERM_WATCHLIST
     capital = capital if capital is not None else config.SHORT_TERM_CAPITAL
 
     sp500_df = get_daily_bars(sector.SP500_PROXY, period="1y")

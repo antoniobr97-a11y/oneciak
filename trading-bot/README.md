@@ -82,13 +82,46 @@ python bot.py schedule
 # Come sopra, schedulato ogni giorno feriale a RUN_TIME (America/New_York).
 ```
 
+### Universo full-market (scansionare tutto il mercato USA)
+
+Di default il breve termine scansiona `SHORT_TERM_WATCHLIST`, la lista fissa
+di 34 titoli validata nel backtest storico. Per non limitarsi ai "soliti
+titoli famosi" e coprire tutto il mercato USA, imposta in `.env`:
+
+```bash
+SHORT_TERM_USE_FULL_MARKET=true
+```
+
+Con questa opzione il bot, a ogni ciclo:
+1. chiede ad Alpaca la lista di **tutti** i titoli azionari USA tradable
+   (NYSE/NASDAQ/ARCA/AMEX/BATS, esclusi OTC e simboli non "semplici" come
+   warrant/unit/azioni privilegiate) — `common/broker.py:list_tradable_symbols`;
+2. applica un **prefiltro di liquidità** veloce (prezzo minimo
+   `SHORT_TERM_MIN_PRICE_FULL_MARKET`, volume$ medio minimo
+   `SHORT_TERM_MIN_DOLLAR_VOLUME`) usando gli snapshot di mercato Alpaca,
+   e tiene solo i migliori `SHORT_TERM_FULL_MARKET_MAX_SYMBOLS` (default
+   300) per volume$ — `short_term/screener.py:build_full_market_universe`;
+3. passa questi titoli alla pipeline completa a 4 stadi (trend → pattern →
+   settore → livelli), esattamente come farebbe con la watchlist fissa.
+
+Il prefiltro esiste perché far girare la pipeline completa ogni giorno su
+migliaia di titoli sarebbe troppo lento e colpirebbe i rate-limit di
+yfinance/Alpaca — è concettualmente lo stesso "Step 1: screening" del corso
+(che nel corso usava Barchart/ProScreener, non replicabile). Nota: gli
+snapshot di liquidità usano il feed IEX gratuito di Alpaca (una frazione del
+volume USA reale), quindi il volume$ è un ranking relativo utile a scartare
+i titoli davvero illiquidi, non una misura esatta del volume di mercato.
+Con `SHORT_TERM_USE_FULL_MARKET=true` servono le chiavi Alpaca anche solo
+per lo screening (senza, non serve — usa solo yfinance).
+
 **Test:**
 ```bash
 pip install pytest
 pytest tests/
 ```
-50 test unitari (money management, formule dei livelli, qualificatori di
-trend, i 7 pattern, orchestrazione di `bot.py` con broker mockato). La
+60 test unitari (money management, formule dei livelli, qualificatori di
+trend, i 7 pattern, screener/universo full-market, orchestrazione di
+`bot.py` con broker mockato). La
 pipeline completa è stata anche sottoposta a uno stress-test con centinaia
 di scenari sintetici multi-regime (vedi STRATEGY.md, "Calibrazione delle
 soglie non specificate dal corso") per cercare bug non coperti dai singoli

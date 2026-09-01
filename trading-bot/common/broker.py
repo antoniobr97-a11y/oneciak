@@ -11,9 +11,12 @@ Covers what both strategies need:
 """
 import logging
 
+from alpaca.data.historical import StockHistoricalDataClient
+from alpaca.data.requests import StockSnapshotRequest
 from alpaca.trading.client import TradingClient
-from alpaca.trading.enums import OrderClass, OrderSide, QueryOrderStatus, TimeInForce
+from alpaca.trading.enums import AssetClass, AssetExchange, AssetStatus, OrderClass, OrderSide, QueryOrderStatus, TimeInForce
 from alpaca.trading.requests import (
+    GetAssetsRequest,
     GetOrdersRequest,
     MarketOrderRequest,
     StopLossRequest,
@@ -23,11 +26,16 @@ from common import config
 
 log = logging.getLogger("bot")
 
+# Borse "principali" per il full-market scan: esclude OTC (penny stock/
+# scarsa trasparenza) e le sedi non-equity (crypto, ecc.).
+_ALLOWED_EXCHANGES = {AssetExchange.NYSE, AssetExchange.NASDAQ, AssetExchange.ARCA, AssetExchange.AMEX, AssetExchange.BATS}
+
 
 class Broker:
     def __init__(self) -> None:
         config.require_alpaca_keys()
         self.client = TradingClient(config.ALPACA_API_KEY, config.ALPACA_SECRET_KEY, paper=config.ALPACA_PAPER)
+        self.data_client = StockHistoricalDataClient(config.ALPACA_API_KEY, config.ALPACA_SECRET_KEY)
         if not config.ALPACA_PAPER:
             log.warning("ALPACA_PAPER=false -- this bot will trade with REAL MONEY.")
 
@@ -66,6 +74,43 @@ class Broker:
             }
             for p in self.client.get_all_positions()
         ]
+
+    # --- short_term: universo full-market (invece della watchlist statica) --
+
+    def list_tradable_symbols(self) -> list[str]:
+        """Tutti i titoli azionari USA effettivamente negoziabili su Alpaca
+        (NYSE/NASDAQ/ARCA/AMEX/BATS), esclusi OTC e simboli non "semplici"
+        (warrant/unit/azioni privilegiate hanno suffissi non alfabetici) --
+        sostituisce la watchlist fissa quando SHORT_TERM_USE_FULL_MARKET=true."""
+        request = GetAssetsRequest(asset_class=AssetClass.US_EQUITY, status=AssetStatus.ACTIVE)
+        assets = self.client.get_all_assets(request)
+        symbols = [
+            a.symbol
+            for a in assets
+            if a.tradable and a.exchange in _ALLOWED_EXCHANGES and a.symbol.isalpha() and len(a.symbol) <= 5
+        ]
+        return sorted(set(symbols))
+
+    def liquidity_snapshot(self, symbols: list[str], batch_size: int = 200) -> dict[str, dict]:
+        """Prezzo e volume$ approssimato (ultima barra giornaliera, feed IEX
+        gratuito -- una frazione del volume USA reale, ma sufficiente per un
+        ranking di liquidità relativo) per ogni simbolo, usato per il
+        prefiltro veloce prima della pipeline completa (STRATEGY.md "Step 1:
+        screening", vedi build_full_market_universe in short_term/screener.py)."""
+        result: dict[str, dict] = {}
+        for i in range(0, len(symbols), batch_size):
+            chunk = symbols[i : i + batch_size]
+            try:
+                snapshots = self.data_client.get_stock_snapshot(StockSnapshotRequest(symbol_or_symbols=chunk))
+            except Exception as exc:
+                log.warning("Liquidity snapshot fallito per il batch che inizia con %s: %s", chunk[0], exc)
+                continue
+            for symbol, snap in snapshots.items():
+                bar = getattr(snap, "daily_bar", None)
+                if bar is None or bar.close is None or bar.volume is None:
+                    continue
+                result[symbol] = {"price": float(bar.close), "dollar_volume": float(bar.close) * float(bar.volume)}
+        return result
 
     # --- long_term: plain rebalancing orders -------------------------------
 

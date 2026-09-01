@@ -89,6 +89,22 @@ SHORT_TERM_WATCHLIST = _list(
     "AAPL,MSFT,INTC,IBM,JPM,XOM,WMT,KO,JNJ,PG,HD,CAT,GE,DIS,CSCO,MCD,PFE,VZ,"
     "CVX,MMM,AMZN,NVDA,NFLX,ADBE,CRM,GOOGL,NKE,COST,QCOM,AMAT,TSLA,META,V,MA",
 )
+
+# Se true, ignora SHORT_TERM_WATCHLIST e scansiona l'intero mercato USA
+# (tutti i titoli tradable via Alpaca su NYSE/NASDAQ/ARCA/AMEX/BATS), con un
+# prefiltro di liquidità prima della pipeline completa -- vedi
+# short_term/screener.py:build_full_market_universe e STRATEGY.md. Richiede
+# le chiavi Alpaca anche solo per lo screening (la watchlist statica no).
+SHORT_TERM_USE_FULL_MARKET = _bool("SHORT_TERM_USE_FULL_MARKET", False)
+# Prefiltro full-market: prezzo minimo (evita penny stock) e volume$ medio
+# minimo (liquidità sufficiente per entrare/uscire senza slippage eccessivo).
+SHORT_TERM_MIN_PRICE_FULL_MARKET = _float("SHORT_TERM_MIN_PRICE_FULL_MARKET", 10.0)
+SHORT_TERM_MIN_DOLLAR_VOLUME = _float("SHORT_TERM_MIN_DOLLAR_VOLUME", 5_000_000.0)
+# Tetto al numero di titoli passati alla pipeline completa dopo il
+# prefiltro (i migliori per volume$), per tenere sotto controllo i tempi di
+# scansione quando l'universo full-market è di migliaia di titoli.
+SHORT_TERM_FULL_MARKET_MAX_SYMBOLS = _int("SHORT_TERM_FULL_MARKET_MAX_SYMBOLS", 300)
+
 SHORT_TERM_ACCOUNT_CURRENCY = os.getenv("SHORT_TERM_ACCOUNT_CURRENCY", "USD")
 SHORT_TERM_FX_RATE = _float("SHORT_TERM_FX_RATE", 1.0)  # unità valuta conto per 1 USD
 
