@@ -279,7 +279,7 @@ caso — configurabile in `.env`:
 
 | Soglia | Default | Convenzione usata |
 |---|---|---|
-| Gap significativo | 1% | range tipico usato in pratica per un gap "degno di nota" (0.5-2%) |
+| Gap significativo | ≥0.5× la volatilità media | soglia relativa alla volatilità del titolo, non una % fissa uguale per tutti (un 1% è enorme per un'utility, insignificante per un titolo che si muove il 5%/giorno) -- convenzione superiore documentata nella letteratura su gap/ATR-based thresholds |
 | Barra ad ampio range | ≥1.5× la volatilità media | "wide-range bar" = range oltre un multiplo del range medio/ATR, non un percentile del periodo (dipenderebbe troppo dalla finestra scelta) |
 | Swing high/low (armonia, S/R) | fractal a 2 barre per lato (giornaliero), 3 sul settimanale | convenzione di Williams (fractal standard a 5 barre); finestra più ampia sul settimanale per privilegiare solo i livelli più significativi |
 | Fascio di EMA "pulito" | separazione minima 0.3% del prezzo tra brevi e lunghe | oltre al semplice ordinamento (che da solo si presta a falsi positivi quando le medie sono ordinate ma quasi a contatto) |

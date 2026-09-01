@@ -110,6 +110,13 @@ PERSISTENCE_MIN_NET_MOVE_PCT = _float(
 # range medio/ATR, vedi ricerca in STRATEGY.md).
 WIDE_RANGE_ATR_MULT = _float("WIDE_RANGE_ATR_MULT", 1.5)
 
+# Gap (qualificatore #2, STRATEGY.md 2.1) = apertura oltre questo multiplo
+# della volatilità media dalla chiusura precedente. Sostituisce una soglia
+# % fissa (che non si adatta alla volatilità del singolo titolo): la
+# ricerca su gap/ATR-based thresholds indica la soglia relativa come
+# convenzione superiore e standard (vedi STRATEGY.md).
+GAP_VOLATILITY_MULT = _float("GAP_VOLATILITY_MULT", 0.5)
+
 # Separazione minima (% del prezzo) tra EMA brevi e lunghe perché il fascio
 # (STRATEGY.md 2.6) conti come "pulito" e non solo tecnicamente ordinato ma
 # quasi a contatto. Il corso non dà un numero, solo "intrecciate sì/no".

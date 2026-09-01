@@ -13,7 +13,6 @@ from short_term.indicators import adx, avg_daily_range
 # grafico) -- dove manca un numero preciso si usa una convenzione standard
 # di analisi tecnica, documentata e configurabile in common/config.py,
 # invece di un numero inventato a caso.
-GAP_THRESHOLD_PCT = 1.0  # gap = open oltre l'1% dalla chiusura precedente (range tipico usato in pratica: 0.5-2%)
 WIDE_RANGE_MIN_COUNT = 2
 PERSISTENCE_TOLERANCE_ATR_MULT = 1.0
 
@@ -65,12 +64,21 @@ def performance_qualifier(df: pd.DataFrame, direction: str, lookback: int) -> bo
 
 
 def gap_qualifier(df: pd.DataFrame, direction: str, lookback: int) -> bool:
+    """Gap = apertura abbastanza distante dalla chiusura precedente
+    RISPETTO ALLA VOLATILITÀ PROPRIA del titolo (rapporto con
+    l'Indicatore di Volatilità), non una % fissa uguale per tutti -- un
+    gap dell'1% è enorme per un'utility poco volatile e insignificante
+    per un titolo che si muove il 5% al giorno. Soglia relativa = la
+    convenzione standard nella letteratura su gap/ATR-based thresholds
+    (un valore fisso in punti percentuali è statico e non si adatta al
+    titolo, vedi STRATEGY.md)."""
     w = _window(df, lookback)
+    vol = avg_daily_range(df["high"], df["low"], config.VOLATILITY_PERIOD).reindex(w.index)
     prev_close = w["close"].shift(1)
-    gap_pct = (w["open"] - prev_close) / prev_close * 100
+    gap_ratio = (w["open"] - prev_close) / vol
     if direction == "long":
-        return bool((gap_pct >= GAP_THRESHOLD_PCT).any())
-    return bool((gap_pct <= -GAP_THRESHOLD_PCT).any())
+        return bool((gap_ratio >= config.GAP_VOLATILITY_MULT).fillna(False).any())
+    return bool((gap_ratio <= -config.GAP_VOLATILITY_MULT).fillna(False).any())
 
 
 def wide_range_qualifier(df: pd.DataFrame, direction: str, lookback: int) -> bool:
