@@ -59,7 +59,7 @@ def scan_symbol(
 
     candidates: list[Candidate] = []
     ribbon = ema_ribbon(daily["close"])
-    ribbon_state = ribbon_alignment(ribbon.iloc[-1])
+    ribbon_state = ribbon_alignment(ribbon.iloc[-1], price=float(daily["close"].iloc[-1]))
 
     for direction in ("long", "short"):
         trend = qualify_trend(daily, direction)

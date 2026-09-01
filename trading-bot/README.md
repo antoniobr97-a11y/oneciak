@@ -87,6 +87,12 @@ python bot.py schedule
 pip install pytest
 pytest tests/
 ```
+50 test unitari (money management, formule dei livelli, qualificatori di
+trend, i 7 pattern, orchestrazione di `bot.py` con broker mockato). La
+pipeline completa è stata anche sottoposta a uno stress-test con centinaia
+di scenari sintetici multi-regime (vedi STRATEGY.md, "Calibrazione delle
+soglie non specificate dal corso") per cercare bug non coperti dai singoli
+test unitari.
 
 ## Cosa implementa (in breve)
 
@@ -122,8 +128,9 @@ Vedi STRATEGY.md per i dettagli e le soglie esatte. Riassunto:
   le sostituzioni scelte.
 - Diverse soglie numeriche non erano specificate esattamente nel corso
   (es. soglia % dei gap, soglia di prezzo "troppo costoso" per i long): sono
+  calibrate su convenzioni standard di analisi tecnica (vedi STRATEGY.md),
   segnalate come assunzioni esplicite nel codice (`common/config.py`,
-  `short_term/trend.py`, `short_term/risk_checks.py`), configurabili via
+  `short_term/trend.py`, `short_term/risk_checks.py`) e configurabili via
   `.env`.
 - Nessun backtest end-to-end della pipeline breve termine in questa
   versione (i pattern/livelli sono testati unitariamente in `tests/`, ma

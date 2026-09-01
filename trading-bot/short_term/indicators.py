@@ -3,6 +3,8 @@
 import numpy as np
 import pandas as pd
 
+from common import config
+
 EMA_SHORT_PERIODS = [3, 5, 8, 10, 12, 15]
 EMA_LONG_PERIODS = [30, 35, 40, 45, 50, 60]
 
@@ -71,15 +73,27 @@ def ema_ribbon(close: pd.Series) -> pd.DataFrame:
     return pd.DataFrame(cols)
 
 
-def ribbon_alignment(ribbon_row: pd.Series) -> str:
-    """'bullish' se tutte le EMA brevi sono sopra tutte le lunghe, 'bearish'
-    se sotto, 'mixed' (intrecciate) altrimenti -- trend non pulito."""
+def ribbon_alignment(ribbon_row: pd.Series, price: float | None = None) -> str:
+    """'bullish' se tutte le EMA brevi sono sopra tutte le lunghe con una
+    separazione minima (config.RIBBON_MIN_SEPARATION_PCT), 'bearish' se
+    sotto, 'mixed' (intrecciate o troppo ravvicinate) altrimenti -- trend
+    non pulito. Il corso (video 39/46) non dà un numero -- "fanned out,
+    neatly ordered" è la convenzione standard per un ribbon "pulito" (vs.
+    "tangled"), qui tradotta in una soglia minima per evitare falsi
+    positivi quando le EMA sono ordinate ma numericamente quasi a contatto."""
     shorts = [ribbon_row[f"ema_{p}"] for p in EMA_SHORT_PERIODS]
     longs = [ribbon_row[f"ema_{p}"] for p in EMA_LONG_PERIODS]
     if any(pd.isna(v) for v in shorts + longs):
         return "mixed"
-    if min(shorts) > max(longs):
-        return "bullish"
-    if max(shorts) < min(longs):
-        return "bearish"
+
+    min_separation_pct = config.RIBBON_MIN_SEPARATION_PCT
+    closest_short, closest_long = min(shorts), max(longs)
+    if closest_short > closest_long:
+        gap_pct = (closest_short - closest_long) / closest_long * 100 if price is None else (closest_short - closest_long) / price * 100
+        return "bullish" if gap_pct >= min_separation_pct else "mixed"
+
+    closest_short, closest_long = max(shorts), min(longs)
+    if closest_short < closest_long:
+        gap_pct = (closest_long - closest_short) / closest_long * 100 if price is None else (closest_long - closest_short) / price * 100
+        return "bearish" if gap_pct >= min_separation_pct else "mixed"
     return "mixed"

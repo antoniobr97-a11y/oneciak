@@ -19,7 +19,7 @@ import pandas as pd
 
 from common import config
 from short_term.indicators import adx, ema, sma
-from short_term.trend import WIDE_RANGE_PERCENTILE
+from short_term.trend import is_wide_range_bar
 
 BOWAI_EXTREME_LOOKBACK = 126  # ~6 mesi di borsa
 BOWAI_INVERSION_WINDOW = 5  # "inverte l'ordine in <=5 giorni"
@@ -44,8 +44,10 @@ def _window(df: pd.DataFrame, lookback: int) -> pd.DataFrame:
     return df.iloc[-lookback:] if len(df) > lookback else df
 
 
-def _recent_extreme_pos(df: pd.DataFrame, direction: str, lookback: int) -> int:
+def _recent_extreme_pos(df: pd.DataFrame, direction: str, lookback: int) -> int | None:
     w = _window(df, lookback)
+    if len(w) == 0:
+        return None
     idx = w["high"].idxmax() if direction == "long" else w["low"].idxmin()
     return df.index.get_loc(idx)
 
@@ -70,6 +72,8 @@ def _pullback_segment(df: pd.DataFrame, direction: str, peak_pos: int) -> tuple[
 def detect_pullback_semplice(df: pd.DataFrame, direction: str, lookback: int | None = None) -> PatternMatch | None:
     lookback = lookback or config.TREND_LOOKBACK_DAYS
     peak_pos = _recent_extreme_pos(df, direction, lookback)
+    if peak_pos is None:
+        return None
     non_inside, setup_pos = _pullback_segment(df, direction, peak_pos)
     if setup_pos is None or not (2 <= len(non_inside) <= 7):
         return None
@@ -89,15 +93,14 @@ def detect_pullback_semplice(df: pd.DataFrame, direction: str, lookback: int | N
 def detect_tko(df: pd.DataFrame, direction: str, lookback: int | None = None) -> PatternMatch | None:
     lookback = lookback or config.TREND_LOOKBACK_DAYS
     peak_pos = _recent_extreme_pos(df, direction, lookback)
+    if peak_pos is None:
+        return None
     non_inside, _ = _pullback_segment(df, direction, peak_pos)
     if not non_inside or len(non_inside) > 7:
         return None
 
     last_pos = non_inside[-1]
-    bar_range = df["high"].iloc[last_pos] - df["low"].iloc[last_pos]
-    w = _window(df, lookback)
-    threshold = np.percentile((w["high"] - w["low"]).dropna(), WIDE_RANGE_PERCENTILE)
-    if bar_range < threshold:
+    if not is_wide_range_bar(df, last_pos):
         return None
 
     prior_start = max(0, last_pos - 5)
@@ -114,10 +117,12 @@ def detect_tko(df: pd.DataFrame, direction: str, lookback: int | None = None) ->
 def detect_pullback_persistente(df: pd.DataFrame, direction: str, lookback: int | None = None) -> PatternMatch | None:
     lookback = lookback or config.TREND_LOOKBACK_DAYS
     peak_pos = _recent_extreme_pos(df, direction, lookback)
+    if peak_pos is None:
+        return None
     pre_peak = df.iloc[: peak_pos + 1]
     from short_term.trend import persistence_qualifier
 
-    if not persistence_qualifier(pre_peak):
+    if not persistence_qualifier(pre_peak, direction):
         return None
 
     match = detect_pullback_semplice(df, direction, lookback)
@@ -129,6 +134,8 @@ def detect_pullback_persistente(df: pd.DataFrame, direction: str, lookback: int 
 def detect_trend_pivot_pullback(df: pd.DataFrame, direction: str, lookback: int | None = None) -> PatternMatch | None:
     lookback = lookback or config.TREND_LOOKBACK_DAYS
     peak_pos = _recent_extreme_pos(df, direction, lookback)
+    if peak_pos is None:
+        return None
     non_inside, _ = _pullback_segment(df, direction, peak_pos)
     if not (3 <= len(non_inside) <= 5):
         return None
@@ -149,6 +156,8 @@ def detect_trend_pivot_pullback(df: pd.DataFrame, direction: str, lookback: int 
 def detect_second_entry_pullback(df: pd.DataFrame, direction: str, lookback: int | None = None) -> PatternMatch | None:
     lookback = lookback or config.TREND_LOOKBACK_DAYS
     peak_pos = _recent_extreme_pos(df, direction, lookback)
+    if peak_pos is None:
+        return None
     non_inside, _ = _pullback_segment(df, direction, peak_pos)
     if not (2 <= len(non_inside) <= 5):
         return None
@@ -172,6 +181,8 @@ def detect_second_entry_pullback(df: pd.DataFrame, direction: str, lookback: int
 
 def detect_sacro_graal(df: pd.DataFrame, direction: str, lookback: int | None = None) -> PatternMatch | None:
     lookback = lookback or config.TREND_LOOKBACK_DAYS
+    if len(df) < 2:
+        return None
     adx_series = adx(df["high"], df["low"], df["close"], 14)
     if adx_series.isna().iloc[-1] or adx_series.isna().iloc[-2]:
         return None
@@ -179,6 +190,8 @@ def detect_sacro_graal(df: pd.DataFrame, direction: str, lookback: int | None = 
         return None
 
     peak_pos = _recent_extreme_pos(df, direction, lookback)
+    if peak_pos is None:
+        return None
     non_inside, _ = _pullback_segment(df, direction, peak_pos)
     if not non_inside:
         return None

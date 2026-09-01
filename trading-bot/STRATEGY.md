@@ -268,6 +268,35 @@ coperto dagli altri indicatori sopra.
 
 ---
 
+## Calibrazione delle soglie non specificate dal corso
+
+Il corso descrive alcuni criteri come giudizio visivo sul grafico invece
+che con un numero esatto (gap "significativo", barra ad "ampio range",
+fascio di EMA "pulito" vs "intrecciato", persistenza di una retta di
+tendenza). Dove manca un numero preciso, il codice usa una convenzione
+standard di analisi tecnica — cercata esplicitamente, non inventata a
+caso — configurabile in `.env`:
+
+| Soglia | Default | Convenzione usata |
+|---|---|---|
+| Gap significativo | 1% | range tipico usato in pratica per un gap "degno di nota" (0.5-2%) |
+| Barra ad ampio range | ≥1.5× la volatilità media | "wide-range bar" = range oltre un multiplo del range medio/ATR, non un percentile del periodo (dipenderebbe troppo dalla finestra scelta) |
+| Swing high/low (armonia, S/R) | fractal a 2 barre per lato (giornaliero), 3 sul settimanale | convenzione di Williams (fractal standard a 5 barre); finestra più ampia sul settimanale per privilegiare solo i livelli più significativi |
+| Fascio di EMA "pulito" | separazione minima 0.3% del prezzo tra brevi e lunghe | oltre al semplice ordinamento (che da solo si presta a falsi positivi quando le medie sono ordinate ma quasi a contatto) |
+| Persistenza | adattamento a una retta (≥60% delle barre entro 1 ATR) **e** movimento netto minimo nella direzione testata | una retta piatta si adatta perfettamente anche a un mercato laterale: senza il secondo controllo il qualificatore risultava vero anche senza una vera direzione (bug trovato con stress-test sintetico, poi corretto) |
+
+**Verifica**: oltre alla test suite (`tests/`), l'intera pipeline
+(qualificazione trend, tutti e 7 i pattern, calcolo livelli, money
+management, orchestrazione in `bot.py`) è stata sottoposta a uno
+stress-test con centinaia di combinazioni di dati OHLCV sintetici
+multi-regime (trend forte, laterale, alta volatilità, inversione a V,
+mercato piatto, storico troppo corto) per cercare eccezioni non gestite e
+comportamenti illogici. Ha trovato e fatto correggere 3 bug reali:
+un qualificatore di persistenza cieco alla direzione (risultava vero anche
+in controtendenza o su un mercato piatto), un controllo di armonia che
+trattava un pareggio di prezzo come "discendente", e un crash su
+DataFrame vuoti/troppo corti in `adx_qualifier` e nei pattern detector.
+
 ## Cosa NON è coperto da questo codice
 
 - Le due componenti proprietarie del corso (screener "Barchart"/"ProScreener"

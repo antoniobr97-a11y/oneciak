@@ -138,6 +138,10 @@ def manage_open_short_term_positions(broker: Broker) -> None:
             half_qty = math.floor(abs(qty) / 2)
             if half_qty > 0:
                 broker.close_partial(symbol, half_qty, direction)
+            # Con 1 sola azione half_qty=0 (niente da vendere): lo stop si
+            # sposta comunque al pareggio sull'intera posizione, unico modo
+            # di applicare la regola "zero rischio dopo 1R" quando la size
+            # non è divisibile a metà.
             remaining = abs(qty) - half_qty
             if remaining > 0:
                 broker.move_stop_to_breakeven(symbol, remaining, entry_price, direction)
@@ -167,7 +171,11 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
         _print_candidate(c)
         if args.execute:
             broker.enter_with_stop(c.symbol, c.qty, c.direction, c.levels.stop_loss)
-            open_positions_count += 1
+        # Si incrementa anche in modalità report-only: il candidato mostrato
+        # è quello che verrebbe aperto in sequenza rispettando il tetto di
+        # rischio aggregato, cosi' l'anteprima riflette cosa accadrebbe con
+        # --execute invece di ignorare l'accumulo tra un candidato e l'altro.
+        open_positions_count += 1
 
 
 def cmd_schedule(args: argparse.Namespace) -> None:

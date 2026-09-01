@@ -87,6 +87,28 @@ TREND_MIN_QUALIFIERS = _int("TREND_MIN_QUALIFIERS", 2)
 TREND_PERFORMANCE_THRESHOLD_PCT = _float("TREND_PERFORMANCE_THRESHOLD_PCT", 30.0)
 TREND_ADX_THRESHOLD = _float("TREND_ADX_THRESHOLD", 30.0)
 TREND_PERSISTENCE_WINDOW = _int("TREND_PERSISTENCE_WINDOW", 20)
+# Movimento netto minimo (%) sulla finestra di persistenza perché conti come
+# "diretto" e non solo "ben adattato a una retta" -- una retta piatta si
+# adatta perfettamente anche a un mercato laterale, quindi senza questo
+# controllo il qualificatore di persistenza risultava vero anche in
+# direzioni sbagliate o su dati piatti (bug trovato con stress-test
+# sintetico, vedi STRATEGY.md). Scala TREND_PERFORMANCE_THRESHOLD_PCT in
+# proporzione alla finestra più corta della persistenza.
+PERSISTENCE_MIN_NET_MOVE_PCT = _float(
+    "PERSISTENCE_MIN_NET_MOVE_PCT", TREND_PERFORMANCE_THRESHOLD_PCT * TREND_PERSISTENCE_WINDOW / TREND_LOOKBACK_DAYS
+)
+
+# "Ampio range" (qualificatore #3, STRATEGY.md 2.1) = range della barra >=
+# 1.5x la volatilità media (Indicatore di Volatilità, video 39/41). Il corso
+# non dà un numero, solo "sopra la media" -- 1.5x è la convenzione standard
+# di analisi tecnica per una "wide-range bar" (range oltre un multiplo del
+# range medio/ATR, vedi ricerca in STRATEGY.md).
+WIDE_RANGE_ATR_MULT = _float("WIDE_RANGE_ATR_MULT", 1.5)
+
+# Separazione minima (% del prezzo) tra EMA brevi e lunghe perché il fascio
+# (STRATEGY.md 2.6) conti come "pulito" e non solo tecnicamente ordinato ma
+# quasi a contatto. Il corso non dà un numero, solo "intrecciate sì/no".
+RIBBON_MIN_SEPARATION_PCT = _float("RIBBON_MIN_SEPARATION_PCT", 0.3)
 
 # Livelli entrata/stop (STRATEGY.md 2.4): "indicatore di volatilità" = media
 # mobile del range (max-min) sulle ultime N barre

@@ -167,3 +167,96 @@ def test_detect_pullback_semplice_returns_none_without_pullback():
     closes = list(np.linspace(100, 130, 40))
     df = _make_df([c + 1 for c in closes], [c - 1 for c in closes], closes)
     assert patterns.detect_pullback_semplice(df, "long") is None
+
+
+# --- regressioni trovate con lo stress-test su dati sintetici -------------
+
+def test_harmony_qualifier_flat_market_qualifies_neither_direction():
+    # Bug: un mercato piatto (tutti i valori uguali) faceva risultare vera
+    # l'armonia "short", perché "not (b > a)" include erroneamente il
+    # pareggio (b == a) nel conteggio "discendente".
+    n = 60
+    closes = [100.0] * n
+    df = _make_df(closes, closes, closes)
+    assert trend.harmony_qualifier(df, "long", lookback=60) is False
+    assert trend.harmony_qualifier(df, "short", lookback=60) is False
+
+
+def test_mostly_monotonic_treats_ties_as_neither_direction():
+    assert trend._mostly_monotonic([1, 1, 1, 1, 1], rising=True) is False
+    assert trend._mostly_monotonic([1, 1, 1, 1, 1], rising=False) is False
+    assert trend._mostly_monotonic([1, 2, 3, 4, 5], rising=True) is True
+    assert trend._mostly_monotonic([5, 4, 3, 2, 1], rising=False) is True
+
+
+def test_persistence_qualifier_direction_aware():
+    # Bug: persistence_qualifier non controllava il segno della pendenza,
+    # quindi in un downtrend risultava vera per "long" (e in un mercato
+    # piatto risultava vera per entrambe le direzioni, per pura bontà di
+    # adattamento di una retta orizzontale).
+    n = 40
+    closes = np.linspace(150, 100, n)  # downtrend netto
+    df = _make_df(closes + 1, closes - 1, closes)
+    assert trend.persistence_qualifier(df, "short", window=20) is True
+    assert trend.persistence_qualifier(df, "long", window=20) is False
+
+
+def test_persistence_qualifier_rejects_flat_market():
+    n = 40
+    closes = [100.0] * n
+    df = _make_df(closes, closes, closes)
+    assert trend.persistence_qualifier(df, "long", window=20) is False
+    assert trend.persistence_qualifier(df, "short", window=20) is False
+
+
+# --- edge case: dati insufficienti / degeneri -----------------------------
+
+def test_qualify_trend_short_history_does_not_crash():
+    df = _make_df([101, 102, 103], [99, 100, 101], [100, 101, 102])
+    result = trend.qualify_trend(df, "long")
+    assert result.qualifies is False
+
+
+def test_qualify_trend_empty_after_window_does_not_crash():
+    df = _make_df([], [], [])
+    result = trend.qualify_trend(df, "long")
+    assert result.score == 0
+
+
+def test_detect_all_patterns_tiny_df_returns_empty_list():
+    df = _make_df([101, 102], [99, 100], [100, 101])
+    assert patterns.detect_all(df, "long") == []
+    assert patterns.detect_all(df, "short") == []
+
+
+def test_compute_levels_flat_bar_nonzero_risk():
+    # Su una barra completamente piatta (high==low==close) e volatilità
+    # zero, l'entrata coincide col massimo -> viene spostata 1 cent sopra
+    # (regola "se cade dentro/sul range, sposta appena sopra il massimo"),
+    # quindi il rischio non è mai esattamente zero (eviterebbe una size
+    # infinita in money_management).
+    setup_bar = pd.Series({"open": 100, "high": 100, "low": 100, "close": 100})
+    result = levels.compute_levels(setup_bar, volatility=0.0, direction="long")
+    assert result.risk_per_share > 0.0
+
+
+def test_position_size_negative_capital_returns_zero():
+    assert money_management.position_size(-1000, risk_pct=1.0, risk_per_share=5.0) == 0
+
+
+def test_position_size_negative_risk_per_share_returns_zero():
+    assert money_management.position_size(10_000, risk_pct=1.0, risk_per_share=-5.0) == 0
+
+
+def test_adx_qualifier_insufficient_history_returns_false():
+    closes = [100, 101, 99, 102, 100]
+    df = _make_df([c + 1 for c in closes], [c - 1 for c in closes], closes)
+    assert trend.adx_qualifier(df) is False
+
+
+def test_gap_qualifier_no_gaps_returns_false():
+    n = 30
+    closes = [100.0 + i * 0.01 for i in range(n)]  # no real gaps, tiny drift
+    df = _make_df([c + 0.1 for c in closes], [c - 0.1 for c in closes], closes)
+    assert trend.gap_qualifier(df, "long", lookback=30) is False
+    assert trend.gap_qualifier(df, "short", lookback=30) is False
