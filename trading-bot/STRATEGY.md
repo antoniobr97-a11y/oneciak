@@ -297,6 +297,74 @@ in controtendenza o su un mercato piatto), un controllo di armonia che
 trattava un pareggio di prezzo come "discendente", e un crash su
 DataFrame vuoti/troppo corti in `adx_qualifier` e nei pattern detector.
 
+## Risultati del backtest storico (dati reali, non sintetici)
+
+Oltre allo stress-test sintetico sopra (verifica che il *codice* sia
+corretto), la strategia è stata simulata su **dati di mercato reali**
+2000-2026 per stimare se abbia un vantaggio economico reale. Metodologia
+completa e limiti dichiarati in fondo a questa sezione.
+
+### Lungo termine (Harry Browne + Advanced)
+
+| Strategia | Periodo | CAGR | Max drawdown | Sharpe |
+|---|---|---|---|---|
+| Harry Browne | 2008-2026 (18 anni) | +6.14%/anno | -19.9% | 0.80 |
+| *Buy & hold SPY, confronto* | *stesso periodo* | *+12.32%/anno* | *-47.2%* | *0.69* |
+| Advanced (profilo medio) | 2009-2026 (17 anni) | +3.30%/anno | -10.4% | 0.60 |
+| *Buy & hold SPY, confronto* | *stesso periodo* | *+14.20%/anno* | *-33.7%* | *0.87* |
+
+Entrambe rendono meno del semplice buy-and-hold in un periodo che è stato
+uno dei più forti rialzi azionari della storia — ma è esattamente il
+compromesso dichiarato di un Permanent Portfolio: non massimizzare il
+rendimento, minimizzare i colpi grossi (drawdown un terzo di quello di
+SPY per Harry Browne).
+
+### Breve termine (swing trading azioni)
+
+Simulazione giorno per giorno, senza look-ahead, su 20 azioni USA liquide
+con storico dal 2000 (AAPL, MSFT, INTC, IBM, CSCO, JPM, XOM, CVX, WMT, KO,
+PG, MCD, HD, JNJ, PFE, CAT, GE, MMM, DIS, VZ), 2000-2026:
+
+| Metrica | Solo Step 1 (trend+pattern) | Con Step 2 (settore) + filtri di rischio + slippage |
+|---|---|---|
+| CAGR | +0.92%/anno | **+1.31%/anno** |
+| Max drawdown | -38.6% | **-16.0%** |
+| Sharpe | 0.14 | **0.23** |
+| Profit Factor | 0.98 | **1.28** |
+| Win rate per operazione | 47.6% | 51.7% |
+| Operazioni (26.7 anni) | 1.138 | 271 |
+
+Applicare la disciplina completa (conferma settoriale, supporti/
+resistenze, divergenze) come filtro rigoroso migliora nettamente la
+qualità (Profit Factor sopra 1, drawdown più che dimezzato) al prezzo di
+operare molto meno spesso (-76% di operazioni). Anche nella versione
+migliore, però, il CAGR resta ben sotto un semplice buy-and-hold
+sull'indice nello stesso periodo — il long è profittevole, lo short resta
+in perdita netta (probabile effetto del trend secolare rialzista USA
+2000-2026, in cui operare short va strutturalmente controcorrente).
+
+**Limiti dichiarati di questo backtest** (perché i numeri sopra vadano
+letti come indicativi, non come garanzia):
+- Nessun filtro trimestrali/earnings: non esiste un calendario storico
+  gratuito affidabile per un backtest di questa ampiezza
+- Universo di 20 blue chip stabili, non l'ampio screening automatico del
+  bot live su migliaia di titoli
+- Conferma settoriale e filtri di rischio applicati come blocco rigido
+  (scarta il trade), più severo del bot live che li tratta come nota
+  informativa (tranne per il Bowai, dove restano quasi obbligatori)
+- Mappatura settore→ETF statica sulla classificazione attuale, non le
+  riclassificazioni GICS storiche nel tempo
+- Slippage stimato (0.05% per fill), non commissioni/slippage reali di un
+  broker specifico
+
+Durante la costruzione di questo backtest sono stati trovati e corretti
+**3 bug aggiuntivi** specifici della simulazione storica (non nel codice
+del bot): un bias look-ahead nel segnale mensile (usava il mese in corso
+invece dell'ultimo chiuso), una leva impossibile nel money management
+(nessun tetto sul capitale davvero disponibile), e un disallineamento di
+calendario tra titoli che faceva sparire posizioni aperte dal calcolo
+dell'equity per un giorno.
+
 ## Cosa NON è coperto da questo codice
 
 - Le due componenti proprietarie del corso (screener "Barchart"/"ProScreener"

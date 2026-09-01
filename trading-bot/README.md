@@ -211,8 +211,10 @@ Vedi STRATEGY.md per i dettagli e le soglie esatte. Riassunto:
   segnalate come assunzioni esplicite nel codice (`common/config.py`,
   `short_term/trend.py`, `short_term/risk_checks.py`) e configurabili via
   `.env`.
-- Nessun backtest end-to-end della pipeline breve termine in questa
-  versione (i pattern/livelli sono testati unitariamente in `tests/`, ma
-  non ancora simulati bar-by-bar su storico); il backtest storico della
-  vecchia strategia SMA/RSI è stato rimosso insieme al resto del codice
-  Fase 1 ormai superato.
+- **Nessun track record di trading reale.** Il backtest storico su dati
+  2000-2026 (vedi STRATEGY.md, "Risultati del backtest storico") mostra un
+  Profit Factor sopra 1 e drawdown contenuto con la disciplina completa
+  attiva, ma resta sotto un semplice buy-and-hold sull'indice nello stesso
+  periodo, su un universo di 20 titoli e con diverse semplificazioni
+  dichiarate — nessun backtest sostituisce settimane/mesi di paper trading
+  reale prima di fidarsi.
