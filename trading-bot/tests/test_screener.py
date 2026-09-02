@@ -207,6 +207,37 @@ def _cand(symbol, proximity, score=3, risk=5.0, pattern="Pullback Semplice"):
     )
 
 
+def test_candidate_is_not_actionable_when_the_entry_was_already_passed():
+    """Il caso TEVA del primo giro reale: ingresso calcolato a 37.07 ma il
+    titolo quota gia' 37.43. Un ordine "compra sopra 37.07" e' impossibile
+    (il broker lo rifiuta) e rincorrere a mercato farebbe entrare piu' in
+    alto con lo stesso stop, cioe' rischiando piu' dell'1% previsto."""
+    passed = _cand("TEVA", 0.90)
+    passed.levels.entry, passed.last_close = 37.07, 37.435
+    assert passed.entry_already_triggered
+    assert not passed.is_actionable
+
+    still_valid = _cand("TEVA", 0.90)
+    still_valid.levels.entry, still_valid.last_close = 37.80, 37.435
+    assert not still_valid.entry_already_triggered
+    assert still_valid.is_actionable
+
+
+def test_short_entry_already_passed_is_mirrored():
+    c = _cand("XYZ", 0.90)
+    c.direction = "short"
+    c.levels.entry, c.last_close = 50.0, 49.0  # per uno short si entra SOTTO
+    assert c.entry_already_triggered
+
+
+def test_candidate_without_last_close_is_not_blocked():
+    """last_close a 0 significa "non lo so" (es. candidato costruito a mano
+    nei test): non deve bloccare l'operazione."""
+    c = _cand("AAA", 0.90)
+    c.last_close = 0.0
+    assert not c.entry_already_triggered
+
+
 def test_dedupe_keeps_the_best_qualified_pattern_per_symbol():
     """Un titolo con piu' pattern e' una sola opportunita': senza deduplica
     il bot piazzerebbe un ordine e lo sostituirebbe subito con l'altro."""

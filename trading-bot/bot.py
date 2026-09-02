@@ -19,6 +19,7 @@ import math
 from datetime import date
 
 import pandas as pd
+from alpaca.common.exceptions import APIError
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 
@@ -631,6 +632,14 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
                     pending_since=existing.get("pending_since") or today.isoformat(),
                 )
                 notify.alert(f"Ordine d'ingresso {c.direction.upper()} {c.symbol} x{qty} a {c.levels.entry:.2f} (stop {c.levels.stop_loss:.2f}, {c.pattern})")
+            except APIError as exc:
+                # Rifiuto del broker: e' una risposta, non un guasto del bot.
+                # Va loggato per esteso ma in una riga, senza traceback: un
+                # muro di stack trace per un caso previsto nasconde gli
+                # errori veri (stessa logica del rumore nei log).
+                log.error("Ordine per %s rifiutato dal broker: %s", c.symbol, exc)
+                notify.alert(f"Ordine per {c.symbol} rifiutato dal broker: {exc}", level="error")
+                opened = False
             except Exception:
                 log.exception("Errore inviando l'ordine per %s, salto al prossimo candidato.", c.symbol)
                 notify.alert(f"Errore inviando l'ordine per {c.symbol}", level="error")

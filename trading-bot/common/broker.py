@@ -309,6 +309,13 @@ class Broker:
         try:
             result = self.client.submit_order(request)
         except Exception as exc:
+            # Il ripiego ha senso solo se il rifiuto riguarda la struttura
+            # OTO. Se e' il livello stesso a essere invalido (es. "stop
+            # price must be greater than current price"), riprovare senza
+            # gamba stop-loss fallisce di nuovo -- e nel frattempo si e'
+            # perso il messaggio d'errore utile.
+            if "stop price" in str(exc).lower():
+                raise
             log.warning("OTO con padre stop rifiutato per %s (%s): invio lo stop d'ingresso senza gamba stop-loss.", symbol, exc)
             request = StopOrderRequest(
                 symbol=symbol, qty=qty, side=order_side, time_in_force=TimeInForce.GTC, stop_price=round(entry_price, 2)

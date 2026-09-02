@@ -44,10 +44,29 @@ class Candidate:
     # candidati migliori quando sono piu' dei posti disponibili nel tetto di
     # rischio aggregato -- vedi rank_candidates.
     proximity_52w: float = 0.0
+    # Ultima chiusura nota. Il ciclo gira a mercato chiuso, quindi e' anche
+    # il prezzo corrente: serve a capire se il livello d'ingresso e' gia'
+    # stato superato (vedi entry_already_triggered).
+    last_close: float = 0.0
+
+    @property
+    def entry_already_triggered(self) -> bool:
+        """Il prezzo ha gia' superato il livello d'ingresso senza di noi.
+
+        L'ingresso e' un ordine stop (compra SOPRA il livello, per i long):
+        se il prezzo e' gia' oltre, quell'ordine e' impossibile -- il broker
+        lo rifiuta ("stop price must be greater than current price") -- e
+        rincorrere a mercato significherebbe entrare piu' in alto con lo
+        stesso stop, cioe' rischiare piu' dell'1% previsto. Il corso e' netto
+        su questo: il segnale scatta al superamento del livello calcolato,
+        non "quando capita"."""
+        if self.last_close <= 0:
+            return False
+        return self.levels.entry <= self.last_close if self.direction == "long" else self.levels.entry >= self.last_close
 
     @property
     def is_actionable(self) -> bool:
-        return self.qty > 0 and not self.price_blocks_trade
+        return self.qty > 0 and not self.price_blocks_trade and not self.entry_already_triggered
 
 
 ALL_DIRECTIONS = ("long", "short")
@@ -258,6 +277,10 @@ def _build_candidate(
         capital, config.SHORT_TERM_RISK_PER_TRADE_PCT, levels.risk_per_share, config.SHORT_TERM_FX_RATE
     )
 
+    last_close = float(daily["close"].iloc[-1])
+    if (levels.entry <= last_close) if direction == "long" else (levels.entry >= last_close):
+        notes.append(f"livello d'ingresso {levels.entry:.2f} gia' superato (prezzo {last_close:.2f}), occasione persa")
+
     return Candidate(
         symbol=symbol,
         direction=direction,
@@ -273,6 +296,7 @@ def _build_candidate(
         price_blocks_trade=price_check.blocks_trade,
         has_divergence=divergence.has_divergence,
         proximity_52w=proximity_to_52w_extreme(daily, direction),
+        last_close=last_close,
         notes=notes,
     )
 
