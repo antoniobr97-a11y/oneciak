@@ -296,13 +296,64 @@ def test_one_symbol_error_does_not_block_others():
     broker.submit_oco_exit.assert_called_once_with("AAPL", 3, "long", 115.0, 100.0)
 
 
-def test_short_term_equity_excludes_long_term_etf_value():
+def test_short_term_equity_excludes_long_term_etf_value(monkeypatch):
+    monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 0.0)  # nessun tetto
     broker = MagicMock()
     etf = bot.config.HARRY_BROWNE_TICKERS[0]
     broker.get_equity.return_value = 10_000.0
     broker.list_open_positions.return_value = [_position(etf, 10, 100.0, 300.0)]
 
     assert bot._short_term_equity(broker) == 7_000.0
+
+
+def test_short_term_equity_is_capped_at_the_allocated_capital(monkeypatch):
+    """Conto paper da 100.000$ ma si vuole far muovere al bot solo 10.000:
+    il rischio dell'1% deve valere sui 10.000, non sul conto intero."""
+    monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 10_000.0)
+    broker = MagicMock()
+    broker.get_equity.return_value = 100_000.0
+    broker.list_open_positions.return_value = []
+
+    assert bot._short_term_equity(broker) == 10_000.0
+
+
+def test_short_term_equity_follows_the_account_when_below_the_cap(monkeypatch):
+    monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 10_000.0)
+    broker = MagicMock()
+    broker.get_equity.return_value = 6_000.0  # il conto e' sceso sotto il tetto
+    broker.list_open_positions.return_value = []
+
+    assert bot._short_term_equity(broker) == 6_000.0
+
+
+def test_short_term_cash_leaves_room_only_up_to_the_allocated_capital(monkeypatch):
+    """Dodici posizioni dimensionate sull'1% di 10.000 potrebbero comunque
+    impegnare molto piu' di 10.000: la cassa spendibile e' il tetto meno
+    quanto e' gia' investito nel breve termine."""
+    monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 10_000.0)
+    broker = MagicMock()
+    broker.get_cash.return_value = 100_000.0
+    broker.list_open_positions.return_value = [_position("AAPL", 30, 200.0, 250.0)]  # 7.500 investiti
+
+    assert bot._short_term_cash(broker) == 2_500.0
+
+
+def test_short_term_cash_never_exceeds_real_cash(monkeypatch):
+    monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 10_000.0)
+    broker = MagicMock()
+    broker.get_cash.return_value = 800.0  # niente leva: la cassa vera comanda
+    broker.list_open_positions.return_value = []
+
+    assert bot._short_term_cash(broker) == 800.0
+
+
+def test_short_term_cash_is_zero_when_the_allocation_is_fully_invested(monkeypatch):
+    monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 10_000.0)
+    broker = MagicMock()
+    broker.get_cash.return_value = 50_000.0
+    broker.list_open_positions.return_value = [_position("AAPL", 60, 200.0, 200.0)]  # 12.000 > tetto
+
+    assert bot._short_term_cash(broker) == 0.0
 
 
 # --- ingressi pendenti: riconciliazione ------------------------------------------
@@ -371,7 +422,8 @@ def _cycle_broker(cash=1_000_000.0, equity=10_000.0):
     return broker
 
 
-def test_cmd_short_term_once_submits_stop_entries_and_stops_at_aggregate_risk_cap():
+def test_cmd_short_term_once_submits_stop_entries_and_stops_at_aggregate_risk_cap(monkeypatch):
+    monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 0.0)  # nessun tetto di capitale: si testa quello di rischio
     candidates = [_candidate(f"SYM{i}") for i in range(20)]  # ben oltre il tetto (12% / 1% = 12)
     broker = _cycle_broker()
 
@@ -499,7 +551,25 @@ def test_cmd_short_term_once_failed_order_does_not_block_next_candidate_or_count
     assert "BAD" not in state.data and "MSFT" in state.data
 
 
-def test_short_term_position_count_excludes_long_term_etfs():
+def test_allocated_capital_can_bind_before_the_aggregate_risk_cap(monkeypatch):
+    """Con 10.000 destinati al breve termine e posizioni da 1.000 di
+    controvalore, la cassa finisce alla decima: il tetto di rischio (12)
+    non viene nemmeno raggiunto."""
+    monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 10_000.0)
+    candidates = [_candidate(f"SYM{i}", entry=100.0, stop=95.0, qty=10) for i in range(20)]
+    broker = _cycle_broker(cash=1_000_000.0)
+
+    with patch("bot.Broker", return_value=broker), \
+         patch("bot.screen_universe", return_value=candidates), \
+         patch("bot._print_candidate"), \
+         _patched_state():
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    assert broker.submit_stop_entry.call_count == 10
+
+
+def test_short_term_position_count_excludes_long_term_etfs(monkeypatch):
+    monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 0.0)
     candidates = [_candidate(f"SYM{i}") for i in range(20)]
     etf = bot.config.ADVANCED_TICKERS[0]
     broker = _cycle_broker()

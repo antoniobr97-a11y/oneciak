@@ -244,17 +244,48 @@ def _short_term_positions(broker: Broker) -> list[dict]:
     return [p for p in broker.list_open_positions() if p["symbol"] not in LONG_TERM_TICKERS]
 
 
+def _short_term_positions_value(broker: Broker) -> float:
+    return sum(
+        abs(p["qty"]) * (p["current_price"] or p["avg_entry_price"])
+        for p in _short_term_positions(broker)
+    )
+
+
 def _short_term_equity(broker: Broker) -> float:
-    """Equity del conto meno il controvalore degli ETF di lungo termine:
-    il rischio % per operazione del breve termine si calcola sul capitale
-    del breve termine, non sul totale (come nel backtest)."""
+    """Capitale su cui si calcola il rischio dell'1% per operazione.
+
+    Equity del conto meno il controvalore degli ETF di lungo termine (che
+    hanno il loro capitale dedicato), e comunque non oltre
+    SHORT_TERM_CAPITAL: e' la quota del conto che si vuole destinare al
+    breve termine, esattamente come LONG_TERM_CAPITAL fa per l'altra
+    strategia. Serve quando il conto contiene piu' denaro di quanto si
+    voglia far muovere al bot -- il caso tipico di un conto paper Alpaca da
+    100.000$ usato per provare una strategia da 10.000. 0 = usa tutto."""
     equity = broker.get_equity()
     long_term_value = sum(
         abs(p["qty"]) * (p["current_price"] or p["avg_entry_price"])
         for p in broker.list_open_positions()
         if p["symbol"] in LONG_TERM_TICKERS
     )
-    return max(0.0, equity - long_term_value)
+    available = max(0.0, equity - long_term_value)
+    if config.SHORT_TERM_CAPITAL > 0:
+        return min(available, config.SHORT_TERM_CAPITAL)
+    return available
+
+
+def _short_term_cash(broker: Broker) -> float:
+    """Cassa spendibile in nuove posizioni di breve termine. Oltre alla
+    cassa vera del conto (nessuna leva), rispetta il tetto
+    SHORT_TERM_CAPITAL al netto di quanto e' gia' investito nel breve
+    termine: senza questo, dodici posizioni dimensionate sull'1% di 10.000
+    potrebbero comunque impegnare molto piu' di 10.000 di controvalore.
+    Nel backtest il limite era implicito -- la cassa simulata ERA il
+    capitale della strategia."""
+    cash = broker.get_cash()
+    if config.SHORT_TERM_CAPITAL <= 0:
+        return max(0.0, cash)
+    room = config.SHORT_TERM_CAPITAL - _short_term_positions_value(broker)
+    return max(0.0, min(cash, room))
 
 
 def _pending_symbols() -> list[str]:
@@ -540,7 +571,7 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
     # (decrementata man mano nel ciclo), come nel backtest storico. Il
     # conto paper Alpaca ha margine di default e accetterebbe ordini oltre
     # la cassa -- non e' il profilo di rischio scelto (STRATEGY.md).
-    cash_available = broker.get_cash()
+    cash_available = _short_term_cash(broker)
 
     for c in candidates:
         if not c.is_actionable:
