@@ -23,6 +23,10 @@ from short_term.trend import is_wide_range_bar
 
 BOWAI_EXTREME_LOOKBACK = 126  # ~6 mesi di borsa
 BOWAI_INVERSION_WINDOW = 5  # "inverte l'ordine in <=5 giorni"
+# Corso (video 29): il pullback semplice ha massimi E minimi decrescenti
+# barra dopo barra. True = regola del corso; False = solo i massimi (la
+# versione con cui sono stati fatti i backtest v1-v6, vedi STRATEGY.md v10).
+PULLBACK_REQUIRE_LOWS = True
 
 
 @dataclass
@@ -97,9 +101,13 @@ def detect_pullback_semplice(df: pd.DataFrame, direction: str, lookback: int | N
     highs = [df["high"].iloc[p] for p in non_inside]
     lows = [df["low"].iloc[p] for p in non_inside]
     if direction == "long":
-        harmonic = all(b <= a for a, b in zip(highs, highs[1:])) and all(b <= a for a, b in zip(lows, lows[1:]))
+        harmonic = all(b <= a for a, b in zip(highs, highs[1:]))
+        if PULLBACK_REQUIRE_LOWS:
+            harmonic = harmonic and all(b <= a for a, b in zip(lows, lows[1:]))
     else:
-        harmonic = all(b >= a for a, b in zip(lows, lows[1:])) and all(b >= a for a, b in zip(highs, highs[1:]))
+        harmonic = all(b >= a for a, b in zip(lows, lows[1:]))
+        if PULLBACK_REQUIRE_LOWS:
+            harmonic = harmonic and all(b >= a for a, b in zip(highs, highs[1:]))
     if not harmonic:
         return None
 
