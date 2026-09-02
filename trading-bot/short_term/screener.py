@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 
 import pandas as pd
 
-from common import config
+from common import config, notify
 from common.data import get_daily_bars, get_weekly_bars
 from short_term import money_management, risk_checks, sector
 from short_term.indicators import ema_ribbon, ribbon_alignment, sma
@@ -52,6 +52,11 @@ class Candidate:
 
 ALL_DIRECTIONS = ("long", "short")
 TRADING_DAYS_52W = 252
+# Quota minima di titoli con dati di volatilita' perche' il filtro sia
+# considerato affidabile; sotto, si preferisce saltarlo e segnalare
+# piuttosto che scartare tutto per un guasto sui dati (vedi
+# build_full_market_universe).
+MIN_VOLATILITY_COVERAGE = 0.5
 
 
 def proximity_to_52w_extreme(daily: pd.DataFrame, direction: str) -> float:
@@ -277,7 +282,30 @@ def build_full_market_universe(broker) -> list[str]:
     pool = liquid[: config.SHORT_TERM_FULL_MARKET_MAX_SYMBOLS * 3]
     volatility = broker.volatility_snapshot(pool)
     min_vol = config.SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT / 100
-    survivors = [s for s in pool if volatility.get(s, 0.0) >= min_vol]
+
+    # Se i dati di volatilita' non arrivano (abbonamento dati sbagliato,
+    # API giu', rate-limit), "volatilita' sconosciuta" NON deve diventare
+    # "volatilita' zero": il filtro scarterebbe tutto e il bot smetterebbe
+    # di operare in silenzio, facendo passare un guasto tecnico per "oggi
+    # non ci sono occasioni". Successo al primo avvio reale con un account
+    # gratuito (feed SIP negato). Sotto una copertura minima si segnala
+    # l'anomalia e si salta il filtro: meglio scansionare qualche titolo
+    # piatto in piu' -- la pipeline trend+pattern li scarta comunque -- che
+    # non operare affatto senza accorgersene.
+    coverage = len(volatility) / len(pool) if pool else 0.0
+    if coverage < MIN_VOLATILITY_COVERAGE:
+        log.error(
+            "Dati di volatilita' disponibili solo per %d titoli su %d (%.0f%%): filtro di volatilita' SALTATO "
+            "per questo ciclo. Controlla l'abbonamento dati Alpaca (ALPACA_DATA_FEED) o eventuali rate-limit.",
+            len(volatility), len(pool), coverage * 100,
+        )
+        notify.alert(
+            f"Dati di volatilita' mancanti ({len(volatility)}/{len(pool)}): filtro saltato, controlla il feed dati",
+            level="error",
+        )
+        survivors = list(pool)
+    else:
+        survivors = [s for s in pool if volatility.get(s, 0.0) >= min_vol]
     survivors.sort(key=lambda s: liquidity[s]["dollar_volume"], reverse=True)
 
     top = survivors[: config.SHORT_TERM_FULL_MARKET_MAX_SYMBOLS]

@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 
 from common import config
@@ -94,19 +96,39 @@ def test_build_full_market_universe_filters_by_volatility(monkeypatch):
     assert result == ["TRENDY"]  # FLAT sotto la soglia di volatilita', escluso pur avendo piu' volume$
 
 
-def test_build_full_market_universe_missing_volatility_data_excludes_symbol(monkeypatch):
+def test_missing_volatility_for_a_few_symbols_still_excludes_them(monkeypatch):
+    """Copertura sufficiente (75%): chi non ha dati resta fuori, come prima."""
     monkeypatch.setattr(config, "SHORT_TERM_MIN_PRICE_FULL_MARKET", 0.0)
     monkeypatch.setattr(config, "SHORT_TERM_MIN_DOLLAR_VOLUME", 0.0)
     monkeypatch.setattr(config, "SHORT_TERM_FULL_MARKET_MAX_SYMBOLS", 100)
     monkeypatch.setattr(config, "SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT", 25.0)
 
-    tradable = ["NODATA"]
-    liquidity = {"NODATA": {"price": 50.0, "volume": 1_000_000.0, "dollar_volume":5_000_000.0}}
-    broker = _FakeBroker(tradable, liquidity, volatility={})  # nessun dato di volatilita'
+    tradable = ["A", "B", "C", "NODATA"]
+    liquidity = {s: {"price": 50.0, "volume": 1_000_000.0, "dollar_volume": 5_000_000.0} for s in tradable}
+    volatility = {"A": 0.40, "B": 0.35, "C": 0.30}
+    broker = _FakeBroker(tradable, liquidity, volatility)
 
-    result = screener.build_full_market_universe(broker)
+    assert screener.build_full_market_universe(broker) == ["A", "B", "C"]
 
-    assert result == []
+
+def test_widespread_volatility_data_failure_skips_the_filter_and_alerts(monkeypatch):
+    """Il guasto trovato al primo avvio reale: il feed dati rifiuta le
+    richieste, nessuna volatilita' arriva, e il bot scartava TUTTO
+    smettendo di operare in silenzio. Ora salta il filtro e segnala."""
+    monkeypatch.setattr(config, "SHORT_TERM_MIN_PRICE_FULL_MARKET", 0.0)
+    monkeypatch.setattr(config, "SHORT_TERM_MIN_DOLLAR_VOLUME", 0.0)
+    monkeypatch.setattr(config, "SHORT_TERM_FULL_MARKET_MAX_SYMBOLS", 100)
+    monkeypatch.setattr(config, "SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT", 25.0)
+
+    tradable = ["A", "B", "C", "D"]
+    liquidity = {s: {"price": 50.0, "volume": 1_000_000.0, "dollar_volume": 5_000_000.0} for s in tradable}
+    broker = _FakeBroker(tradable, liquidity, volatility={})  # nessun dato: guasto
+
+    with patch("short_term.screener.notify.alert") as alert:
+        result = screener.build_full_market_universe(broker)
+
+    assert sorted(result) == ["A", "B", "C", "D"], "un guasto sui dati non deve azzerare l'universo"
+    assert any(kw.get("level") == "error" for _, kw in alert.call_args_list), "il guasto va segnalato"
 
 
 def test_screen_universe_uses_full_market_when_enabled(monkeypatch):

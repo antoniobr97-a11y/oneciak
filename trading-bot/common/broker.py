@@ -14,6 +14,7 @@ import math
 import statistics
 from datetime import datetime, timedelta, timezone
 
+from alpaca.data.enums import DataFeed
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest, StockSnapshotRequest
 from alpaca.data.timeframe import TimeFrame
@@ -49,6 +50,17 @@ _LEVERAGED_NAME_MARKERS = (
     "2X", "3X", "-1X", "1.5X", "ULTRA", "ULTRASHORT", "ULTRAPRO",
     "LEVERAGED", "INVERSE", "BEAR", "BULL ", " BULL", "SHORT ", "DAILY ",
 )
+
+
+def _data_feed() -> DataFeed:
+    """Canale dati configurato (default IEX, incluso negli account gratuiti).
+    Senza specificarlo Alpaca usa SIP e rifiuta i dati recenti a chi non ha
+    l'abbonamento -- vedi config.ALPACA_DATA_FEED."""
+    try:
+        return DataFeed(config.ALPACA_DATA_FEED)
+    except ValueError:
+        log.warning("ALPACA_DATA_FEED=%r non valido, uso 'iex'.", config.ALPACA_DATA_FEED)
+        return DataFeed.IEX
 
 
 def _is_leveraged_or_inverse(name: str) -> bool:
@@ -154,7 +166,9 @@ class Broker:
         for i in range(0, len(symbols), batch_size):
             chunk = symbols[i : i + batch_size]
             try:
-                snapshots = self.data_client.get_stock_snapshot(StockSnapshotRequest(symbol_or_symbols=chunk))
+                snapshots = self.data_client.get_stock_snapshot(
+                    StockSnapshotRequest(symbol_or_symbols=chunk, feed=_data_feed())
+                )
             except Exception as exc:
                 log.warning("Liquidity snapshot fallito per il batch che inizia con %s: %s", chunk[0], exc)
                 continue
@@ -183,7 +197,9 @@ class Broker:
         for i in range(0, len(symbols), batch_size):
             chunk = symbols[i : i + batch_size]
             try:
-                request = StockBarsRequest(symbol_or_symbols=chunk, timeframe=TimeFrame.Day, start=start, end=end)
+                request = StockBarsRequest(
+                    symbol_or_symbols=chunk, timeframe=TimeFrame.Day, start=start, end=end, feed=_data_feed()
+                )
                 bars = self.data_client.get_stock_bars(request)
             except Exception as exc:
                 log.warning("Volatility snapshot fallito per il batch che inizia con %s: %s", chunk[0], exc)

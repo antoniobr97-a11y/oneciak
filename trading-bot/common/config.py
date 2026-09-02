@@ -36,6 +36,15 @@ ALPACA_API_KEY = os.getenv("ALPACA_API_KEY", "")
 ALPACA_SECRET_KEY = os.getenv("ALPACA_SECRET_KEY", "")
 ALPACA_PAPER = _bool("ALPACA_PAPER", True)
 
+# Canale dati di mercato Alpaca. "iex" e' quello incluso negli account
+# gratuiti; "sip" (tutte le borse USA) richiede un abbonamento a pagamento e
+# senza di esso le richieste su dati recenti falliscono con
+# "subscription does not permit querying recent SIP data" -- errore
+# incontrato al primo avvio reale. IEX copre una frazione del volume totale,
+# quindi prezzi e volumi sono indicativi: per i prefiltri (liquidita',
+# volatilita') basta e avanza, essendo un ranking relativo.
+ALPACA_DATA_FEED = os.getenv("ALPACA_DATA_FEED", "iex").strip().lower()
+
 # Orario del ciclo giornaliero, fuso orario di mercato (America/New_York).
 # DOPO la chiusura (16:00): la barra del giorno e' definitiva, come nel
 # backtest e come nel corso ("si analizza la sera, si piazzano gli ordini").
