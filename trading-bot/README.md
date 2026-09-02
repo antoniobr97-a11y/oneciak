@@ -50,6 +50,21 @@ tests/        pytest
    ```
    Lascia `ALPACA_PAPER=true`.
 
+## Uso senza terminale (Windows)
+
+Dopo il setup, due file da **doppio clic** nella cartella `trading-bot`
+sostituiscono i comandi:
+
+- **`AVVIA-BOT.bat`** — avvia il bot e lo lascia in esecuzione: parte
+  subito con un ciclo, poi riparte da solo ogni giorno feriale a
+  `RUN_TIME`. Va lasciata aperta la finestra (e il PC acceso, senza
+  sospensione). Per fermarlo: chiudere la finestra.
+- **`CONTROLLA-OGGI.bat`** — esegue **un solo** ciclo e si ferma. Utile
+  per vedere cosa farebbe il bot adesso senza lasciarlo attivo.
+
+Entrambi tengono la finestra aperta a fine esecuzione, così un eventuale
+errore resta leggibile invece di sparire.
+
 ## Uso
 
 I comandi di solo report (`long-term-status`, `short-term-screen` senza
