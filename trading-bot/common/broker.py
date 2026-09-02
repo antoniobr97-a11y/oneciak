@@ -22,9 +22,11 @@ from alpaca.trading.enums import AssetClass, AssetExchange, AssetStatus, OrderCl
 from alpaca.trading.requests import (
     GetAssetsRequest,
     GetOrdersRequest,
+    LimitOrderRequest,
     MarketOrderRequest,
     StopLossRequest,
     StopOrderRequest,
+    TakeProfitRequest,
 )
 
 from common import config
@@ -121,7 +123,11 @@ class Broker:
                 bar = getattr(snap, "daily_bar", None)
                 if bar is None or bar.close is None or bar.volume is None:
                     continue
-                result[symbol] = {"price": float(bar.close), "dollar_volume": float(bar.close) * float(bar.volume)}
+                result[symbol] = {
+                    "price": float(bar.close),
+                    "volume": float(bar.volume),
+                    "dollar_volume": float(bar.close) * float(bar.volume),
+                }
         return result
 
     def volatility_snapshot(self, symbols: list[str], lookback_days: int = 30, batch_size: int = 200) -> dict[str, float]:
@@ -204,9 +210,85 @@ class Broker:
         )
         return result
 
-    def _open_stop_orders(self, symbol: str) -> list:
+    # --- short_term: ingresso con ordine stop + uscite con limit/stop (corso,
+    # video 41/44: long = buy stop in entrata, sell limit a T1, sell stop di
+    # protezione) --------------------------------------------------------------
+
+    def list_open_orders(self, symbol: str) -> list:
         request = GetOrdersRequest(status=QueryOrderStatus.OPEN, symbols=[symbol])
-        orders = self.client.get_orders(request)
+        return list(self.client.get_orders(request))
+
+    def cancel_open_orders(self, symbol: str) -> int:
+        """Cancella TUTTI gli ordini aperti sul titolo (entrata pendente,
+        stop di protezione, limit di take-profit). Ritorna quanti."""
+        cancelled = 0
+        for order in self.list_open_orders(symbol):
+            try:
+                self.client.cancel_order_by_id(order.id)
+                cancelled += 1
+            except Exception as exc:
+                log.warning("Could not cancel order %s for %s: %s", order.id, symbol, exc)
+        return cancelled
+
+    def submit_stop_entry(self, symbol: str, qty: int, side: str, entry_price: float, stop_price: float):
+        """Ordine di INGRESSO stop GTC al livello calcolato (chiusura della
+        barra di setup + volatilita'), come da corso: si entra solo se il
+        prezzo supera davvero il livello, non a mercato alla chiusura.
+        Prova ad attaccare lo stop-loss come gamba OTO; se il broker non
+        accetta un padre di tipo stop per l'OTO, invia lo stop d'ingresso
+        da solo e lo stop-loss viene messo dal ciclo successivo
+        (auto-riparazione in bot.py) -- finestra scoperta al massimo di una
+        seduta, segnalata nel log."""
+        if qty <= 0:
+            return None
+        order_side = OrderSide.BUY if side == "long" else OrderSide.SELL
+        request = StopOrderRequest(
+            symbol=symbol,
+            qty=qty,
+            side=order_side,
+            time_in_force=TimeInForce.GTC,
+            stop_price=round(entry_price, 2),
+            order_class=OrderClass.OTO,
+            stop_loss=StopLossRequest(stop_price=round(stop_price, 2)),
+        )
+        try:
+            result = self.client.submit_order(request)
+        except Exception as exc:
+            log.warning("OTO con padre stop rifiutato per %s (%s): invio lo stop d'ingresso senza gamba stop-loss.", symbol, exc)
+            request = StopOrderRequest(
+                symbol=symbol, qty=qty, side=order_side, time_in_force=TimeInForce.GTC, stop_price=round(entry_price, 2)
+            )
+            result = self.client.submit_order(request)
+        log.info(
+            "%s STOP entry submitted: %s qty=%s entry=%.2f stop=%.2f order_id=%s",
+            side.upper(), symbol, qty, entry_price, stop_price, result.id,
+        )
+        return result
+
+    def submit_oco_exit(self, symbol: str, qty: float, side: str, limit_price: float, stop_price: float):
+        """Uscita OCO per una quota della posizione: take-profit limit a
+        `limit_price` e stop di protezione a `stop_price`, uno cancella
+        l'altro. Alpaca: type=limit, take_profit.limit_price e
+        stop_loss.stop_price obbligatori."""
+        if qty <= 0:
+            return None
+        close_side = OrderSide.SELL if side == "long" else OrderSide.BUY
+        request = LimitOrderRequest(
+            symbol=symbol,
+            qty=qty,
+            side=close_side,
+            time_in_force=TimeInForce.GTC,
+            limit_price=round(limit_price, 2),
+            order_class=OrderClass.OCO,
+            take_profit=TakeProfitRequest(limit_price=round(limit_price, 2)),
+            stop_loss=StopLossRequest(stop_price=round(stop_price, 2)),
+        )
+        result = self.client.submit_order(request)
+        log.info("OCO exit submitted: %s qty=%s take_profit=%.2f stop=%.2f order_id=%s", symbol, qty, limit_price, stop_price, result.id)
+        return result
+
+    def _open_stop_orders(self, symbol: str) -> list:
+        orders = self.list_open_orders(symbol)
         return [o for o in orders if o.order_type is not None and "stop" in str(o.order_type).lower()]
 
     def get_open_stop_order(self, symbol: str):
@@ -230,13 +312,12 @@ class Broker:
                 log.warning("Could not cancel stop order %s for %s: %s", order.id, symbol, exc)
         return cancelled
 
-    def place_stop(self, symbol: str, qty: float, stop_price: float, side: str):
-        """Nuovo ordine stop GTC per la quantita' indicata, dopo aver
-        cancellato gli stop gia' aperti sul titolo (mai due stop attivi
-        sulla stessa posizione)."""
+    def submit_stop(self, symbol: str, qty: float, stop_price: float, side: str):
+        """Ordine stop GTC di protezione per la quantita' indicata, SENZA
+        toccare gli altri ordini aperti (usato accanto a un OCO su un'altra
+        quota della stessa posizione)."""
         if qty <= 0:
             return None
-        self.cancel_open_stop_orders(symbol)
         stop_side = OrderSide.SELL if side == "long" else OrderSide.BUY
         order = StopOrderRequest(
             symbol=symbol,
@@ -248,6 +329,15 @@ class Broker:
         result = self.client.submit_order(order)
         log.info("Stop placed: %s qty=%s stop=%.2f order_id=%s", symbol, qty, stop_price, result.id)
         return result
+
+    def place_stop(self, symbol: str, qty: float, stop_price: float, side: str):
+        """Nuovo ordine stop GTC per la quantita' indicata, dopo aver
+        cancellato gli stop gia' aperti sul titolo (mai due stop attivi
+        sulla stessa quota)."""
+        if qty <= 0:
+            return None
+        self.cancel_open_stop_orders(symbol)
+        return self.submit_stop(symbol, qty, stop_price, side)
 
     def move_stop_to_breakeven(self, symbol: str, qty: float, entry_price: float, side: str) -> None:
         """Replace the existing stop order (if any) with one at the entry

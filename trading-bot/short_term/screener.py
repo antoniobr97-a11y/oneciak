@@ -210,6 +210,7 @@ def build_full_market_universe(broker) -> list[str]:
         for s, data in liquidity.items()
         if data["price"] >= config.SHORT_TERM_MIN_PRICE_FULL_MARKET
         and data["dollar_volume"] >= config.SHORT_TERM_MIN_DOLLAR_VOLUME
+        and data.get("volume", 0.0) >= config.SHORT_TERM_MIN_SHARE_VOLUME
     ]
     liquid.sort(key=lambda s: liquidity[s]["dollar_volume"], reverse=True)
     log.info(

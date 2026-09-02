@@ -130,3 +130,71 @@ def test_enter_with_stop_uses_gtc_so_the_stop_leg_survives_the_day(monkeypatch):
     submitted = client.submit_order.call_args[0][0]
     assert str(submitted.time_in_force).lower().endswith("gtc")
     assert submitted.stop_loss.stop_price == 95.0
+
+
+# --- corso, video 41: ingresso buy-stop con stop-loss attaccato, uscite OCO ----
+
+def test_submit_stop_entry_is_a_gtc_stop_order_with_oto_stop_loss(monkeypatch):
+    broker, client = _broker_with_client(monkeypatch, [])
+
+    broker.submit_stop_entry("AAPL", 10, "long", 101.5, 95.0)
+
+    submitted = client.submit_order.call_args[0][0]
+    assert submitted.stop_price == 101.5
+    assert str(submitted.side).lower().endswith("buy")
+    assert str(submitted.time_in_force).lower().endswith("gtc")
+    assert str(submitted.order_class).lower().endswith("oto")
+    assert submitted.stop_loss.stop_price == 95.0
+
+
+def test_submit_stop_entry_falls_back_to_plain_stop_if_oto_rejected(monkeypatch):
+    broker, client = _broker_with_client(monkeypatch, [])
+    client.submit_order.side_effect = [ValueError("order class not supported for stop"), MagicMock(id="x")]
+
+    broker.submit_stop_entry("AAPL", 10, "long", 101.5, 95.0)
+
+    assert client.submit_order.call_count == 2
+    fallback = client.submit_order.call_args_list[1][0][0]
+    assert fallback.stop_price == 101.5 and fallback.stop_loss is None
+
+
+def test_submit_stop_entry_short_uses_sell_side(monkeypatch):
+    broker, client = _broker_with_client(monkeypatch, [])
+
+    broker.submit_stop_entry("TSLA", 10, "short", 98.5, 105.0)
+
+    submitted = client.submit_order.call_args[0][0]
+    assert str(submitted.side).lower().endswith("sell")
+    assert submitted.stop_loss.stop_price == 105.0
+
+
+def test_submit_oco_exit_shape(monkeypatch):
+    broker, client = _broker_with_client(monkeypatch, [])
+
+    broker.submit_oco_exit("AAPL", 5, "long", 105.0, 95.0)
+
+    submitted = client.submit_order.call_args[0][0]
+    assert str(submitted.order_class).lower().endswith("oco")
+    assert str(submitted.side).lower().endswith("sell")
+    assert submitted.limit_price == 105.0
+    assert submitted.take_profit.limit_price == 105.0
+    assert submitted.stop_loss.stop_price == 95.0
+    assert str(submitted.time_in_force).lower().endswith("gtc")
+
+
+def test_cancel_open_orders_cancels_every_open_order(monkeypatch):
+    limit = MagicMock(); limit.id = "lim"; limit.order_type = "limit"
+    broker, client = _broker_with_client(monkeypatch, [_stop_order("a"), limit])
+
+    assert broker.cancel_open_orders("AAPL") == 2
+    assert [c[0][0] for c in client.cancel_order_by_id.call_args_list] == ["a", "lim"]
+
+
+def test_submit_stop_does_not_cancel_other_orders(monkeypatch):
+    broker, client = _broker_with_client(monkeypatch, [_stop_order("keep")])
+
+    broker.submit_stop("AAPL", 5, 95.0, "long")
+
+    client.cancel_order_by_id.assert_not_called()
+    submitted = client.submit_order.call_args[0][0]
+    assert submitted.stop_price == 95.0 and submitted.qty == 5

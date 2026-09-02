@@ -81,10 +81,13 @@ python bot.py short-term-screen
 # settore + livelli + size), nessun ordine.
 
 python bot.py short-term-once --execute
-# Un ciclo completo: gestisce le posizioni aperte (chiusura a metà su 1R,
-# stop al pareggio, seconda quota a 3R, runner, auto-riparazione dello
-# stop se manca), poi screena ed entra sui nuovi candidati rispettando il
-# tetto di rischio aggregato e la cassa disponibile (nessuna leva).
+# Un ciclo completo: gestisce le posizioni aperte (metà venduta a 1R dal
+# limit, stop al pareggio, seconda quota a 3R, runner fino alla SMA200,
+# ordini di uscita riemessi se mancano), riconcilia gli ordini d'ingresso
+# pendenti, poi screena e mette in attesa i nuovi candidati con un ordine
+# buy-stop al livello calcolato (corso, video 41) -- si entra solo se il
+# prezzo lo supera davvero -- rispettando il tetto di rischio aggregato, la
+# cassa disponibile (nessuna leva) e il freno di drawdown.
 
 python bot.py schedule
 # short-term-once + long-term-once, ogni giorno feriale a RUN_TIME
@@ -151,10 +154,11 @@ default resta la scelta più testata.
 pip install pytest
 pytest tests/
 ```
-100 test unitari (money management, formule dei livelli, qualificatori di
+117 test unitari (money management, formule dei livelli, qualificatori di
 trend, i 7 pattern, screener/universo full-market/filtro di regime, broker
-(volatilità, ordine delle operazioni sugli stop), ciclo automatico di
-lungo termine, orchestrazione di `bot.py` con broker mockato). La
+(volatilità, ordini stop/OCO, ordine delle operazioni), macchina a stati
+delle posizioni e degli ingressi pendenti, ciclo automatico di lungo
+termine, orchestrazione di `bot.py` con broker mockato). La
 pipeline completa è stata anche sottoposta a uno stress-test con centinaia
 di scenari sintetici multi-regime (vedi STRATEGY.md, "Calibrazione delle
 soglie non specificate dal corso") per cercare bug non coperti dai singoli
@@ -279,12 +283,16 @@ Vedi STRATEGY.md per i dettagli e le soglie esatte. Riassunto:
   come proxy dei sotto-indici del corso, non liberamente disponibili)
 - `short_term/levels.py`: formula di entrata/stop-loss basata sulla
   volatilità
-- `common/position_state.py` + `bot.py`: gestione della posizione a
-  scaglioni (1R → chiusura a metà + stop a pareggio; 3R → altra quota +
-  stop a pareggio riemesso sul residuo; 10-20% residuo lasciato correre
-  fino all'inversione sulla SMA200) — validata nel backtest storico, vedi
-  STRATEGY.md — più auto-riparazione dello stop (se una posizione non ha
-  uno stop attivo al broker, viene riemesso) e tetto di cassa senza leva
+- `common/position_state.py` + `bot.py`: ingresso con ordine **buy-stop**
+  al livello calcolato e stop-loss attaccato (corso, video 41), poi
+  gestione a scaglioni con gli ordini di uscita SEMPRE al broker (video
+  44): OCO sulla metà da vendere a 1R (sell limit a 1R / sell stop
+  iniziale) + sell stop sull'altra metà; a 1R eseguito, stop a pareggio su
+  tutto e OCO sulla quota da vendere a 3R; il 10-20% residuo corre fino
+  all'inversione sulla SMA200 — validata nel backtest storico, vedi
+  STRATEGY.md — con auto-riparazione (se al broker non c'è nessun ordine
+  di uscita, la struttura viene riemessa), tetto di cassa senza leva e
+  freno di drawdown (video 45)
 - `bot.py:run_long_term_cycle`: ciclo automatico di lungo termine
   (Advanced mensile / Harry Browne trimestrale), idempotente per periodo
 - `short_term/risk_checks.py`: supporti/resistenze, trimestrali, livello di

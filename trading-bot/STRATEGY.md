@@ -692,6 +692,49 @@ e corretti **5 problemi reali**, tutti coperti da test:
    trovata nel backtest, presente anche nel codice live. Fix: solo mesi
    chiusi (`long_term/advanced_portfolio.py:closed_monthly_closes`).
 
+Seconda passata, rileggendo gli appunti del corso video per video contro
+il codice (richiesta esplicita: "replicare il corso con tutti i
+parametri"). Altri **2 scostamenti sostanziali** trovati e corretti:
+
+6. **Ingresso a mercato invece che con ordine stop.** Il corso (video 19 e
+   41) entra con un **buy stop** al livello calcolato (chiusura della barra
+   di setup + volatilità): si compra solo se il prezzo supera davvero quel
+   livello, altrimenti l'ordine resta in attesa o decade. Il bot comprava
+   a mercato alle 15:50 del giorno dello screening, a qualunque prezzo —
+   anche il backtest (che invece innesca il pendente solo quando il
+   massimo di giornata tocca il livello) non stava simulando quello che il
+   bot faceva. Fix: `broker.submit_stop_entry` (stop GTC con stop-loss
+   attaccato), stato "pending", ordine aggiornato se la barra di setup si
+   sposta e cancellato quando il setup sparisce dallo screening (stessa
+   regola del backtest) o oltre `SHORT_TERM_PENDING_MAX_DAYS`.
+7. **Take-profit a 1R controllato una volta al giorno invece che con un
+   limit.** Il corso (video 41/44) mette un **sell limit** a T1 per metà
+   posizione: se il prezzo tocca T1 intraday la metà viene venduta. Il bot
+   confrontava il prezzo corrente con 1R solo alle 15:50: un tocco
+   intraday seguito da un ritorno sotto T1 veniva perso (mentre il backtest
+   riempie a 1R appena il massimo lo tocca). Fix: alla prima gestione
+   dopo l'ingresso il bot mette al broker un OCO sulla metà (limit a 1R +
+   stop iniziale) e uno stop sull'altra metà; a 1R eseguito, OCO sulla
+   quota da 3R (limit a 3R + stop a pareggio) e stop a pareggio sul runner.
+   Le uscite non dipendono più dal bot che gira quel giorno: sono ordini
+   al broker, sempre. Il ciclo giornaliero rileva gli stadi dalla
+   quantità residua e riemette la struttura se al broker non c'è più
+   nessun ordine di uscita.
+
+Aggiunti nella stessa passata, dal corso: il **freno di drawdown** (video
+45: drawdown complessivo entro il 10-15% → sotto il 15% dal massimo
+dell'equity niente nuove entrate finché non recupera; nel backtest v6 il
+drawdown massimo è stato -13%, quindi storicamente non sarebbe mai
+scattato: è protezione oltre il passato, non un parametro ottimizzato) e
+il **volume minimo in pezzi** (>100.000/giorno, video 18) nel prefiltro
+full-market. Verificati e già conformi: i 6 qualificatori (ADX >30 *o
+crescente*, performance 30%, persistenza ~20 barre), i limiti 2-7 e 2-5
+barre dei pullback, il minimo a 6 mesi del Bowai, la formula dei livelli
+(chiusura ± volatilità, stop = minimo/massimo ∓ volatilità), il sizing
+`floor(capitale × rischio% / rischio per azione)` con arrotondamento per
+difetto, il tetto aggregato 10-12%, la scala 1R (metà) → 3R/4R → quota
+residua, l'uscita su medie 100/200.
+
 Nella stessa revisione il lungo termine è stato **automatizzato**
 (`bot.py:run_long_term_cycle`, `LONG_TERM_AUTO_STRATEGY` in `.env`), con
 una scelta di design esplicita: il ciclo Advanced usa lo **stato** (chiusura

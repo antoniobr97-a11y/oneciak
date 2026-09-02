@@ -26,16 +26,32 @@ def test_build_full_market_universe_filters_by_price_and_volume(monkeypatch):
 
     tradable = ["AAA", "PENNY", "ILLIQUID", "BBB"]
     liquidity = {
-        "AAA": {"price": 50.0, "dollar_volume": 5_000_000.0},
-        "PENNY": {"price": 2.0, "dollar_volume": 3_000_000.0},  # sotto la soglia di prezzo
-        "ILLIQUID": {"price": 40.0, "dollar_volume": 100_000.0},  # sotto la soglia di volume$
-        "BBB": {"price": 20.0, "dollar_volume": 2_000_000.0},
+        "AAA": {"price": 50.0, "volume": 1_000_000.0, "dollar_volume":5_000_000.0},
+        "PENNY": {"price": 2.0, "volume": 1_000_000.0, "dollar_volume":3_000_000.0},  # sotto la soglia di prezzo
+        "ILLIQUID": {"price": 40.0, "volume": 1_000_000.0, "dollar_volume":100_000.0},  # sotto la soglia di volume$
+        "BBB": {"price": 20.0, "volume": 1_000_000.0, "dollar_volume":2_000_000.0},
     }
     broker = _FakeBroker(tradable, liquidity)
 
     result = screener.build_full_market_universe(broker)
 
     assert result == ["AAA", "BBB"]  # ordinati per volume$ decrescente, penny/illiquid esclusi
+
+
+def test_build_full_market_universe_filters_by_share_volume(monkeypatch):
+    monkeypatch.setattr(config, "SHORT_TERM_MIN_PRICE_FULL_MARKET", 0.0)
+    monkeypatch.setattr(config, "SHORT_TERM_MIN_DOLLAR_VOLUME", 0.0)
+    monkeypatch.setattr(config, "SHORT_TERM_MIN_SHARE_VOLUME", 100_000.0)  # corso: >100k pezzi/giorno
+    monkeypatch.setattr(config, "SHORT_TERM_FULL_MARKET_MAX_SYMBOLS", 100)
+    monkeypatch.setattr(config, "SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT", 0.0)
+
+    liquidity = {
+        "THIN": {"price": 500.0, "volume": 20_000.0, "dollar_volume": 10_000_000.0},  # tanti $, pochi pezzi
+        "OK": {"price": 20.0, "volume": 500_000.0, "dollar_volume": 10_000_000.0},
+    }
+    broker = _FakeBroker(["THIN", "OK"], liquidity)
+
+    assert screener.build_full_market_universe(broker) == ["OK"]
 
 
 def test_build_full_market_universe_caps_to_max_symbols(monkeypatch):
@@ -46,9 +62,9 @@ def test_build_full_market_universe_caps_to_max_symbols(monkeypatch):
 
     tradable = ["LOW", "MID", "HIGH"]
     liquidity = {
-        "LOW": {"price": 20.0, "dollar_volume": 1.0},
-        "MID": {"price": 20.0, "dollar_volume": 2.0},
-        "HIGH": {"price": 20.0, "dollar_volume": 3.0},
+        "LOW": {"price": 20.0, "volume": 1_000_000.0, "dollar_volume":1.0},
+        "MID": {"price": 20.0, "volume": 1_000_000.0, "dollar_volume":2.0},
+        "HIGH": {"price": 20.0, "volume": 1_000_000.0, "dollar_volume":3.0},
     }
     broker = _FakeBroker(tradable, liquidity)
 
@@ -65,8 +81,8 @@ def test_build_full_market_universe_filters_by_volatility(monkeypatch):
 
     tradable = ["FLAT", "TRENDY"]
     liquidity = {
-        "FLAT": {"price": 50.0, "dollar_volume": 5_000_000.0},
-        "TRENDY": {"price": 50.0, "dollar_volume": 1_000_000.0},
+        "FLAT": {"price": 50.0, "volume": 1_000_000.0, "dollar_volume":5_000_000.0},
+        "TRENDY": {"price": 50.0, "volume": 1_000_000.0, "dollar_volume":1_000_000.0},
     }
     volatility = {"FLAT": 0.10, "TRENDY": 0.40}  # 10% e 40% annualizzata
     broker = _FakeBroker(tradable, liquidity, volatility)
@@ -83,7 +99,7 @@ def test_build_full_market_universe_missing_volatility_data_excludes_symbol(monk
     monkeypatch.setattr(config, "SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT", 25.0)
 
     tradable = ["NODATA"]
-    liquidity = {"NODATA": {"price": 50.0, "dollar_volume": 5_000_000.0}}
+    liquidity = {"NODATA": {"price": 50.0, "volume": 1_000_000.0, "dollar_volume":5_000_000.0}}
     broker = _FakeBroker(tradable, liquidity, volatility={})  # nessun dato di volatilita'
 
     result = screener.build_full_market_universe(broker)
@@ -98,7 +114,7 @@ def test_screen_universe_uses_full_market_when_enabled(monkeypatch):
     monkeypatch.setattr(config, "SHORT_TERM_FULL_MARKET_MAX_SYMBOLS", 10)
     monkeypatch.setattr(config, "SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT", 0.0)
 
-    broker = _FakeBroker(["ZZZ"], {"ZZZ": {"price": 15.0, "dollar_volume": 10.0}})
+    broker = _FakeBroker(["ZZZ"], {"ZZZ": {"price": 15.0, "volume": 1_000_000.0, "dollar_volume":10.0}})
     scanned: list[str] = []
     monkeypatch.setattr(screener, "scan_symbol", lambda symbol, *a, **k: scanned.append(symbol) or [])
     monkeypatch.setattr(screener, "get_daily_bars", lambda symbol, period="1y": _empty_bars())

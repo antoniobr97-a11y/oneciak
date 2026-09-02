@@ -113,10 +113,13 @@ SHORT_TERM_WATCHLIST = _list(
 # short_term/screener.py:build_full_market_universe e STRATEGY.md. Richiede
 # le chiavi Alpaca anche solo per lo screening (la watchlist statica no).
 SHORT_TERM_USE_FULL_MARKET = _bool("SHORT_TERM_USE_FULL_MARKET", False)
-# Prefiltro full-market: prezzo minimo (evita penny stock) e volume$ medio
-# minimo (liquidità sufficiente per entrare/uscire senza slippage eccessivo).
+# Prefiltro full-market: prezzo minimo (evita penny stock), volume$ medio
+# minimo (liquidità sufficiente per entrare/uscire senza slippage eccessivo)
+# e volume in pezzi minimo (corso, video 18: azioni singole sopra ~100.000
+# scambi medi giornalieri).
 SHORT_TERM_MIN_PRICE_FULL_MARKET = _float("SHORT_TERM_MIN_PRICE_FULL_MARKET", 10.0)
 SHORT_TERM_MIN_DOLLAR_VOLUME = _float("SHORT_TERM_MIN_DOLLAR_VOLUME", 5_000_000.0)
+SHORT_TERM_MIN_SHARE_VOLUME = _float("SHORT_TERM_MIN_SHARE_VOLUME", 100_000.0)
 # Tetto al numero di titoli passati alla pipeline completa dopo il
 # prefiltro (i migliori per volume$), per tenere sotto controllo i tempi di
 # scansione quando l'universo full-market è di migliaia di titoli.
@@ -199,3 +202,19 @@ MARKET_REGIME_MA_PERIOD = _int("MARKET_REGIME_MA_PERIOD", 200)
 # drawdown -15.7% -> -13.0%). Default: solo long. Mettere true per
 # riattivare gli short come da corso.
 SHORT_TERM_ALLOW_SHORTS = _bool("SHORT_TERM_ALLOW_SHORTS", False)
+
+# Freno di drawdown (corso, video 45: "mantenere il drawdown complessivo
+# entro il 10-15%"): se l'equity del conto e' sotto il suo massimo di piu'
+# di questa %, il bot NON apre nuove posizioni (gestisce solo quelle
+# aperte) finche' non recupera. Nel backtest v6 il drawdown massimo e'
+# stato -13%, quindi a 15% il freno non e' mai scattato storicamente: e'
+# una protezione per scenari peggiori del passato, non un parametro
+# ottimizzato. 0 = disattivato.
+SHORT_TERM_MAX_DRAWDOWN_PCT = _float("SHORT_TERM_MAX_DRAWDOWN_PCT", 15.0)
+
+# Un ordine d'ingresso pendente (buy stop) resta valido finche' il titolo
+# continua a mostrare il setup allo screening quotidiano (come nel
+# backtest: pendente aggiornato o cancellato a ogni scansione); questo e'
+# solo un tetto di sicurezza in giorni di calendario oltre il quale viene
+# cancellato comunque.
+SHORT_TERM_PENDING_MAX_DAYS = _int("SHORT_TERM_PENDING_MAX_DAYS", 20)
