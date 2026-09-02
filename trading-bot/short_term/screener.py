@@ -117,7 +117,7 @@ def _build_candidate(
     sp500_df: pd.DataFrame,
     russell_df: pd.DataFrame,
 ) -> Candidate | None:
-    levels = levels_for_setup_bar(daily, match.setup_bar_index, direction)
+    levels = levels_for_setup_bar(daily, match.setup_bar_index, direction, stop_bar_index=match.stop_bar_index)
     if levels.risk_per_share <= 0:
         return None
 

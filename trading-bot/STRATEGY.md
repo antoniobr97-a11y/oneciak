@@ -721,6 +721,19 @@ parametri"). Altri **2 scostamenti sostanziali** trovati e corretti:
    quantità residua e riemette la struttura se al broker non c'è più
    nessun ordine di uscita.
 
+8. **Pullback semplice: controllava solo i massimi decrescenti.** Il corso
+   (video 29) definisce il ritracciamento come massimi **e** minimi
+   decrescenti barra dopo barra (crescenti per lo short). Fix: entrambe le
+   serie, sulle barre non-inside.
+9. **Stop del Trend Pivot e del Second Entry sulla barra sbagliata.** Il
+   corso (video 32/33) entra sopra il massimo della barra di pivot / del
+   breakout fallito ma mette lo stop "sotto il minimo più basso del
+   pullback", che può essere un'altra barra; il codice usava la stessa
+   barra per entrata e stop. Fix: `PatternMatch.stop_bar_index` e
+   `levels_for_setup_bar(..., stop_bar_index=)`; il Trend Pivot entra ora
+   sulla barra di pivot (quella centrale), come da corso. Effetto sul
+   backtest: vedi v10 sotto.
+
 Aggiunti nella stessa passata, dal corso: il **freno di drawdown** (video
 45: drawdown complessivo entro il 10-15% → sotto il 15% dal massimo
 dell'equity niente nuove entrate finché non recupera; nel backtest v6 il

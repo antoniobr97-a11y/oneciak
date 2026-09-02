@@ -16,40 +16,55 @@ class EntryLevels:
     risk_per_share: float
 
 
-def compute_levels(setup_bar: pd.Series, volatility: float, direction: str) -> EntryLevels:
+def compute_levels(
+    setup_bar: pd.Series, volatility: float, direction: str, stop_bar: pd.Series | None = None
+) -> EntryLevels:
     """
     LONG:
       entrata   = chiusura(barra_di_setup) + volatilità
                   (se cade dentro il range della barra, spostare appena
                   sopra il massimo)
-      stop_loss = minimo(barra_di_setup) - volatilità
+      stop_loss = minimo(barra_di_stop) - volatilità
 
     SHORT (speculare):
       entrata   = chiusura(barra_di_setup) - volatilità
-      stop_loss = massimo(barra_di_setup) + volatilità
+      stop_loss = massimo(barra_di_stop) + volatilità
+
+    `stop_bar` e' la barra di setup stessa per quasi tutti i pattern; per
+    Trend Pivot / Second Entry il corso mette lo stop sotto il minimo piu'
+    basso del pullback, che puo' essere una barra diversa da quella di
+    entrata (vedi patterns.PatternMatch.stop_bar_index).
     """
+    stop_bar = setup_bar if stop_bar is None else stop_bar
     if direction == "long":
         entry = setup_bar["close"] + volatility
         if entry <= setup_bar["high"]:
             entry = setup_bar["high"] + 0.01
-        stop_loss = setup_bar["low"] - volatility
+        stop_loss = stop_bar["low"] - volatility
     else:
         entry = setup_bar["close"] - volatility
         if entry >= setup_bar["low"]:
             entry = setup_bar["low"] - 0.01
-        stop_loss = setup_bar["high"] + volatility
+        stop_loss = stop_bar["high"] + volatility
 
     risk_per_share = abs(entry - stop_loss)
     return EntryLevels(direction=direction, entry=entry, stop_loss=stop_loss, risk_per_share=risk_per_share)
 
 
-def levels_for_setup_bar(df: pd.DataFrame, setup_bar_index: int, direction: str, period: int | None = None) -> EntryLevels:
+def levels_for_setup_bar(
+    df: pd.DataFrame,
+    setup_bar_index: int,
+    direction: str,
+    period: int | None = None,
+    stop_bar_index: int | None = None,
+) -> EntryLevels:
     period = period or config.VOLATILITY_PERIOD
     volatility_series = avg_daily_range(df["high"], df["low"], period)
     volatility = volatility_series.iloc[setup_bar_index]
     if pd.isna(volatility):
         volatility = (df["high"] - df["low"]).iloc[: setup_bar_index + 1].mean()
-    return compute_levels(df.iloc[setup_bar_index], float(volatility), direction)
+    stop_bar = None if stop_bar_index is None else df.iloc[stop_bar_index]
+    return compute_levels(df.iloc[setup_bar_index], float(volatility), direction, stop_bar=stop_bar)
 
 
 # --- Gestione della posizione dopo l'ingresso (STRATEGY.md 2.4, punto 4) ---

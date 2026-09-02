@@ -29,9 +29,22 @@ BOWAI_INVERSION_WINDOW = 5  # "inverte l'ordine in <=5 giorni"
 class PatternMatch:
     pattern: str
     direction: str
-    setup_bar_index: int
+    setup_bar_index: int  # barra di riferimento per l'ENTRATA (sopra il suo massimo / sotto il suo minimo)
     pullback_bar_count: int
     details: str = ""
+    # Barra di riferimento per lo STOP quando e' diversa da quella di
+    # entrata: il corso (video 32/33) entra sopra il massimo della barra di
+    # pivot / del breakout fallito, ma mette lo stop "sotto il minimo piu'
+    # basso del pullback". None = stessa barra dell'entrata.
+    stop_bar_index: int | None = None
+
+
+def _deepest_bar(df: pd.DataFrame, direction: str, positions: list[int]) -> int:
+    """Barra con il minimo piu' basso (long) / massimo piu' alto (short)
+    tra quelle indicate: e' il riferimento dello stop-loss del corso."""
+    if direction == "long":
+        return min(positions, key=lambda p: df["low"].iloc[p])
+    return max(positions, key=lambda p: df["high"].iloc[p])
 
 
 def _is_inside_bar(df: pd.DataFrame, pos: int) -> bool:
@@ -78,12 +91,15 @@ def detect_pullback_semplice(df: pd.DataFrame, direction: str, lookback: int | N
     if setup_pos is None or not (2 <= len(non_inside) <= 7):
         return None
 
+    # Corso (video 29): il ritracciamento e' una sequenza di massimi E
+    # minimi decrescenti (long) / crescenti (short), barra dopo barra --
+    # entrambe le serie, non solo una.
+    highs = [df["high"].iloc[p] for p in non_inside]
+    lows = [df["low"].iloc[p] for p in non_inside]
     if direction == "long":
-        highs = [df["high"].iloc[p] for p in non_inside]
-        harmonic = all(b <= a for a, b in zip(highs, highs[1:]))
+        harmonic = all(b <= a for a, b in zip(highs, highs[1:])) and all(b <= a for a, b in zip(lows, lows[1:]))
     else:
-        lows = [df["low"].iloc[p] for p in non_inside]
-        harmonic = all(b >= a for a, b in zip(lows, lows[1:]))
+        harmonic = all(b >= a for a, b in zip(lows, lows[1:])) and all(b >= a for a, b in zip(highs, highs[1:]))
     if not harmonic:
         return None
 
@@ -149,7 +165,13 @@ def detect_trend_pivot_pullback(df: pd.DataFrame, direction: str, lookback: int 
             is_pivot = df["low"].iloc[b] < df["low"].iloc[a] and df["low"].iloc[b] < df["low"].iloc[c]
             failed = df["high"].iloc[c] > df["high"].iloc[a]
         if is_pivot and failed:
-            return PatternMatch("Trend Pivot Pullback", direction, c, len(non_inside))
+            # Corso (video 32): ingresso sopra il massimo della barra di
+            # PIVOT (quella centrale), stop sotto il minimo piu' basso del
+            # pullback (la barra successiva, che ha "fallito").
+            return PatternMatch(
+                "Trend Pivot Pullback", direction, b, len(non_inside),
+                stop_bar_index=_deepest_bar(df, direction, non_inside),
+            )
     return None
 
 
@@ -175,7 +197,12 @@ def detect_second_entry_pullback(df: pd.DataFrame, direction: str, lookback: int
                 and df["close"].iloc[cur_pos] > df["low"].iloc[prev_pos]
             )
         if failed_breakout:
-            return PatternMatch("Second Entry Pullback", direction, cur_pos, len(non_inside))
+            # Corso (video 33): ingresso sopra il massimo della barra del
+            # breakout fallito, stop "sotto il minimo piu' basso del pullback".
+            return PatternMatch(
+                "Second Entry Pullback", direction, cur_pos, len(non_inside),
+                stop_bar_index=_deepest_bar(df, direction, non_inside),
+            )
     return None
 
 

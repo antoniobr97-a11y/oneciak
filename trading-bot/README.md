@@ -154,8 +154,9 @@ default resta la scelta più testata.
 pip install pytest
 pytest tests/
 ```
-117 test unitari (money management, formule dei livelli, qualificatori di
-trend, i 7 pattern, screener/universo full-market/filtro di regime, broker
+121 test unitari (money management, formule dei livelli, qualificatori di
+trend, i 7 pattern e la loro fedeltà al corso, screener/universo
+full-market/filtro di regime, broker
 (volatilità, ordini stop/OCO, ordine delle operazioni), macchina a stati
 delle posizioni e degli ingressi pendenti, ciclo automatico di lungo
 termine, orchestrazione di `bot.py` con broker mockato). La
