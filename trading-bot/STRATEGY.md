@@ -557,6 +557,33 @@ grandi. **Non entra nel bot.** La preferenza per operazioni brevi resta
 soddisfatta dal sistema com'è (mediana ~27 giorni per posizione): forzarla
 oltre costa rendimento.
 
+### v6b: rischio 1.5% per operazione (invece dell'1%) — misurato, non adottato
+
+Richiesta dell'utente ("cosa possiamo fare per renderlo più performante"):
+la leva più diretta è il rischio per operazione, che il corso ammette fino
+all'1-2%. Test a parità di tutto il resto (v6 con 1.5%):
+
+| Metrica | v6: 1% | v6b: 1.5% |
+|---|---|---|
+| CAGR | +4.53%/anno | **+5.04%/anno** |
+| Max drawdown | -13.0% | **-16.5%** |
+| Sharpe | 0.61 | 0.58 |
+| Profit Factor per operazione | 1.71 | 1.65 |
+| Operazioni (26.7 anni) | 393 | 344 |
+| Anni peggiori (2004 / 2007 / 2011) | -4.6% / -2.1% / -2.0% | -5.7% / -4.6% / -5.1% |
+
+Come previsto dalla formula del modello: più rischio per operazione =
+più rendimento **e** più drawdown, con un dettaglio non ovvio — il
+rendimento cresce meno che proporzionalmente (+11% invece di +50%)
+perché il tetto aggregato del 12% permette al massimo 8 posizioni all'1.5%
+invece di 12 all'1%, quindi si perdono operazioni (344 contro 393) e il
+rischio "comprato" in più si concentra su meno titoli (meno
+diversificazione → Sharpe e Profit Factor peggiorano). In sintesi: mezzo
+punto di CAGR in più al prezzo di 3.5 punti di drawdown e di un rapporto
+rendimento/rischio peggiore. **Non adottato**: il default resta 1%
+(configurabile in `.env`, `SHORT_TERM_RISK_PER_TRADE_PCT`, per chi
+accetta consapevolmente il compromesso).
+
 Nota di metodo, per non ingannarsi: v5, v6 e v7 sono state decise
 **prima** di vedere i risultati, su un'ipotesi motivata (letteratura +
 risultati coerenti delle versioni precedenti + regole del corso), non
