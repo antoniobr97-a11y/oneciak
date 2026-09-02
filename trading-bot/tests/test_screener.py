@@ -1,3 +1,5 @@
+import pytest
+
 from common import config
 from short_term import screener
 
@@ -133,6 +135,71 @@ def test_screen_universe_ignores_full_market_when_disabled(monkeypatch):
     screener.screen_universe(symbols=["AAPL"])
 
     assert scanned == ["AAPL"]
+
+
+# --- priorita' ai candidati vicini all'estremo a 52 settimane (v9) ----------
+
+def _closes(values):
+    import pandas as pd
+
+    idx = pd.date_range("2024-01-01", periods=len(values), freq="B")
+    return pd.DataFrame({"close": pd.Series(values, dtype=float, index=idx)})
+
+
+def test_proximity_long_is_one_at_a_new_yearly_high():
+    df = _closes(list(range(100, 400)))  # ultimo valore = massimo
+    assert screener.proximity_to_52w_extreme(df, "long") == 1.0
+
+
+def test_proximity_long_is_lower_far_from_the_high():
+    df = _closes(list(range(100, 300)) + [200.0])  # massimo 299, ultimo 200
+    assert screener.proximity_to_52w_extreme(df, "long") == pytest.approx(200 / 299, rel=1e-6)
+
+
+def test_proximity_short_is_one_at_a_new_yearly_low():
+    df = _closes(list(range(400, 100, -1)))  # ultimo valore = minimo
+    assert screener.proximity_to_52w_extreme(df, "short") == 1.0
+
+
+def test_proximity_uses_only_the_last_52_weeks():
+    # un massimo vecchissimo (1000) fuori dalla finestra non deve contare
+    df = _closes([1000.0] + [100.0] * 300)
+    assert screener.proximity_to_52w_extreme(df, "long") == 1.0
+
+
+def test_proximity_is_zero_without_enough_data():
+    assert screener.proximity_to_52w_extreme(_closes([100.0]), "long") == 0.0
+
+
+def _cand(symbol, proximity):
+    from short_term.levels import EntryLevels
+    from short_term.trend import TrendQualification
+
+    return screener.Candidate(
+        symbol=symbol, direction="long", pattern="Pullback Semplice",
+        trend=TrendQualification(direction="long", score=3, satisfied={}),
+        levels=EntryLevels(direction="long", entry=100.0, stop_loss=95.0, risk_per_share=5.0),
+        qty=10, ribbon_aligned=True, sector_etf="XLK", sector_passes=True,
+        earnings_warn=False, sr_too_close=False, price_blocks_trade=False,
+        has_divergence=False, proximity_52w=proximity,
+    )
+
+
+def test_rank_candidates_puts_the_closest_to_the_yearly_high_first():
+    ranked = screener.rank_candidates([_cand("FAR", 0.70), _cand("NEAR", 0.99), _cand("MID", 0.85)])
+    assert [c.symbol for c in ranked] == ["NEAR", "MID", "FAR"]
+
+
+def test_screen_universe_returns_candidates_ranked(monkeypatch):
+    monkeypatch.setattr(config, "SHORT_TERM_USE_FULL_MARKET", False)
+    monkeypatch.setattr(config, "MARKET_REGIME_FILTER", False)
+    by_symbol = {"LOW": [_cand("LOW", 0.60)], "HIGH": [_cand("HIGH", 0.98)]}
+    monkeypatch.setattr(screener, "scan_symbol", lambda symbol, *a, **k: by_symbol[symbol])
+    monkeypatch.setattr(screener, "get_daily_bars", lambda symbol, period="1y": _empty_bars())
+
+    ranked = screener.screen_universe(symbols=["LOW", "HIGH"])
+
+    assert [c.symbol for c in ranked] == ["HIGH", "LOW"]
 
 
 def _empty_bars():

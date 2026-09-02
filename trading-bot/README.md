@@ -154,7 +154,7 @@ default resta la scelta più testata.
 pip install pytest
 pytest tests/
 ```
-121 test unitari (money management, formule dei livelli, qualificatori di
+128 test unitari (money management, formule dei livelli, qualificatori di
 trend, i 7 pattern e la loro fedeltà al corso, screener/universo
 full-market/filtro di regime, broker
 (volatilità, ordini stop/OCO, ordine delle operazioni), macchina a stati
@@ -305,7 +305,10 @@ Vedi STRATEGY.md per i dettagli e le soglie esatte. Riassunto:
   la SMA200, short solo se sotto — STRATEGY.md "v5") e, di default, **solo
   long**: gli short sono implementati come da corso ma in perdita netta in
   ogni backtest, disattivati salvo `SHORT_TERM_ALLOW_SHORTS=true`
-  (STRATEGY.md "v6")
+  (STRATEGY.md "v6"). Quando i candidati di un giorno sono più dei posti
+  liberi nel tetto di rischio, hanno la precedenza quelli più vicini al
+  massimo a 52 settimane (STRATEGY.md "v9": stesso numero di operazioni,
+  rendimento più alto e drawdown più basso)
 
 ## Limiti noti
 

@@ -39,12 +39,50 @@ class Candidate:
     has_divergence: bool
     notes: list[str] = field(default_factory=list)
 
+    # Vicinanza al massimo/minimo a 52 settimane (0-1, 1 = sul massimo per
+    # un long / sul minimo per uno short). Usata per dare la precedenza ai
+    # candidati migliori quando sono piu' dei posti disponibili nel tetto di
+    # rischio aggregato -- vedi rank_candidates.
+    proximity_52w: float = 0.0
+
     @property
     def is_actionable(self) -> bool:
         return self.qty > 0 and not self.price_blocks_trade
 
 
 ALL_DIRECTIONS = ("long", "short")
+TRADING_DAYS_52W = 252
+
+
+def proximity_to_52w_extreme(daily: pd.DataFrame, direction: str) -> float:
+    """Quanto il titolo e' vicino al suo estremo a 52 settimane: per un long
+    prezzo/massimo (1.0 = nuovo massimo annuale), per uno short minimo/prezzo
+    (1.0 = nuovo minimo annuale). 0.0 se i dati non bastano.
+
+    George & Hwang (2004), "The 52-Week High and Momentum Investing": la
+    vicinanza al massimo annuale predice i rendimenti futuri meglio del
+    momentum classico. Il corso (video 47) dice la stessa cosa in altre
+    parole: "concentrarsi sulle migliori opportunita', non riempire uno
+    slot con un setup mediocre"."""
+    closes = daily["close"].dropna()
+    if len(closes) < 2:
+        return 0.0
+    window = closes.iloc[-TRADING_DAYS_52W:]
+    last = float(window.iloc[-1])
+    if direction == "long":
+        high = float(window.max())
+        return last / high if high > 0 else 0.0
+    low = float(window.min())
+    return low / last if last > 0 else 0.0
+
+
+def rank_candidates(candidates: list[Candidate]) -> list[Candidate]:
+    """Ordina i candidati dal migliore al peggiore. Conta solo quando i
+    candidati sono piu' dei posti liberi nel tetto di rischio aggregato:
+    in quel caso il bot prende i primi, non i primi in ordine alfabetico.
+    Validato nel backtest (STRATEGY.md "v9"): a parita' di numero di
+    operazioni migliora il rendimento E riduce il drawdown."""
+    return sorted(candidates, key=lambda c: c.proximity_52w, reverse=True)
 
 
 def allowed_directions(sp500_df: pd.DataFrame) -> tuple[str, ...]:
@@ -180,6 +218,7 @@ def _build_candidate(
         sr_too_close=sr.too_close,
         price_blocks_trade=price_check.blocks_trade,
         has_divergence=divergence.has_divergence,
+        proximity_52w=proximity_to_52w_extreme(daily, direction),
         notes=notes,
     )
 
@@ -271,4 +310,8 @@ def screen_universe(
             )
         except Exception:
             log.exception("Error screening %s", symbol)
-    return all_candidates
+    # I candidati escono in ordine di scansione (alfabetico): quando sono
+    # piu' dei posti liberi nel tetto di rischio, chi arriva prima nella
+    # lista vince, che e' un criterio senza senso. Ordinati per vicinanza
+    # all'estremo a 52 settimane (STRATEGY.md "v9").
+    return rank_candidates(all_candidates)

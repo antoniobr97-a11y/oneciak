@@ -632,6 +632,102 @@ minimi resta comunque un interruttore documentato
 (`patterns.PULLBACK_REQUIRE_LOWS`). I numeri di riferimento del sistema
 da qui in avanti sono quelli della colonna v10.
 
+### v8: universo ampio di titoli liquidi e volatili, molti "non famosi"
+
+Richiesta dell'utente: cercare anche fuori dai soliti nomi, senza leva.
+La lezione di v4 era che *quali* titoli si aggiungono conta più di quanti:
+lì erano entrate difensive piatte (utility, beni di consumo) e il sistema
+era peggiorato. Qui l'universo è stato allargato scegliendo per
+**carattere**, non per nome: 78 titoli liquidi e volatili con storico
+lungo — semiconduttori (MU, AMD, LRCX, KLAC, ON, MPWR...), software e
+internet (SHOP, MELI, TTD, ROKU, AXON...), consumo discrezionale e viaggi
+(LULU, DECK, CROX, WYNN, RCL, UAL...), biotech (REGN, VRTX, ALGN, DXCM,
+SRPT...), energia e materiali (DVN, OXY, HAL, FCX, CLF, NUE, FSLR, ENPH...)
+— aggiunti ai 42 validati, per 120 totali (119 con dati).
+
+**Prima, un errore ripetuto e corretto.** Il primo giro è partito senza
+la mappatura settoriale dei 78 titoli nuovi: esattamente lo stesso
+errore delle ADR in v4. Risultato: zero operazioni sui titoli nuovi e un
+backtest identico alla v6 al centesimo — sembrava un risultato, non lo
+era. Stavolta oltre a correggere la mappatura è stata aggiunta una
+guardia nel motore che si ferma subito se un titolo non è mappato, così
+non può succedere una terza volta.
+
+| Metrica | v10: 42 titoli | **v8: 120 titoli (regole v10)** |
+|---|---|---|
+| CAGR | +4.00%/anno | **+7.87%/anno** |
+| Capitale finale (da $10.000) | $28.436 | **$75.273** |
+| Max drawdown | -15.3% | **-26.6%** |
+| Sharpe | 0.57 | **0.70** |
+| Profit Factor per operazione | 1.68 | 1.56 |
+| Win rate per operazione | 56.5% | 57.2% |
+| Operazioni (26.7 anni) | 361 | **670** (~25 l'anno) |
+| di cui sui 78 titoli nuovi | — | 403, win rate 57.8%, PF 1.59, +$27.7k |
+| Anni peggiori | 2007 -5.6%, 2025 -7.7% | 2022 -10.2%, 2021 -6.3%, 2008 -5.8% |
+
+Lettura onesta, nei due sensi:
+- **La leva "più operazioni di qualità" funziona.** Il rendimento quasi
+  raddoppia perché le operazioni quasi raddoppiano *a parità di qualità
+  per operazione* (Profit Factor 1.56-1.59, win rate 57-58%: i titoli
+  nuovi non sono peggiori di quelli famosi, sono altrettanto buoni e sono
+  di più). È esattamente la formula del modello: stesso $\mathbb{E}[R]$,
+  più operazioni l'anno. Anche lo Sharpe migliora (0.57 → 0.70).
+- **Ma il drawdown quasi raddoppia** (-15% → -27%), perché con più
+  posizioni aperte in contemporanea le fasi brutte colpiscono tutto
+  insieme (2021-22: due anni negativi di fila). -27% è sopra la soglia
+  del corso (10-15%) e sopra quella scelta dall'utente. Nel bot live il
+  **freno di drawdown al 15%** sarebbe scattato in quelle fasi — quanto
+  avrebbe cambiato le cose lo misura la variante v8b sotto, che aggiunge il
+  freno al motore di backtest.
+- **Rischio di sopravvivenza, dichiarato.** I 78 titoli sono stati scelti
+  oggi, sapendo che esistono ancora e che sono liquidi: tra loro ci sono
+  vincitori noti (NVDA da sola fa +$5.5k, AXON +$3.4k, ANET +$3.3k). Un
+  universo scelto nel 2000 avrebbe incluso anche titoli poi falliti o
+  delistati, che qui mancano. Il +7.9% è quindi **una stima ottimista**;
+  la direzione (più titoli volatili e liquidi = più operazioni buone) è
+  solida, la grandezza esatta no. La modalità full-market del bot live
+  (`SHORT_TERM_USE_FULL_MARKET`, prefiltro per liquidità *e* volatilità)
+  è la versione senza sopravvivenza di questa stessa idea.
+
+### v9: dare la precedenza ai candidati vicini al massimo annuale — adottato
+
+**Il problema, notato guardando come il bot sceglie.** Quando i candidati
+di un giorno sono più dei posti liberi nel tetto di rischio aggregato
+(12 posizioni all'1%), il bot ne prendeva i primi *in ordine di
+scansione* — cioè in ordine alfabetico. Un criterio che non ha alcun
+senso economico: AAPL prima di NVDA perché comincia per A.
+
+**L'ipotesi.** George & Hwang, "The 52-Week High and Momentum Investing"
+(2004): la vicinanza al massimo a 52 settimane predice i rendimenti
+futuri meglio del momentum classico, e l'effetto è più forte sui titoli
+piccoli — cioè proprio l'universo ampio della v8. Il corso (video 47)
+dice la stessa cosa a parole: *"mi sto concentrando sulle migliori
+opportunità o sto solo riempiendo uno slot con un setup mediocre?"*.
+Quindi: a parità di setup valido, prima chi è più vicino al suo massimo
+annuale (per gli short, al minimo).
+
+**Test a parità di tutto il resto** (v8, 120 titoli, regole v10):
+
+| Metrica | v8: ordine alfabetico | **v9: priorità al massimo annuale** |
+|---|---|---|
+| CAGR | +7.87%/anno | **+8.40%/anno** |
+| Capitale finale (da $10.000) | $75.273 | **$85.785** |
+| Max drawdown | -26.6% | **-20.2%** |
+| Sharpe | 0.70 | **0.73** |
+| Profit Factor per operazione | 1.56 | **1.60** |
+| Operazioni (26.7 anni) | 670 | 669 |
+
+Questo è il risultato più pulito di tutta la serie, e per un motivo
+preciso: **migliora il rendimento E riduce il drawdown di 6 punti a
+parità di numero di operazioni** (669 contro 670). Non sta prendendo più
+rischio né più trade: sta prendendo *gli stessi trade migliori* quando
+deve scegliere. È l'unica modifica che sposta entrambe le metriche nella
+direzione giusta, ed è quella con la base teorica più solida.
+
+Nel bot live: `short_term/screener.py:rank_candidates` ordina i candidati
+per `proximity_52w` prima di restituirli, quindi `bot.py` prende i
+migliori quando il tetto di rischio non basta per tutti.
+
 Nota di metodo, per non ingannarsi: ogni variante da v5 in poi è stata
 decisa **prima** di vedere i risultati, su un'ipotesi motivata
 (letteratura + risultati coerenti delle versioni precedenti + regole del
