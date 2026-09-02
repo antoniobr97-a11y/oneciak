@@ -14,7 +14,7 @@ import pandas as pd
 from common import config
 from common.data import get_daily_bars, get_weekly_bars
 from short_term import money_management, risk_checks, sector
-from short_term.indicators import ema_ribbon, ribbon_alignment
+from short_term.indicators import ema_ribbon, ribbon_alignment, sma
 from short_term.levels import EntryLevels, levels_for_setup_bar
 from short_term.patterns import PatternMatch, detect_all
 from short_term.trend import TrendQualification, qualify_trend
@@ -44,12 +44,33 @@ class Candidate:
         return self.qty > 0 and not self.price_blocks_trade
 
 
+ALL_DIRECTIONS = ("long", "short")
+
+
+def allowed_directions(sp500_df: pd.DataFrame) -> tuple[str, ...]:
+    """Filtro di regime di mercato (STRATEGY.md "v5"): long solo se l'indice
+    chiude sopra la sua SMA di lungo periodo, short solo se sotto. Se il
+    filtro e' disattivato o lo storico non basta per la media, entrambe
+    le direzioni restano ammesse (nessun blocco "per sicurezza" non
+    motivato dai dati)."""
+    if not config.MARKET_REGIME_FILTER:
+        return ALL_DIRECTIONS
+    closes = sp500_df["close"]
+    if len(closes) < config.MARKET_REGIME_MA_PERIOD:
+        return ALL_DIRECTIONS
+    long_ma = sma(closes, config.MARKET_REGIME_MA_PERIOD).iloc[-1]
+    if pd.isna(long_ma):
+        return ALL_DIRECTIONS
+    return ("long",) if float(closes.iloc[-1]) > float(long_ma) else ("short",)
+
+
 def scan_symbol(
     symbol: str,
     capital: float,
     open_positions_count: int,
     sp500_df: pd.DataFrame,
     russell_df: pd.DataFrame,
+    directions: tuple[str, ...] = ALL_DIRECTIONS,
 ) -> list[Candidate]:
     daily = get_daily_bars(symbol, period="1y")
     weekly = get_weekly_bars(symbol, period="6y")
@@ -61,7 +82,7 @@ def scan_symbol(
     ribbon = ema_ribbon(daily["close"])
     ribbon_state = ribbon_alignment(ribbon.iloc[-1], price=float(daily["close"].iloc[-1]))
 
-    for direction in ("long", "short"):
+    for direction in directions:
         trend = qualify_trend(daily, direction)
         if not trend.qualifies:
             continue
@@ -223,13 +244,19 @@ def screen_universe(
             symbols = config.SHORT_TERM_WATCHLIST
     capital = capital if capital is not None else config.SHORT_TERM_CAPITAL
 
-    sp500_df = get_daily_bars(sector.SP500_PROXY, period="1y")
+    sp500_df = get_daily_bars(sector.SP500_PROXY, period="2y")
     russell_df = get_daily_bars(sector.RUSSELL2000_PROXY, period="1y")
+
+    directions = allowed_directions(sp500_df)
+    if directions != ALL_DIRECTIONS:
+        log.info("Regime di mercato (%s vs SMA%d): solo %s.", sector.SP500_PROXY, config.MARKET_REGIME_MA_PERIOD, directions[0].upper())
 
     all_candidates: list[Candidate] = []
     for symbol in symbols:
         try:
-            all_candidates.extend(scan_symbol(symbol, capital, open_positions_count, sp500_df, russell_df))
+            all_candidates.extend(
+                scan_symbol(symbol, capital, open_positions_count, sp500_df, russell_df, directions=directions)
+            )
         except Exception:
             log.exception("Error screening %s", symbol)
     return all_candidates

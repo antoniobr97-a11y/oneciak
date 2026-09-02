@@ -183,3 +183,11 @@ SHORT_MIN_PRICE = _float("SHORT_MIN_PRICE", 80.0)
 
 # Settori: ETF SPDR come proxy dei sotto-indici Dow Jones citati nel corso
 SECTOR_RS_LOOKBACK_DAYS = _int("SECTOR_RS_LOOKBACK_DAYS", 60)
+
+# Filtro di regime di mercato (STRATEGY.md "v5", validato nel backtest):
+# long solo se l'indice (SPY) chiude sopra la sua SMA di lungo periodo,
+# short solo se sotto. Estende lo Step 2 del corso (titolo e settore
+# allineati al mercato) all'indice stesso; letteratura: Faber 2007,
+# rendimento dell'S&P 500 sopra/sotto la SMA200.
+MARKET_REGIME_FILTER = _bool("MARKET_REGIME_FILTER", True)
+MARKET_REGIME_MA_PERIOD = _int("MARKET_REGIME_MA_PERIOD", 200)

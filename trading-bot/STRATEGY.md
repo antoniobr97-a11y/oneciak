@@ -450,6 +450,49 @@ poche operazioni per fidarsene. Solo le 8 sopra sono state aggiunte a
 reale oltre i soliti nomi USA, ma solo dove il backtest la conferma, non
 un'aggiunta a caso.
 
+### v5: filtro di regime di mercato (SPY vs SMA200)
+
+**Ipotesi, e da dove viene.** In *tutti* i backtest v1-v4 il lato long è
+profittevole e il lato short è in perdita netta (Profit Factor ~0.7). La
+letteratura dice la stessa cosa in modo indipendente: l'S&P 500 rende in
+media circa +12%/anno quando è sopra la sua media a 200 giorni e circa
+-4%/anno quando è sotto ([backtest della regola](https://www.quantifiedstrategies.com/200-day-moving-average/)),
+e i portafogli long-only battono i long-short in quasi tutti i punti della
+distribuzione ([Short selling and market anomalies](https://www.sciencedirect.com/science/article/abs/pii/S1386418118303525)).
+Lo Step 2 del corso chiede già che titolo e settore siano allineati al
+mercato; il filtro di regime applica lo stesso principio all'indice:
+**long solo se SPY chiude sopra la SMA200, short solo se sotto.**
+
+**Test a parità di tutto il resto** (stesso motore v3/v4, stesso universo
+validato di 42 titoli = 34 USA + 8 ADR, 2000-2026):
+
+| Metrica | 42 titoli, senza filtro | **42 titoli, con filtro (v5)** |
+|---|---|---|
+| CAGR | +3.85%/anno | **+4.08%/anno** |
+| Max drawdown | -16.3% | **-15.7%** |
+| Sharpe | 0.48 | **0.52** |
+| Profit Factor per operazione | 1.41 | **1.54** |
+| Win rate per operazione | 54.6% | 54.5% |
+| Operazioni (26.7 anni) | 546 | 470 |
+| Long: n / PF | 432 / 1.62 | 397 / 1.71 |
+| Short: n / PF | 114 / 0.70 | 73 / 0.67 |
+
+Due cose da leggere in questi numeri, onestamente:
+- Il filtro **migliora ogni metrica**, ma di poco (Sharpe +0.04, PF +0.13,
+  drawdown -0.6 punti). Non è una svolta: è un filtro che toglie
+  operazioni controtendenza (76 in meno) e migliora la qualità media di
+  quelle rimaste. Il beneficio maggiore è negli anni orso: 2008 -3.9%
+  contro -7.8%, 2011 -3.0% contro -5.7%, 2022 -7.4% contro -9.5%.
+- Nota a margine, ma importante: la colonna "senza filtro" su 42 titoli è
+  già migliore del v3 su 34 (CAGR 3.85% contro 2.69%, Sharpe 0.48 contro
+  0.39) — conferma indipendente che le 8 ADR aggiunte in v4 aiutano
+  davvero, non solo da sole.
+- Gli **short restano in perdita anche col filtro** (PF 0.67). Il filtro
+  non li salva: li riduce. Questo è il motivo del test v6 sotto.
+
+Il filtro è nel bot live (`MARKET_REGIME_FILTER=true` di default,
+`short_term/screener.py:allowed_directions`), disattivabile da `.env`.
+
 Durante la costruzione di questi backtest sono stati trovati e corretti
 **5 bug** specifici della simulazione storica (non nel codice del bot): un
 bias look-ahead nel segnale mensile (usava il mese in corso invece
