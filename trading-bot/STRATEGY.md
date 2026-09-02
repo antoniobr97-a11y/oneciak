@@ -584,13 +584,61 @@ rendimento/rischio peggiore. **Non adottato**: il default resta 1%
 (configurabile in `.env`, `SHORT_TERM_RISK_PER_TRADE_PCT`, per chi
 accetta consapevolmente il compromesso).
 
-Nota di metodo, per non ingannarsi: v5, v6 e v7 sono state decise
-**prima** di vedere i risultati, su un'ipotesi motivata (letteratura +
-risultati coerenti delle versioni precedenti + regole del corso), non
-cercando a tentativi la configurazione che rendesse di più. Tre varianti,
-ognuna con una ragione economica chiara; due accettate, una scartata e
-documentata lo stesso — non cento parametri fino a trovare quello
-"giusto" per il passato.
+### v10: pattern resi fedeli al corso — adottato, con i numeri in chiaro
+
+Rileggendo i video 29/32/33 contro `short_term/patterns.py` (vedi
+"Audit", punti 8-9) sono emersi tre scostamenti: il pullback semplice
+controllava solo i massimi decrescenti (il corso vuole massimi **e**
+minimi); il Trend Pivot entrava sulla barra dopo il pivot invece che sopra
+il massimo del pivot; Trend Pivot e Second Entry mettevano lo stop sulla
+barra di entrata invece che "sotto il minimo più basso del pullback".
+Corretti tutti e tre, poi misurati (stessa configurazione v6):
+
+| Metrica | v6: pattern come prima | **v10: tutti e tre fedeli al corso** | solo stop fedele (senza la regola sui minimi) |
+|---|---|---|---|
+| CAGR | +4.53%/anno | +4.00%/anno | +3.85%/anno |
+| Max drawdown | -13.0% | -15.3% | -13.5% |
+| Sharpe | 0.61 | 0.57 | 0.55 |
+| Profit Factor per operazione | 1.71 | 1.68 | 1.63 |
+| Win rate per operazione | 55.5% | 56.5% | 56.1% |
+| Operazioni | 393 | 361 | 369 |
+| Second Entry: n / win rate / PnL | 115 / 51% / +$1.7k | **129 / 57% / +$6.0k** | 126 / 55% / +$4.4k |
+| Pullback Semplice: n / PnL | 165 / +$12.6k | 149 / +$7.0k | 160 / +$8.3k |
+
+Lettura onesta:
+- La versione fedele al corso rende **un po' meno** della precedente
+  (mezzo punto di CAGR, 2 punti di drawdown). Non è un crollo (v4, che
+  invece è stata scartata, dimezzava il CAGR), ma non è nemmeno un
+  miglioramento.
+- Le tre varianti sono **dentro il rumore statistico**: con ~370
+  operazioni in 26 anni, la differenza tra Sharpe 0.55 e 0.61 non è
+  significativa, e lo dimostra il fatto che la variante intermedia è la
+  peggiore delle tre — se l'effetto fosse reale e additivo, starebbe in
+  mezzo. Buona parte della differenza viene da *quali* operazioni
+  prendono gli slot del tetto di rischio in giornate affollate, non dalle
+  regole in sé.
+- Un effetto invece è chiaro e coerente con il corso: lo stop "sotto il
+  minimo del pullback" migliora nettamente il Second Entry (win rate dal
+  51% al 57%, PnL più che triplicato), perché lo stop finisce sotto il
+  livello che il mercato ha già rispettato invece che sotto una barra
+  intermedia.
+
+Decisione: **si tiene la versione fedele al corso** (v10). La richiesta
+esplicita era replicare il corso con tutti i suoi parametri; la
+differenza di rendimento è entro il rumore; e una regola che si può
+spiegare ("questo è quello che il corso dice") è più solida di una che
+rende lo 0.5% in più sul passato senza che si sappia perché. La regola sui
+minimi resta comunque un interruttore documentato
+(`patterns.PULLBACK_REQUIRE_LOWS`). I numeri di riferimento del sistema
+da qui in avanti sono quelli della colonna v10.
+
+Nota di metodo, per non ingannarsi: ogni variante da v5 in poi è stata
+decisa **prima** di vedere i risultati, su un'ipotesi motivata
+(letteratura + risultati coerenti delle versioni precedenti + regole del
+corso), non cercando a tentativi la configurazione che rendesse di più.
+Accettate: v5, v6, v10 (fedeltà). Misurate e non adottate: v6b (rischio
+1.5%), v7 (time-stop). Tutte documentate, anche quelle scartate — non
+cento parametri fino a trovare quello "giusto" per il passato.
 
 Durante la costruzione di questi backtest sono stati trovati e corretti
 **5 bug** specifici della simulazione storica (non nel codice del bot): un
@@ -649,14 +697,14 @@ cui scattano tutti gli stop insieme).
 
 **6. Perché rende (valore atteso).** Per operazione, in unità di R:
 $$\mathbb{E}[R] = p \cdot W - (1-p) \cdot L$$
-con $W$ vincita media e $L$ perdita media in R. Dal backtest v6:
-$p = 55.5\%$ e Profit Factor 1.71, quindi
-$W/L = \text{PF} \cdot (1-p)/p \approx 1.37$; con $L \approx 1$ (lo stop
+con $W$ vincita media e $L$ perdita media in R. Dal backtest v10 (la
+configurazione attuale): $p = 56.5\%$ e Profit Factor 1.68, quindi
+$W/L = \text{PF} \cdot (1-p)/p \approx 1.29$; con $L \approx 1$ (lo stop
 è a 1R per costruzione) si ottiene
-$\mathbb{E}[R] \approx 0.555 \cdot 1.37 - 0.445 \approx +0.31\,R$ per
-operazione. Controllo di coerenza: ~393 operazioni in 26.7 anni ≈ 15
-l'anno × 0.31R × 1% del capitale ≈ **+4.6%/anno**, contro un CAGR
-misurato di +4.53% — le due strade, una analitica e una simulata,
+$\mathbb{E}[R] \approx 0.565 \cdot 1.29 - 0.435 \approx +0.30\,R$ per
+operazione. Controllo di coerenza: ~361 operazioni in 26.7 anni ≈ 13.5
+l'anno × 0.30R × 1% del capitale ≈ **+4.0%/anno**, contro un CAGR
+misurato di +4.00% — le due strade, una analitica e una simulata,
 tornano. Il vantaggio non sta nel vincere spesso ($p$ è appena sopra il
 50%) ma nel fatto che le vincite sono più grandi delle perdite (scala di
 uscita: metà del profitto totale viene da 3R e dai runner, vedi "per
@@ -672,10 +720,11 @@ entra nel calcolo di $C$ del breve termine.
 
 **8. Cosa dice tutto questo sul rischio.** Perdita massima "di
 progetto" del breve termine: 12% (tutti gli stop insieme) più il rischio
-di gap oltre lo stop. Drawdown massimo misurato 2000-2026: -13.0% (v6),
-coerente. Rendimento atteso: nell'ordine del 4-5% annuo sul capitale del
-breve termine, con anni a +20% e anni a -8% — non di più, e chi promette
-di più su queste regole non le ha misurate.
+di gap oltre lo stop. Drawdown massimo misurato 2000-2026: -15.3% (v10;
+-13.0% in v6), coerente; il freno di drawdown al 15% (video 45) è la
+rete di sicurezza oltre quel livello. Rendimento atteso: nell'ordine del
+4-5% annuo sul capitale del breve termine, con anni a +20% e anni a -8%
+— non di più, e chi promette di più su queste regole non le ha misurate.
 
 ## Audit del codice live (bug trovati e corretti prima del paper trading)
 
