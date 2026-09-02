@@ -784,6 +784,55 @@ stato (a) definisce cosa fare su un conto nuovo, dove "dentro se già
 dentro" non ha senso, e (b) si auto-ripara se il ciclo di un mese è stato
 saltato — un incrocio perso non si rivede mai più, lo stato sì.
 
+## Fonti consultate oltre al corso (e cosa hanno cambiato)
+
+Solo le fonti che hanno inciso su una decisione concreta, non una
+bibliografia di facciata:
+
+- **Faber, "A Quantitative Approach to Tactical Asset Allocation" (2007)**
+  — la regola SMA10 mensile del portafoglio Advanced è la sua; sulle
+  azioni USA riduce il drawdown da ~46% a <10% al costo di un rendimento
+  un po' inferiore. Ha confermato la scelta di usare lo *stato* (sopra/
+  sotto la media a fine mese) nel ciclo automatico.
+  [SSRN 962461](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=962461)
+- **Regole originali dei Turtle Traders (Dennis/Eckhardt, 1983)** — unità
+  di rischio = 1% del conto / N (volatilità), stop a multipli di N: è la
+  stessa struttura del sizing del corso (1% / rischio per azione basato
+  sulla volatilità). Ha confermato che il sizing non va toccato.
+  [The Original Turtle Trading Rules](https://www.theturtletrader.com/turtle-trading-rules/)
+- **Moskowitz, Ooi, Pedersen, "Time Series Momentum" (2012)** — gran
+  parte del profitto dei sistemi momentum/trend viene dal *volatility
+  scaling* (size inversa alla volatilità). Stessa conferma.
+- **Hurst, Ooi, Pedersen, "A Century of Evidence on Trend-Following
+  Investing"** — il trend-following funziona da oltre un secolo ma con
+  lunghi periodi piatti: coerente con gli anni a zero/negativi del
+  backtest, che non sono un difetto del codice.
+  [PDF](https://fairmodel.econ.yale.edu/ec439/hurst.pdf)
+- **Rendimento dell'S&P 500 sopra/sotto la SMA200** (~+12%/anno contro
+  ~-4%) e **asimmetria long-only vs long-short** (i portafogli long-only
+  battono i long-short quasi ovunque) — hanno motivato v5 (filtro di
+  regime) e v6 (niente short), entrambi poi confermati dal backtest.
+  [quantifiedstrategies.com](https://www.quantifiedstrategies.com/200-day-moving-average/),
+  [Short selling and market anomalies](https://www.sciencedirect.com/science/article/abs/pii/S1386418118303525)
+- **George & Hwang, "The 52-Week High and Momentum Investing" (2004)** —
+  la vicinanza al massimo a 52 settimane predice i rendimenti meglio del
+  momentum classico, con effetto più forte sui titoli piccoli. Ha motivato
+  il test v9 (priorità ai titoli vicini al massimo annuale quando il tetto
+  di rischio non basta per tutti) e sostiene l'idea dell'utente di cercare
+  anche fuori dai titoli famosi. [PDF](https://www.bauer.uh.edu/tgeorge/papers/gh4-paper.pdf)
+- **Raschke & Connors, "Street Smarts" (1996)** — origine del pattern
+  "Holy Grail" (Sacro Graal) del corso e della regola del time-stop
+  testata e scartata in v7.
+- **Minervini, "trend template"** (prezzo sopra le medie 50/150/200,
+  entro il 25% dal massimo a 52 settimane, forza relativa alta) — stesso
+  spirito dello Step 1-2 del corso; non aggiunge regole nuove al
+  protocollo, conferma quelle esistenti.
+
+Quello che la letteratura **non** supporta e che quindi non è stato fatto:
+leva (moltiplica i drawdown), ottimizzazione fine dei parametri sul
+passato, aggiunta di indicatori per "confermare" (il corso stesso, video
+39, li vuole solo come conferma, mai come segnale).
+
 ## Cosa NON è coperto da questo codice
 
 - Le due componenti proprietarie del corso (screener "Barchart"/"ProScreener"
