@@ -728,6 +728,44 @@ Nel bot live: `short_term/screener.py:rank_candidates` ordina i candidati
 per `proximity_52w` prima di restituirli, quindi `bot.py` prende i
 migliori quando il tetto di rischio non basta per tutti.
 
+### v8b: il freno di drawdown era una trappola senza uscita (bug critico)
+
+Testando l'universo ampio **con il freno di drawdown attivo** (cioè come
+si sarebbe comportato davvero il bot live) è emerso il bug più grave di
+tutta la sessione, in una riga di codice scritta poche ore prima:
+
+```
+2020    -5.2%    ← il freno scatta (crollo COVID)
+2021    +0.0%
+2022    +0.0%
+2023    +0.0%    ← il bot non opera MAI PIÙ
+2024    +0.0%
+2025    +0.0%
+```
+
+**Perché.** Il freno bloccava le nuove entrate quando l'equity scendeva
+oltre il 15% **dal massimo storico assoluto**. Ma se il bot non apre più
+posizioni, l'equity non può risalire; se non risale, il massimo storico
+resta irraggiungibile; se resta irraggiungibile, il freno non si sblocca
+mai. È uno stato assorbente: una protezione che, superata una certa
+soglia, spegne il sistema per sempre. Nella realtà si sarebbe tradotto in
+un conto fermo per anni dopo un crollo di mercato, con l'utente che se ne
+accorge mesi dopo.
+
+**La correzione.** Il massimo di riferimento è ora quello **degli ultimi
+252 giorni di borsa** (~1 anno), non assoluto: se l'equity resta ferma, il
+vecchio picco esce dalla finestra e il freno si rilascia da solo. Il bot
+riparte al massimo dopo un anno, e molto prima se recupera. È in
+`bot.py:_drawdown_brake_active` con un test dedicato che riproduce
+esattamente lo scenario del blocco permanente.
+
+**Lezione di metodo.** Il bug non è stato trovato dai test unitari (che
+verificavano il comportamento *nel momento* in cui il freno scatta, non
+quello *dopo*) né rileggendo il codice: è emerso solo perché la protezione
+è stata simulata su 26 anni di dati veri. Una regola di sicurezza va
+testata anche nel caso peggiore in cui si attiva — altrimenti la
+protezione diventa il danno.
+
 Nota di metodo, per non ingannarsi: ogni variante da v5 in poi è stata
 decisa **prima** di vedere i risultati, su un'ipotesi motivata
 (letteratura + risultati coerenti delle versioni precedenti + regole del

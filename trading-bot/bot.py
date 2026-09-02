@@ -470,20 +470,42 @@ def reconcile_pending_entries(broker: Broker, candidate_symbols: set[str], today
             log.exception("Errore riconciliando l'ingresso pendente su %s.", symbol)
 
 
-def _drawdown_brake_active(broker: Broker) -> bool:
+EQUITY_HISTORY_DAYS = 252  # ~1 anno di borsa: finestra del massimo di riferimento
+
+
+def _drawdown_brake_active(broker: Broker, today: date | None = None) -> bool:
     """Corso, video 45: drawdown complessivo da tenere entro il 10-15%. Se
-    l'equity del conto e' sotto il suo massimo storico di piu' di
+    l'equity del conto e' sotto il massimo DELL'ULTIMO ANNO di piu' di
     SHORT_TERM_MAX_DRAWDOWN_PCT, niente nuove entrate finche' non recupera
-    (le posizioni aperte continuano a essere gestite normalmente)."""
+    (le posizioni aperte continuano a essere gestite normalmente).
+
+    Il massimo e' su finestra mobile, non storico assoluto, e la ragione e'
+    un bug trovato nel backtest: con il massimo assoluto il freno e' una
+    trappola senza uscita -- il bot smette di aprire posizioni, quindi
+    l'equity non puo' piu' risalire, quindi il massimo resta irraggiungibile
+    e il freno non si sblocca MAI. Nel backtest v8b il bot si spegneva nel
+    2020 e non operava piu' fino al 2026 (vedi STRATEGY.md "v8b"). Con la
+    finestra mobile, dopo al massimo un anno di equity ferma il vecchio
+    picco esce dalla finestra e il freno si rilascia da solo."""
     if config.SHORT_TERM_MAX_DRAWDOWN_PCT <= 0:
         return False
+    today = today or date.today()
     equity = broker.get_equity()
-    peak = max(float(position_state.get_meta("equity_peak", 0.0) or 0.0), equity)
-    position_state.set_meta("equity_peak", peak)
+
+    history = list(position_state.get_meta("equity_history", []) or [])
+    history = [h for h in history if h and h[0] != today.isoformat()]  # un campione al giorno
+    history.append([today.isoformat(), equity])
+    history = history[-EQUITY_HISTORY_DAYS:]
+    position_state.set_meta("equity_history", history)
+
+    peak = max(float(v) for _, v in history)
     drawdown = 1 - equity / peak if peak > 0 else 0.0
     if drawdown >= config.SHORT_TERM_MAX_DRAWDOWN_PCT / 100:
-        log.warning("Freno di drawdown attivo: equity %.0f, massimo %.0f (-%.1f%%). Nessuna nuova entrata.", equity, peak, drawdown * 100)
-        notify.alert(f"Freno di drawdown attivo (-{drawdown * 100:.1f}% dal massimo): nessuna nuova entrata", level="warning")
+        log.warning(
+            "Freno di drawdown attivo: equity %.0f, massimo dell'ultimo anno %.0f (-%.1f%%). Nessuna nuova entrata.",
+            equity, peak, drawdown * 100,
+        )
+        notify.alert(f"Freno di drawdown attivo (-{drawdown * 100:.1f}% dal massimo dell'ultimo anno): nessuna nuova entrata", level="warning")
         return True
     return False
 
@@ -504,7 +526,7 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
     reconcile_pending_entries(broker, {c.symbol for c in candidates if c.is_actionable}, today)
     open_positions_count = len(_short_term_positions(broker)) + len(_pending_symbols())
 
-    if _drawdown_brake_active(broker):
+    if _drawdown_brake_active(broker, today):
         return
 
     # Nessuna leva: la size e' limitata alla cassa davvero disponibile

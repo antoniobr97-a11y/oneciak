@@ -2,7 +2,7 @@
 mockati -- nessuna chiamata di rete, nessun ordine reale."""
 import argparse
 from contextlib import contextmanager
-from datetime import date
+from datetime import date, timedelta
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
@@ -530,12 +530,65 @@ def test_drawdown_brake_blocks_new_entries_but_not_management(monkeypatch):
     with patch("bot.Broker", return_value=broker), \
          patch("bot.screen_universe", return_value=[_candidate("MSFT")]), \
          patch("bot._print_candidate"), \
-         _patched_state({"AAPL": ENTERED_10}, meta={"equity_peak": 10_000.0}) as state:
+         _patched_state({"AAPL": ENTERED_10}, meta={"equity_history": [["2026-01-02", 10_000.0]]}) as state:
         bot.cmd_short_term_once(argparse.Namespace(execute=True))
 
     broker.submit_stop_entry.assert_not_called()  # niente nuove entrate
     broker.submit_oco_exit.assert_called_once()  # ma la posizione aperta e' stata gestita
-    assert state.meta["equity_peak"] == 10_000.0
+    assert max(v for _, v in state.meta["equity_history"]) == 10_000.0
+
+
+def test_drawdown_brake_releases_after_a_year_of_flat_equity(monkeypatch):
+    """Il bug: col massimo storico ASSOLUTO il freno non si sblocca mai --
+    bloccate le entrate, l'equity resta ferma, il picco resta irraggiungibile.
+    Nel backtest il bot si spegneva nel 2020 e non operava piu' fino al 2026.
+    Col massimo su finestra mobile, dopo un anno il vecchio picco esce dalla
+    finestra e il freno si rilascia da solo."""
+    monkeypatch.setattr(bot.config, "SHORT_TERM_MAX_DRAWDOWN_PCT", 15.0)
+    broker = MagicMock()
+    broker.get_equity.return_value = 8_000.0  # -20% dal picco di 10.000
+
+    with _patched_state(meta={"equity_history": [["2026-01-02", 10_000.0]]}) as state:
+        # giorno del crollo: il freno scatta
+        assert bot._drawdown_brake_active(broker, date(2026, 1, 5)) is True
+        # equity ferma per un anno: il picco vecchio esce dalla finestra
+        for i in range(1, bot.EQUITY_HISTORY_DAYS + 1):
+            active = bot._drawdown_brake_active(broker, date(2026, 1, 5) + timedelta(days=i))
+        assert active is False, "il freno deve rilasciarsi, non bloccare il bot per sempre"
+        assert len(state.meta["equity_history"]) <= bot.EQUITY_HISTORY_DAYS
+
+
+def test_drawdown_brake_seeds_peak_from_the_first_sample(monkeypatch):
+    monkeypatch.setattr(bot.config, "SHORT_TERM_MAX_DRAWDOWN_PCT", 15.0)
+    broker = MagicMock()
+    broker.get_equity.return_value = 10_000.0
+
+    with _patched_state():
+        # primo giorno in assoluto: nessuno storico, nessun freno
+        assert bot._drawdown_brake_active(broker, date(2026, 1, 5)) is False
+
+
+def test_drawdown_brake_keeps_one_sample_per_day(monkeypatch):
+    monkeypatch.setattr(bot.config, "SHORT_TERM_MAX_DRAWDOWN_PCT", 15.0)
+    broker = MagicMock()
+    broker.get_equity.return_value = 10_000.0
+
+    with _patched_state() as state:
+        bot._drawdown_brake_active(broker, date(2026, 1, 5))
+        broker.get_equity.return_value = 9_900.0
+        bot._drawdown_brake_active(broker, date(2026, 1, 5))  # stesso giorno, riesecuzione
+
+    assert len(state.meta["equity_history"]) == 1
+    assert state.meta["equity_history"][0][1] == 9_900.0  # tenuto il valore piu' recente
+
+
+def test_drawdown_brake_disabled_when_threshold_is_zero(monkeypatch):
+    monkeypatch.setattr(bot.config, "SHORT_TERM_MAX_DRAWDOWN_PCT", 0.0)
+    broker = MagicMock()
+    broker.get_equity.return_value = 1.0
+
+    with _patched_state(meta={"equity_history": [["2026-01-01", 10_000.0]]}):
+        assert bot._drawdown_brake_active(broker, date(2026, 1, 5)) is False
 
 
 def test_drawdown_brake_updates_peak_and_allows_entries_within_limit(monkeypatch):
@@ -545,11 +598,11 @@ def test_drawdown_brake_updates_peak_and_allows_entries_within_limit(monkeypatch
     with patch("bot.Broker", return_value=broker), \
          patch("bot.screen_universe", return_value=[_candidate("MSFT")]), \
          patch("bot._print_candidate"), \
-         _patched_state(meta={"equity_peak": 10_000.0}) as state:
+         _patched_state(meta={"equity_history": [["2026-01-02", 10_000.0]]}) as state:
         bot.cmd_short_term_once(argparse.Namespace(execute=True))
 
     broker.submit_stop_entry.assert_called_once()
-    assert state.meta["equity_peak"] == 12_000.0
+    assert max(v for _, v in state.meta["equity_history"]) == 12_000.0
 
 
 # --- ciclo automatico di lungo termine --------------------------------------------
