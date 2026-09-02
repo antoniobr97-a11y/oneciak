@@ -364,21 +364,92 @@ letti come indicativi, non come garanzia):
   riclassificazioni GICS storiche nel tempo
 - Slippage stimato (0.05% per fill), non commissioni/slippage reali di un
   broker specifico
-- Universo comunque limitato a 34 titoli. Il bot live supporta anche
-  l'universo full-market (`SHORT_TERM_USE_FULL_MARKET=true` in `.env`, vedi
-  README "Universo full-market") — scansiona tutti i titoli USA tradable su
-  Alpaca con un prefiltro di liquidità, invece della watchlist fissa — ma
-  **questa modalità non è stata backtestata storicamente**: i numeri sopra
-  restano validi solo per l'universo di 34 titoli usato nel backtest
+- Universo comunque limitato a 34 titoli (v3) / 85-110 titoli (v4, vedi
+  sotto). Il bot live supporta anche l'universo full-market
+  (`SHORT_TERM_USE_FULL_MARKET=true` in `.env`, vedi README "Universo
+  full-market") — scansiona tutti i titoli USA tradable su Alpaca con un
+  prefiltro di liquidità, invece della watchlist fissa — ma **questa
+  modalità non è stata backtestata alla sua scala reale (migliaia di
+  titoli)**: il test più vicino disponibile è il v4 sotto (85 titoli, senza
+  prefiltro di liquidità/volatilità aggiuntivo)
+
+### v4: universo allargato a 85 titoli USA + 25 ADR non-USA (test separato)
+
+Domanda dell'utente: "le azioni che il bot deve cercare non sono le solite
+famose, deve cercare tutto il mercato statunitense" + volontà di
+diversificare oltre i titoli USA. Due backtest aggiuntivi rispondono a
+entrambe:
+
+**Prima un bug trovato e corretto prima di fidarsi dei numeri**: il primo
+giro includeva le 25 ADR insieme agli 85 titoli USA, ma restituiva **zero
+operazioni su tutte le 25 ADR**. Causa: la conferma settoriale nel motore
+di backtest è un filtro rigido (scarta il trade se non passa, per ogni
+pattern — più severo del bot live, vedi sopra) e le ADR non avevano una
+voce in `SECTOR_MAP` (mappatura statica del backtest) → `sector_etf=None`
+→ scartate sempre, indipendentemente dal pattern. Non era un giudizio di
+mercato, era un artefatto del filtro. Fix: aggiunta una mappatura
+settoriale approssimata sul business reale di ciascuna ADR (es. Toyota →
+consumo discrezionale, banche europee/canadesi → finanziario), poi
+ripetuto il test. **Nota**: questo bug esisteva solo nel motore di
+backtest, non nel bot live — `short_term/sector.py` legge il settore reale
+da yfinance dinamicamente per qualunque titolo incluse le ADR, e lo tratta
+comunque solo come nota informativa (tranne Bowai), mai come blocco.
+
+| Metrica | v3 (34 titoli, sopra) | **v4a: +51 titoli USA (85 tot.)** | **v4b: solo 25 ADR non-USA** |
+|---|---|---|---|
+| CAGR | +2.69%/anno | **+1.53%/anno** | **+1.13%/anno** |
+| Max drawdown | -18.7% | **-33.6%** | **-19.1%** |
+| Sharpe | 0.39 | **0.20** | **0.23** |
+| Profit Factor | 1.36 | **1.11** | **1.19** |
+| Win rate per operazione | 52.0% | 49.6% | 54.9% |
+| Operazioni (26.7 anni) | 446 | 839 posizioni | 304 posizioni |
+
+**Risultato onesto, non quello sperato**: allargare l'universo da 34 a 85
+titoli USA **peggiora** tutte le metriche corrette per il rischio, non le
+migliora — CAGR quasi dimezzato, drawdown quasi raddoppiato. Causa più
+probabile: i 51 titoli aggiunti includono parecchie difensive/utility a
+bassa volatilità (DUK, SO, NEE, CL, KMB, GIS, MO, PM) — un sistema
+trend-following rende storicamente peggio su titoli che si muovono poco
+(stessa logica Turtle Traders già citata per v2→v3, qui in direzione
+opposta). **Lezione concreta: più titoli non significa più soldi** — la
+qualità/volatilità dell'universo conta più della quantità grezza. Per
+questo la modalità full-market (`SHORT_TERM_USE_FULL_MARKET`) resta
+disponibile ma NON è il default consigliato senza un filtro di volatilità
+aggiuntivo (non ancora implementato) oltre a quello di liquidità.
+
+Le 25 ADR da sole, invece, si comportano ragionevolmente bene — PF 1.19 e
+Sharpe 0.23 sono vicini alla qualità del v3 curato, non diluiti come
+l'espansione USA generica. Per titolo (posizioni distinte, min. 4 per
+essere considerate):
+
+| Titolo | Operazioni | Win rate | PnL totale |
+|---|---|---|---|
+| ASML (Paesi Bassi) | 22 | 54.5% | +$834 |
+| TM — Toyota (Giappone) | 4 | 75.0% | +$702 |
+| TSM — TSMC (Taiwan) | 16 | 56.2% | +$593 |
+| NVO — Novo Nordisk (Danimarca) | 12 | 66.7% | +$544 |
+| TTE — TotalEnergies (Francia) | 11 | 63.6% | +$488 |
+| RIO — Rio Tinto (UK/Australia) | 20 | 70.0% | +$471 |
+| SONY (Giappone) | 19 | 68.4% | +$352 |
+| BHP (Australia) | 15 | 73.3% | +$319 |
+
+Le altre 17 ADR testate (BP, SHEL, HSBC, SAP, UL, DEO, BUD, AZN, NVS, SNY,
+ERIC, NOK, TD, RY, BABA, JD, PDD) erano deboli, in perdita, o con troppo
+poche operazioni per fidarsene. Solo le 8 sopra sono state aggiunte a
+`SHORT_TERM_WATCHLIST` di default (vedi `common/config.py`) — diversificazione
+reale oltre i soliti nomi USA, ma solo dove il backtest la conferma, non
+un'aggiunta a caso.
 
 Durante la costruzione di questi backtest sono stati trovati e corretti
-**4 bug** specifici della simulazione storica (non nel codice del bot): un
+**5 bug** specifici della simulazione storica (non nel codice del bot): un
 bias look-ahead nel segnale mensile (usava il mese in corso invece
 dell'ultimo chiuso), una leva impossibile nel money management (nessun
 tetto sul capitale davvero disponibile), un disallineamento di calendario
 tra titoli che faceva sparire posizioni aperte dal calcolo dell'equity per
-un giorno, e un crash sui titoli con storico più corto (quotati dopo il
-2000) quando la finestra di analisi cadeva prima della loro quotazione.
+un giorno, un crash sui titoli con storico più corto (quotati dopo il
+2000) quando la finestra di analisi cadeva prima della loro quotazione, e
+la mappatura settoriale mancante per le ADR (v4, sopra) che le escludeva
+sempre dal test.
 
 ## Cosa NON è coperto da questo codice
 

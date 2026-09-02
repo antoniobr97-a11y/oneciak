@@ -83,11 +83,17 @@ SHORT_TERM_CAPITAL = _float("SHORT_TERM_CAPITAL", 10_000.0)
 # Universo validato nel backtest storico 2000-2026 (vedi STRATEGY.md):
 # blue chip stabili + titoli a maggiore crescita/volatilità, dove un
 # sistema trend-following storicamente rende meglio (vedi analisi in
-# STRATEGY.md, "Risultati del backtest storico").
+# STRATEGY.md, "Risultati del backtest storico") + 8 ADR di grandi aziende
+# non-USA (Toyota, ASML, TSMC, Novo Nordisk, TotalEnergies, Rio Tinto,
+# Sony, BHP) validate separatamente nello stesso backtest (win rate
+# 54-75%, PnL positivo su tutte e 8): diversificazione oltre i soliti nomi
+# USA, ma solo quelle con un riscontro storico reale, non un'aggiunta a
+# caso -- le altre 17 ADR testate erano deboli o in perdita, escluse.
 SHORT_TERM_WATCHLIST = _list(
     "SHORT_TERM_WATCHLIST",
     "AAPL,MSFT,INTC,IBM,JPM,XOM,WMT,KO,JNJ,PG,HD,CAT,GE,DIS,CSCO,MCD,PFE,VZ,"
-    "CVX,MMM,AMZN,NVDA,NFLX,ADBE,CRM,GOOGL,NKE,COST,QCOM,AMAT,TSLA,META,V,MA",
+    "CVX,MMM,AMZN,NVDA,NFLX,ADBE,CRM,GOOGL,NKE,COST,QCOM,AMAT,TSLA,META,V,MA,"
+    "ASML,TM,TSM,NVO,TTE,RIO,SONY,BHP",
 )
 
 # Se true, ignora SHORT_TERM_WATCHLIST e scansiona l'intero mercato USA

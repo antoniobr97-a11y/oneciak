@@ -85,8 +85,11 @@ python bot.py schedule
 ### Universo full-market (scansionare tutto il mercato USA)
 
 Di default il breve termine scansiona `SHORT_TERM_WATCHLIST`, la lista fissa
-di 34 titoli validata nel backtest storico. Per non limitarsi ai "soliti
-titoli famosi" e coprire tutto il mercato USA, imposta in `.env`:
+di 42 titoli validata nel backtest storico (i 34 USA originali + 8 ADR di
+grandi aziende non-USA: Toyota, ASML, TSMC, Novo Nordisk, TotalEnergies,
+Rio Tinto, Sony, BHP — vedi STRATEGY.md "v4" per il dettaglio). Per non
+limitarsi del tutto ai "soliti titoli famosi" e coprire tutto il mercato
+USA, imposta in `.env`:
 
 ```bash
 SHORT_TERM_USE_FULL_MARKET=true
@@ -113,6 +116,18 @@ volume USA reale), quindi il volume$ è un ranking relativo utile a scartare
 i titoli davvero illiquidi, non una misura esatta del volume di mercato.
 Con `SHORT_TERM_USE_FULL_MARKET=true` servono le chiavi Alpaca anche solo
 per lo screening (senza, non serve — usa solo yfinance).
+
+**Attenzione, risultato reale del backtest**: un test su un universo
+allargato a 85 titoli (34 curati + 51 aggiunti) ha dato risultati
+**peggiori**, non migliori, della lista curata (CAGR +1.53%/anno contro
++2.69%, drawdown -33.6% contro -18.7% — vedi STRATEGY.md "v4"). La causa
+probabile è l'inclusione di titoli difensivi a bassa volatilità (utility,
+consumer staples), su cui un sistema trend-following rende storicamente
+peggio. La modalità full-market applica solo un prefiltro di liquidità
+(prezzo, volume$), non uno di volatilità — quindi **non è il default
+consigliato per chi vuole il rischio più basso possibile**: usala solo se
+preferisci un universo più ampio pur sapendo che il backtest disponibile
+mostra un rischio/rendimento peggiore della watchlist curata.
 
 **Test:**
 ```bash
