@@ -365,6 +365,7 @@ def test_pending_entry_left_alone_once_position_exists():
 def _cycle_broker(cash=1_000_000.0, equity=10_000.0):
     broker = _broker()
     broker.is_market_open.return_value = True
+    broker.is_trading_day.return_value = True
     broker.get_equity.return_value = equity
     broker.get_cash.return_value = cash
     return broker
@@ -437,9 +438,12 @@ def test_cmd_short_term_once_skips_symbol_already_in_position():
     assert broker.submit_stop_entry.call_args[0][0] == "MSFT"
 
 
-def test_cmd_short_term_once_market_closed_does_nothing():
+def test_cmd_short_term_once_non_trading_day_does_nothing():
+    """Weekend o festivo: nessuna seduta, niente da analizzare. Nota che il
+    ciclo gira DOPO la chiusura, quindi "mercato aperto adesso" sarebbe
+    sempre falso e non e' il controllo giusto."""
     broker = MagicMock()
-    broker.is_market_open.return_value = False
+    broker.is_trading_day.return_value = False
 
     with patch("bot.Broker", return_value=broker), \
          patch("bot.screen_universe") as mock_screen:
@@ -447,6 +451,22 @@ def test_cmd_short_term_once_market_closed_does_nothing():
 
     mock_screen.assert_not_called()
     broker.list_open_positions.assert_not_called()
+
+
+def test_cmd_short_term_once_runs_after_close_on_a_trading_day():
+    """Il ciclo deve girare a mercato CHIUSO purche' oggi ci sia stata una
+    seduta: gli ordini sono GTC e restano in coda per la riapertura."""
+    broker = _cycle_broker()
+    broker.is_market_open.return_value = False  # dopo la chiusura
+    broker.is_trading_day.return_value = True
+
+    with patch("bot.Broker", return_value=broker), \
+         patch("bot.screen_universe", return_value=[_candidate("AAPL")]), \
+         patch("bot._print_candidate"), \
+         _patched_state():
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    broker.submit_stop_entry.assert_called_once()
 
 
 def test_cmd_short_term_once_report_only_never_submits_orders():

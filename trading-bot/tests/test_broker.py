@@ -190,6 +190,46 @@ def test_cancel_open_orders_cancels_every_open_order(monkeypatch):
     assert [c[0][0] for c in client.cancel_order_by_id.call_args_list] == ["a", "lim"]
 
 
+def test_leveraged_and_inverse_products_are_recognised():
+    from common.broker import _is_leveraged_or_inverse
+
+    # esclusi: introdurrebbero leva 2-3x per via indiretta
+    assert _is_leveraged_or_inverse("ProShares UltraPro QQQ")
+    assert _is_leveraged_or_inverse("Direxion Daily Semiconductor Bull 3X Shares")
+    assert _is_leveraged_or_inverse("ProShares Short S&P500")
+    assert _is_leveraged_or_inverse("ProShares UltraShort 20+ Year Treasury")
+    assert _is_leveraged_or_inverse("Direxion Daily Financial Bear 3X")
+
+    # ammessi: azioni e ETF normali, compresi obbligazionari e oro
+    assert not _is_leveraged_or_inverse("Apple Inc. Common Stock")
+    assert not _is_leveraged_or_inverse("SPDR S&P 500 ETF Trust")
+    assert not _is_leveraged_or_inverse("iShares 20+ Year Treasury Bond ETF")
+    assert not _is_leveraged_or_inverse("SPDR Gold Shares")
+    assert not _is_leveraged_or_inverse("Vanguard Total Stock Market ETF")
+
+
+def test_list_tradable_symbols_includes_etfs_and_drops_leveraged(monkeypatch):
+    from alpaca.trading.enums import AssetExchange
+
+    def _asset(symbol, name, exchange=AssetExchange.NASDAQ, tradable=True):
+        a = MagicMock()
+        a.symbol, a.name, a.exchange, a.tradable = symbol, name, exchange, tradable
+        return a
+
+    broker, client = _broker_with_client(monkeypatch, [])
+    client.get_all_assets.return_value = [
+        _asset("AAPL", "Apple Inc. Common Stock"),
+        _asset("SPY", "SPDR S&P 500 ETF Trust", AssetExchange.ARCA),
+        _asset("TLT", "iShares 20+ Year Treasury Bond ETF", AssetExchange.NASDAQ),
+        _asset("TQQQ", "ProShares UltraPro QQQ"),                       # a leva -> fuori
+        _asset("SQQQ", "ProShares UltraPro Short QQQ"),                 # inverso -> fuori
+        _asset("OTCX", "Some OTC Thing", AssetExchange.OTC),            # OTC -> fuori
+        _asset("NOPE", "Untradable Inc", tradable=False),               # non negoziabile -> fuori
+    ]
+
+    assert broker.list_tradable_symbols() == ["AAPL", "SPY", "TLT"]
+
+
 def test_submit_stop_does_not_cancel_other_orders(monkeypatch):
     broker, client = _broker_with_client(monkeypatch, [_stop_order("keep")])
 

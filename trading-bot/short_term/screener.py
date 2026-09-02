@@ -76,6 +76,19 @@ def proximity_to_52w_extreme(daily: pd.DataFrame, direction: str) -> float:
     return low / last if last > 0 else 0.0
 
 
+# Gli ETF settoriali sono ~11 in tutto e servono a ogni candidato: senza
+# cache, con l'universo full-market (fino a 300 titoli) verrebbero
+# riscaricati centinaia di volte per ciclo. La cache dura un ciclo e viene
+# svuotata all'inizio di ogni scansione (i dati devono essere freschi).
+_sector_cache: dict[str, pd.DataFrame] = {}
+
+
+def _sector_bars(sector_etf: str) -> pd.DataFrame:
+    if sector_etf not in _sector_cache:
+        _sector_cache[sector_etf] = get_daily_bars(sector_etf, period="1y")
+    return _sector_cache[sector_etf]
+
+
 def rank_candidates(candidates: list[Candidate]) -> list[Candidate]:
     """Ordina i candidati dal migliore al peggiore. Conta solo quando i
     candidati sono piu' dei posti liberi nel tetto di rischio aggregato:
@@ -170,7 +183,7 @@ def _build_candidate(
     sector_passes = False
     if sector_etf is not None:
         try:
-            sector_df = get_daily_bars(sector_etf, period="1y")
+            sector_df = _sector_bars(sector_etf)
             analysis = sector.sector_check(daily, sector_df, sp500_df, russell_df, direction, sector_etf)
             sector_passes = analysis.passes
             if not sector_passes:
@@ -290,6 +303,7 @@ def screen_universe(
         else:
             symbols = config.SHORT_TERM_WATCHLIST
     capital = capital if capital is not None else config.SHORT_TERM_CAPITAL
+    _sector_cache.clear()  # dati freschi a ogni ciclo
 
     sp500_df = get_daily_bars(sector.SP500_PROXY, period="2y")
     russell_df = get_daily_bars(sector.RUSSELL2000_PROXY, period="1y")

@@ -21,6 +21,7 @@ from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import AssetClass, AssetExchange, AssetStatus, OrderClass, OrderSide, QueryOrderStatus, TimeInForce
 from alpaca.trading.requests import (
     GetAssetsRequest,
+    GetCalendarRequest,
     GetOrdersRequest,
     LimitOrderRequest,
     MarketOrderRequest,
@@ -37,6 +38,23 @@ log = logging.getLogger("bot")
 # scarsa trasparenza) e le sedi non-equity (crypto, ecc.).
 _ALLOWED_EXCHANGES = {AssetExchange.NYSE, AssetExchange.NASDAQ, AssetExchange.ARCA, AssetExchange.AMEX, AssetExchange.BATS}
 
+# ETF a leva (2x/3x) e inversi: superano facilmente il filtro di volatilita'
+# proprio perche' amplificano i movimenti, quindi il bot li sceglierebbe
+# spesso -- ma comprarli rischiando l'1% significa avere leva 2-3 sul
+# mercato per via indiretta, cioe' esattamente il rischio che la strategia
+# esclude (nessuna leva, vedi STRATEGY.md). In piu' il decadimento
+# giornaliero li rende inadatti a posizioni tenute settimane. Alpaca non
+# ha un flag per identificarli: si riconoscono dal nome del prodotto.
+_LEVERAGED_NAME_MARKERS = (
+    "2X", "3X", "-1X", "1.5X", "ULTRA", "ULTRASHORT", "ULTRAPRO",
+    "LEVERAGED", "INVERSE", "BEAR", "BULL ", " BULL", "SHORT ", "DAILY ",
+)
+
+
+def _is_leveraged_or_inverse(name: str) -> bool:
+    upper = f" {name.upper()} "
+    return any(marker in upper for marker in _LEVERAGED_NAME_MARKERS)
+
 
 class Broker:
     def __init__(self) -> None:
@@ -48,6 +66,15 @@ class Broker:
 
     def is_market_open(self) -> bool:
         return bool(self.client.get_clock().is_open)
+
+    def is_trading_day(self, day) -> bool:
+        """Vero se in quella data la borsa USA ha (o ha avuto) una seduta --
+        falso su weekend e festivi. Serve al ciclo di breve termine, che gira
+        DOPO la chiusura: "mercato aperto adesso" sarebbe sempre falso a
+        quell'ora, ma il giorno di borsa c'e' stato e le sue barre sono
+        definitive."""
+        days = self.client.get_calendar(GetCalendarRequest(start=day, end=day))
+        return len(days) > 0
 
     def get_equity(self) -> float:
         return float(self.client.get_account().equity)
@@ -92,17 +119,29 @@ class Broker:
     # --- short_term: universo full-market (invece della watchlist statica) --
 
     def list_tradable_symbols(self) -> list[str]:
-        """Tutti i titoli azionari USA effettivamente negoziabili su Alpaca
-        (NYSE/NASDAQ/ARCA/AMEX/BATS), esclusi OTC e simboli non "semplici"
-        (warrant/unit/azioni privilegiate hanno suffissi non alfabetici) --
-        sostituisce la watchlist fissa quando SHORT_TERM_USE_FULL_MARKET=true."""
+        """Tutto il mercato USA negoziabile su Alpaca (NYSE/NASDAQ/ARCA/
+        AMEX/BATS): azioni **e** ETF, inclusi obbligazionari, oro, settoriali
+        -- Alpaca li classifica tutti come us_equity. Esclusi: OTC, simboli
+        non "semplici" (warrant/unit/privilegiate hanno suffissi non
+        alfabetici) e i prodotti a LEVA o inversi (vedi
+        _is_leveraged_or_inverse). Sostituisce la watchlist fissa quando
+        SHORT_TERM_USE_FULL_MARKET=true."""
         request = GetAssetsRequest(asset_class=AssetClass.US_EQUITY, status=AssetStatus.ACTIVE)
         assets = self.client.get_all_assets(request)
         symbols = [
             a.symbol
             for a in assets
-            if a.tradable and a.exchange in _ALLOWED_EXCHANGES and a.symbol.isalpha() and len(a.symbol) <= 5
+            if a.tradable
+            and a.exchange in _ALLOWED_EXCHANGES
+            and a.symbol.isalpha()
+            and len(a.symbol) <= 5
+            and not _is_leveraged_or_inverse(getattr(a, "name", "") or "")
         ]
+        excluded = sum(
+            1 for a in assets
+            if a.tradable and a.exchange in _ALLOWED_EXCHANGES and _is_leveraged_or_inverse(getattr(a, "name", "") or "")
+        )
+        log.info("Universo Alpaca: %d strumenti negoziabili (esclusi %d a leva/inversi).", len(symbols), excluded)
         return sorted(set(symbols))
 
     def liquidity_snapshot(self, symbols: list[str], batch_size: int = 200) -> dict[str, dict]:

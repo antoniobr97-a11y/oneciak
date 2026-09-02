@@ -1003,6 +1003,24 @@ stato (a) definisce cosa fare su un conto nuovo, dove "dentro se già
 dentro" non ha senso, e (b) si auto-ripara se il ciclo di un mese è stato
 saltato — un incrocio perso non si rivede mai più, lo stato sì.
 
+## Configurazione operativa scelta (cosa gira davvero)
+
+Dopo tutti i test, il bot parte così — ogni scelta rimanda alla sezione
+che la giustifica:
+
+| Cosa | Impostazione | Perché |
+|---|---|---|
+| Universo | **tutto il mercato USA** (azioni + ETF), non la watchlist fissa | richiesta esplicita dell'utente; v8/v9 mostrano che più titoli *di qualità* alzano il rendimento a parità di rischio per operazione |
+| Prodotti a leva/inversi | **esclusi** | passerebbero il filtro di volatilità ma introdurrebbero leva 2-3x indiretta, contro la scelta "niente leva" |
+| Prefiltri | liquidità (prezzo, volume$, 100k pezzi) + volatilità ≥25% annua | v4: senza il filtro di volatilità l'universo largo *peggiora* i risultati |
+| Direzione | **solo long** | v6: gli short perdono in ogni backtest |
+| Filtro di regime | attivo (long solo con SPY sopra la SMA200) | v5 |
+| Priorità tra candidati | vicinanza al massimo a 52 settimane | v9: unica modifica che migliora rendimento *e* drawdown insieme |
+| Rischio per operazione | 1%, tetto aggregato 12% | corso; v6b mostra che all'1.5% il rapporto peggiora |
+| Freno di drawdown | **spento** | v8b: peggiora il drawdown invece di ridurlo |
+| Orario del ciclo | 16:15 New York, **dopo la chiusura** | barra definitiva come nel backtest e come nel corso; gli ordini GTC aspettano la riapertura |
+| Lungo termine | Harry Browne (ribilanciamento trimestrale al 25%) | +6.1%/anno con Sharpe 0.80 contro +3.3%/Sharpe 0.60 di Advanced |
+
 ## Fonti consultate oltre al corso (e cosa hanno cambiato)
 
 Solo le fonti che hanno inciso su una decisione concreta, non una

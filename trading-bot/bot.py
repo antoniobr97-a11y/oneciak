@@ -220,10 +220,11 @@ def run_long_term_cycle(broker: Broker, execute: bool, today: date | None = None
 
 def cmd_long_term_once(args: argparse.Namespace) -> None:
     broker = Broker()
-    if args.execute and not broker.is_market_open():
-        log.info("Mercato chiuso, salto il ciclo di lungo termine.")
+    today = date.today()
+    if args.execute and not broker.is_trading_day(today):
+        log.info("Oggi la borsa USA e' chiusa (weekend o festivo), salto il ciclo di lungo termine.")
         return
-    run_long_term_cycle(broker, execute=args.execute)
+    run_long_term_cycle(broker, execute=args.execute, today=today)
     if not args.execute:
         print("\n(report only -- passa --execute per inviare gli ordini in paper trading)")
 
@@ -512,10 +513,16 @@ def _drawdown_brake_active(broker: Broker, today: date | None = None) -> bool:
 
 def cmd_short_term_once(args: argparse.Namespace) -> None:
     broker = Broker()
-    if not broker.is_market_open():
-        log.info("Mercato chiuso, salto il ciclo.")
-        return
     today = date.today()
+    # Il ciclo gira DOPO la chiusura di Wall Street (vedi RUN_TIME): la
+    # barra del giorno e' definitiva, come nel backtest e come nel corso
+    # ("si analizza la sera, si piazzano gli ordini per il giorno dopo").
+    # Gli ordini sono GTC: restano in coda e si attivano alla riapertura.
+    # Quindi la condizione giusta non e' "il mercato e' aperto adesso" ma
+    # "oggi c'e' stata una seduta".
+    if not broker.is_trading_day(today):
+        log.info("Oggi la borsa USA e' chiusa (weekend o festivo), salto il ciclo.")
+        return
 
     manage_open_short_term_positions(broker)
 

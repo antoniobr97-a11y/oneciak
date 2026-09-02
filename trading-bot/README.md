@@ -91,27 +91,31 @@ python bot.py short-term-once --execute
 
 python bot.py schedule
 # short-term-once + long-term-once, ogni giorno feriale a RUN_TIME
-# (America/New_York). Il lungo termine e' idempotente: gira ogni giorno ma
-# agisce una sola volta per mese (Advanced) o per trimestre (Harry Browne).
+# (America/New_York, default 16:15 = DOPO la chiusura, cosi' la barra del
+# giorno e' definitiva come nel backtest; gli ordini sono GTC e restano in
+# coda per la riapertura). Il lungo termine e' idempotente: gira ogni
+# giorno ma agisce una volta al mese (Advanced) o al trimestre (Harry Browne).
 ```
 
 ### Universo full-market (scansionare tutto il mercato USA)
 
-Di default il breve termine scansiona `SHORT_TERM_WATCHLIST`, la lista fissa
-di 42 titoli validata nel backtest storico (i 34 USA originali + 8 ADR di
-grandi aziende non-USA: Toyota, ASML, TSMC, Novo Nordisk, TotalEnergies,
-Rio Tinto, Sony, BHP — vedi STRATEGY.md "v4" per il dettaglio). Per non
-limitarsi del tutto ai "soliti titoli famosi" e coprire tutto il mercato
-USA, imposta in `.env`:
+**Di default (`SHORT_TERM_USE_FULL_MARKET=true`) il bot scansiona tutto il
+mercato USA**, non una lista fissa. Per tornare alla watchlist curata di 42
+titoli validata nel backtest (i 34 USA originali + 8 ADR non-USA: Toyota,
+ASML, TSMC, Novo Nordisk, TotalEnergies, Rio Tinto, Sony, BHP — vedi
+STRATEGY.md "v4") basta mettere `SHORT_TERM_USE_FULL_MARKET=false` in
+`.env`: in quel caso viene usata `SHORT_TERM_WATCHLIST`.
 
-```bash
-SHORT_TERM_USE_FULL_MARKET=true
-```
-
-Con questa opzione il bot, a ogni ciclo:
-1. chiede ad Alpaca la lista di **tutti** i titoli azionari USA tradable
-   (NYSE/NASDAQ/ARCA/AMEX/BATS, esclusi OTC e simboli non "semplici" come
-   warrant/unit/azioni privilegiate) — `common/broker.py:list_tradable_symbols`;
+In modalità full-market il bot, a ogni ciclo:
+1. chiede ad Alpaca la lista di **tutto il mercato USA negoziabile** —
+   azioni **e** ETF (compresi obbligazionari, oro, settoriali: Alpaca li
+   classifica tutti come `us_equity`) su NYSE/NASDAQ/ARCA/AMEX/BATS.
+   Esclusi: OTC, simboli non "semplici" (warrant/unit/privilegiate) e i
+   **prodotti a leva o inversi** (TQQQ, SQQQ, UltraPro, Direxion 3X…):
+   passerebbero facilmente il filtro di volatilità proprio perché
+   amplificano i movimenti, ma comprarli rischiando l'1% significherebbe
+   avere leva 2-3x per via indiretta, cioè il rischio che la strategia
+   esclude per scelta — `common/broker.py:list_tradable_symbols`;
 2. applica un **prefiltro di liquidità** (prezzo minimo
    `SHORT_TERM_MIN_PRICE_FULL_MARKET`, volume$ medio minimo
    `SHORT_TERM_MIN_DOLLAR_VOLUME`) usando gli snapshot di mercato Alpaca;
@@ -154,7 +158,7 @@ default resta la scelta più testata.
 pip install pytest
 pytest tests/
 ```
-132 test unitari (money management, formule dei livelli, qualificatori di
+135 test unitari (money management, formule dei livelli, qualificatori di
 trend, i 7 pattern e la loro fedeltà al corso, screener/universo
 full-market/filtro di regime, broker
 (volatilità, ordini stop/OCO, ordine delle operazioni), macchina a stati

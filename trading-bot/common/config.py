@@ -36,7 +36,12 @@ ALPACA_API_KEY = os.getenv("ALPACA_API_KEY", "")
 ALPACA_SECRET_KEY = os.getenv("ALPACA_SECRET_KEY", "")
 ALPACA_PAPER = _bool("ALPACA_PAPER", True)
 
-RUN_TIME = os.getenv("RUN_TIME", "15:50")
+# Orario del ciclo giornaliero, fuso orario di mercato (America/New_York).
+# DOPO la chiusura (16:00): la barra del giorno e' definitiva, come nel
+# backtest e come nel corso ("si analizza la sera, si piazzano gli ordini").
+# Gli ordini sono GTC e restano in coda fino alla riapertura, quindi non
+# serve che il mercato sia aperto mentre il bot lavora.
+RUN_TIME = os.getenv("RUN_TIME", "16:15")
 
 # URL webhook opzionale (Telegram/Discord/Slack o endpoint generico che
 # accetta {"text": "..."}) per notifiche di ordini eseguiti ed errori.
@@ -112,7 +117,7 @@ SHORT_TERM_WATCHLIST = _list(
 # prefiltro di liquidità prima della pipeline completa -- vedi
 # short_term/screener.py:build_full_market_universe e STRATEGY.md. Richiede
 # le chiavi Alpaca anche solo per lo screening (la watchlist statica no).
-SHORT_TERM_USE_FULL_MARKET = _bool("SHORT_TERM_USE_FULL_MARKET", False)
+SHORT_TERM_USE_FULL_MARKET = _bool("SHORT_TERM_USE_FULL_MARKET", True)
 # Prefiltro full-market: prezzo minimo (evita penny stock), volume$ medio
 # minimo (liquidità sufficiente per entrare/uscire senza slippage eccessivo)
 # e volume in pezzi minimo (corso, video 18: azioni singole sopra ~100.000
