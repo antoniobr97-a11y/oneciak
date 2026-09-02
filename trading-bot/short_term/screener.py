@@ -48,20 +48,27 @@ ALL_DIRECTIONS = ("long", "short")
 
 
 def allowed_directions(sp500_df: pd.DataFrame) -> tuple[str, ...]:
-    """Filtro di regime di mercato (STRATEGY.md "v5"): long solo se l'indice
-    chiude sopra la sua SMA di lungo periodo, short solo se sotto. Se il
-    filtro e' disattivato o lo storico non basta per la media, entrambe
-    le direzioni restano ammesse (nessun blocco "per sicurezza" non
-    motivato dai dati)."""
+    """Direzioni ammesse in questo ciclo:
+      - SHORT_TERM_ALLOW_SHORTS=false (default, STRATEGY.md "v6"): mai short
+      - filtro di regime di mercato (STRATEGY.md "v5"): long solo se
+        l'indice chiude sopra la sua SMA di lungo periodo, short solo se
+        sotto. Se il filtro e' disattivato o lo storico non basta per la
+        media, il regime non blocca nulla (nessun blocco "per sicurezza"
+        non motivato dai dati).
+    Puo' essere vuota (regime ribassista + short disattivati): in quel caso
+    il bot resta fuori dal mercato, che e' esattamente cio' che il
+    backtest v6 fa negli anni orso."""
+    base = ALL_DIRECTIONS if config.SHORT_TERM_ALLOW_SHORTS else ("long",)
     if not config.MARKET_REGIME_FILTER:
-        return ALL_DIRECTIONS
+        return base
     closes = sp500_df["close"]
     if len(closes) < config.MARKET_REGIME_MA_PERIOD:
-        return ALL_DIRECTIONS
+        return base
     long_ma = sma(closes, config.MARKET_REGIME_MA_PERIOD).iloc[-1]
     if pd.isna(long_ma):
-        return ALL_DIRECTIONS
-    return ("long",) if float(closes.iloc[-1]) > float(long_ma) else ("short",)
+        return base
+    regime = ("long",) if float(closes.iloc[-1]) > float(long_ma) else ("short",)
+    return tuple(d for d in base if d in regime)
 
 
 def scan_symbol(
@@ -248,8 +255,12 @@ def screen_universe(
     russell_df = get_daily_bars(sector.RUSSELL2000_PROXY, period="1y")
 
     directions = allowed_directions(sp500_df)
+    if not directions:
+        log.info("Nessuna direzione ammessa oggi (regime ribassista, short disattivati): nessuna nuova entrata.")
+        return []
     if directions != ALL_DIRECTIONS:
-        log.info("Regime di mercato (%s vs SMA%d): solo %s.", sector.SP500_PROXY, config.MARKET_REGIME_MA_PERIOD, directions[0].upper())
+        log.info("Direzioni ammesse oggi (regime %s vs SMA%d, short=%s): %s.",
+                 sector.SP500_PROXY, config.MARKET_REGIME_MA_PERIOD, config.SHORT_TERM_ALLOW_SHORTS, ", ".join(d.upper() for d in directions))
 
     all_candidates: list[Candidate] = []
     for symbol in symbols:

@@ -135,30 +135,48 @@ def _index_bars(closes):
 
 
 def test_allowed_directions_long_only_in_bull_regime(monkeypatch):
+    monkeypatch.setattr(config, "SHORT_TERM_ALLOW_SHORTS", True)
     monkeypatch.setattr(config, "MARKET_REGIME_FILTER", True)
     monkeypatch.setattr(config, "MARKET_REGIME_MA_PERIOD", 200)
     assert screener.allowed_directions(_index_bars(range(100, 400))) == ("long",)
 
 
-def test_allowed_directions_short_only_in_bear_regime(monkeypatch):
+def test_allowed_directions_short_only_in_bear_regime_when_shorts_enabled(monkeypatch):
+    monkeypatch.setattr(config, "SHORT_TERM_ALLOW_SHORTS", True)
     monkeypatch.setattr(config, "MARKET_REGIME_FILTER", True)
     monkeypatch.setattr(config, "MARKET_REGIME_MA_PERIOD", 200)
     assert screener.allowed_directions(_index_bars(range(400, 100, -1))) == ("short",)
 
 
-def test_allowed_directions_both_when_filter_disabled(monkeypatch):
+def test_allowed_directions_both_when_filter_disabled_and_shorts_enabled(monkeypatch):
+    monkeypatch.setattr(config, "SHORT_TERM_ALLOW_SHORTS", True)
     monkeypatch.setattr(config, "MARKET_REGIME_FILTER", False)
     assert screener.allowed_directions(_index_bars(range(100, 400))) == ("long", "short")
 
 
 def test_allowed_directions_both_without_enough_history(monkeypatch):
+    monkeypatch.setattr(config, "SHORT_TERM_ALLOW_SHORTS", True)
     monkeypatch.setattr(config, "MARKET_REGIME_FILTER", True)
     monkeypatch.setattr(config, "MARKET_REGIME_MA_PERIOD", 200)
     assert screener.allowed_directions(_index_bars(range(100, 150))) == ("long", "short")
 
 
+def test_allowed_directions_default_never_shorts(monkeypatch):
+    monkeypatch.setattr(config, "SHORT_TERM_ALLOW_SHORTS", False)
+    monkeypatch.setattr(config, "MARKET_REGIME_FILTER", False)
+    assert screener.allowed_directions(_index_bars(range(400, 100, -1))) == ("long",)
+
+
+def test_allowed_directions_empty_in_bear_regime_without_shorts(monkeypatch):
+    monkeypatch.setattr(config, "SHORT_TERM_ALLOW_SHORTS", False)
+    monkeypatch.setattr(config, "MARKET_REGIME_FILTER", True)
+    monkeypatch.setattr(config, "MARKET_REGIME_MA_PERIOD", 200)
+    assert screener.allowed_directions(_index_bars(range(400, 100, -1))) == ()
+
+
 def test_screen_universe_passes_regime_directions_to_scan(monkeypatch):
     monkeypatch.setattr(config, "SHORT_TERM_USE_FULL_MARKET", False)
+    monkeypatch.setattr(config, "SHORT_TERM_ALLOW_SHORTS", True)
     monkeypatch.setattr(config, "MARKET_REGIME_FILTER", True)
     monkeypatch.setattr(config, "MARKET_REGIME_MA_PERIOD", 200)
     seen = {}
@@ -168,3 +186,16 @@ def test_screen_universe_passes_regime_directions_to_scan(monkeypatch):
     screener.screen_universe(symbols=["AAPL"])
 
     assert seen["AAPL"] == ("long",)
+
+
+def test_screen_universe_scans_nothing_in_bear_regime_without_shorts(monkeypatch):
+    monkeypatch.setattr(config, "SHORT_TERM_USE_FULL_MARKET", False)
+    monkeypatch.setattr(config, "SHORT_TERM_ALLOW_SHORTS", False)
+    monkeypatch.setattr(config, "MARKET_REGIME_FILTER", True)
+    monkeypatch.setattr(config, "MARKET_REGIME_MA_PERIOD", 200)
+    scanned = []
+    monkeypatch.setattr(screener, "scan_symbol", lambda symbol, *a, **k: scanned.append(symbol) or [])
+    monkeypatch.setattr(screener, "get_daily_bars", lambda symbol, period="1y": _index_bars(range(400, 100, -1)))
+
+    assert screener.screen_universe(symbols=["AAPL"]) == []
+    assert scanned == []

@@ -292,9 +292,11 @@ Vedi STRATEGY.md per i dettagli e le soglie esatte. Riassunto:
 - `short_term/money_management.py`: sizing, tetto di rischio aggregato,
   matematica del drawdown, Profit Factor
 - `short_term/screener.py`: mette insieme tutto quanto sopra su una
-  watchlist, per entrambe le direzioni (long/short), con il filtro di
-  regime di mercato (long solo se SPY è sopra la SMA200, short solo se
-  sotto — validato nel backtest, STRATEGY.md "v5")
+  watchlist, con il filtro di regime di mercato (long solo se SPY è sopra
+  la SMA200, short solo se sotto — STRATEGY.md "v5") e, di default, **solo
+  long**: gli short sono implementati come da corso ma in perdita netta in
+  ogni backtest, disattivati salvo `SHORT_TERM_ALLOW_SHORTS=true`
+  (STRATEGY.md "v6")
 
 ## Limiti noti
 

@@ -493,6 +493,47 @@ Due cose da leggere in questi numeri, onestamente:
 Il filtro è nel bot live (`MARKET_REGIME_FILTER=true` di default,
 `short_term/screener.py:allowed_directions`), disattivabile da `.env`.
 
+### v6: niente short (solo long, con filtro di regime)
+
+**Ipotesi.** Il corso insegna entrambe le direzioni e il codice le
+implementa per intero (pattern speculari, livelli, gestione). Ma il lato
+short è in perdita netta in **ogni** backtest fatto — v1, v2, v3, v4a, v4b
+(ADR), v5 — con Profit Factor tra 0.67 e 0.70, anche quando il filtro di
+regime lo limita ai soli mercati ribassisti. Non è un caso di un singolo
+universo o periodo: 2000-2026 include tre mercati orso (2000-02, 2008,
+2022) e gli short perdono lo stesso. La spiegazione più semplice è
+strutturale: nei ribassi le azioni scendono più in fretta ma con rimbalzi
+violenti che colpiscono lo stop (asimmetria documentata, vedi fonti in
+v5); il sistema, pensato per cavalcare trend, sul lato short paga stop
+più spesso di quanto incassi.
+
+**Test a parità di tutto il resto** (v5 + short disattivati):
+
+| Metrica | v5: regime, long+short | **v6: regime, solo long** |
+|---|---|---|
+| CAGR | +4.08%/anno | **+4.53%/anno** |
+| Max drawdown | -15.7% | **-13.0%** |
+| Sharpe | 0.52 | **0.61** |
+| Profit Factor per operazione | 1.54 | **1.71** |
+| Win rate per operazione | 54.5% | 55.5% |
+| Operazioni (26.7 anni) | 470 | 393 |
+| Anni orso: 2002 / 2008 / 2022 | -4.9% / -3.9% / -7.4% | **-1.0% / -2.9% / -4.4%** |
+
+È il miglioramento più netto tra tutte le versioni: ogni metrica migliora
+e il drawdown scende di quasi 3 punti, esattamente nella direzione del
+"rischio basso" scelto. Nel bot live gli short sono quindi **disattivati
+di default** (`SHORT_TERM_ALLOW_SHORTS=false`): quando SPY è sotto la
+SMA200 il bot semplicemente non apre nuove posizioni e gestisce solo
+quelle esistenti. Chi vuole seguire il corso alla lettera li riattiva da
+`.env`, sapendo cosa dicono i numeri.
+
+Nota di metodo, per non ingannarsi: v5 e v6 sono state decise **prima** di
+vedere i risultati, su un'ipotesi motivata (letteratura + risultati
+coerenti di tutte le versioni precedenti), non cercando a tentativi la
+configurazione che rendesse di più. Sono state testate due sole varianti,
+entrambe con una ragione economica chiara — non cento parametri fino a
+trovare quello "giusto" per il passato.
+
 Durante la costruzione di questi backtest sono stati trovati e corretti
 **5 bug** specifici della simulazione storica (non nel codice del bot): un
 bias look-ahead nel segnale mensile (usava il mese in corso invece

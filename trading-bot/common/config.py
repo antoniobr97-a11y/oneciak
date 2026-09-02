@@ -191,3 +191,11 @@ SECTOR_RS_LOOKBACK_DAYS = _int("SECTOR_RS_LOOKBACK_DAYS", 60)
 # rendimento dell'S&P 500 sopra/sotto la SMA200.
 MARKET_REGIME_FILTER = _bool("MARKET_REGIME_FILTER", True)
 MARKET_REGIME_MA_PERIOD = _int("MARKET_REGIME_MA_PERIOD", 200)
+
+# Operazioni short (STRATEGY.md "v6"): il corso le prevede e il codice le
+# implementa per intero, ma in OGNI backtest 2000-2026 (v1-v5) il lato
+# short e' in perdita netta (Profit Factor ~0.7) anche col filtro di
+# regime, mentre toglierle migliora tutte le metriche (Sharpe 0.52 -> 0.61,
+# drawdown -15.7% -> -13.0%). Default: solo long. Mettere true per
+# riattivare gli short come da corso.
+SHORT_TERM_ALLOW_SHORTS = _bool("SHORT_TERM_ALLOW_SHORTS", False)
