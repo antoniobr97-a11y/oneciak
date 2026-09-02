@@ -312,6 +312,6 @@ Vedi STRATEGY.md per i dettagli e le soglie esatte. Riassunto:
   2000-2026 (vedi STRATEGY.md, "Risultati del backtest storico") mostra un
   Profit Factor sopra 1 e drawdown contenuto con la disciplina completa
   attiva, ma resta sotto un semplice buy-and-hold sull'indice nello stesso
-  periodo, su un universo di 20 titoli e con diverse semplificazioni
+  periodo, su un universo di 42 titoli e con diverse semplificazioni
   dichiarate — nessun backtest sostituisce settimane/mesi di paper trading
   reale prima di fidarsi.
