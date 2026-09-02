@@ -527,12 +527,43 @@ SMA200 il bot semplicemente non apre nuove posizioni e gestisce solo
 quelle esistenti. Chi vuole seguire il corso alla lettera li riattiva da
 `.env`, sapendo cosa dicono i numeri.
 
-Nota di metodo, per non ingannarsi: v5 e v6 sono state decise **prima** di
-vedere i risultati, su un'ipotesi motivata (letteratura + risultati
-coerenti di tutte le versioni precedenti), non cercando a tentativi la
-configurazione che rendesse di più. Sono state testate due sole varianti,
-entrambe con una ragione economica chiara — non cento parametri fino a
-trovare quello "giusto" per il passato.
+### v7: time-stop a 20 barre — testato e **scartato**
+
+**Ipotesi.** Il corso vuole il breve termine "immediato" e nel backtest
+la mediana dei giorni per arrivare a 1R è ~13: un trade che dopo un mese
+non è ancora partito forse non è più il trade che si era comprato.
+Regola classica (Raschke/Connors, Van Tharp: "time stop"): chiudere in
+chiusura dopo 20 barre se non si è ancora raggiunto 1R.
+
+**Risultato, a parità di tutto il resto (v5 + time-stop):**
+
+| Metrica | v5 (regime) | v7 (regime + time-stop 20) |
+|---|---|---|
+| CAGR | +4.08%/anno | **+3.33%/anno (peggio)** |
+| Max drawdown | -15.7% | -16.1% (peggio) |
+| Sharpe | 0.52 | **0.46 (peggio)** |
+| Profit Factor per operazione | 1.54 | 1.48 (peggio) |
+| Uscite a 3R / sulla SMA200 | 94 / 68 | **74 / 51** |
+| Durata al 90° percentile | 278 gg | 177 gg |
+
+Il time-stop fa quello che promette (le posizioni lunghe si accorciano:
+90° percentile da 278 a 177 giorni) ma **costa**: le 100 operazioni
+chiuse per tempo chiudono in pari (+$1.138 in totale), e in cambio
+spariscono 20 uscite a 3R e 17 uscite sul runner — cioè una parte di
+quei trade "lenti a partire" sarebbe diventata proprio le vincite grandi
+che reggono tutto il sistema (vedi punto 6 del modello). In un sistema
+asimmetrico come questo, tagliare i lenti è tagliare anche i futuri
+grandi. **Non entra nel bot.** La preferenza per operazioni brevi resta
+soddisfatta dal sistema com'è (mediana ~27 giorni per posizione): forzarla
+oltre costa rendimento.
+
+Nota di metodo, per non ingannarsi: v5, v6 e v7 sono state decise
+**prima** di vedere i risultati, su un'ipotesi motivata (letteratura +
+risultati coerenti delle versioni precedenti + regole del corso), non
+cercando a tentativi la configurazione che rendesse di più. Tre varianti,
+ognuna con una ragione economica chiara; due accettate, una scartata e
+documentata lo stesso — non cento parametri fino a trovare quello
+"giusto" per il passato.
 
 Durante la costruzione di questi backtest sono stati trovati e corretti
 **5 bug** specifici della simulazione storica (non nel codice del bot): un
