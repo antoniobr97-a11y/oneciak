@@ -461,6 +461,57 @@ un giorno, un crash sui titoli con storico più corto (quotati dopo il
 la mappatura settoriale mancante per le ADR (v4, sopra) che le escludeva
 sempre dal test.
 
+## Audit del codice live (bug trovati e corretti prima del paper trading)
+
+Dopo i backtest, revisione riga per riga del codice che manda ordini veri
+(`bot.py`, `common/broker.py`), cercando errori che nessun backtest può
+vedere perché riguardano il rapporto col broker, non la strategia. Trovati
+e corretti **5 problemi reali**, tutti coperti da test:
+
+1. **Stop-loss che scadeva a fine giornata (il più grave).** L'ordine di
+   entrata era un OTO con time-in-force DAY: la gamba stop-loss eredita il
+   TIF del padre, quindi lo stop veniva cancellato alla chiusura dello
+   stesso giorno in cui il bot entra (alle 15:50). Dal giorno dopo ogni
+   posizione restava **senza protezione**, per tutta la sua durata (giorni
+   o settimane). Fix: GTC. In più, auto-riparazione: a ogni ciclo, se una
+   posizione non ha uno stop attivo al broker, viene riemesso (allo stop
+   originale prima di 1R, al pareggio dopo) e notificato — il livello di
+   stop originale è ora salvato nello stato apposta per questo.
+2. **Chiusura parziale rifiutata dal broker.** Su Alpaca un ordine di
+   vendita aperto (lo stop) riserva le azioni: la vendita di metà
+   posizione a 1R veniva inviata PRIMA di cancellare lo stop → rifiuto
+   "insufficient qty available", ogni giorno, per sempre (l'errore era
+   catturato e loggato, ma la regola 1R non veniva mai eseguita). Fix:
+   cancella gli stop → chiusura parziale → nuovo stop sul residuo.
+3. **Stop a pareggio con quantità sbagliata dopo 3R.** Dopo la seconda
+   chiusura parziale lo stop non veniva riemesso: quello esistente copriva
+   la quantità pre-3R (più azioni di quelle rimaste) e, se scattato,
+   avrebbe tentato di vendere azioni non possedute. Fix: riemesso sul nuovo
+   residuo. Stessa cura per la chiusura totale del runner (cancella gli
+   stop prima di chiudere).
+4. **Leva nascosta nel sizing live.** Il conto paper Alpaca ha margine di
+   default: il sizing a rischio % non limitava l'esposizione in dollari
+   alla cassa disponibile (identico al bug trovato e corretto nel
+   backtest). Fix: quantità limitata a `floor(cassa / prezzo)`, cassa
+   decrementata man mano nel ciclo — nessuna leva, come nel backtest.
+   Inoltre gli ETF di lungo termine (stesso conto) sono ora esclusi dal
+   conteggio del tetto di rischio, dalla gestione a scaglioni e
+   dall'equity su cui si calcola il rischio % del breve termine.
+5. **Segnale mensile Advanced calcolato sul mese in corso.** Il resample
+   mensile include il mese parziale come ultima barra e il segnale la
+   trattava come "chiusura mensile" — la stessa classe di bug look-ahead
+   trovata nel backtest, presente anche nel codice live. Fix: solo mesi
+   chiusi (`long_term/advanced_portfolio.py:closed_monthly_closes`).
+
+Nella stessa revisione il lungo termine è stato **automatizzato**
+(`bot.py:run_long_term_cycle`, `LONG_TERM_AUTO_STRATEGY` in `.env`), con
+una scelta di design esplicita: il ciclo Advanced usa lo **stato** (chiusura
+mensile chiusa sopra/sotto la SMA10) e non l'incrocio del mese. A regime è
+la stessa cosa (dopo un incrocio dal basso il prezzo È sopra la SMA), ma lo
+stato (a) definisce cosa fare su un conto nuovo, dove "dentro se già
+dentro" non ha senso, e (b) si auto-ripara se il ciclo di un mese è stato
+saltato — un incrocio perso non si rivede mai più, lo stato sì.
+
 ## Cosa NON è coperto da questo codice
 
 - Le due componenti proprietarie del corso (screener "Barchart"/"ProScreener"

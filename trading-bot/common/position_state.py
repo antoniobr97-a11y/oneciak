@@ -37,12 +37,29 @@ def _save(state: dict) -> None:
         log.warning("Impossibile salvare lo stato posizioni (%s): %s", STATE_PATH, exc)
 
 
+# Chiave riservata per lo stato NON legato a un singolo titolo (es. ultimo
+# mese processato dal ciclo Advanced, data dell'ultimo ribilanciamento
+# Harry Browne). Esclusa da tracked_symbols(), altrimenti la pulizia degli
+# "orfani" in bot.py la cancellerebbe come un titolo non piu' in posizione.
+_META_KEY = "_meta"
+
+
 def get(symbol: str) -> dict:
     return _load().get(symbol, {})
 
 
 def tracked_symbols() -> list[str]:
-    return list(_load().keys())
+    return [k for k in _load().keys() if k != _META_KEY]
+
+
+def get_meta(key: str, default=None):
+    return _load().get(_META_KEY, {}).get(key, default)
+
+
+def set_meta(key: str, value) -> None:
+    state = _load()
+    state.setdefault(_META_KEY, {})[key] = value
+    _save(state)
 
 
 def set_fields(symbol: str, **fields) -> None:

@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock
+
 import pytest
 
 from common import config
@@ -70,3 +72,61 @@ def test_volatility_snapshot_skips_symbols_missing_from_response(monkeypatch):
     result = broker.volatility_snapshot(["MISSING"])
 
     assert result == {}
+
+
+# --- audit: ordine delle operazioni sugli stop ---------------------------------
+
+def _stop_order(order_id="stop-1"):
+    o = MagicMock()
+    o.id = order_id
+    o.order_type = "stop"
+    return o
+
+
+def _broker_with_client(monkeypatch, open_orders):
+    monkeypatch.setattr(config, "ALPACA_API_KEY", "test_key")
+    monkeypatch.setattr(config, "ALPACA_SECRET_KEY", "test_secret")
+    broker = Broker()
+    client = MagicMock()
+    client.get_orders.return_value = open_orders
+    broker.client = client
+    return broker, client
+
+
+def test_close_partial_cancels_open_stop_before_submitting(monkeypatch):
+    broker, client = _broker_with_client(monkeypatch, [_stop_order()])
+
+    broker.close_partial("AAPL", 5, "long")
+
+    names = [c[0] for c in client.method_calls if c[0] in ("cancel_order_by_id", "submit_order")]
+    assert names == ["cancel_order_by_id", "submit_order"]
+
+
+def test_flatten_cancels_open_stops_before_closing(monkeypatch):
+    broker, client = _broker_with_client(monkeypatch, [_stop_order("a"), _stop_order("b")])
+
+    broker.flatten("AAPL")
+
+    names = [c[0] for c in client.method_calls if c[0] in ("cancel_order_by_id", "close_position")]
+    assert names == ["cancel_order_by_id", "cancel_order_by_id", "close_position"]
+
+
+def test_place_stop_replaces_existing_stop_with_gtc(monkeypatch):
+    broker, client = _broker_with_client(monkeypatch, [_stop_order()])
+
+    broker.place_stop("AAPL", 5, 100.0, "long")
+
+    client.cancel_order_by_id.assert_called_once_with("stop-1")
+    submitted = client.submit_order.call_args[0][0]
+    assert str(submitted.time_in_force).lower().endswith("gtc")
+    assert submitted.qty == 5 and submitted.stop_price == 100.0
+
+
+def test_enter_with_stop_uses_gtc_so_the_stop_leg_survives_the_day(monkeypatch):
+    broker, client = _broker_with_client(monkeypatch, [])
+
+    broker.enter_with_stop("AAPL", 10, "long", 95.0)
+
+    submitted = client.submit_order.call_args[0][0]
+    assert str(submitted.time_in_force).lower().endswith("gtc")
+    assert submitted.stop_loss.stop_price == 95.0

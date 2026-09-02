@@ -65,6 +65,13 @@ python bot.py long-term-pac --deposit 500 --strategy harry_browne
 python bot.py long-term-pac --deposit 500 --strategy advanced --execute
 # Ordini di acquisto per un versamento PAC (non vende mai). --execute li
 # invia davvero in paper trading, altrimenti stampa solo il report.
+
+python bot.py long-term-once
+python bot.py long-term-once --execute
+# Il ciclo AUTOMATICO di lungo termine (quello che lo scheduler lancia ogni
+# giorno): Advanced = dentro/fuori per asset sulla SMA10 mensile, una
+# decisione al mese; Harry Browne = ribilanciamento al 25% a ogni
+# REBALANCE_FREQUENCY. Scegli quale con LONG_TERM_AUTO_STRATEGY in .env.
 ```
 
 **Breve termine:**
@@ -75,11 +82,14 @@ python bot.py short-term-screen
 
 python bot.py short-term-once --execute
 # Un ciclo completo: gestisce le posizioni aperte (chiusura a metà su 1R,
-# stop al pareggio), poi screena ed entra sui nuovi candidati rispettando
-# il tetto di rischio aggregato.
+# stop al pareggio, seconda quota a 3R, runner, auto-riparazione dello
+# stop se manca), poi screena ed entra sui nuovi candidati rispettando il
+# tetto di rischio aggregato e la cassa disponibile (nessuna leva).
 
 python bot.py schedule
-# Come sopra, schedulato ogni giorno feriale a RUN_TIME (America/New_York).
+# short-term-once + long-term-once, ogni giorno feriale a RUN_TIME
+# (America/New_York). Il lungo termine e' idempotente: gira ogni giorno ma
+# agisce una sola volta per mese (Advanced) o per trimestre (Harry Browne).
 ```
 
 ### Universo full-market (scansionare tutto il mercato USA)
@@ -141,8 +151,9 @@ default resta la scelta più testata.
 pip install pytest
 pytest tests/
 ```
-66 test unitari (money management, formule dei livelli, qualificatori di
-trend, i 7 pattern, screener/universo full-market, broker (volatilità),
+92 test unitari (money management, formule dei livelli, qualificatori di
+trend, i 7 pattern, screener/universo full-market, broker (volatilità,
+ordine delle operazioni sugli stop), ciclo automatico di lungo termine,
 orchestrazione di `bot.py` con broker mockato). La
 pipeline completa è stata anche sottoposta a uno stress-test con centinaia
 di scenari sintetici multi-regime (vedi STRATEGY.md, "Calibrazione delle
@@ -183,8 +194,9 @@ docker compose up -d --build
 ```
 Fatto: il container riparte da solo anche se il server si riavvia
 (`restart: unless-stopped`), e lancia `python bot.py schedule` — il ciclo
-di breve termine gira ogni giorno feriale all'orario configurato in
-`RUN_TIME` (fuso orario di mercato USA, gestito internamente).
+di breve termine E quello di lungo termine girano ogni giorno feriale
+all'orario configurato in `RUN_TIME` (fuso orario di mercato USA, gestito
+internamente).
 
 **Comandi utili una volta avviato:**
 ```bash
@@ -194,11 +206,31 @@ docker compose down             # ferma tutto
 git pull && docker compose up -d --build   # aggiorna il codice e riavvia
 ```
 
-**Nota:** questo automatizza solo il ciclo di **breve termine** (screening
-+ gestione posizioni ogni giorno). Il lungo termine (Harry Browne/Advanced,
-PAC) per sua natura si rivede al massimo una volta al mese/trimestre — ha
-più senso lanciarlo a mano (`python bot.py long-term-status` /
-`long-term-pac`) quando serve, che schedularlo.
+### Lungo termine automatico
+
+Lo scheduler lancia anche `long-term-once --execute` ogni giorno, subito
+dopo il ciclo di breve termine. Cosa fa dipende da `LONG_TERM_AUTO_STRATEGY`
+in `.env`:
+
+- **`advanced`** (default): per ognuno dei 5 ETF, guarda l'ultima chiusura
+  **mensile chiusa** (mai il mese in corso) contro la SMA10 mensile: sopra →
+  dentro (compra `LONG_TERM_CAPITAL × peso del profilo di rischio`, se non
+  già in posizione), sotto → fuori (vende tutto, se in posizione). Una
+  decisione al mese per asset, mai spostamenti di capitale tra asset
+  (regole rigide di STRATEGY.md 1.2).
+- **`harry_browne`**: riporta i 4 ETF al 25% di `LONG_TERM_CAPITAL` a ogni
+  `REBALANCE_FREQUENCY` (trimestrale di default), mai a soglia di
+  scostamento.
+- **`none`**: lungo termine solo a mano (`long-term-status` / `long-term-pac`).
+
+Il ciclo è **idempotente**: gira ogni giorno ma agisce una sola volta per
+mese/trimestre (lo stato è in `state/positions.json`), quindi un giorno
+festivo o un server spento nel giorno "giusto" non fa saltare il mese —
+viene recuperato al primo giorno utile. Gli ETF di lungo termine vivono
+nello stesso conto Alpaca delle azioni di breve termine ma sono tenuti
+fuori dalla gestione a scaglioni, dal tetto di rischio e dall'equity usata
+per il sizing del breve termine. Il PAC (versamenti periodici) resta
+manuale, perché dipende da quando **tu** versi denaro sul conto.
 
 ### Notifiche (sapere cosa fa il bot senza controllare i log a mano)
 
@@ -248,9 +280,13 @@ Vedi STRATEGY.md per i dettagli e le soglie esatte. Riassunto:
 - `short_term/levels.py`: formula di entrata/stop-loss basata sulla
   volatilità
 - `common/position_state.py` + `bot.py`: gestione della posizione a
-  scaglioni (1R → chiusura a metà + stop a pareggio; 3R → altra quota;
-  10-20% residuo lasciato correre fino all'inversione sulla SMA200) —
-  validata nel backtest storico, vedi STRATEGY.md
+  scaglioni (1R → chiusura a metà + stop a pareggio; 3R → altra quota +
+  stop a pareggio riemesso sul residuo; 10-20% residuo lasciato correre
+  fino all'inversione sulla SMA200) — validata nel backtest storico, vedi
+  STRATEGY.md — più auto-riparazione dello stop (se una posizione non ha
+  uno stop attivo al broker, viene riemesso) e tetto di cassa senza leva
+- `bot.py:run_long_term_cycle`: ciclo automatico di lungo termine
+  (Advanced mensile / Harry Browne trimestrale), idempotente per periodo
 - `short_term/risk_checks.py`: supporti/resistenze, trimestrali, livello di
   prezzo, divergenze MACD settimanali
 - `short_term/money_management.py`: sizing, tetto di rischio aggregato,

@@ -24,6 +24,7 @@ from alpaca.trading.requests import (
     GetOrdersRequest,
     MarketOrderRequest,
     StopLossRequest,
+    StopOrderRequest,
 )
 
 from common import config
@@ -48,6 +49,13 @@ class Broker:
 
     def get_equity(self) -> float:
         return float(self.client.get_account().equity)
+
+    def get_cash(self) -> float:
+        """Cassa disponibile (non il buying power a margine): usata per
+        limitare la size delle nuove posizioni al capitale davvero
+        disponibile, senza leva -- stessa assunzione del backtest storico
+        (STRATEGY.md), che senza questo tetto mostrava una leva impossibile."""
+        return float(self.client.get_account().cash)
 
     def get_open_position_qty(self, symbol: str) -> float:
         try:
@@ -176,11 +184,16 @@ class Broker:
             return None
 
         order_side = OrderSide.BUY if side == "long" else OrderSide.SELL
+        # GTC, non DAY: la gamba stop-loss dell'ordine OTO eredita il
+        # time-in-force del padre. Con DAY lo stop scadeva a fine giornata
+        # (il bot entra alle 15:50, 10 minuti prima della chiusura),
+        # lasciando la posizione SENZA protezione da tutti i giorni
+        # successivi -- bug trovato nell'audit, vedi STRATEGY.md.
         order = MarketOrderRequest(
             symbol=symbol,
             qty=qty,
             side=order_side,
-            time_in_force=TimeInForce.DAY,
+            time_in_force=TimeInForce.GTC,
             order_class=OrderClass.OTO,
             stop_loss=StopLossRequest(stop_price=round(stop_price, 2)),
         )
@@ -191,42 +204,64 @@ class Broker:
         )
         return result
 
-    def get_open_stop_order(self, symbol: str):
+    def _open_stop_orders(self, symbol: str) -> list:
         request = GetOrdersRequest(status=QueryOrderStatus.OPEN, symbols=[symbol])
         orders = self.client.get_orders(request)
-        for order in orders:
-            if order.order_type is not None and "stop" in str(order.order_type).lower():
-                return order
-        return None
+        return [o for o in orders if o.order_type is not None and "stop" in str(o.order_type).lower()]
 
-    def move_stop_to_breakeven(self, symbol: str, qty: float, entry_price: float, side: str) -> None:
-        """Cancel the existing stop order (if any) and replace it with one
-        at the entry price, for the given remaining quantity."""
-        existing = self.get_open_stop_order(symbol)
-        if existing is not None:
+    def get_open_stop_order(self, symbol: str):
+        stops = self._open_stop_orders(symbol)
+        return stops[0] if stops else None
+
+    def cancel_open_stop_orders(self, symbol: str) -> int:
+        """Cancella TUTTI gli stop aperti sul titolo (dopo errori/riemissioni
+        potrebbero essercene piu' di uno). Su Alpaca un ordine di vendita
+        aperto riserva le azioni: qualunque altra vendita sulle stesse
+        azioni (chiusura parziale a 1R/3R, chiusura totale) viene rifiutata
+        con "insufficient qty available" finche' lo stop non e' cancellato
+        -- bug trovato nell'audit, vedi STRATEGY.md. Ritorna il numero di
+        ordini cancellati."""
+        cancelled = 0
+        for order in self._open_stop_orders(symbol):
             try:
-                self.client.cancel_order_by_id(existing.id)
+                self.client.cancel_order_by_id(order.id)
+                cancelled += 1
             except Exception as exc:
-                log.warning("Could not cancel existing stop for %s: %s", symbol, exc)
+                log.warning("Could not cancel stop order %s for %s: %s", order.id, symbol, exc)
+        return cancelled
 
+    def place_stop(self, symbol: str, qty: float, stop_price: float, side: str):
+        """Nuovo ordine stop GTC per la quantita' indicata, dopo aver
+        cancellato gli stop gia' aperti sul titolo (mai due stop attivi
+        sulla stessa posizione)."""
+        if qty <= 0:
+            return None
+        self.cancel_open_stop_orders(symbol)
         stop_side = OrderSide.SELL if side == "long" else OrderSide.BUY
-        from alpaca.trading.requests import StopOrderRequest
-
         order = StopOrderRequest(
             symbol=symbol,
             qty=qty,
             side=stop_side,
             time_in_force=TimeInForce.GTC,
-            stop_price=round(entry_price, 2),
+            stop_price=round(stop_price, 2),
         )
         result = self.client.submit_order(order)
-        log.info("Stop moved to breakeven: %s qty=%s stop=%.2f order_id=%s", symbol, qty, entry_price, result.id)
+        log.info("Stop placed: %s qty=%s stop=%.2f order_id=%s", symbol, qty, stop_price, result.id)
+        return result
+
+    def move_stop_to_breakeven(self, symbol: str, qty: float, entry_price: float, side: str) -> None:
+        """Replace the existing stop order (if any) with one at the entry
+        price, for the given remaining quantity."""
+        self.place_stop(symbol, qty, entry_price, side)
 
     def close_partial(self, symbol: str, qty: float, side: str):
-        """Close part of an open position at market (used for the 1R
-        partial exit)."""
+        """Close part of an open position at market (used for the 1R/3R
+        partial exits). Cancella PRIMA gli stop aperti, altrimenti le
+        azioni risultano riservate e l'ordine viene rifiutato -- il
+        chiamante deve poi riemettere lo stop per la quantita' residua."""
         if qty <= 0:
             return None
+        self.cancel_open_stop_orders(symbol)
         close_side = OrderSide.SELL if side == "long" else OrderSide.BUY
         order = MarketOrderRequest(symbol=symbol, qty=qty, side=close_side, time_in_force=TimeInForce.DAY)
         result = self.client.submit_order(order)
@@ -234,7 +269,10 @@ class Broker:
         return result
 
     def flatten(self, symbol: str):
+        """Chiude l'intera posizione, cancellando prima gli stop aperti
+        (stesso motivo di close_partial: azioni riservate)."""
         try:
+            self.cancel_open_stop_orders(symbol)
             result = self.client.close_position(symbol)
             log.info("Position flattened: %s", symbol)
             return result

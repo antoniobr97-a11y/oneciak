@@ -3,6 +3,7 @@ trend-following in/out signal per asset, risk-profile-based target weights
 (risk_profile.py). See STRATEGY.md 1.2."""
 import math
 from dataclasses import dataclass
+from datetime import date
 
 import pandas as pd
 
@@ -10,6 +11,42 @@ from common import config
 from short_term.indicators import sma
 
 ASSET_CLASSES = ["equity", "bond_long", "bond_short", "gold", "real_estate"]
+
+
+def closed_monthly_closes(monthly_closes: pd.Series, today: date | None = None) -> pd.Series:
+    """Scarta l'ultima barra mensile se e' il mese IN CORSO (non ancora
+    chiuso): il resample mensile dei dati giornalieri include sempre il
+    mese corrente parziale come ultima riga, e usarlo come "chiusura
+    mensile" produce un segnale su una barra incompleta -- stesso bug
+    look-ahead/barra-incompleta trovato prima nel backtest, presente
+    anche nel codice live (audit, vedi STRATEGY.md). Regola Faber/corso:
+    si decide il primo giorno del mese sulla chiusura del mese PRECEDENTE."""
+    if monthly_closes.empty:
+        return monthly_closes
+    today = today or date.today()
+    last = monthly_closes.index[-1]
+    if last.year == today.year and last.month == today.month:
+        return monthly_closes.iloc[:-1]
+    return monthly_closes
+
+
+def is_above_sma(monthly_closes: pd.Series, sma_period: int | None = None) -> bool | None:
+    """Stato dentro/fuori per il ciclo automatico: True se l'ultima chiusura
+    mensile CHIUSA e' sopra la SMA, False se sotto, None se lo storico non
+    basta. Equivale alla regola a incroci del corso (BUY su incrocio dal
+    basso, SELL su incrocio dall'alto, HOLD altrimenti) a regime: dopo un
+    incrocio dal basso il prezzo E' sopra la SMA, dopo uno dall'alto E'
+    sotto. Usare lo stato invece dell'incrocio serve a (1) inizializzare
+    un conto nuovo, dove "dentro se gia' dentro" non e' definito, e (2)
+    auto-ripararsi se un ciclo mensile e' stato saltato (server spento
+    quel giorno): l'incrocio perso non viene mai piu' visto, lo stato si'."""
+    period = sma_period or config.ADVANCED_SMA_PERIOD
+    if len(monthly_closes) < period:
+        return None
+    sma_series = sma(monthly_closes, period)
+    if pd.isna(sma_series.iloc[-1]):
+        return None
+    return bool(monthly_closes.iloc[-1] > sma_series.iloc[-1])
 
 
 @dataclass

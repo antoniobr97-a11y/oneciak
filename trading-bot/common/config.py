@@ -77,6 +77,17 @@ ADVANCED_BOND_LONG_SPLIT = _float("ADVANCED_BOND_LONG_SPLIT", 0.5)
 # Ribilanciamento Harry Browne/Advanced a data fissa (non a soglia di scostamento)
 REBALANCE_FREQUENCY = os.getenv("REBALANCE_FREQUENCY", "quarterly")  # quarterly|semiannual|annual
 
+# Quale portafoglio di lungo termine gestire in AUTOMATICO nello scheduler
+# (vedi bot.py:run_long_term_cycle): "advanced" (dentro/fuori per asset
+# sulla SMA10 mensile, una decisione al mese), "harry_browne"
+# (ribilanciamento al 25% a ogni REBALANCE_FREQUENCY) oppure "none" (solo
+# a mano con long-term-status / long-term-pac). Il ciclo e' idempotente:
+# gira ogni giorno insieme al breve termine ma agisce una sola volta per
+# mese/trimestre, cosi' un giorno festivo o un server spento non lo salta.
+LONG_TERM_AUTO_STRATEGY = os.getenv("LONG_TERM_AUTO_STRATEGY", "advanced").strip().lower()
+if LONG_TERM_AUTO_STRATEGY not in ("advanced", "harry_browne", "none"):
+    raise RuntimeError(f"LONG_TERM_AUTO_STRATEGY={LONG_TERM_AUTO_STRATEGY!r}: usa advanced, harry_browne o none")
+
 
 # --- Breve termine (short_term/) -------------------------------------------
 SHORT_TERM_CAPITAL = _float("SHORT_TERM_CAPITAL", 10_000.0)

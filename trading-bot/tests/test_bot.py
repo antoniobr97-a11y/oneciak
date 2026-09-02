@@ -2,6 +2,7 @@
 mockati -- nessuna chiamata di rete, nessun ordine reale."""
 import argparse
 from contextlib import contextmanager
+from datetime import date
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
@@ -147,6 +148,9 @@ def test_manage_positions_3r_stage_triggers_second_partial():
         bot.manage_open_short_term_positions(broker)
 
     broker.close_partial.assert_called_once_with("AAPL", 3, "long")
+    # lo stop a pareggio va riemesso sul NUOVO residuo (5 - 3 = 2): quello
+    # precedente viene cancellato da close_partial e copriva 5 azioni
+    broker.move_stop_to_breakeven.assert_called_once_with("AAPL", 2, 100.0, "long")
     assert state.data["AAPL"]["stage"] == "3R_done"
 
 
@@ -209,6 +213,7 @@ def test_cmd_short_term_once_stops_at_aggregate_risk_cap():
     mock_broker_instance.is_market_open.return_value = True
     mock_broker_instance.list_open_positions.return_value = []
     mock_broker_instance.get_equity.return_value = 10_000.0
+    mock_broker_instance.get_cash.return_value = 1_000_000.0
     mock_broker_instance.get_open_position.return_value = None
 
     with patch("bot.Broker", return_value=mock_broker_instance), \
@@ -228,6 +233,7 @@ def test_cmd_short_term_once_skips_symbol_already_in_position():
     mock_broker_instance.is_market_open.return_value = True
     mock_broker_instance.list_open_positions.return_value = []
     mock_broker_instance.get_equity.return_value = 10_000.0
+    mock_broker_instance.get_cash.return_value = 1_000_000.0
     mock_broker_instance.get_open_position.side_effect = lambda s: {"symbol": "AAPL"} if s == "AAPL" else None
 
     with patch("bot.Broker", return_value=mock_broker_instance), \
@@ -260,6 +266,7 @@ def test_cmd_short_term_once_report_only_never_calls_enter_with_stop():
     mock_broker_instance.is_market_open.return_value = True
     mock_broker_instance.list_open_positions.return_value = []
     mock_broker_instance.get_equity.return_value = 10_000.0
+    mock_broker_instance.get_cash.return_value = 1_000_000.0
     mock_broker_instance.get_open_position.return_value = None
 
     with patch("bot.Broker", return_value=mock_broker_instance), \
@@ -302,6 +309,7 @@ def test_cmd_short_term_once_failed_order_does_not_block_next_candidate_or_count
     mock_broker_instance.is_market_open.return_value = True
     mock_broker_instance.list_open_positions.return_value = []
     mock_broker_instance.get_equity.return_value = 10_000.0
+    mock_broker_instance.get_cash.return_value = 1_000_000.0
     mock_broker_instance.get_open_position.return_value = None
     mock_broker_instance.enter_with_stop.side_effect = [ConnectionError("ordine rifiutato"), None]
 
@@ -314,3 +322,282 @@ def test_cmd_short_term_once_failed_order_does_not_block_next_candidate_or_count
     assert mock_broker_instance.enter_with_stop.call_count == 2
     second_call_symbol = mock_broker_instance.enter_with_stop.call_args_list[1][0][0]
     assert second_call_symbol == "MSFT"
+
+
+# --- audit: auto-riparazione dello stop mancante ------------------------------
+
+def test_missing_stop_is_replaced_at_original_level_before_1r():
+    broker = MagicMock()
+    broker.list_open_positions.return_value = [_position("AAPL", 10, 100.0, 102.0)]  # sotto 1R
+    broker.get_open_stop_order.return_value = None  # nessuno stop attivo al broker
+
+    with _patched_state({"AAPL": {"risk_per_share": 5.0, "original_qty": 10, "stage": "entered", "stop_price": 95.0}}):
+        bot.manage_open_short_term_positions(broker)
+
+    broker.place_stop.assert_called_once_with("AAPL", 10, 95.0, "long")
+
+
+def test_missing_stop_is_replaced_at_breakeven_after_1r():
+    broker = MagicMock()
+    broker.list_open_positions.return_value = [_position("AAPL", 5, 100.0, 108.0)]  # tra 1R e 3R
+    broker.get_open_stop_order.return_value = None
+
+    with _patched_state({"AAPL": {"risk_per_share": 5.0, "original_qty": 10, "stage": "1R_done", "stop_price": 95.0}}):
+        bot.manage_open_short_term_positions(broker)
+
+    broker.place_stop.assert_called_once_with("AAPL", 5, 100.0, "long")
+
+
+def test_missing_stop_without_saved_level_alerts_and_does_not_invent_one():
+    broker = MagicMock()
+    broker.list_open_positions.return_value = [_position("AAPL", 10, 100.0, 102.0)]
+    broker.get_open_stop_order.return_value = None
+
+    with _patched_state({"AAPL": {"risk_per_share": 5.0, "original_qty": 10, "stage": "entered"}}), \
+         patch("bot.notify.alert") as alert:
+        bot.manage_open_short_term_positions(broker)
+
+    broker.place_stop.assert_not_called()
+    assert any(kw.get("level") == "error" for _, kw in alert.call_args_list)
+
+
+def test_existing_stop_is_left_alone():
+    broker = MagicMock()
+    broker.list_open_positions.return_value = [_position("AAPL", 10, 100.0, 102.0)]
+    broker.get_open_stop_order.return_value = _stop_order(95.0)
+
+    with _patched_state({"AAPL": {"risk_per_share": 5.0, "original_qty": 10, "stage": "entered", "stop_price": 95.0}}):
+        bot.manage_open_short_term_positions(broker)
+
+    broker.place_stop.assert_not_called()
+
+
+# --- audit: separazione breve/lungo termine nello stesso conto ---------------
+
+def test_long_term_etfs_are_ignored_by_short_term_management():
+    broker = MagicMock()
+    etf = bot.config.ADVANCED_TICKERS[0]
+    broker.list_open_positions.return_value = [_position(etf, 10, 100.0, 200.0)]  # +100%, ma e' un ETF di lungo termine
+    broker.get_open_stop_order.return_value = None
+
+    with _patched_state({}):
+        bot.manage_open_short_term_positions(broker)
+
+    broker.close_partial.assert_not_called()
+    broker.place_stop.assert_not_called()
+
+
+def test_short_term_equity_excludes_long_term_etf_value():
+    broker = MagicMock()
+    etf = bot.config.HARRY_BROWNE_TICKERS[0]
+    broker.get_equity.return_value = 10_000.0
+    broker.list_open_positions.return_value = [_position(etf, 10, 100.0, 300.0)]  # 3.000$ di ETF
+
+    assert bot._short_term_equity(broker) == 7_000.0
+
+
+def test_short_term_position_count_excludes_long_term_etfs():
+    candidates = [_candidate(f"SYM{i}") for i in range(20)]
+    etf = bot.config.ADVANCED_TICKERS[0]
+
+    mock_broker_instance = MagicMock()
+    mock_broker_instance.is_market_open.return_value = True
+    # 11 ETF di lungo termine aperti: NON devono contare nel tetto (12 posizioni)
+    mock_broker_instance.list_open_positions.return_value = [_position(f"{etf}", 1, 1.0, 1.0)] * 11
+    mock_broker_instance.get_equity.return_value = 10_000.0
+    mock_broker_instance.get_cash.return_value = 1_000_000.0
+    mock_broker_instance.get_open_position.return_value = None
+
+    with patch("bot.Broker", return_value=mock_broker_instance), \
+         patch("bot.screen_universe", return_value=candidates), \
+         patch("bot._print_candidate"), \
+         patch("bot.position_state.set_fields"), \
+         patch("bot.position_state.get", return_value={}), \
+         patch("bot.position_state.tracked_symbols", return_value=[]):
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    assert mock_broker_instance.enter_with_stop.call_count == 12
+
+
+# --- audit: tetto di cassa (nessuna leva) ------------------------------------
+
+def test_cash_cap_limits_position_size_and_is_consumed_across_candidates():
+    candidates = [_candidate("AAA", entry=100.0, stop=95.0, qty=10), _candidate("BBB", entry=100.0, stop=95.0, qty=10)]
+
+    mock_broker_instance = MagicMock()
+    mock_broker_instance.is_market_open.return_value = True
+    mock_broker_instance.list_open_positions.return_value = []
+    mock_broker_instance.get_equity.return_value = 10_000.0
+    mock_broker_instance.get_cash.return_value = 1_500.0  # basta per 10 azioni della prima e 5 della seconda
+    mock_broker_instance.get_open_position.return_value = None
+
+    with patch("bot.Broker", return_value=mock_broker_instance), \
+         patch("bot.screen_universe", return_value=candidates), \
+         patch("bot._print_candidate"), \
+         patch("bot.position_state.set_fields") as set_fields:
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    calls = mock_broker_instance.enter_with_stop.call_args_list
+    assert [(c[0][0], c[0][1]) for c in calls] == [("AAA", 10), ("BBB", 5)]
+    # lo stato salva la size EFFETTIVA e il livello di stop per l'auto-riparazione
+    saved = {c[0][0]: c[1] for c in set_fields.call_args_list}
+    assert saved["BBB"]["original_qty"] == 5
+    assert saved["BBB"]["stop_price"] == 95.0
+
+
+def test_cash_cap_skips_candidate_when_not_even_one_share_is_affordable():
+    candidates = [_candidate("AAA", entry=100.0, stop=95.0, qty=10)]
+
+    mock_broker_instance = MagicMock()
+    mock_broker_instance.is_market_open.return_value = True
+    mock_broker_instance.list_open_positions.return_value = []
+    mock_broker_instance.get_equity.return_value = 10_000.0
+    mock_broker_instance.get_cash.return_value = 50.0
+    mock_broker_instance.get_open_position.return_value = None
+
+    with patch("bot.Broker", return_value=mock_broker_instance), \
+         patch("bot.screen_universe", return_value=candidates), \
+         patch("bot._print_candidate"), \
+         patch("bot.position_state.set_fields"):
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    mock_broker_instance.enter_with_stop.assert_not_called()
+
+
+# --- audit: ciclo automatico di lungo termine ---------------------------------
+
+def _monthly_closes(values):
+    idx = pd.date_range("2020-01-31", periods=len(values), freq="ME")
+    return pd.DataFrame({"close": pd.Series(values, index=idx)})
+
+
+def _fake_state_meta():
+    meta = {}
+    return meta, patch("bot.position_state.get_meta", side_effect=lambda k, d=None: meta.get(k, d)), \
+        patch("bot.position_state.set_meta", side_effect=lambda k, v: meta.__setitem__(k, v))
+
+
+def test_advanced_cycle_buys_asset_above_sma_when_not_holding(monkeypatch):
+    monkeypatch.setattr(bot.config, "LONG_TERM_AUTO_STRATEGY", "advanced")
+    monkeypatch.setattr(bot.config, "LONG_TERM_CAPITAL", 10_000.0)
+    broker = MagicMock()
+    broker.get_cash.return_value = 10_000.0
+    broker.get_open_position.return_value = None  # non in posizione su nessun ETF
+    rising = _monthly_closes(list(range(100, 130)))  # sopra la SMA10
+
+    meta, p_get, p_set = _fake_state_meta()
+    with p_get, p_set, \
+         patch("bot.get_monthly_bars", return_value=rising), \
+         patch("bot._last_close", return_value=100.0):
+        bot.run_long_term_cycle(broker, execute=True, today=date(2026, 9, 2))
+
+    assert broker.buy_market.call_count == len(bot.config.ADVANCED_TICKERS)
+    broker.sell_market.assert_not_called()
+    assert meta["advanced_last_month"] == "2026-09"
+
+
+def test_advanced_cycle_sells_asset_below_sma_when_holding(monkeypatch):
+    monkeypatch.setattr(bot.config, "LONG_TERM_AUTO_STRATEGY", "advanced")
+    broker = MagicMock()
+    broker.get_cash.return_value = 10_000.0
+    broker.get_open_position.return_value = {"symbol": "X", "qty": 7.0, "avg_entry_price": 100.0, "current_price": 90.0}
+    falling = _monthly_closes(list(range(130, 100, -1)))  # sotto la SMA10
+
+    meta, p_get, p_set = _fake_state_meta()
+    with p_get, p_set, \
+         patch("bot.get_monthly_bars", return_value=falling), \
+         patch("bot._last_close", return_value=100.0):
+        bot.run_long_term_cycle(broker, execute=True, today=date(2026, 9, 2))
+
+    assert broker.sell_market.call_count == len(bot.config.ADVANCED_TICKERS)
+    assert all(c[0][1] == 7 for c in broker.sell_market.call_args_list)
+    broker.buy_market.assert_not_called()
+
+
+def test_advanced_cycle_runs_only_once_per_month(monkeypatch):
+    monkeypatch.setattr(bot.config, "LONG_TERM_AUTO_STRATEGY", "advanced")
+    broker = MagicMock()
+    broker.get_cash.return_value = 10_000.0
+    broker.get_open_position.return_value = None
+    rising = _monthly_closes(list(range(100, 130)))
+
+    meta, p_get, p_set = _fake_state_meta()
+    with p_get, p_set, \
+         patch("bot.get_monthly_bars", return_value=rising), \
+         patch("bot._last_close", return_value=100.0):
+        bot.run_long_term_cycle(broker, execute=True, today=date(2026, 9, 2))
+        bot.run_long_term_cycle(broker, execute=True, today=date(2026, 9, 15))  # stesso mese: niente
+
+    assert broker.buy_market.call_count == len(bot.config.ADVANCED_TICKERS)
+
+
+def test_advanced_cycle_report_only_places_no_orders_and_does_not_consume_month(monkeypatch):
+    monkeypatch.setattr(bot.config, "LONG_TERM_AUTO_STRATEGY", "advanced")
+    broker = MagicMock()
+    broker.get_cash.return_value = 10_000.0
+    broker.get_open_position.return_value = None
+    rising = _monthly_closes(list(range(100, 130)))
+
+    meta, p_get, p_set = _fake_state_meta()
+    with p_get, p_set, \
+         patch("bot.get_monthly_bars", return_value=rising), \
+         patch("bot._last_close", return_value=100.0):
+        bot.run_long_term_cycle(broker, execute=False, today=date(2026, 9, 2))
+
+    broker.buy_market.assert_not_called()
+    assert "advanced_last_month" not in meta
+
+
+def test_advanced_cycle_ignores_current_unclosed_month(monkeypatch):
+    """L'ultima barra mensile e' il mese in corso (settembre 2026): va
+    scartata. Qui i mesi CHIUSI sono in discesa (fuori), mentre il mese
+    in corso parziale spara in alto -- senza la correzione il bot
+    comprerebbe su una barra incompleta."""
+    monkeypatch.setattr(bot.config, "LONG_TERM_AUTO_STRATEGY", "advanced")
+    broker = MagicMock()
+    broker.get_cash.return_value = 10_000.0
+    broker.get_open_position.return_value = None
+    values = list(range(130, 100, -1)) + [500.0]
+    idx = pd.date_range("2024-03-31", periods=len(values), freq="ME")  # l'ultima cade nel 2026-09
+    assert idx[-1].year == 2026 and idx[-1].month == 9
+    bars = pd.DataFrame({"close": pd.Series(values, index=idx)})
+
+    meta, p_get, p_set = _fake_state_meta()
+    with p_get, p_set, \
+         patch("bot.get_monthly_bars", return_value=bars), \
+         patch("bot._last_close", return_value=100.0):
+        bot.run_long_term_cycle(broker, execute=True, today=date(2026, 9, 2))
+
+    broker.buy_market.assert_not_called()
+
+
+def test_harry_browne_cycle_rebalances_when_due_and_skips_when_not(monkeypatch):
+    monkeypatch.setattr(bot.config, "LONG_TERM_AUTO_STRATEGY", "harry_browne")
+    monkeypatch.setattr(bot.config, "LONG_TERM_CAPITAL", 10_000.0)
+    monkeypatch.setattr(bot.config, "REBALANCE_FREQUENCY", "quarterly")
+    broker = MagicMock()
+    broker.get_cash.return_value = 10_000.0
+    broker.get_open_position.return_value = None  # partenza da zero: 4 acquisti da 25%
+
+    meta, p_get, p_set = _fake_state_meta()
+    with p_get, p_set, patch("bot._last_close", return_value=100.0):
+        bot.run_long_term_cycle(broker, execute=True, today=date(2026, 1, 2))
+        assert broker.buy_market.call_count == 4
+        assert all(c[0][1] == 25 for c in broker.buy_market.call_args_list)  # 2.500$ / 100$
+        assert meta["harry_browne_last_rebalance"] == "2026-01-02"
+
+        bot.run_long_term_cycle(broker, execute=True, today=date(2026, 2, 15))  # non ancora dovuto
+        assert broker.buy_market.call_count == 4
+
+        bot.run_long_term_cycle(broker, execute=True, today=date(2026, 4, 1))  # trimestre passato
+        assert broker.buy_market.call_count == 8
+
+
+def test_long_term_cycle_none_does_nothing(monkeypatch):
+    monkeypatch.setattr(bot.config, "LONG_TERM_AUTO_STRATEGY", "none")
+    broker = MagicMock()
+
+    bot.run_long_term_cycle(broker, execute=True, today=date(2026, 9, 2))
+
+    broker.buy_market.assert_not_called()
+    broker.sell_market.assert_not_called()
