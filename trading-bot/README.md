@@ -151,10 +151,10 @@ default resta la scelta più testata.
 pip install pytest
 pytest tests/
 ```
-92 test unitari (money management, formule dei livelli, qualificatori di
-trend, i 7 pattern, screener/universo full-market, broker (volatilità,
-ordine delle operazioni sugli stop), ciclo automatico di lungo termine,
-orchestrazione di `bot.py` con broker mockato). La
+100 test unitari (money management, formule dei livelli, qualificatori di
+trend, i 7 pattern, screener/universo full-market/filtro di regime, broker
+(volatilità, ordine delle operazioni sugli stop), ciclo automatico di
+lungo termine, orchestrazione di `bot.py` con broker mockato). La
 pipeline completa è stata anche sottoposta a uno stress-test con centinaia
 di scenari sintetici multi-regime (vedi STRATEGY.md, "Calibrazione delle
 soglie non specificate dal corso") per cercare bug non coperti dai singoli

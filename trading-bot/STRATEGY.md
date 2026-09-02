@@ -545,6 +545,80 @@ un giorno, un crash sui titoli con storico più corto (quotati dopo il
 la mappatura settoriale mancante per le ADR (v4, sopra) che le escludeva
 sempre dal test.
 
+## Il modello in una pagina (come si intrecciano i pezzi)
+
+Tutto quello che il bot fa si riduce a poche formule, ognuna con un
+parametro misurato nel backtest, non scelto a sentimento. Notazione: $E$
+prezzo di entrata, $S$ stop, $r = E - S$ rischio per azione ("1R"), $C$
+capitale del breve termine, $p$ frequenza delle operazioni vincenti.
+
+**1. Quando si può entrare (regime, v5/v6).** Nuove posizioni solo se
+l'indice è in trend: $\text{SPY}_t > \text{SMA}_{200}(\text{SPY})_t$.
+Sotto, il bot non apre nulla e gestisce solo l'esistente (solo long di
+default). Negli anni orso questo dimezza le perdite (2008: -2.9% contro
+-7.8% senza).
+
+**2. Cosa si compra (Step 1-2 del corso).** Un titolo dell'universo
+validato (42 nomi) che soddisfa almeno 2 dei 6 qualificatori di trend
+(performance ≥30% in 60 giorni, gap, barre ad ampio range, armonia
+massimi/minimi, ADX ≥30, persistenza) **e** forma uno dei 7 pattern
+sulla barra di setup, con la conferma settoriale (forza relativa
+titolo/settore/indice).
+
+**3. A che prezzo, con quale stop (2.4).** $V$ = media del range
+(max-min) delle ultime 10 barre. Long: $E = \text{close} + V$,
+$S = \text{low} - V$. Lo stop è quindi proporzionale alla volatilità del
+singolo titolo: un titolo nervoso ha uno stop più largo e (punto 4) una
+size più piccola — è il "volatility scaling" dei Turtle Traders e di
+Moskowitz-Ooi-Pedersen, da cui viene gran parte del rendimento dei
+sistemi trend-following.
+
+**4. Quante azioni (2.7, money management).**
+$$q = \min\Big(\Big\lfloor \frac{C \cdot 1\%}{r} \Big\rfloor,\ \Big\lfloor \frac{\text{cassa}}{E} \Big\rfloor\Big)$$
+Ogni operazione rischia l'1% del capitale del breve termine allo stop;
+il secondo termine vieta la leva. Tetto aggregato: al massimo 12
+posizioni aperte (12 × 1% = 12% di perdita nello scenario peggiore in
+cui scattano tutti gli stop insieme).
+
+**5. Come si esce (2.4 punto 2, scala in multipli di R).**
+- a $E + 1r$: vendi il 50%, stop a $E$ (da qui la posizione non può più
+  perdere, salvo gap)
+- a $E + 3r$: vendi il 30% della size originale, stop a $E$ sul residuo
+- il 20% residuo ("runner") corre finché la chiusura non scende sotto la
+  $\text{SMA}_{200}$ del titolo
+- in ogni ciclo: se non c'è uno stop attivo al broker, viene riemesso
+  (auto-riparazione)
+
+**6. Perché rende (valore atteso).** Per operazione, in unità di R:
+$$\mathbb{E}[R] = p \cdot W - (1-p) \cdot L$$
+con $W$ vincita media e $L$ perdita media in R. Dal backtest v6:
+$p = 55.5\%$ e Profit Factor 1.71, quindi
+$W/L = \text{PF} \cdot (1-p)/p \approx 1.37$; con $L \approx 1$ (lo stop
+è a 1R per costruzione) si ottiene
+$\mathbb{E}[R] \approx 0.555 \cdot 1.37 - 0.445 \approx +0.31\,R$ per
+operazione. Controllo di coerenza: ~393 operazioni in 26.7 anni ≈ 15
+l'anno × 0.31R × 1% del capitale ≈ **+4.6%/anno**, contro un CAGR
+misurato di +4.53% — le due strade, una analitica e una simulata,
+tornano. Il vantaggio non sta nel vincere spesso ($p$ è appena sopra il
+50%) ma nel fatto che le vincite sono più grandi delle perdite (scala di
+uscita: metà del profitto totale viene da 3R e dai runner, vedi "per
+motivo di uscita" nei log del backtest).
+
+**7. Lungo termine (Parte 1), in parallelo e separato.** Advanced: per
+ogni asset $a$ con peso $w_a$ dal profilo di rischio, posizione
+$= w_a \cdot C_{LT}$ se l'ultima chiusura mensile chiusa è sopra la
+$\text{SMA}_{10}$ mensile, altrimenti 0 (cash) — una decisione al mese
+(Faber 2007: drawdown azionario da ~46% a <10%). Harry Browne: 25% su 4
+ETF, riportati al 25% ogni trimestre. Il capitale di lungo termine non
+entra nel calcolo di $C$ del breve termine.
+
+**8. Cosa dice tutto questo sul rischio.** Perdita massima "di
+progetto" del breve termine: 12% (tutti gli stop insieme) più il rischio
+di gap oltre lo stop. Drawdown massimo misurato 2000-2026: -13.0% (v6),
+coerente. Rendimento atteso: nell'ordine del 4-5% annuo sul capitale del
+breve termine, con anni a +20% e anni a -8% — non di più, e chi promette
+di più su queste regole non le ha misurate.
+
 ## Audit del codice live (bug trovati e corretti prima del paper trading)
 
 Dopo i backtest, revisione riga per riga del codice che manda ordini veri
