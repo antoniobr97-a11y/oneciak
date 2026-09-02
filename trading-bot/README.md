@@ -99,44 +99,51 @@ Con questa opzione il bot, a ogni ciclo:
 1. chiede ad Alpaca la lista di **tutti** i titoli azionari USA tradable
    (NYSE/NASDAQ/ARCA/AMEX/BATS, esclusi OTC e simboli non "semplici" come
    warrant/unit/azioni privilegiate) — `common/broker.py:list_tradable_symbols`;
-2. applica un **prefiltro di liquidità** veloce (prezzo minimo
+2. applica un **prefiltro di liquidità** (prezzo minimo
    `SHORT_TERM_MIN_PRICE_FULL_MARKET`, volume$ medio minimo
-   `SHORT_TERM_MIN_DOLLAR_VOLUME`) usando gli snapshot di mercato Alpaca,
-   e tiene solo i migliori `SHORT_TERM_FULL_MARKET_MAX_SYMBOLS` (default
-   300) per volume$ — `short_term/screener.py:build_full_market_universe`;
-3. passa questi titoli alla pipeline completa a 4 stadi (trend → pattern →
+   `SHORT_TERM_MIN_DOLLAR_VOLUME`) usando gli snapshot di mercato Alpaca;
+3. applica un **prefiltro di volatilità** (volatilità storica annualizzata
+   minima `SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT`, default 25%) sui
+   migliori sopravvissuti al passo precedente — aggiunto dopo che il primo
+   backtest su un universo allargato (senza questo filtro) ha dato
+   risultati peggiori della watchlist curata, vedi sotto;
+4. tiene i migliori `SHORT_TERM_FULL_MARKET_MAX_SYMBOLS` (default 300) per
+   volume$ tra chi supera entrambi i filtri — `short_term/screener.py:build_full_market_universe`;
+5. passa questi titoli alla pipeline completa a 4 stadi (trend → pattern →
    settore → livelli), esattamente come farebbe con la watchlist fissa.
 
-Il prefiltro esiste perché far girare la pipeline completa ogni giorno su
+I prefiltri esistono perché far girare la pipeline completa ogni giorno su
 migliaia di titoli sarebbe troppo lento e colpirebbe i rate-limit di
 yfinance/Alpaca — è concettualmente lo stesso "Step 1: screening" del corso
 (che nel corso usava Barchart/ProScreener, non replicabile). Nota: gli
-snapshot di liquidità usano il feed IEX gratuito di Alpaca (una frazione del
-volume USA reale), quindi il volume$ è un ranking relativo utile a scartare
-i titoli davvero illiquidi, non una misura esatta del volume di mercato.
+snapshot Alpaca usano il feed IEX gratuito (una frazione del volume USA
+reale), quindi volume$ e volatilità sono un ranking relativo utile a
+scartare i titoli davvero illiquidi/piatti, non una misura esatta.
 Con `SHORT_TERM_USE_FULL_MARKET=true` servono le chiavi Alpaca anche solo
 per lo screening (senza, non serve — usa solo yfinance).
 
-**Attenzione, risultato reale del backtest**: un test su un universo
-allargato a 85 titoli (34 curati + 51 aggiunti) ha dato risultati
-**peggiori**, non migliori, della lista curata (CAGR +1.53%/anno contro
-+2.69%, drawdown -33.6% contro -18.7% — vedi STRATEGY.md "v4"). La causa
-probabile è l'inclusione di titoli difensivi a bassa volatilità (utility,
-consumer staples), su cui un sistema trend-following rende storicamente
-peggio. La modalità full-market applica solo un prefiltro di liquidità
-(prezzo, volume$), non uno di volatilità — quindi **non è il default
-consigliato per chi vuole il rischio più basso possibile**: usala solo se
-preferisci un universo più ampio pur sapendo che il backtest disponibile
-mostra un rischio/rendimento peggiore della watchlist curata.
+**Perché c'è anche il filtro di volatilità**: un primo test storico su un
+universo allargato a 85 titoli (34 curati + 51 aggiunti, **senza** filtro
+di volatilità) ha dato risultati peggiori della lista curata (CAGR
++1.53%/anno contro +2.69%, drawdown -33.6% contro -18.7% — vedi
+STRATEGY.md "v4"). Causa probabile: titoli difensivi a bassa volatilità
+(utility, consumer staples), su cui un sistema trend-following rende
+storicamente peggio. Il filtro di volatilità qui sopra esiste apposta per
+escluderli. **Nota però che il filtro non è stato validato in un nuovo
+backtest storico dedicato** (richiederebbe rifare il test da capo con lo
+stesso universo allargato ma con il filtro attivo) — è una correzione
+motivata dal problema trovato, non una garanzia di risultato migliore.
+Se vuoi il rischio più prevedibile possibile, la watchlist curata di
+default resta la scelta più testata.
 
 **Test:**
 ```bash
 pip install pytest
 pytest tests/
 ```
-60 test unitari (money management, formule dei livelli, qualificatori di
-trend, i 7 pattern, screener/universo full-market, orchestrazione di
-`bot.py` con broker mockato). La
+66 test unitari (money management, formule dei livelli, qualificatori di
+trend, i 7 pattern, screener/universo full-market, broker (volatilità),
+orchestrazione di `bot.py` con broker mockato). La
 pipeline completa è stata anche sottoposta a uno stress-test con centinaia
 di scenari sintetici multi-regime (vedi STRATEGY.md, "Calibrazione delle
 soglie non specificate dal corso") per cercare bug non coperti dai singoli

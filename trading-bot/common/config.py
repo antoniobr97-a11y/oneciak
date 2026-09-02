@@ -110,6 +110,13 @@ SHORT_TERM_MIN_DOLLAR_VOLUME = _float("SHORT_TERM_MIN_DOLLAR_VOLUME", 5_000_000.
 # prefiltro (i migliori per volume$), per tenere sotto controllo i tempi di
 # scansione quando l'universo full-market è di migliaia di titoli.
 SHORT_TERM_FULL_MARKET_MAX_SYMBOLS = _int("SHORT_TERM_FULL_MARKET_MAX_SYMBOLS", 300)
+# Volatilità storica annualizzata minima (STRATEGY.md "v4"): il backtest ha
+# mostrato che un prefiltro di sola liquidità lascia passare titoli
+# difensivi a bassa volatilità (utility, beni di consumo) su cui un
+# sistema trend-following rende storicamente peggio. 25% è vicino alla
+# volatilità storica di un blue chip "normale" (es. IBM) -- esclude le
+# difensive più piatte, non i titoli con un minimo di movimento reale.
+SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT = _float("SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT", 25.0)
 
 SHORT_TERM_ACCOUNT_CURRENCY = os.getenv("SHORT_TERM_ACCOUNT_CURRENCY", "USD")
 SHORT_TERM_FX_RATE = _float("SHORT_TERM_FX_RATE", 1.0)  # unità valuta conto per 1 USD

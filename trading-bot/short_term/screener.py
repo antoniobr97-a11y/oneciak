@@ -159,28 +159,51 @@ def _build_candidate(
 def build_full_market_universe(broker) -> list[str]:
     """Universo "tutto il mercato USA" (STRATEGY.md, richiesto per non
     limitarsi ai soliti titoli famosi): parte da tutti i titoli tradable su
-    Alpaca, poi applica un prefiltro di liquidità (prezzo minimo, volume$
-    medio minimo) e tiene solo i migliori SHORT_TERM_FULL_MARKET_MAX_SYMBOLS
-    per volume$ -- mimando lo "Step 1: screening" del corso, necessario
-    perché far girare la pipeline completa (trend+pattern+settore) su
-    migliaia di titoli ogni giorno sarebbe troppo lento e colpirebbe i
-    rate-limit di yfinance/Alpaca."""
+    Alpaca, poi applica due prefiltri prima della pipeline completa (mima lo
+    "Step 1: screening" del corso, necessario perché far girare la pipeline
+    completa trend+pattern+settore su migliaia di titoli ogni giorno
+    sarebbe troppo lento e colpirebbe i rate-limit di yfinance/Alpaca):
+      1. liquidità (prezzo minimo, volume$ medio minimo)
+      2. volatilità storica minima -- il backtest (STRATEGY.md "v4") ha
+         mostrato che il solo filtro di liquidità lascia passare titoli
+         difensivi a bassa volatilità (utility, beni di consumo) su cui un
+         sistema trend-following rende storicamente peggio; senza questo
+         filtro un universo allargato ha dato risultati PEGGIORI (CAGR
+         quasi dimezzato, drawdown quasi raddoppiato) della watchlist
+         curata, non migliori
+    Tiene solo i migliori SHORT_TERM_FULL_MARKET_MAX_SYMBOLS per volume$
+    tra i sopravvissuti a entrambi i filtri."""
     all_symbols = broker.list_tradable_symbols()
     log.info("Full-market: %d titoli tradable su Alpaca (NYSE/NASDAQ/ARCA/AMEX/BATS).", len(all_symbols))
 
     liquidity = broker.liquidity_snapshot(all_symbols)
-    filtered = [
+    liquid = [
         s
         for s, data in liquidity.items()
         if data["price"] >= config.SHORT_TERM_MIN_PRICE_FULL_MARKET
         and data["dollar_volume"] >= config.SHORT_TERM_MIN_DOLLAR_VOLUME
     ]
-    filtered.sort(key=lambda s: liquidity[s]["dollar_volume"], reverse=True)
-    top = filtered[: config.SHORT_TERM_FULL_MARKET_MAX_SYMBOLS]
+    liquid.sort(key=lambda s: liquidity[s]["dollar_volume"], reverse=True)
     log.info(
-        "Full-market: %d titoli dopo il prefiltro di liquidità (prezzo>=%.0f, volume$>=%.0f), "
+        "Full-market: %d titoli dopo il prefiltro di liquidità (prezzo>=%.0f, volume$>=%.0f).",
+        len(liquid), config.SHORT_TERM_MIN_PRICE_FULL_MARKET, config.SHORT_TERM_MIN_DOLLAR_VOLUME,
+    )
+
+    # Il filtro di volatilità richiede una chiamata dati aggiuntiva per
+    # titolo: applicato solo a un pool 3x più ampio del tetto finale (non a
+    # tutti i sopravvissuti alla liquidità, potenzialmente migliaia), per
+    # tenere sotto controllo i tempi anche sull'universo full-market.
+    pool = liquid[: config.SHORT_TERM_FULL_MARKET_MAX_SYMBOLS * 3]
+    volatility = broker.volatility_snapshot(pool)
+    min_vol = config.SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT / 100
+    survivors = [s for s in pool if volatility.get(s, 0.0) >= min_vol]
+    survivors.sort(key=lambda s: liquidity[s]["dollar_volume"], reverse=True)
+
+    top = survivors[: config.SHORT_TERM_FULL_MARKET_MAX_SYMBOLS]
+    log.info(
+        "Full-market: %d titoli dopo il prefiltro di volatilità (>=%.0f%% annualizzata su un pool di %d), "
         "tenuti i migliori %d per volume$.",
-        len(filtered), config.SHORT_TERM_MIN_PRICE_FULL_MARKET, config.SHORT_TERM_MIN_DOLLAR_VOLUME, len(top),
+        len(survivors), config.SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT, len(pool), len(top),
     )
     return top
 

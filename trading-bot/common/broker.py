@@ -10,9 +10,13 @@ Covers what both strategies need:
     breakeven) described in STRATEGY.md 2.4
 """
 import logging
+import math
+import statistics
+from datetime import datetime, timedelta, timezone
 
 from alpaca.data.historical import StockHistoricalDataClient
-from alpaca.data.requests import StockSnapshotRequest
+from alpaca.data.requests import StockBarsRequest, StockSnapshotRequest
+from alpaca.data.timeframe import TimeFrame
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import AssetClass, AssetExchange, AssetStatus, OrderClass, OrderSide, QueryOrderStatus, TimeInForce
 from alpaca.trading.requests import (
@@ -110,6 +114,37 @@ class Broker:
                 if bar is None or bar.close is None or bar.volume is None:
                     continue
                 result[symbol] = {"price": float(bar.close), "dollar_volume": float(bar.close) * float(bar.volume)}
+        return result
+
+    def volatility_snapshot(self, symbols: list[str], lookback_days: int = 30, batch_size: int = 200) -> dict[str, float]:
+        """Volatilità storica annualizzata (deviazione standard dei
+        rendimenti giornalieri, feed IEX) sugli ultimi `lookback_days`
+        giorni di borsa per ogni simbolo. Il backtest storico (STRATEGY.md
+        "v4") ha mostrato che un prefiltro di sola liquidità lascia passare
+        titoli difensivi a bassa volatilità (utility, beni di consumo) su
+        cui un sistema trend-following rende peggio -- questo prefiltro
+        aggiuntivo li esclude prima della pipeline completa."""
+        end = datetime.now(timezone.utc)
+        start = end - timedelta(days=lookback_days * 2)  # margine per weekend/festivi
+        result: dict[str, float] = {}
+        for i in range(0, len(symbols), batch_size):
+            chunk = symbols[i : i + batch_size]
+            try:
+                request = StockBarsRequest(symbol_or_symbols=chunk, timeframe=TimeFrame.Day, start=start, end=end)
+                bars = self.data_client.get_stock_bars(request)
+            except Exception as exc:
+                log.warning("Volatility snapshot fallito per il batch che inizia con %s: %s", chunk[0], exc)
+                continue
+            for symbol in chunk:
+                try:
+                    symbol_bars = bars[symbol]
+                except KeyError:
+                    continue
+                closes = [b.close for b in symbol_bars if b.close is not None]
+                if len(closes) < 5:
+                    continue
+                returns = [closes[j] / closes[j - 1] - 1 for j in range(1, len(closes))]
+                result[symbol] = statistics.pstdev(returns) * math.sqrt(252)
         return result
 
     # --- long_term: plain rebalancing orders -------------------------------

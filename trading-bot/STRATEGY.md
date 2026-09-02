@@ -412,10 +412,20 @@ bassa volatilità (DUK, SO, NEE, CL, KMB, GIS, MO, PM) — un sistema
 trend-following rende storicamente peggio su titoli che si muovono poco
 (stessa logica Turtle Traders già citata per v2→v3, qui in direzione
 opposta). **Lezione concreta: più titoli non significa più soldi** — la
-qualità/volatilità dell'universo conta più della quantità grezza. Per
-questo la modalità full-market (`SHORT_TERM_USE_FULL_MARKET`) resta
-disponibile ma NON è il default consigliato senza un filtro di volatilità
-aggiuntivo (non ancora implementato) oltre a quello di liquidità.
+qualità/volatilità dell'universo conta più della quantità grezza.
+
+Di conseguenza `build_full_market_universe` (`short_term/screener.py`) ora
+applica anche un prefiltro di volatilità storica minima
+(`SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT`, default 25% annualizzata,
+`common/broker.py:volatility_snapshot`), oltre a quello di liquidità, per
+escludere le difensive piatte prima della pipeline completa. **Attenzione**:
+questo filtro non è stato ri-validato con un nuovo backtest storico dedicato
+sullo stesso universo di 85 titoli (richiederebbe un altro giro di ore in
+background) — è una correzione motivata direttamente dal problema
+diagnosticato sopra, non un risultato nuovamente misurato. La watchlist
+curata di 42 titoli resta l'unica configurazione con un backtest storico
+completo alle spalle; la modalità full-market resta disponibile per chi
+preferisce un universo più ampio, ma senza la stessa garanzia empirica.
 
 Le 25 ADR da sole, invece, si comportano ragionevolmente bene — PF 1.19 e
 Sharpe 0.23 sono vicini alla qualità del v3 curato, non diluiti come
