@@ -1003,6 +1003,33 @@ stato (a) definisce cosa fare su un conto nuovo, dove "dentro se già
 dentro" non ha senso, e (b) si auto-ripara se il ciclo di un mese è stato
 saltato — un incrocio perso non si rivede mai più, lo stato sì.
 
+## Storico minimo per analizzare un titolo (assunzione esplicita)
+
+`short_term/screener.py:MIN_HISTORY_BARS = 250` — un titolo con meno di
+250 barre giornaliere (circa un anno di borsa) non viene analizzato.
+
+**Non è una regola del corso**, che dà per scontato l'occhio umano: chi
+apre il grafico di una società quotata da tre mesi *vede* che lo storico
+inizia a metà schermo. Un programma no. Il numero è imposto dalle due
+regole del sistema che hanno bisogno di più dati:
+
+| Regola | Barre necessarie |
+|---|---|
+| Uscita del runner sulla SMA200 | 200 |
+| Priorità per vicinanza al massimo a 52 settimane (v9) | 252 |
+
+Senza questa soglia c'era anche un effetto perverso: una società quotata
+da tre mesi è **per definizione** vicina al suo massimo (non ha un anno di
+storia da cui allontanarsi), quindi la regola v9 — pensata per premiare i
+titoli più forti — spingeva in cima alla lista proprio quelli con le basi
+statistiche più fragili. Emerso solo passando all'universo full-market:
+con la watchlist di 42 blue chip il caso non si presentava.
+
+Il backtest richiedeva già 300 barre reali prima di analizzare un titolo,
+quindi tutti i risultati documentati sopra sono stati misurati con questo
+vincolo attivo: senza, il bot dal vivo farebbe qualcosa di diverso da ciò
+che è stato testato.
+
 ## Configurazione operativa scelta (cosa gira davvero)
 
 Dopo tutti i test, il bot parte così — ogni scelta rimanda alla sezione
