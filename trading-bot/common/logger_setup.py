@@ -21,3 +21,12 @@ def setup_logging() -> None:
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=handlers,
     )
+
+    # yfinance logga come ERROR i 404 su dati che per certi strumenti non
+    # esistono proprio: il calendario delle trimestrali di un ETF, per
+    # esempio ("No fundamentals data found for symbol: GDX"). Con l'universo
+    # full-market ne arrivano a decine per ciclo, tutti innocui (il codice
+    # chiamante li gestisce gia' come "nessun dato"), ma riempiono il log di
+    # rosso e nascondono gli errori veri. Alzata la soglia: i problemi
+    # rilevanti restano visibili perche' li segnala il nostro codice.
+    logging.getLogger("yfinance").setLevel(logging.CRITICAL)

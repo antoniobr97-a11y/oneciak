@@ -57,6 +57,10 @@ TRADING_DAYS_52W = 252
 # piuttosto che scartare tutto per un guasto sui dati (vedi
 # build_full_market_universe).
 MIN_VOLATILITY_COVERAGE = 0.5
+# Barre giornaliere minime perche' un titolo sia analizzabile: sotto questa
+# soglia SMA200, qualificatori e "massimo a 52 settimane" non hanno una base
+# reale (stesso requisito del backtest).
+MIN_HISTORY_BARS = 250
 
 
 def proximity_to_52w_extreme(daily: pd.DataFrame, direction: str) -> float:
@@ -94,13 +98,35 @@ def _sector_bars(sector_etf: str) -> pd.DataFrame:
     return _sector_cache[sector_etf]
 
 
+def _best_of(candidates: list[Candidate]) -> Candidate:
+    """Il candidato migliore tra piu' pattern sullo stesso titolo: prima il
+    trend piu' qualificato (piu' qualificatori soddisfatti su 6), a parita'
+    quello con lo stop piu' stretto (stessa perdita in euro su piu' azioni,
+    quindi piu' spazio di guadagno per unita' di rischio)."""
+    return max(candidates, key=lambda c: (c.trend.score, -c.levels.risk_per_share))
+
+
+def dedupe_by_symbol(candidates: list[Candidate]) -> list[Candidate]:
+    """Un titolo puo' formare piu' pattern contemporaneamente (es. TEVA:
+    TKO a 38.43 e Second Entry a 37.07): sono la stessa opportunita' vista
+    da due angoli, non due operazioni. Senza deduplica il bot piazzerebbe
+    un ordine e subito dopo lo sostituirebbe con l'altro, con livelli
+    decisi dall'ordine casuale della lista. Se ne tiene uno solo per
+    titolo, il migliore."""
+    by_symbol: dict[str, list[Candidate]] = {}
+    for c in candidates:
+        by_symbol.setdefault(c.symbol, []).append(c)
+    return [_best_of(group) for group in by_symbol.values()]
+
+
 def rank_candidates(candidates: list[Candidate]) -> list[Candidate]:
-    """Ordina i candidati dal migliore al peggiore. Conta solo quando i
-    candidati sono piu' dei posti liberi nel tetto di rischio aggregato:
-    in quel caso il bot prende i primi, non i primi in ordine alfabetico.
-    Validato nel backtest (STRATEGY.md "v9"): a parita' di numero di
-    operazioni migliora il rendimento E riduce il drawdown."""
-    return sorted(candidates, key=lambda c: c.proximity_52w, reverse=True)
+    """Un candidato per titolo (il migliore), ordinati dal migliore al
+    peggiore. L'ordine conta quando i candidati sono piu' dei posti liberi
+    nel tetto di rischio aggregato: in quel caso il bot prende i primi, non
+    i primi in ordine alfabetico. Validato nel backtest (STRATEGY.md "v9"):
+    a parita' di numero di operazioni migliora il rendimento E riduce il
+    drawdown."""
+    return sorted(dedupe_by_symbol(candidates), key=lambda c: c.proximity_52w, reverse=True)
 
 
 def allowed_directions(sp500_df: pd.DataFrame) -> tuple[str, ...]:
@@ -137,6 +163,16 @@ def scan_symbol(
 ) -> list[Candidate]:
     daily = get_daily_bars(symbol, period="1y")
     weekly = get_weekly_bars(symbol, period="6y")
+
+    # Storico minimo: i qualificatori guardano 60 giorni, la SMA200
+    # dell'uscita ne vuole 200, e la vicinanza al massimo "a 52 settimane"
+    # non significa niente su un titolo quotato da tre mesi. Il backtest
+    # richiedeva 300 barre reali prima di analizzare un titolo; con
+    # l'universo full-market arrivano anche IPO recentissime, quindi lo
+    # stesso requisito serve anche dal vivo.
+    if len(daily.dropna()) < MIN_HISTORY_BARS:
+        log.debug("%s: solo %d barre di storico (min %d), salto.", symbol, len(daily.dropna()), MIN_HISTORY_BARS)
+        return []
 
     if not money_management.can_open_new_position(open_positions_count):
         return []

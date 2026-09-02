@@ -193,18 +193,40 @@ def test_proximity_is_zero_without_enough_data():
     assert screener.proximity_to_52w_extreme(_closes([100.0]), "long") == 0.0
 
 
-def _cand(symbol, proximity):
+def _cand(symbol, proximity, score=3, risk=5.0, pattern="Pullback Semplice"):
     from short_term.levels import EntryLevels
     from short_term.trend import TrendQualification
 
     return screener.Candidate(
-        symbol=symbol, direction="long", pattern="Pullback Semplice",
-        trend=TrendQualification(direction="long", score=3, satisfied={}),
-        levels=EntryLevels(direction="long", entry=100.0, stop_loss=95.0, risk_per_share=5.0),
+        symbol=symbol, direction="long", pattern=pattern,
+        trend=TrendQualification(direction="long", score=score, satisfied={}),
+        levels=EntryLevels(direction="long", entry=100.0, stop_loss=100.0 - risk, risk_per_share=risk),
         qty=10, ribbon_aligned=True, sector_etf="XLK", sector_passes=True,
         earnings_warn=False, sr_too_close=False, price_blocks_trade=False,
         has_divergence=False, proximity_52w=proximity,
     )
+
+
+def test_dedupe_keeps_the_best_qualified_pattern_per_symbol():
+    """Un titolo con piu' pattern e' una sola opportunita': senza deduplica
+    il bot piazzerebbe un ordine e lo sostituirebbe subito con l'altro."""
+    ranked = screener.rank_candidates([
+        _cand("TEVA", 0.90, score=3, risk=3.63, pattern="TKO"),
+        _cand("TEVA", 0.90, score=5, risk=2.33, pattern="Second Entry Pullback"),
+    ])
+
+    assert len(ranked) == 1
+    assert ranked[0].pattern == "Second Entry Pullback"  # trend piu' qualificato
+
+
+def test_dedupe_tie_on_score_prefers_the_tighter_stop():
+    ranked = screener.rank_candidates([
+        _cand("DGX", 0.90, score=4, risk=12.86, pattern="TKO"),
+        _cand("DGX", 0.90, score=4, risk=6.40, pattern="Second Entry Pullback"),
+    ])
+
+    assert len(ranked) == 1
+    assert ranked[0].levels.risk_per_share == 6.40
 
 
 def test_rank_candidates_puts_the_closest_to_the_yearly_high_first():
