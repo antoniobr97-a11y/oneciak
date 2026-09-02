@@ -203,14 +203,19 @@ MARKET_REGIME_MA_PERIOD = _int("MARKET_REGIME_MA_PERIOD", 200)
 # riattivare gli short come da corso.
 SHORT_TERM_ALLOW_SHORTS = _bool("SHORT_TERM_ALLOW_SHORTS", False)
 
-# Freno di drawdown (corso, video 45: "mantenere il drawdown complessivo
-# entro il 10-15%"): se l'equity del conto e' sotto il suo massimo di piu'
-# di questa %, il bot NON apre nuove posizioni (gestisce solo quelle
-# aperte) finche' non recupera. Nel backtest v6 il drawdown massimo e'
-# stato -13%, quindi a 15% il freno non e' mai scattato storicamente: e'
-# una protezione per scenari peggiori del passato, non un parametro
-# ottimizzato. 0 = disattivato.
-SHORT_TERM_MAX_DRAWDOWN_PCT = _float("SHORT_TERM_MAX_DRAWDOWN_PCT", 15.0)
+# Freno di drawdown: se l'equity del conto e' sotto il massimo dell'ultimo
+# anno di piu' di questa %, il bot NON apre nuove posizioni (gestisce solo
+# quelle aperte) finche' non recupera.
+#
+# DISATTIVATO DI DEFAULT (0) sulla base del backtest, non per svista. Al
+# 15% e' stato misurato su 26 anni e PEGGIORA entrambe le metriche che
+# dovrebbe proteggere: CAGR +8.40% -> +7.35% e soprattutto max drawdown
+# -20.2% -> -33.8% (vedi STRATEGY.md "v8b"). Il motivo e' che blocca le
+# entrate dopo le perdite, cioe' vicino ai minimi, e tiene il bot fuori
+# dal mercato proprio durante il rimbalzo: la discesa non viene fermata,
+# il recupero sì. Il rischio per operazione (1%) e il tetto aggregato
+# (12%) restano i veri controlli del drawdown, come nel corso.
+SHORT_TERM_MAX_DRAWDOWN_PCT = _float("SHORT_TERM_MAX_DRAWDOWN_PCT", 0.0)
 
 # Un ordine d'ingresso pendente (buy stop) resta valido finche' il titolo
 # continua a mostrare il setup allo screening quotidiano (come nel

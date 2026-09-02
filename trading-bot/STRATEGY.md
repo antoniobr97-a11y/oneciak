@@ -766,6 +766,42 @@ quello *dopo*) né rileggendo il codice: è emerso solo perché la protezione
 testata anche nel caso peggiore in cui si attiva — altrimenti la
 protezione diventa il danno.
 
+**E poi il verdetto sul freno stesso: disattivato.** Corretto il blocco
+permanente, il freno è stato rimisurato onestamente. Risultato:
+
+| Metrica | v9: senza freno | v8b: con freno al 15% (corretto) |
+|---|---|---|
+| CAGR | +8.40%/anno | **+7.35%/anno (peggio)** |
+| Max drawdown | -20.2% | **-33.8% (molto peggio)** |
+| Sharpe | 0.73 | 0.67 (peggio) |
+| Profit Factor | 1.60 | 1.52 (peggio) |
+| 2020 / 2021 / 2022 | +14.4% / +2.1% / -8.6% | **-5.2% / -3.1% / -14.5%** |
+
+Il freno **peggiora proprio la metrica che dovrebbe proteggere**: il
+drawdown massimo passa da -20% a -34%. Non è un paradosso, è meccanica:
+il freno blocca le nuove entrate *dopo* le perdite, cioè vicino ai minimi,
+e tiene il bot fuori dal mercato durante il rimbalzo. La discesa non la
+ferma (le posizioni aperte restano aperte, con i loro stop); il recupero
+sì. Il sistema resta sott'acqua più a lungo e più a fondo — si vede nel
+triennio 2020-2022, dove il freno trasforma +14.4% in -5.2% e poi
+raddoppia la perdita del 2022.
+
+C'è anche una ragione strutturale: il filtro di regime (v5) **già** tiene
+il bot fuori dai mercati ribassisti, guardando il mercato. Il freno è un
+secondo filtro che guarda invece le *proprie perdite* — e in un mercato
+azionario che storicamente recupera, "ho appena perso" è vicino a "sta per
+risalire". Due protezioni sovrapposte, la seconda con il tempismo
+sbagliato.
+
+Nel bot `SHORT_TERM_MAX_DRAWDOWN_PCT` è quindi **0 (disattivato) di
+default**, riattivabile da `.env` per chi lo vuole comunque. I controlli
+del rischio restano quelli del corso, che il backtest conferma validi:
+rischio 1% per operazione, tetto aggregato 12%, stop-loss sempre presente.
+Nota: il corso (video 45) dice di *tenere* il drawdown entro il 10-15%,
+e lo dice parlando di dimensionamento della posizione — il freno
+automatico era una mia aggiunta, non una regola del corso, e i dati dicono
+che era sbagliata.
+
 Nota di metodo, per non ingannarsi: ogni variante da v5 in poi è stata
 decisa **prima** di vedere i risultati, su un'ipotesi motivata
 (letteratura + risultati coerenti delle versioni precedenti + regole del
