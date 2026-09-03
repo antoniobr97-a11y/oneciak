@@ -383,6 +383,30 @@ def _exit_structure_incomplete(open_orders, expects_limit: bool) -> bool:
     return expects_limit and not _has_open_limit(open_orders)
 
 
+def _fallback_protect(broker, symbol, direction, abs_qty, stop_price) -> None:
+    """Ultima rete di sicurezza.
+
+    Ogni struttura di uscita si costruisce cancellando prima gli ordini
+    esistenti (su Alpaca un ordine di vendita aperto riserva le azioni, e
+    senza cancellarlo il nuovo verrebbe rifiutato). Quella cancellazione
+    lascia una finestra: se poi la nuova struttura non parte -- ordine
+    rifiutato, rete caduta a meta' -- la posizione resta SCOPERTA fino al
+    ciclo del giorno dopo, che e' esattamente cio' che questo bot non deve
+    mai permettere.
+
+    Qui si rinuncia alla scala di uscita per oggi (il ciclo successivo la
+    rimette) e si garantisce almeno lo stop sull'intera posizione. Se
+    fallisce anche questo, l'eccezione sale al chiamante, che notifica."""
+    log.error("%s: struttura di uscita non completata, ripiego su uno stop semplice sull'intera posizione.", symbol)
+    broker.cancel_open_orders(symbol)
+    broker.submit_stop(symbol, abs_qty, stop_price, direction)
+    notify.alert(
+        f"{symbol}: struttura di uscita non completata, messa solo la protezione "
+        f"(stop {stop_price:.2f} su {abs_qty}); la scala di uscita riparte al prossimo ciclo",
+        level="error",
+    )
+
+
 def _place_entered_structure(broker, symbol, direction, abs_qty, entry, risk, stop_price, half) -> None:
     """Stadio 'entered' (corso, video 44 scenario A/B): sulla meta' da
     vendere a T1 un OCO (sell limit a entrata+1R / sell stop allo stop
@@ -393,10 +417,13 @@ def _place_entered_structure(broker, symbol, direction, abs_qty, entry, risk, st
     broker.cancel_open_orders(symbol)
     oco_qty = min(half, abs_qty)
     rest = abs_qty - oco_qty
-    if oco_qty > 0:
-        broker.submit_oco_exit(symbol, oco_qty, direction, _target(entry, risk, 1.0, direction), stop_price)
-    if rest > 0:
-        broker.submit_stop(symbol, rest, stop_price, direction)
+    try:
+        if oco_qty > 0:
+            broker.submit_oco_exit(symbol, oco_qty, direction, _target(entry, risk, 1.0, direction), stop_price)
+        if rest > 0:
+            broker.submit_stop(symbol, rest, stop_price, direction)
+    except Exception:
+        _fallback_protect(broker, symbol, direction, abs_qty, stop_price)
 
 
 def _place_1r_done_structure(broker, symbol, direction, abs_qty, entry, risk, second) -> None:
@@ -406,10 +433,13 @@ def _place_1r_done_structure(broker, symbol, direction, abs_qty, entry, risk, se
     broker.cancel_open_orders(symbol)
     oco_qty = min(second, abs_qty)
     rest = abs_qty - oco_qty
-    if oco_qty > 0:
-        broker.submit_oco_exit(symbol, oco_qty, direction, _target(entry, risk, SECOND_SCALE_OUT_R, direction), entry)
-    if rest > 0:
-        broker.submit_stop(symbol, rest, entry, direction)
+    try:
+        if oco_qty > 0:
+            broker.submit_oco_exit(symbol, oco_qty, direction, _target(entry, risk, SECOND_SCALE_OUT_R, direction), entry)
+        if rest > 0:
+            broker.submit_stop(symbol, rest, entry, direction)
+    except Exception:
+        _fallback_protect(broker, symbol, direction, abs_qty, entry)
 
 
 def _place_runner_structure(broker, symbol, direction, abs_qty, entry) -> None:
@@ -620,7 +650,15 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
         log.info("Oggi la borsa USA e' chiusa (weekend o festivo), salto il ciclo.")
         return
 
-    manage_open_short_term_positions(broker)
+    # La gestione delle posizioni aperte INVIA ordini veri (arma le uscite,
+    # riemette stop mancanti): senza --execute il comando deve limitarsi al
+    # report, come promesso nella docstring in cima al file. Il ciclo
+    # automatico passa sempre execute=True, quindi in esercizio non cambia
+    # nulla -- cambia che un'anteprima resta davvero un'anteprima.
+    if args.execute:
+        manage_open_short_term_positions(broker)
+    else:
+        log.info("Modalita' report: gestione delle posizioni aperte saltata (invierebbe ordini veri).")
 
     # Screening e riconciliazione dei pendenti SOLO a mercato chiuso.
     # common/data.py prende le barre giornaliere da yfinance: a mercato
@@ -647,8 +685,10 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
     open_positions_count = len(_short_term_positions(broker)) + len(_pending_symbols())
     candidates = screen_universe(capital=equity, open_positions_count=open_positions_count, broker=broker)
 
-    reconcile_pending_entries(broker, {c.symbol for c in candidates if c.is_actionable}, today)
-    open_positions_count = len(_short_term_positions(broker)) + len(_pending_symbols())
+    if args.execute:
+        # Cancella ordini veri al broker: anche questa non e' un'anteprima.
+        reconcile_pending_entries(broker, {c.symbol for c in candidates if c.is_actionable}, today)
+        open_positions_count = len(_short_term_positions(broker)) + len(_pending_symbols())
 
     if _drawdown_brake_active(broker, today):
         return

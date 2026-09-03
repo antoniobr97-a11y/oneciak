@@ -1134,3 +1134,76 @@ def test_replacing_a_pending_order_reuses_the_cash_it_already_held(monkeypatch):
 
     # 1.050 disponibili per il nuovo ordine (50 liberi + 1.000 liberati), non 50
     broker.submit_stop_entry.assert_called_once_with("AAPL", 10, "long", 102.0, 97.0)
+
+
+# --- La posizione non resta mai scoperta -----------------------------------
+# Ogni struttura di uscita si costruisce cancellando prima gli ordini
+# esistenti (Alpaca riserva le azioni su un ordine di vendita aperto). Se la
+# nuova struttura non parte, quella cancellazione lascerebbe la posizione
+# senza stop fino al giorno dopo.
+
+def test_failed_oco_still_leaves_a_stop_on_the_whole_position():
+    broker = _broker([_position("AAPL", 10, 100.0, 101.0)], open_orders=[_order("stop")])
+    broker.submit_oco_exit.side_effect = RuntimeError("rifiutato")
+
+    with _patched_state({"AAPL": ENTERED_10}), patch.object(bot.notify, "alert"):
+        bot.manage_open_short_term_positions(broker)
+
+    broker.submit_stop.assert_called_once_with("AAPL", 10, 95.0, "long")  # tutte e 10, non solo il resto
+
+
+def test_failed_second_leg_still_leaves_a_stop_on_the_whole_position():
+    broker = _broker([_position("AAPL", 10, 100.0, 101.0)], open_orders=[_order("stop")])
+    broker.submit_stop.side_effect = [RuntimeError("rifiutato"), None]
+
+    with _patched_state({"AAPL": ENTERED_10}), patch.object(bot.notify, "alert"):
+        bot.manage_open_short_term_positions(broker)
+
+    assert broker.submit_stop.call_args_list[-1][0] == ("AAPL", 10, 95.0, "long")
+
+
+def test_fallback_uses_breakeven_after_1r():
+    broker = _broker([_position("AAPL", 5, 100.0, 108.0)], open_orders=[_order("stop")])
+    broker.submit_oco_exit.side_effect = RuntimeError("rifiutato")
+
+    with _patched_state({"AAPL": {**ENTERED_10, "stage": "1R_done"}}), patch.object(bot.notify, "alert"):
+        bot.manage_open_short_term_positions(broker)
+
+    broker.submit_stop.assert_called_once_with("AAPL", 5, 100.0, "long")  # pareggio, non lo stop iniziale
+
+
+def test_a_failing_fallback_is_reported_and_does_not_kill_the_cycle():
+    """Se non si riesce nemmeno a mettere lo stop di ripiego, l'errore deve
+    arrivare all'utente: e' una posizione scoperta da sistemare a mano."""
+    broker = _broker([_position("AAPL", 10, 100.0, 101.0), _position("MSFT", 10, 100.0, 101.0)],
+                     open_orders=[_order("stop")])
+    broker.submit_oco_exit.side_effect = RuntimeError("rifiutato")
+    broker.submit_stop.side_effect = RuntimeError("rifiutato anche questo")
+
+    with _patched_state({"AAPL": ENTERED_10, "MSFT": ENTERED_10}), \
+         patch.object(bot.notify, "alert") as alert:
+        bot.manage_open_short_term_positions(broker)
+
+    assert any(c.kwargs.get("level") == "error" for c in alert.call_args_list)
+    # il secondo titolo viene comunque tentato
+    assert broker.submit_oco_exit.call_count == 2
+
+
+def test_report_only_mode_sends_no_orders_at_all():
+    """La docstring in cima a bot.py promette che senza --execute nessun
+    ordine viene inviato. La gestione delle posizioni aperte pero' ne
+    invia (arma le uscite, riemette stop mancanti) e veniva eseguita
+    comunque: un'anteprima che opera davvero e' peggio di nessuna."""
+    broker = _cycle_broker()
+    broker.list_open_positions.return_value = [_position("AAPL", 10, 100.0, 101.0)]
+
+    with patch("bot.Broker", return_value=broker), \
+         patch("bot.screen_universe", return_value=[_candidate("MSFT")]), \
+         patch("bot._print_candidate"), \
+         _patched_state({"AAPL": ENTERED_10}):
+        bot.cmd_short_term_once(argparse.Namespace(execute=False))
+
+    broker.submit_oco_exit.assert_not_called()
+    broker.submit_stop.assert_not_called()
+    broker.cancel_open_orders.assert_not_called()
+    broker.submit_stop_entry.assert_not_called()

@@ -1080,6 +1080,28 @@ precedente.
     che il broker poi rifiuta). Unificate in
     `common/broker.py:order_type_name`, che legge entrambi i campi.
 
+15. **La finestra scoperta allargata da un fix precedente.** Ogni
+    struttura di uscita si costruisce cancellando prima gli ordini
+    esistenti (su Alpaca un ordine di vendita aperto riserva le azioni).
+    Se la nuova struttura non parte a metà — ordine rifiutato, rete caduta
+    — la posizione resta **senza stop** fino al ciclo del giorno dopo. Era
+    un percorso raro; il fix n. 10 lo ha reso quello attraversato da
+    **ogni posizione appena eseguita**, allargando un buco che non aveva
+    creato. Fix: `bot.py:_fallback_protect` — se la struttura fallisce si
+    rinuncia alla scala di uscita per oggi e si garantisce almeno lo stop
+    sull'intera posizione, con notifica di errore; il ciclo successivo
+    rimette la scala. Se fallisce anche il ripiego, l'eccezione sale e
+    viene notificata: è una posizione da sistemare a mano.
+16. **L'anteprima operava davvero.** La docstring in cima a `bot.py`
+    promette che senza `--execute` nessun ordine viene inviato, ma
+    `short-term-once` chiamava comunque la gestione delle posizioni
+    aperte (che arma uscite e riemette stop) e la riconciliazione dei
+    pendenti (che cancella ordini). Il test di modalità report copriva
+    solo i nuovi ingressi, e nel suo scenario non c'erano posizioni
+    aperte. In esercizio non cambiava nulla — lo scheduler passa sempre
+    `execute=True` — ma un'anteprima che opera è peggio di nessuna
+    anteprima. Fix: entrambe le fasi solo con `--execute`.
+
 ## Storico minimo per analizzare un titolo (assunzione esplicita)
 
 `short_term/screener.py:MIN_HISTORY_BARS = 250` — un titolo con meno di
