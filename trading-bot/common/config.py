@@ -17,14 +17,36 @@ def _bool(name: str, default: bool) -> bool:
     return val.strip().lower() in ("1", "true", "yes", "on")
 
 
+class ConfigError(RuntimeError):
+    """Errore di configurazione in .env, con un messaggio leggibile."""
+
+
 def _float(name: str, default: float) -> float:
     val = os.getenv(name)
-    return float(val) if val else default
+    if not val:
+        return default
+    try:
+        return float(val)
+    except ValueError:
+        # Errore facile da fare e altrimenti illeggibile: in italiano si
+        # scrive "10.000" per diecimila e "1,5" per uno virgola cinque,
+        # entrambi sbagliati qui (rispettivamente diventerebbe 10 e
+        # solleverebbe). Meglio dirlo con chiarezza che far uscire un
+        # traceback all'avvio.
+        raise ConfigError(
+            f"{name}={val!r} in .env non e' un numero valido. Usa il punto per i decimali e "
+            f"nessun separatore per le migliaia: 10000 oppure 1.5, non 10.000 ne' 1,5."
+        ) from None
 
 
 def _int(name: str, default: int) -> int:
     val = os.getenv(name)
-    return int(val) if val else default
+    if not val:
+        return default
+    try:
+        return int(val)
+    except ValueError:
+        raise ConfigError(f"{name}={val!r} in .env non e' un numero intero valido.") from None
 
 
 def _list(name: str, default: str) -> list[str]:
@@ -237,3 +259,38 @@ SHORT_TERM_MAX_DRAWDOWN_PCT = _float("SHORT_TERM_MAX_DRAWDOWN_PCT", 0.0)
 # solo un tetto di sicurezza in giorni di calendario oltre il quale viene
 # cancellato comunque.
 SHORT_TERM_PENDING_MAX_DAYS = _int("SHORT_TERM_PENDING_MAX_DAYS", 20)
+
+
+# --- Coerenza della configurazione ------------------------------------------
+# Diverse impostazioni sbagliate non danno errore: spengono il bot in
+# silenzio, e dal log sembra solo che "oggi non ci siano occasioni". E'
+# gia' successo due volte per altre cause (feed dati SIP, volatilita'
+# mancante), quindi qui si preferisce un errore chiaro all'avvio.
+
+def _validate() -> None:
+    hhmm = RUN_TIME.split(":")
+    if len(hhmm) != 2 or not all(p.isdigit() for p in hhmm) or not (0 <= int(hhmm[0]) <= 23 and 0 <= int(hhmm[1]) <= 59):
+        raise ConfigError(f"RUN_TIME={RUN_TIME!r}: serve un orario nel formato HH:MM, per esempio 16:15.")
+
+    if SHORT_TERM_RISK_PER_TRADE_PCT <= 0:
+        raise ConfigError(
+            f"SHORT_TERM_RISK_PER_TRADE_PCT={SHORT_TERM_RISK_PER_TRADE_PCT}: con rischio zero la size "
+            "di ogni operazione e' zero e il bot non aprirebbe mai nulla."
+        )
+    if SHORT_TERM_MAX_AGGREGATE_RISK_PCT < SHORT_TERM_RISK_PER_TRADE_PCT:
+        raise ConfigError(
+            f"SHORT_TERM_MAX_AGGREGATE_RISK_PCT={SHORT_TERM_MAX_AGGREGATE_RISK_PCT} e' sotto il rischio "
+            f"di una singola operazione ({SHORT_TERM_RISK_PER_TRADE_PCT}): non ci sarebbe posto nemmeno "
+            "per la prima, e il bot non aprirebbe mai nulla."
+        )
+    if SHORT_TERM_CAPITAL < 0 or LONG_TERM_CAPITAL < 0:
+        raise ConfigError("SHORT_TERM_CAPITAL e LONG_TERM_CAPITAL non possono essere negativi.")
+    if not 0 <= SHORT_TERM_MAX_DRAWDOWN_PCT < 100:
+        raise ConfigError(f"SHORT_TERM_MAX_DRAWDOWN_PCT={SHORT_TERM_MAX_DRAWDOWN_PCT}: usa un valore fra 0 e 100 (0 = disattivato).")
+    if SHORT_TERM_FX_RATE <= 0:
+        raise ConfigError(f"SHORT_TERM_FX_RATE={SHORT_TERM_FX_RATE}: deve essere maggiore di zero.")
+    if not HARRY_BROWNE_TICKERS or not ADVANCED_TICKERS:
+        raise ConfigError("HARRY_BROWNE_TICKERS e ADVANCED_TICKERS non possono essere vuoti.")
+
+
+_validate()

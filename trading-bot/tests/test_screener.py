@@ -395,3 +395,46 @@ def test_incomplete_liquidity_data_is_reported(monkeypatch):
         screener.build_full_market_universe(broker)
 
     assert any(c.kwargs.get("level") == "error" for c in alert.call_args_list)
+
+
+def test_a_mass_scan_failure_is_reported(monkeypatch):
+    """Un titolo che fallisce e' fisiologico; meta' dell'universo che fallisce e'
+    un guasto, e senza segnalazione sembrerebbe solo che oggi non ci sono
+    occasioni."""
+    from unittest.mock import patch
+
+    monkeypatch.setattr(config, "SHORT_TERM_USE_FULL_MARKET", False)
+    monkeypatch.setattr(config, "MARKET_REGIME_FILTER", False)
+
+    def boom(symbol, *a, **k):
+        if symbol != "OK":
+            raise RuntimeError("dati non disponibili")
+        return []
+
+    monkeypatch.setattr(screener, "scan_symbol", boom)
+    monkeypatch.setattr(screener, "get_daily_bars", lambda symbol, period="1y": _empty_bars())
+
+    with patch.object(screener.notify, "alert") as alert:
+        screener.screen_universe(symbols=["OK", "A", "B", "C"])
+
+    assert any(c.kwargs.get("level") == "error" for c in alert.call_args_list)
+
+
+def test_a_few_scan_failures_are_not_escalated(monkeypatch):
+    from unittest.mock import patch
+
+    monkeypatch.setattr(config, "SHORT_TERM_USE_FULL_MARKET", False)
+    monkeypatch.setattr(config, "MARKET_REGIME_FILTER", False)
+
+    def one_bad(symbol, *a, **k):
+        if symbol == "BAD":
+            raise RuntimeError("dati non disponibili")
+        return []
+
+    monkeypatch.setattr(screener, "scan_symbol", one_bad)
+    monkeypatch.setattr(screener, "get_daily_bars", lambda symbol, period="1y": _empty_bars())
+
+    with patch.object(screener.notify, "alert") as alert:
+        screener.screen_universe(symbols=["BAD"] + [f"OK{i}" for i in range(9)])
+
+    assert not alert.called

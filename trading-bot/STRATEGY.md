@@ -1102,6 +1102,76 @@ precedente.
     `execute=True` — ma un'anteprima che opera è peggio di nessuna
     anteprima. Fix: entrambe le fasi solo con `--execute`.
 
+### Revisione riga per riga dell'intero codice (3 settembre 2026)
+
+Lettura completa di tutti i file sorgente, non piu' controlli mirati.
+Ogni voce ha test di regressione che falliscono sul codice precedente.
+
+17. **Il tetto di rischio pieno veniva scambiato per "nessuna
+    occasione" (il piu' grave).** `can_open_new_position` era controllato
+    dentro `scan_symbol`: a portafoglio pieno lo screener restituiva zero
+    candidati, e `reconcile_pending_entries` legge una lista vuota come
+    "questi setup non esistono piu'" e cancella **tutti** gli ordini
+    d'ingresso in attesa. Successo il 3 settembre: 10 ordini cancellati in
+    un colpo, e sarebbe successo ogni giorno in cui il bot lavora a pieno
+    regime. "Questo grafico ha un setup?" e "c'e' posto per aprirlo?" sono
+    domande diverse: solo la prima appartiene allo screener, la seconda era
+    gia' applicata in `bot.py` dove gli ordini partono davvero.
+18. **Gli swing point mescolavano picchi e valli.** La funzione
+    restituiva i punti che erano massimo **oppure** minimo della finestra,
+    quindi chi chiedeva "i massimi sono crescenti?" riceveva una sequenza
+    picco-valle-picco-valle. Conseguenze misurate: `harmony_qualifier` --
+    uno dei 6 qualificatori del corso -- non poteva quasi mai essere vero;
+    `divergence_check` confrontava gli ultimi due punti, cioe' un picco con
+    una valle; `support_resistance_check` inventava resistenze dalle valli.
+    La funzione era anche duplicata in due moduli. Ora una sola
+    `indicators.swing_points(kind=)`, picchi dai massimi e valli dai minimi.
+19. **Il file di stato poteva restare troncato.** Veniva scritto in
+    place: un'interruzione a meta' scrittura lo lascia illeggibile, e il
+    modo documentato per fermare il bot su Windows e' chiudere la finestra,
+    che uccide il processo. Si perderebbero size originale, stop e stadio
+    di **ogni** posizione aperta. Ora scrittura atomica (file temporaneo +
+    `os.replace`) e, se il file risulta illeggibile, errore esplicito e
+    copia conservata invece di uno stato vuoto in silenzio.
+20. **`flatten()` fingeva di aver chiuso.** Cancellava gli stop, poi
+    ingoiava un errore di chiusura e restituiva `None`: il chiamante
+    cancellava lo stato di una posizione ancora aperta al broker, ormai
+    senza stop e senza i dati per gestirla. Ora rilancia, e l'uscita del
+    runner rimette la protezione prima di propagare l'errore.
+21. **`get_open_position()` trasformava qualsiasi guasto in "nessuna
+    posizione".** Uno scatto di rete avrebbe fatto aprire una **seconda**
+    posizione su un titolo gia' in portafoglio (o ricomprare un ETF di
+    lungo termine gia' posseduto). Ora `None` solo su un 404 vero.
+22. **Un ciclo di lungo termine fallito veniva segnato come completato**,
+    lasciando il portafoglio sbilanciato per un mese (Advanced) o un
+    trimestre (Harry Browne) senza che nulla riprovasse. Ora si segna solo
+    a buon fine; riprovare e' sicuro perche' gli ordini sono ricalcolati
+    come differenza dalle quote realmente possedute.
+23. **La settimana in corso non veniva scartata.** Il backtest scarta
+    gia' la settimana non chiusa; il codice live la passava ai controlli su
+    supporti/resistenze e divergenza MACD, che leggono i punti di
+    inversione piu' recenti -- un massimo settimanale ancora in formazione
+    ne crea uno che a fine settimana potrebbe non esistere. Stessa famiglia
+    dei punti 5 (mese in corso) e 12 (giorno in corso).
+24. **Una configurazione sbagliata spegneva il bot in silenzio.** Rischio
+    per operazione a zero, tetto aggregato sotto il rischio singolo,
+    `RUN_TIME` malformato: nessuno dava errore, semplicemente non si apriva
+    mai nulla. In piu' `SHORT_TERM_CAPITAL=10.000` (notazione italiana per
+    diecimila) diventava 10 senza un avviso. Ora la configurazione e'
+    validata all'avvio con messaggi espliciti.
+
+Sistemati nella stessa revisione, senza conseguenze gia' osservate:
+aritmetica su etichette dell'indice dove date duplicate (dati Yahoo)
+rompono lo slicing, ora posizionale e verificata identica su 200 serie
+casuali; dati di liquidita' incompleti e fallimenti di massa nell'analisi
+ora segnalati come gia' avveniva per la volatilita'; `notify.alert` poteva
+sollevare su un URL webhook malformato, prima ancora di inviare; il file di
+log cresceva senza limite; `common/live_data.py` era codice morto che
+conteneva il bug del feed SIP responsabile del primo avvio fallito; e
+cinque metodi del broker non erano usati da nessuna parte, tra cui un
+`enter_with_stop` che compra **a mercato**, cioe' il comportamento che il
+corso esclude e che era gia' stato corretto altrove.
+
 ## Storico minimo per analizzare un titolo (assunzione esplicita)
 
 `short_term/screener.py:MIN_HISTORY_BARS = 250` — un titolo con meno di

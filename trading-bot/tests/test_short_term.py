@@ -319,3 +319,28 @@ def test_harmony_qualifier_recognises_a_textbook_downtrend():
     down = _wave(rise=-60)
     assert harmony_qualifier(down, "short", 60) is True
     assert harmony_qualifier(down, "long", 60) is False
+
+
+# --- la settimana in corso non e' un dato ----------------------------------
+
+def test_weekly_bars_drop_the_week_still_in_progress():
+    """Il backtest scartava gia' la settimana in corso, il codice live no:
+    un massimo settimanale ancora in formazione crea un punto di
+    inversione che a fine settimana potrebbe non esistere, e i controlli
+    su supporti/resistenze e divergenza MACD leggono proprio quelli."""
+    import pandas as pd
+
+    from common.data import closed_weekly_bars
+
+    # mercoledi' come ultimo giorno: la settimana non e' finita
+    idx = pd.date_range("2026-08-31", periods=10, freq="B")  # lun -> ven successivo
+    daily = pd.DataFrame({"open": 1.0, "high": 2.0, "low": 0.5, "close": 1.5, "volume": 100.0}, index=idx)
+
+    until_wednesday = daily.iloc[:8]  # ultimo giorno = mercoledi' 9 settembre
+    assert until_wednesday.index[-1].dayofweek == 2
+    full = closed_weekly_bars(until_wednesday)
+    assert len(full) == 1  # solo la prima settimana, chiusa
+
+    until_friday = daily  # ultimo giorno = venerdi'
+    assert until_friday.index[-1].dayofweek == 4
+    assert len(closed_weekly_bars(until_friday)) == 2  # entrambe chiuse

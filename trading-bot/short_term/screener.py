@@ -79,6 +79,10 @@ MIN_VOLATILITY_COVERAGE = 0.5
 # Idem per il prefiltro di liquidita': sotto questa copertura l'universo del
 # giorno e' incompleto e va segnalato, non subito in silenzio.
 MIN_LIQUIDITY_COVERAGE = 0.8
+# Quota di titoli che possono fallire l'analisi prima che il ciclo venga
+# considerato incompleto e segnalato (qualche errore isolato e' fisiologico
+# con dati gratuiti).
+MAX_SCAN_FAILURE_RATE = 0.2
 # Barre giornaliere minime perche' un titolo sia analizzabile: sotto questa
 # soglia SMA200, qualificatori e "massimo a 52 settimane" non hanno una base
 # reale (stesso requisito del backtest).
@@ -434,6 +438,7 @@ def screen_universe(
                  sector.SP500_PROXY, config.MARKET_REGIME_MA_PERIOD, config.SHORT_TERM_ALLOW_SHORTS, ", ".join(d.upper() for d in directions))
 
     all_candidates: list[Candidate] = []
+    failed: list[str] = []
     for symbol in symbols:
         try:
             all_candidates.extend(
@@ -441,6 +446,24 @@ def screen_universe(
             )
         except Exception:
             log.exception("Error screening %s", symbol)
+            failed.append(symbol)
+
+    # Un titolo che fallisce e' isolato e non blocca gli altri, ma se ne
+    # fallisce una fetta consistente l'analisi di oggi e' incompleta e va
+    # detto: altrimenti un guasto (yfinance giu', rete instabile,
+    # rate-limit) si presenta come "oggi ci sono meno occasioni", che e'
+    # esattamente il modo in cui questo bot ha gia' smesso di operare in
+    # silenzio due volte.
+    if symbols and len(failed) / len(symbols) > MAX_SCAN_FAILURE_RATE:
+        log.error(
+            "Analisi fallita su %d titoli su %d (%.0f%%): la scansione di oggi e' incompleta. "
+            "Primi simboli coinvolti: %s",
+            len(failed), len(symbols), len(failed) / len(symbols) * 100, ", ".join(failed[:10]),
+        )
+        notify.alert(
+            f"Analisi fallita su {len(failed)}/{len(symbols)} titoli: scansione incompleta, controlla i log",
+            level="error",
+        )
     # I candidati escono in ordine di scansione (alfabetico): quando sono
     # piu' dei posti liberi nel tetto di rischio, chi arriva prima nella
     # lista vince, che e' un criterio senza senso. Ordinati per vicinanza
