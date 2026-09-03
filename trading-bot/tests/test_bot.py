@@ -87,6 +87,21 @@ def _broker(positions=(), open_orders=None):
     return broker
 
 
+def _order(kind, legs=None):
+    """Ordine aperto come lo restituisce Alpaca: cio' che conta e' il tipo
+    (limit = presa di profitto, stop = protezione) e le eventuali gambe di
+    un ordine composto."""
+    order = MagicMock()
+    order.type = kind
+    order.legs = legs
+    return order
+
+
+def _oco(limit_price=None):
+    """Un OCO al broker: ordine padre con due gambe, limit + stop."""
+    return _order("limit", legs=[_order("limit"), _order("stop")])
+
+
 ENTERED_10 = {"risk_per_share": 5.0, "original_qty": 10, "stage": "entered", "stop_price": 95.0, "direction": "long"}
 
 
@@ -125,8 +140,8 @@ def test_entered_without_exit_orders_places_oco_half_and_stop_half():
     broker.submit_stop.assert_called_once_with("AAPL", 5, 95.0, "long")
 
 
-def test_entered_with_exit_orders_present_does_nothing():
-    broker = _broker([_position("AAPL", 10, 100.0, 104.0)], open_orders=[MagicMock()])
+def test_entered_with_the_full_exit_structure_does_nothing():
+    broker = _broker([_position("AAPL", 10, 100.0, 104.0)], open_orders=[_oco(), _order("stop")])
 
     with _patched_state({"AAPL": ENTERED_10}) as state:
         bot.manage_open_short_term_positions(broker)
@@ -210,7 +225,7 @@ def test_1r_done_without_exit_orders_replaces_structure():
 
 
 def test_1r_done_with_orders_and_no_3r_fill_does_nothing():
-    broker = _broker([_position("AAPL", 5, 100.0, 108.0)], open_orders=[MagicMock()])
+    broker = _broker([_position("AAPL", 5, 100.0, 108.0)], open_orders=[_oco(), _order("stop")])
 
     with _patched_state({"AAPL": {**ENTERED_10, "stage": "1R_done"}}):
         bot.manage_open_short_term_positions(broker)
@@ -943,3 +958,81 @@ def test_schedule_registers_the_daily_job_before_running_the_first_cycle():
     assert isinstance(triggers[0], bot.CronTrigger)  # prima il quotidiano
     assert triggers[1] is None                       # poi il giro immediato
     assert scheduler.start.called
+
+
+# --- La gamba di presa di profitto va armata dopo l'esecuzione dell'ingresso ---
+# Regressione trovata in esercizio (paper trading, posizione TEAM da 5
+# azioni): l'ordine d'ingresso OTO, una volta eseguito, lascia aperto SOLO
+# il suo stop-loss. Il controllo "nessun ordine aperto" lo scambiava per
+# struttura gia' a posto, quindi il limit a 1R non veniva MAI piazzato: la
+# posizione poteva solo andare a stop o correre all'infinito, e la meta'
+# della strategia che porta a casa il profitto non entrava mai in funzione.
+
+def test_filled_oto_entry_leaves_only_a_stop_and_the_take_profit_is_armed():
+    broker = _broker([_position("TEAM", 5, 100.0, 101.0)], open_orders=[_order("stop")])
+
+    with _patched_state({"TEAM": {**ENTERED_10, "original_qty": 5}}):
+        bot.manage_open_short_term_positions(broker)
+
+    # meta' (2) va in OCO con limit a 1R (105), il resto (3) resta a stop
+    broker.submit_oco_exit.assert_called_once_with("TEAM", 2, "long", 105.0, 95.0)
+    broker.submit_stop.assert_called_once_with("TEAM", 3, 95.0, "long")
+
+
+def test_take_profit_leg_is_recognised_inside_an_oco_parent():
+    """Un OCO al broker e' un ordine padre con due gambe: se il limit e'
+    solo nelle gambe, la struttura e' comunque completa e non va rifatta
+    ogni giorno."""
+    parent = _order("stop", legs=[_order("limit"), _order("stop")])
+    broker = _broker([_position("TEAM", 5, 100.0, 101.0)], open_orders=[parent])
+
+    with _patched_state({"TEAM": {**ENTERED_10, "original_qty": 5}}):
+        bot.manage_open_short_term_positions(broker)
+
+    broker.submit_oco_exit.assert_not_called()
+    broker.submit_stop.assert_not_called()
+
+
+def test_single_share_position_with_only_a_stop_is_left_alone():
+    """Con una sola azione non c'e' nessuna meta' da vendere a 1R: il solo
+    stop E' la struttura completa. Senza questa distinzione il bot
+    cancellerebbe e riemetterebbe l'ordine ogni giorno a vuoto."""
+    broker = _broker([_position("BITO", 1, 10.68, 10.89)], open_orders=[_order("stop")])
+
+    with _patched_state({"BITO": {"risk_per_share": 0.71, "original_qty": 1,
+                                  "stage": "entered", "stop_price": 9.97, "direction": "long"}}):
+        bot.manage_open_short_term_positions(broker)
+
+    broker.cancel_open_orders.assert_not_called()
+    broker.submit_oco_exit.assert_not_called()
+
+
+def test_1r_done_with_only_a_stop_rearms_the_3r_take_profit():
+    broker = _broker([_position("AAPL", 5, 100.0, 108.0)], open_orders=[_order("stop")])
+
+    with _patched_state({"AAPL": {**ENTERED_10, "stage": "1R_done"}}):
+        bot.manage_open_short_term_positions(broker)
+
+    broker.submit_oco_exit.assert_called_once_with("AAPL", 3, "long", 115.0, 100.0)
+
+
+def test_runner_stop_alone_is_a_complete_structure():
+    """Stadio 3R_done: la struttura prevista e' il solo stop a pareggio,
+    nessun limit -- non va riemessa a ogni ciclo."""
+    broker = _broker([_position("AAPL", 2, 100.0, 130.0)], open_orders=[_order("stop")])
+
+    with _patched_state({"AAPL": {**ENTERED_10, "stage": "3R_done"}}), \
+         patch.object(bot, "get_daily_bars", return_value=pd.DataFrame({"close": [130.0] * 250})):
+        bot.manage_open_short_term_positions(broker)
+
+    broker.cancel_open_orders.assert_not_called()
+    broker.submit_stop.assert_not_called()
+
+
+def test_has_open_limit_tolerates_enum_types_and_missing_legs():
+    class _Enum:
+        value = "limit"
+
+    assert bot._has_open_limit([_order(_Enum())])
+    assert not bot._has_open_limit([_order("stop")])
+    assert not bot._has_open_limit([])

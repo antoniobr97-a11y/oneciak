@@ -1003,6 +1003,42 @@ stato (a) definisce cosa fare su un conto nuovo, dove "dentro se già
 dentro" non ha senso, e (b) si auto-ripara se il ciclo di un mese è stato
 saltato — un incrocio perso non si rivede mai più, lo stato sì.
 
+## Bug trovati in esercizio (paper trading reale)
+
+Cose che nessun backtest e nessuna revisione a tavolino avevano visto,
+emerse solo facendo girare il bot su un conto vero (paper) da un PC di
+casa. Entrambe coperte da test di regressione che falliscono sul codice
+precedente.
+
+10. **La presa di profitto a 1R non veniva MAI armata (il più grave dei
+    due).** Il fix n. 7 metteva l'OCO con il limit a 1R "se al broker non
+    c'è nessun ordine di uscita aperto". Ma l'ingresso è un ordine OTO
+    (fix n. 6): quando viene eseguito, lascia aperto il proprio
+    stop-loss. Quindi al primo ciclo dopo l'esecuzione un ordine di
+    uscita c'era — solo che era lo stop, non il limit. Il bot lo
+    scambiava per struttura completa e non piazzava mai la gamba di
+    profitto: la posizione poteva soltanto andare a stop o correre
+    all'infinito. Nessun errore, nessun log: la metà della strategia che
+    porta a casa i guadagni semplicemente non entrava in funzione.
+    I due fix precedenti erano corretti singolarmente e incompatibili
+    insieme — il tipo di bug che si vede solo guardando un conto vero.
+    Fix: `bot.py:_exit_structure_incomplete` verifica che ci sia la gamba
+    *prevista da quello stadio* (limit di take-profit incluso), non che
+    esista un ordine qualsiasi. Distingue anche i casi in cui il solo
+    stop È la struttura completa — posizione da 1 azione (niente metà da
+    vendere) e stadio runner — che altrimenti verrebbero cancellati e
+    riemessi a vuoto ogni giorno.
+11. **Un solo scatto di rete faceva perdere l'intero giro del giorno.**
+    Bot lanciato appena acceso il PC, connessione non ancora pronta:
+    `ConnectTimeout` su `/v2/calendar` → ciclo abortito, nessuna gestione
+    delle posizioni aperte, nessun ordine nuovo. alpaca-py ritenta solo
+    i codici HTTP di rate limit, mai gli errori di connessione, e non
+    imposta alcun timeout. Fix su tre livelli (timeout espliciti, retry
+    HTTP con backoff, retry di ciclo dopo 1/5/15 minuti) — vedi README,
+    "Connessione assente o instabile". I retry non ripetono mai alla
+    cieca l'invio di un ordine: solo richieste mai partite o di sola
+    lettura.
+
 ## Storico minimo per analizzare un titolo (assunzione esplicita)
 
 `short_term/screener.py:MIN_HISTORY_BARS = 250` — un titolo con meno di

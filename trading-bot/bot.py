@@ -338,6 +338,37 @@ def _tranches(original_qty: int) -> tuple[int, int, int]:
     return half, second, runner
 
 
+def _has_open_limit(open_orders) -> bool:
+    """Vero se tra gli ordini aperti c'e' un limit, cioe' la gamba di presa
+    di profitto. Guarda anche le gambe degli ordini composti: un OCO al
+    broker e' un ordine padre con due gambe (limit + stop)."""
+    for order in open_orders:
+        legs = getattr(order, "legs", None)
+        for leg in (order, *(legs if isinstance(legs, (list, tuple)) else ())):
+            raw = getattr(leg, "type", None)
+            if str(getattr(raw, "value", raw) or "").lower() == "limit":
+                return True
+    return False
+
+
+def _exit_structure_incomplete(open_orders, expects_limit: bool) -> bool:
+    """La struttura di uscita va (ri)emessa se al broker non c'e' NESSUN
+    ordine aperto, oppure se manca la gamba di presa di profitto prevista
+    da quello stadio.
+
+    Il secondo caso non e' teorico ed e' il motivo per cui questo controllo
+    esiste: appena l'ordine d'ingresso OTO viene eseguito, al broker resta
+    aperto il suo stop-loss e nient'altro. Guardando solo "nessun ordine
+    aperto" il bot lo scambiava per struttura gia' a posto e non piazzava
+    mai il limit a 1R -- la posizione poteva solo andare a stop o correre
+    all'infinito, cioe' meta' della strategia (vendere meta' a 1R e portare
+    lo stop a pareggio) non entrava mai in funzione. Bug trovato in
+    esercizio su una posizione reale in paper trading."""
+    if not open_orders:
+        return True
+    return expects_limit and not _has_open_limit(open_orders)
+
+
 def _place_entered_structure(broker, symbol, direction, abs_qty, entry, risk, stop_price, half) -> None:
     """Stadio 'entered' (corso, video 44 scenario A/B): sulla meta' da
     vendere a T1 un OCO (sell limit a entrata+1R / sell stop allo stop
@@ -388,8 +419,9 @@ def manage_open_short_term_positions(broker: Broker) -> None:
       3R_done  -> stop pareggio sul runner; chiusura totale quando il prezzo
                   chiude oltre la SMA200 nella direzione opposta
     A ogni stadio, se al broker non c'e' NESSUN ordine di uscita aperto
-    (scaduto, cancellato, riemissione fallita), la struttura viene riemessa
-    (auto-riparazione). Il broker non conserva size originale, rischio per
+    (scaduto, cancellato, riemissione fallita) O se manca la gamba di presa
+    di profitto prevista da quello stadio, la struttura viene riemessa
+    (auto-riparazione, vedi _exit_structure_incomplete). Il broker non conserva size originale, rischio per
     azione e stadio: li traccia common/position_state.py. Ogni posizione e'
     isolata in un try/except."""
     open_positions = _short_term_positions(broker)
@@ -439,21 +471,28 @@ def manage_open_short_term_positions(broker: Broker) -> None:
                     # al pareggio (unico modo di applicare "zero rischio dopo 1R").
                     _place_runner_structure(broker, symbol, direction, abs_qty, entry_price)
                     position_state.set_fields(symbol, stage="1R_done")
-                elif not open_orders:
+                elif _exit_structure_incomplete(open_orders, expects_limit=half > 0):
                     if not stop_price:
                         log.error("%s: nessun ordine di uscita e nessuno stop salvato -- VA MESSO A MANO.", symbol)
                         notify.alert(f"{symbol}: posizione SENZA stop e senza livello salvato, intervenire a mano", level="error")
                         continue
                     _place_entered_structure(broker, symbol, direction, abs_qty, entry_price, risk, stop_price, half)
-                    log.warning("%s: ordini di uscita mancanti, riemessi (stop %.2f, T1 %.2f).", symbol, stop_price, _target(entry_price, risk, 1.0, direction))
-                    notify.alert(f"{symbol}: ordini di uscita mancanti, riemessi", level="warning")
+                    t1 = _target(entry_price, risk, 1.0, direction)
+                    if open_orders:
+                        # Caso normale al primo ciclo dopo l'esecuzione
+                        # dell'ingresso: c'era il solo stop-loss dell'OTO.
+                        log.info("%s: uscita armata -- %d azioni in vendita a %.2f (1R), stop %.2f su tutto.", symbol, min(half, abs_qty), t1, stop_price)
+                        notify.alert(f"{symbol}: uscita armata, meta' in vendita a {t1:.2f}")
+                    else:
+                        log.warning("%s: ordini di uscita mancanti, riemessi (stop %.2f, T1 %.2f).", symbol, stop_price, t1)
+                        notify.alert(f"{symbol}: ordini di uscita mancanti, riemessi", level="warning")
 
             elif stage == "1R_done":
                 if second > 0 and abs_qty <= runner:
                     _place_runner_structure(broker, symbol, direction, abs_qty, entry_price)
                     position_state.set_fields(symbol, stage="3R_done")
                     notify.alert(f"{symbol}: 3R raggiunto, venduta seconda quota, runner in corsa")
-                elif not open_orders:
+                elif _exit_structure_incomplete(open_orders, expects_limit=second > 0):
                     _place_1r_done_structure(broker, symbol, direction, abs_qty, entry_price, risk, second)
                     notify.alert(f"{symbol}: ordini di uscita mancanti, riemessi", level="warning")
 
