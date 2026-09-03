@@ -9,19 +9,9 @@ import pandas as pd
 import yfinance as yf
 
 from common import config
-from short_term.indicators import macd
+from short_term.indicators import macd, swing_points
 
 log = logging.getLogger("bot")
-
-
-def _swing_points(series: pd.Series, order: int = 3) -> list[tuple[int, float]]:
-    points = []
-    values = series.to_numpy()
-    for i in range(order, len(values) - order):
-        window = values[i - order : i + order + 1]
-        if values[i] == window.max() or values[i] == window.min():
-            points.append((i, values[i]))
-    return points
 
 
 @dataclass
@@ -49,11 +39,11 @@ def support_resistance_check(
 
     recent = weekly_df.iloc[-(6 * 52) :]  # ~5-6 anni di storico settimanale
     if direction == "long":
-        swing_highs = _swing_points(recent["high"], order=3)
+        swing_highs = swing_points(recent["high"], order=3, kind="high")
         candidates = [v for _, v in swing_highs if v > entry]
         nearest = min(candidates) if candidates else None
     else:
-        swing_lows = _swing_points(recent["low"], order=3)
+        swing_lows = swing_points(recent["low"], order=3, kind="low")
         candidates = [v for _, v in swing_lows if v < entry]
         nearest = max(candidates) if candidates else None
 
@@ -132,9 +122,9 @@ def divergence_check(weekly_df: pd.DataFrame, direction: str) -> DivergenceCheck
     nuovo estremo nella direzione del trend ma l'istogramma no."""
     hist = macd(weekly_df["close"])["histogram"]
     if direction == "long":
-        price_points = _swing_points(weekly_df["high"], order=2)
+        price_points = swing_points(weekly_df["high"], order=2, kind="high")
     else:
-        price_points = _swing_points(weekly_df["low"], order=2)
+        price_points = swing_points(weekly_df["low"], order=2, kind="low")
 
     if len(price_points) < 2:
         return DivergenceCheck(False)

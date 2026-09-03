@@ -73,6 +73,36 @@ def ema_ribbon(close: pd.Series) -> pd.DataFrame:
     return pd.DataFrame(cols)
 
 
+def swing_points(series: pd.Series, order: int = 3, kind: str = "high") -> list[tuple[int, float]]:
+    """Punti di inversione di una serie (fractal di Williams): un punto e'
+    uno swing HIGH se e' il massimo tra `order` barre prima e dopo, uno
+    swing LOW se ne e' il minimo.
+
+    `kind` non e' un dettaglio: la versione precedente restituiva i punti
+    che erano massimo *oppure* minimo della finestra, cioe' picchi E valli
+    mescolati nella stessa lista. Chi la usava chiedeva "i massimi
+    crescenti?" e riceveva una sequenza che alterna picco-valle-picco-valle,
+    quindi non crescente quasi mai. Conseguenze misurate:
+      - trend.harmony_qualifier era di fatto sempre falso (uno dei 6
+        qualificatori del corso, morto);
+      - risk_checks.divergence_check confrontava gli ultimi due punti, cioe'
+        tipicamente un picco con una valle: confronto senza significato;
+      - risk_checks.support_resistance_check aggiungeva alle resistenze
+        anche le valli, segnalando livelli "troppo vicini" inesistenti.
+    Ritorna coppie (posizione, valore), con la posizione riferita alla
+    serie passata."""
+    if kind not in ("high", "low"):
+        raise ValueError(f"kind deve essere 'high' o 'low', non {kind!r}")
+    points: list[tuple[int, float]] = []
+    values = series.to_numpy()
+    for i in range(order, len(values) - order):
+        window = values[i - order: i + order + 1]
+        extreme = window.max() if kind == "high" else window.min()
+        if values[i] == extreme:
+            points.append((i, float(values[i])))
+    return points
+
+
 def ribbon_alignment(ribbon_row: pd.Series, price: float | None = None) -> str:
     """'bullish' se tutte le EMA brevi sono sopra tutte le lunghe con una
     separazione minima (config.RIBBON_MIN_SEPARATION_PCT), 'bearish' se

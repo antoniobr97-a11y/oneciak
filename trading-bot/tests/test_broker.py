@@ -98,15 +98,6 @@ def _broker_with_client(monkeypatch, open_orders):
     return broker, client
 
 
-def test_close_partial_cancels_open_stop_before_submitting(monkeypatch):
-    broker, client = _broker_with_client(monkeypatch, [_stop_order()])
-
-    broker.close_partial("AAPL", 5, "long")
-
-    names = [c[0] for c in client.method_calls if c[0] in ("cancel_order_by_id", "submit_order")]
-    assert names == ["cancel_order_by_id", "submit_order"]
-
-
 def test_flatten_cancels_open_stops_before_closing(monkeypatch):
     broker, client = _broker_with_client(monkeypatch, [_stop_order("a"), _stop_order("b")])
 
@@ -115,29 +106,6 @@ def test_flatten_cancels_open_stops_before_closing(monkeypatch):
     names = [c[0] for c in client.method_calls if c[0] in ("cancel_order_by_id", "close_position")]
     assert names == ["cancel_order_by_id", "cancel_order_by_id", "close_position"]
 
-
-def test_place_stop_replaces_existing_stop_with_gtc(monkeypatch):
-    broker, client = _broker_with_client(monkeypatch, [_stop_order()])
-
-    broker.place_stop("AAPL", 5, 100.0, "long")
-
-    client.cancel_order_by_id.assert_called_once_with("stop-1")
-    submitted = client.submit_order.call_args[0][0]
-    assert str(submitted.time_in_force).lower().endswith("gtc")
-    assert submitted.qty == 5 and submitted.stop_price == 100.0
-
-
-def test_enter_with_stop_uses_gtc_so_the_stop_leg_survives_the_day(monkeypatch):
-    broker, client = _broker_with_client(monkeypatch, [])
-
-    broker.enter_with_stop("AAPL", 10, "long", 95.0)
-
-    submitted = client.submit_order.call_args[0][0]
-    assert str(submitted.time_in_force).lower().endswith("gtc")
-    assert submitted.stop_loss.stop_price == 95.0
-
-
-# --- corso, video 41: ingresso buy-stop con stop-loss attaccato, uscite OCO ----
 
 def test_submit_stop_entry_is_a_gtc_stop_order_with_oto_stop_loss(monkeypatch):
     broker, client = _broker_with_client(monkeypatch, [])
@@ -329,8 +297,7 @@ def test_order_type_is_read_from_either_field():
 def test_open_stop_orders_found_via_the_deprecated_field(monkeypatch):
     broker, client = _broker_with_client(monkeypatch, [_stop_order(deprecated_field_only=True)])
 
-    broker.place_stop("AAPL", 5, 100.0, "long")
-
+    assert broker.cancel_open_stop_orders("AAPL") == 1
     client.cancel_order_by_id.assert_called_once_with("stop-1")
 
 
@@ -341,3 +308,35 @@ def test_limit_orders_are_not_mistaken_for_stops(monkeypatch):
 
     assert broker.cancel_open_stop_orders("AAPL") == 0
     client.cancel_order_by_id.assert_not_called()
+
+
+def test_missing_position_is_none_but_a_broker_failure_is_raised(monkeypatch):
+    """None vuol dire "non ho quella posizione". Se lo dicesse anche su un
+    errore di rete, il ciclo aprirebbe una SECONDA posizione su un titolo
+    che ha gia' -- o ricomprerebbe un ETF di lungo termine gia' in
+    portafoglio."""
+    from alpaca.common.exceptions import APIError
+
+    monkeypatch.setattr(config, "ALPACA_API_KEY", "test_key")
+    monkeypatch.setattr(config, "ALPACA_SECRET_KEY", "test_secret")
+    broker = Broker()
+    broker.client = MagicMock()
+
+    broker.client.get_open_position.side_effect = APIError('{"code":40410000,"message":"position does not exist"}')
+    assert broker.get_open_position("AAPL") is None
+
+    broker.client.get_open_position.side_effect = requests.exceptions.ConnectTimeout("rete assente")
+    with pytest.raises(requests.exceptions.ConnectTimeout):
+        broker.get_open_position("AAPL")
+
+
+def test_flatten_raises_instead_of_pretending_the_position_is_closed(monkeypatch):
+    """flatten cancella gli stop PRIMA di chiudere. Ingoiando l'errore, il
+    chiamante proseguiva come se fosse chiusa: cancellava lo stato e
+    lasciava al broker una posizione aperta, senza stop e senza piu' i
+    dati per gestirla."""
+    broker, client = _broker_with_client(monkeypatch, [_stop_order()])
+    client.close_position.side_effect = RuntimeError("chiusura rifiutata")
+
+    with pytest.raises(RuntimeError):
+        broker.flatten("AAPL")

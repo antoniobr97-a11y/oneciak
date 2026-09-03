@@ -1207,3 +1207,41 @@ def test_report_only_mode_sends_no_orders_at_all():
     broker.submit_stop.assert_not_called()
     broker.cancel_open_orders.assert_not_called()
     broker.submit_stop_entry.assert_not_called()
+
+
+# --- Tetto di rischio pieno != "nessuna occasione" -------------------------
+# Bug reale, 3 settembre 2026: con 12 tra posizioni e ordini in attesa lo
+# screener restituiva zero candidati (il tetto di rischio era controllato
+# dentro scan_symbol), e il ciclo lo leggeva come "nessun setup e' piu'
+# valido" cancellando TUTTI e 10 gli ordini in attesa. Sarebbe successo
+# ogni giorno in cui il bot lavora a pieno regime.
+
+def test_pending_orders_survive_when_the_aggregate_cap_is_full():
+    pending = {f"PEND{i}": {**PENDING, "entry": 100.0, "stop_price": 95.0} for i in range(12)}
+    candidates = [_candidate(f"PEND{i}") for i in range(12)]  # gli stessi setup ci sono ancora
+    broker = _cycle_broker()
+    broker.list_open_orders.return_value = [_order("stop")]  # ordini pendenti vivi al broker
+
+    with patch("bot.Broker", return_value=broker), \
+         patch("bot.screen_universe", return_value=candidates), \
+         patch("bot._print_candidate"), \
+         _patched_state(pending) as state:
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    broker.cancel_open_orders.assert_not_called()
+    assert len(state.data) == 12
+    broker.submit_stop_entry.assert_not_called()  # nessun posto libero: giusto non aprirne altre
+
+
+def test_a_failed_runner_close_keeps_the_state_and_re_protects():
+    broker = _broker([_position("AAPL", 2, 100.0, 90.0)], open_orders=[_order("stop")])
+    broker.flatten.side_effect = RuntimeError("chiusura rifiutata")
+    falling = pd.DataFrame({"close": [200.0] * 249 + [90.0]})
+
+    with _patched_state({"AAPL": {**ENTERED_10, "stage": "3R_done"}}) as state, \
+         patch.object(bot, "get_daily_bars", return_value=falling), \
+         patch.object(bot.notify, "alert"):
+        bot.manage_open_short_term_positions(broker)
+
+    assert "AAPL" in state.data                       # lo stato NON va perso
+    broker.submit_stop.assert_called_with("AAPL", 2, 100.0, "long")  # protezione rimessa

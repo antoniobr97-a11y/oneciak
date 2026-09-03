@@ -18,6 +18,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
+from alpaca.common.exceptions import APIError
 from alpaca.data.enums import DataFeed
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest, StockSnapshotRequest
@@ -185,18 +186,21 @@ class Broker:
         (STRATEGY.md), che senza questo tetto mostrava una leva impossibile."""
         return float(self.client.get_account().cash)
 
-    def get_open_position_qty(self, symbol: str) -> float:
-        try:
-            pos = self.client.get_open_position(symbol)
-            return float(pos.qty)
-        except Exception:
-            return 0.0
-
     def get_open_position(self, symbol: str) -> dict | None:
+        """La posizione aperta sul titolo, oppure None se non ce n'e' una.
+
+        None significa SOLO "non ho quella posizione". Un errore di rete o
+        del broker viene rilanciato invece di essere tradotto in None: chi
+        chiama usa None per decidere che il titolo e' libero, e su un
+        guasto di rete aprirebbe una SECONDA posizione su un titolo che ha
+        gia' (o ricomprerebbe un ETF di lungo termine gia' in
+        portafoglio). Meglio far fallire il ciclo, che riprova da solo."""
         try:
             pos = self.client.get_open_position(symbol)
-        except Exception:
-            return None
+        except APIError as exc:
+            if exc.status_code == 404 or "position does not exist" in str(exc).lower():
+                return None
+            raise
         return {
             "symbol": pos.symbol,
             "qty": float(pos.qty),
@@ -323,39 +327,6 @@ class Broker:
 
     # --- short_term: entry + stop, then dynamic management -----------------
 
-    def enter_with_stop(self, symbol: str, qty: int, side: str, stop_price: float):
-        """Market entry with an attached stop-loss (OTO order). No fixed
-        take-profit: STRATEGY.md 2.4 manages the exit dynamically (partial
-        close at 1R, stop moved to breakeven, let the rest run)."""
-        if qty <= 0:
-            log.info("Skipping %s: computed position size is 0.", symbol)
-            return None
-
-        order_side = OrderSide.BUY if side == "long" else OrderSide.SELL
-        # GTC, non DAY: la gamba stop-loss dell'ordine OTO eredita il
-        # time-in-force del padre. Con DAY lo stop scadeva a fine giornata
-        # (il bot entra alle 15:50, 10 minuti prima della chiusura),
-        # lasciando la posizione SENZA protezione da tutti i giorni
-        # successivi -- bug trovato nell'audit, vedi STRATEGY.md.
-        order = MarketOrderRequest(
-            symbol=symbol,
-            qty=qty,
-            side=order_side,
-            time_in_force=TimeInForce.GTC,
-            order_class=OrderClass.OTO,
-            stop_loss=StopLossRequest(stop_price=round(stop_price, 2)),
-        )
-        result = self.client.submit_order(order)
-        log.info(
-            "%s entry submitted: %s qty=%s stop=%.2f order_id=%s",
-            side.upper(), symbol, qty, stop_price, result.id,
-        )
-        return result
-
-    # --- short_term: ingresso con ordine stop + uscite con limit/stop (corso,
-    # video 41/44: long = buy stop in entrata, sell limit a T1, sell stop di
-    # protezione) --------------------------------------------------------------
-
     def list_open_orders(self, symbol: str) -> list:
         request = GetOrdersRequest(status=QueryOrderStatus.OPEN, symbols=[symbol])
         return list(self.client.get_orders(request))
@@ -440,10 +411,6 @@ class Broker:
         orders = self.list_open_orders(symbol)
         return [o for o in orders if "stop" in order_type_name(o)]
 
-    def get_open_stop_order(self, symbol: str):
-        stops = self._open_stop_orders(symbol)
-        return stops[0] if stops else None
-
     def cancel_open_stop_orders(self, symbol: str) -> int:
         """Cancella TUTTI gli stop aperti sul titolo (dopo errori/riemissioni
         potrebbero essercene piu' di uno). Su Alpaca un ordine di vendita
@@ -479,42 +446,17 @@ class Broker:
         log.info("Stop placed: %s qty=%s stop=%.2f order_id=%s", symbol, qty, stop_price, result.id)
         return result
 
-    def place_stop(self, symbol: str, qty: float, stop_price: float, side: str):
-        """Nuovo ordine stop GTC per la quantita' indicata, dopo aver
-        cancellato gli stop gia' aperti sul titolo (mai due stop attivi
-        sulla stessa quota)."""
-        if qty <= 0:
-            return None
-        self.cancel_open_stop_orders(symbol)
-        return self.submit_stop(symbol, qty, stop_price, side)
-
-    def move_stop_to_breakeven(self, symbol: str, qty: float, entry_price: float, side: str) -> None:
-        """Replace the existing stop order (if any) with one at the entry
-        price, for the given remaining quantity."""
-        self.place_stop(symbol, qty, entry_price, side)
-
-    def close_partial(self, symbol: str, qty: float, side: str):
-        """Close part of an open position at market (used for the 1R/3R
-        partial exits). Cancella PRIMA gli stop aperti, altrimenti le
-        azioni risultano riservate e l'ordine viene rifiutato -- il
-        chiamante deve poi riemettere lo stop per la quantita' residua."""
-        if qty <= 0:
-            return None
-        self.cancel_open_stop_orders(symbol)
-        close_side = OrderSide.SELL if side == "long" else OrderSide.BUY
-        order = MarketOrderRequest(symbol=symbol, qty=qty, side=close_side, time_in_force=TimeInForce.DAY)
-        result = self.client.submit_order(order)
-        log.info("Partial close submitted: %s qty=%s order_id=%s", symbol, qty, result.id)
-        return result
-
     def flatten(self, symbol: str):
-        """Chiude l'intera posizione, cancellando prima gli stop aperti
-        (stesso motivo di close_partial: azioni riservate)."""
-        try:
-            self.cancel_open_stop_orders(symbol)
-            result = self.client.close_position(symbol)
-            log.info("Position flattened: %s", symbol)
-            return result
-        except Exception as exc:
-            log.warning("Could not close position for %s: %s", symbol, exc)
-            return None
+        """Chiude l'intera posizione, cancellando prima gli stop aperti (su
+        Alpaca un ordine di vendita aperto riserva le azioni e farebbe
+        rifiutare la chiusura).
+
+        Se la chiusura fallisce l'eccezione viene RILANCIATA. Ingoiandola e
+        restituendo None, il chiamante proseguiva come se la posizione
+        fosse chiusa: cancellava lo stato e lasciava al broker una
+        posizione ancora aperta, ormai senza stop (cancellato qui sopra) e
+        senza piu' i dati per gestirla."""
+        self.cancel_open_stop_orders(symbol)
+        result = self.client.close_position(symbol)
+        log.info("Position flattened: %s", symbol)
+        return result

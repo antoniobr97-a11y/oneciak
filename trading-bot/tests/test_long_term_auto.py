@@ -44,3 +44,75 @@ def test_monthly_signal_on_closed_months_only():
     assert s.index[-1].month == 9 and s.index[-1].year == 2026
     clean = advanced_portfolio.closed_monthly_closes(s, today=date(2026, 9, 2))
     assert advanced_portfolio.monthly_signal(clean, sma_period=10).action != "BUY"
+
+
+# --- Un ciclo fallito non deve essere segnato come completato ---------------
+# Advanced agisce una volta al mese, Harry Browne una volta al trimestre: se
+# un errore (rete, ordine rifiutato) lo marcasse comunque come fatto, il
+# portafoglio resterebbe sbilanciato fino al periodo successivo senza che
+# nessuno riprovi.
+
+def test_advanced_month_is_not_marked_done_when_an_asset_fails(monkeypatch):
+    import bot
+    from unittest.mock import MagicMock, patch
+    from datetime import date
+
+    monkeypatch.setattr(bot.config, "LONG_TERM_AUTO_STRATEGY", "advanced")
+    broker = MagicMock()
+    broker.get_cash.return_value = 100_000.0
+    broker.get_open_position.return_value = None
+    broker.buy_market.side_effect = RuntimeError("rifiutato dal broker")
+
+    import pandas as pd
+    monthly = pd.Series(range(1, 40), dtype=float,
+                        index=pd.date_range("2023-01-31", periods=39, freq="ME"))
+    marked = {}
+    with patch.object(bot, "get_monthly_bars", return_value=pd.DataFrame({"close": monthly})), \
+         patch.object(bot, "_last_close", return_value=100.0), \
+         patch.object(bot.position_state, "get_meta", return_value=None), \
+         patch.object(bot.position_state, "set_meta", side_effect=lambda k, v: marked.update({k: v})), \
+         patch.object(bot.notify, "alert"):
+        bot.run_long_term_cycle(broker, execute=True, today=date(2026, 9, 3))
+
+    assert marked == {}  # nulla segnato: si riprovera' domani
+
+
+def test_harry_browne_rebalance_is_not_marked_done_when_an_etf_fails(monkeypatch):
+    import bot
+    from unittest.mock import MagicMock, patch
+    from datetime import date
+
+    monkeypatch.setattr(bot.config, "LONG_TERM_AUTO_STRATEGY", "harry_browne")
+    broker = MagicMock()
+    broker.get_cash.return_value = 100_000.0
+    broker.get_open_position.return_value = None
+    broker.buy_market.side_effect = RuntimeError("rifiutato dal broker")
+
+    marked = {}
+    with patch.object(bot, "_last_close", return_value=100.0), \
+         patch.object(bot.position_state, "get_meta", return_value=None), \
+         patch.object(bot.position_state, "set_meta", side_effect=lambda k, v: marked.update({k: v})), \
+         patch.object(bot.notify, "alert"):
+        bot.run_long_term_cycle(broker, execute=True, today=date(2026, 9, 3))
+
+    assert marked == {}
+
+
+def test_harry_browne_rebalance_is_marked_done_when_it_succeeds(monkeypatch):
+    import bot
+    from unittest.mock import MagicMock, patch
+    from datetime import date
+
+    monkeypatch.setattr(bot.config, "LONG_TERM_AUTO_STRATEGY", "harry_browne")
+    broker = MagicMock()
+    broker.get_cash.return_value = 100_000.0
+    broker.get_open_position.return_value = None
+
+    marked = {}
+    with patch.object(bot, "_last_close", return_value=100.0), \
+         patch.object(bot.position_state, "get_meta", return_value=None), \
+         patch.object(bot.position_state, "set_meta", side_effect=lambda k, v: marked.update({k: v})), \
+         patch.object(bot.notify, "alert"):
+        bot.run_long_term_cycle(broker, execute=True, today=date(2026, 9, 3))
+
+    assert marked["harry_browne_last_rebalance"] == "2026-09-03"

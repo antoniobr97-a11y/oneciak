@@ -260,3 +260,62 @@ def test_gap_qualifier_no_gaps_returns_false():
     df = _make_df([c + 0.1 for c in closes], [c - 0.1 for c in closes], closes)
     assert trend.gap_qualifier(df, "long", lookback=30) is False
     assert trend.gap_qualifier(df, "short", lookback=30) is False
+
+
+# --- swing point: picchi e valli non vanno mescolati ------------------------
+# Bug reale: la versione precedente restituiva i punti che erano massimo
+# OPPURE minimo della finestra. Chi chiedeva "i massimi sono crescenti?"
+# riceveva una sequenza picco-valle-picco-valle, quindi non crescente quasi
+# mai. Conseguenza misurata: harmony_qualifier sempre falso (uno dei 6
+# qualificatori del corso, morto) e divergence_check che confrontava un
+# picco con una valle.
+
+def _wave(cycles=14, rise=60, n=80, amp=6):
+    import numpy as np
+    import pandas as pd
+
+    close = np.linspace(100, 100 + rise, n) + amp * np.sin(np.linspace(0, cycles * np.pi, n))
+    return pd.DataFrame(
+        {"open": close, "high": close + 1, "low": close - 1, "close": close, "volume": [1e6] * n},
+        index=pd.date_range("2025-01-01", periods=n, freq="B"),
+    )
+
+
+def test_swing_points_returns_only_peaks_or_only_troughs():
+    from short_term.indicators import swing_points
+
+    df = _wave()
+    peaks = [v for _, v in swing_points(df["high"], order=2, kind="high")]
+    troughs = [v for _, v in swing_points(df["low"], order=2, kind="low")]
+
+    assert len(peaks) >= 4 and len(troughs) >= 4
+    # in un rialzo regolare i picchi crescono, e cosi' le valli
+    assert peaks == sorted(peaks)
+    assert troughs == sorted(troughs)
+    # nessun picco coincide con una valle: le due liste sono davvero distinte
+    assert not set(peaks) & set(troughs)
+
+
+def test_swing_points_rejects_an_unknown_kind():
+    import pytest
+
+    from short_term.indicators import swing_points
+
+    with pytest.raises(ValueError):
+        swing_points(_wave()["high"], kind="entrambi")
+
+
+def test_harmony_qualifier_recognises_a_textbook_uptrend():
+    from short_term.trend import harmony_qualifier
+
+    up = _wave()
+    assert harmony_qualifier(up, "long", 60) is True
+    assert harmony_qualifier(up, "short", 60) is False
+
+
+def test_harmony_qualifier_recognises_a_textbook_downtrend():
+    from short_term.trend import harmony_qualifier
+
+    down = _wave(rise=-60)
+    assert harmony_qualifier(down, "short", 60) is True
+    assert harmony_qualifier(down, "long", 60) is False

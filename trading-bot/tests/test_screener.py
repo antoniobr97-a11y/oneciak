@@ -357,3 +357,41 @@ def test_screen_universe_scans_nothing_in_bear_regime_without_shorts(monkeypatch
 
     assert screener.screen_universe(symbols=["AAPL"]) == []
     assert scanned == []
+
+
+def test_scan_symbol_is_not_silenced_by_a_full_portfolio(monkeypatch):
+    """Lo screener risponde a "questo titolo ha un setup valido?", domanda
+    sul grafico. "C'e' posto in portafoglio?" la decide bot.py. Quando le
+    due erano mescolate, a tetto pieno lo screener diceva "nessun setup" e
+    il ciclo cancellava tutti gli ordini in attesa."""
+    import inspect
+
+    from short_term import screener as scr
+
+    params = inspect.signature(scr.scan_symbol).parameters
+    assert "open_positions_count" not in params
+    assert "open_positions_count" not in inspect.signature(scr.screen_universe).parameters
+    src = inspect.getsource(scr.scan_symbol)
+    assert "can_open_new_position" not in src
+
+
+def test_incomplete_liquidity_data_is_reported(monkeypatch):
+    """I dati arrivano a blocchi: un blocco fallito toglie in silenzio 200
+    titoli dall'universo, e senza segnalazione sembrerebbe solo che "oggi
+    ci sono meno occasioni"."""
+    from unittest.mock import patch
+
+    monkeypatch.setattr(config, "SHORT_TERM_MIN_PRICE_FULL_MARKET", 0.0)
+    monkeypatch.setattr(config, "SHORT_TERM_MIN_DOLLAR_VOLUME", 0.0)
+    monkeypatch.setattr(config, "SHORT_TERM_MIN_SHARE_VOLUME", 0.0)
+    monkeypatch.setattr(config, "SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT", 0.0)
+
+    symbols = [f"S{i}" for i in range(10)]
+    # dati arrivati solo per 3 titoli su 10
+    partial = {s: {"price": 20.0, "volume": 1e6, "dollar_volume": 2e7} for s in symbols[:3]}
+    broker = _FakeBroker(symbols, partial)
+
+    with patch.object(screener.notify, "alert") as alert:
+        screener.build_full_market_universe(broker)
+
+    assert any(c.kwargs.get("level") == "error" for c in alert.call_args_list)

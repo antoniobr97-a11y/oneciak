@@ -76,6 +76,9 @@ TRADING_DAYS_52W = 252
 # piuttosto che scartare tutto per un guasto sui dati (vedi
 # build_full_market_universe).
 MIN_VOLATILITY_COVERAGE = 0.5
+# Idem per il prefiltro di liquidita': sotto questa copertura l'universo del
+# giorno e' incompleto e va segnalato, non subito in silenzio.
+MIN_LIQUIDITY_COVERAGE = 0.8
 # Barre giornaliere minime perche' un titolo sia analizzabile: sotto questa
 # soglia SMA200, qualificatori e "massimo a 52 settimane" non hanno una base
 # reale (stesso requisito del backtest).
@@ -175,13 +178,22 @@ def allowed_directions(sp500_df: pd.DataFrame) -> tuple[str, ...]:
 def scan_symbol(
     symbol: str,
     capital: float,
-    open_positions_count: int,
     sp500_df: pd.DataFrame,
     russell_df: pd.DataFrame,
     directions: tuple[str, ...] = ALL_DIRECTIONS,
 ) -> list[Candidate]:
+    """Setup validi sul titolo, indipendentemente da quanti posti liberi ci
+    siano.
+
+    Il tetto di rischio aggregato NON si applica qui, e la distinzione non
+    e' formale: qui si risponde a "questo titolo ha un setup valido?", che
+    e' una domanda sul grafico. "C'e' posto per aprirlo?" e' una domanda
+    sul portafoglio, e la decide bot.py al momento di mandare l'ordine.
+    Mescolarle faceva danni veri: a tetto pieno lo screener restituiva zero
+    candidati, e il ciclo lo interpretava come "nessun setup e' piu'
+    valido" cancellando TUTTI gli ordini d'ingresso in attesa -- successo
+    davvero, 10 ordini cancellati in un colpo (vedi STRATEGY.md)."""
     daily = get_daily_bars(symbol, period="1y")
-    weekly = get_weekly_bars(symbol, period="6y")
 
     # Storico minimo: i qualificatori guardano 60 giorni, la SMA200
     # dell'uscita ne vuole 200, e la vicinanza al massimo "a 52 settimane"
@@ -193,20 +205,22 @@ def scan_symbol(
         log.debug("%s: solo %d barre di storico (min %d), salto.", symbol, len(daily.dropna()), MIN_HISTORY_BARS)
         return []
 
-    if not money_management.can_open_new_position(open_positions_count):
+    # La qualificazione del trend usa solo dati giornalieri. I settimanali
+    # servono ai controlli di rischio (supporti/resistenze, divergenza
+    # MACD), cioe' solo se un trend qualifica: scaricarli prima significava
+    # un download in piu' per ognuno dei 300 titoli dell'universo, quasi
+    # sempre buttato.
+    qualified = [(d, tq) for d in directions for tq in [qualify_trend(daily, d)] if tq.qualifies]
+    if not qualified:
         return []
 
+    weekly = get_weekly_bars(symbol, period="6y")
     candidates: list[Candidate] = []
     ribbon = ema_ribbon(daily["close"])
     ribbon_state = ribbon_alignment(ribbon.iloc[-1], price=float(daily["close"].iloc[-1]))
 
-    for direction in directions:
-        trend = qualify_trend(daily, direction)
-        if not trend.qualifies:
-            continue
-
-        matches = detect_all(daily, direction)
-        for match in matches:
+    for direction, trend in qualified:
+        for match in detect_all(daily, direction):
             candidate = _build_candidate(
                 symbol, direction, match, trend, daily, weekly, capital, ribbon_state, sp500_df, russell_df
             )
@@ -322,6 +336,22 @@ def build_full_market_universe(broker) -> list[str]:
     log.info("Full-market: %d titoli tradable su Alpaca (NYSE/NASDAQ/ARCA/AMEX/BATS).", len(all_symbols))
 
     liquidity = broker.liquidity_snapshot(all_symbols)
+    # Stessa cautela del filtro di volatilita' piu' sotto: i dati arrivano a
+    # blocchi e un blocco fallito toglie in silenzio 200 titoli
+    # dall'universo. Senza questo controllo un guasto sui dati si
+    # presenterebbe come "oggi il mercato offre meno occasioni".
+    liquidity_coverage = len(liquidity) / len(all_symbols) if all_symbols else 0.0
+    if liquidity_coverage < MIN_LIQUIDITY_COVERAGE:
+        log.error(
+            "Dati di prezzo/volume disponibili solo per %d titoli su %d (%.0f%%): l'universo di oggi e' "
+            "incompleto. Controlla il feed dati Alpaca (ALPACA_DATA_FEED) o eventuali rate-limit.",
+            len(liquidity), len(all_symbols), liquidity_coverage * 100,
+        )
+        notify.alert(
+            f"Dati di liquidita' incompleti ({len(liquidity)}/{len(all_symbols)}): universo ridotto, "
+            "controlla il feed dati",
+            level="error",
+        )
     liquid = [
         s
         for s, data in liquidity.items()
@@ -380,7 +410,6 @@ def build_full_market_universe(broker) -> list[str]:
 def screen_universe(
     symbols: list[str] | None = None,
     capital: float | None = None,
-    open_positions_count: int = 0,
     broker=None,
 ) -> list[Candidate]:
     if symbols is None:
@@ -408,7 +437,7 @@ def screen_universe(
     for symbol in symbols:
         try:
             all_candidates.extend(
-                scan_symbol(symbol, capital, open_positions_count, sp500_df, russell_df, directions=directions)
+                scan_symbol(symbol, capital, sp500_df, russell_df, directions=directions)
             )
         except Exception:
             log.exception("Error screening %s", symbol)

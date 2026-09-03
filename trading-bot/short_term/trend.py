@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from common import config
-from short_term.indicators import adx, avg_daily_range
+from short_term.indicators import adx, avg_daily_range, swing_points
 
 # Non tutte le soglie sono numeri espliciti nel corso (es. "gap" e "barre ad
 # ampio range" non hanno una soglia % dichiarata, sono giudizio visivo sul
@@ -48,19 +48,29 @@ def _window(df: pd.DataFrame, lookback: int) -> pd.DataFrame:
 
 
 def performance_qualifier(df: pd.DataFrame, direction: str, lookback: int) -> bool:
+    """Movimento dall'estremo della finestra fino al punto piu' lontano
+    raggiunto dopo.
+
+    Taglio della finestra per POSIZIONE, non per etichetta: `w.loc[data:]`
+    solleva se l'indice ha date duplicate (capita con i dati Yahoo).
+    Risultato identico su dati ben formati."""
     w = _window(df, lookback)
     if len(w) < 2:
         return False
+    series = (w["low"] if direction == "long" else w["high"]).to_numpy(dtype=float)
+    if np.all(np.isnan(series)):
+        return False
+    start = int(np.nanargmin(series)) if direction == "long" else int(np.nanargmax(series))
+    origin = series[start]
+    if not origin > 0:
+        return False
+    after = w.iloc[start:]
     if direction == "long":
-        low_idx = w["low"].idxmin()
-        after_low = w.loc[low_idx:]
-        move_pct = (after_low["high"].max() / w["low"].min() - 1) * 100
+        move_pct = (after["high"].max() / origin - 1) * 100
     else:
-        high_idx = w["high"].idxmax()
-        after_high = w.loc[high_idx:]
-        move_pct = (after_high["low"].min() / w["high"].max() - 1) * 100
+        move_pct = (after["low"].min() / origin - 1) * 100
     threshold = config.TREND_PERFORMANCE_THRESHOLD_PCT
-    return move_pct >= threshold if direction == "long" else move_pct <= -threshold
+    return bool(move_pct >= threshold if direction == "long" else move_pct <= -threshold)
 
 
 def gap_qualifier(df: pd.DataFrame, direction: str, lookback: int) -> bool:
@@ -99,21 +109,6 @@ def wide_range_qualifier(df: pd.DataFrame, direction: str, lookback: int) -> boo
     return int(matches.sum()) >= WIDE_RANGE_MIN_COUNT
 
 
-def _swing_points(series: pd.Series, order: int = 3) -> list[tuple[int, float]]:
-    """Fractal di Williams: un punto è uno swing high/low se è l'estremo tra
-    `order` barre prima e dopo (order=2 è la convenzione standard a 5
-    barre; qui si usa order=2 sul giornaliero per l'armonia del trend, un
-    order leggermente più ampio sul settimanale per i supporti/resistenze,
-    dove si vogliono solo i livelli più significativi)."""
-    points = []
-    values = series.to_numpy()
-    for i in range(order, len(values) - order):
-        window = values[i - order: i + order + 1]
-        if values[i] == window.max() or values[i] == window.min():
-            points.append((i, values[i]))
-    return points
-
-
 def _mostly_monotonic(values: list[float], rising: bool) -> bool:
     """Vero se la sequenza è crescente/decrescente tollerando AL MASSIMO
     un'eccezione (STRATEGY.md 2.1: "una sequenza incoerente indebolisce la
@@ -134,8 +129,10 @@ def harmony_qualifier(df: pd.DataFrame, direction: str, lookback: int) -> bool:
     w = _window(df, lookback)
     if len(w) < 10:
         return False
-    highs = _swing_points(w["high"], order=2)
-    lows = _swing_points(w["low"], order=2)
+    # Massimi dalla serie dei massimi, minimi da quella dei minimi:
+    # "armonia del trend" = massimi crescenti E minimi crescenti (corso).
+    highs = swing_points(w["high"], order=2, kind="high")
+    lows = swing_points(w["low"], order=2, kind="low")
     if len(highs) < 4 or len(lows) < 4:
         return False
 

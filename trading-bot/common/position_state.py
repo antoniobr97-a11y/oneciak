@@ -10,6 +10,7 @@ deve mai bloccare il ciclo di trading."""
 import json
 import logging
 import os
+import tempfile
 
 from common import config
 
@@ -22,17 +23,54 @@ def _load() -> dict:
     try:
         with open(STATE_PATH) as f:
             return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
+    except FileNotFoundError:
+        return {}
+    except json.JSONDecodeError as exc:
+        # Non si torna a "{}" in silenzio: uno stato illeggibile significa
+        # che il bot ha perso size originale, stop e stadio di OGNI
+        # posizione aperta, e dal ciclo dopo le gestirebbe "a mano" senza
+        # che nessuno se ne accorga. Il file rotto viene conservato per
+        # poterlo recuperare.
+        broken = f"{STATE_PATH}.corrotto"
+        try:
+            os.replace(STATE_PATH, broken)
+        except OSError:
+            broken = "(non salvato)"
+        log.error(
+            "Stato posizioni illeggibile (%s): %s. File conservato in %s. "
+            "Le posizioni aperte vanno ricontrollate a mano.", STATE_PATH, exc, broken,
+        )
         return {}
 
 
 def _save(state: dict) -> None:
+    """Scrittura atomica: file temporaneo nella stessa cartella, poi
+    os.replace (atomico su Windows e Linux).
+
+    Scrivendo direttamente sul file vero, un'interruzione a meta' scrittura
+    lo lascia troncato e quindi illeggibile. Non e' teorico: il modo in cui
+    si ferma il bot su Windows e' chiudere la finestra, che uccide il
+    processo -- se capita durante un salvataggio si perde lo stato di tutte
+    le posizioni aperte."""
+    directory = os.path.dirname(STATE_PATH)
     try:
-        directory = os.path.dirname(STATE_PATH)
         if directory:
             os.makedirs(directory, exist_ok=True)
-        with open(STATE_PATH, "w") as f:
-            json.dump(state, f)
+        fd, tmp = tempfile.mkstemp(dir=directory or ".", prefix=".positions-", suffix=".tmp")
+        try:
+            with os.fdopen(fd, "w") as f:
+                json.dump(state, f)
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(tmp, STATE_PATH)
+        except BaseException:
+            # Anche su Ctrl+C / chiusura finestra: niente file temporanei
+            # orfani, e soprattutto il file buono resta intatto.
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            raise
     except OSError as exc:
         log.warning("Impossibile salvare lo stato posizioni (%s): %s", STATE_PATH, exc)
 

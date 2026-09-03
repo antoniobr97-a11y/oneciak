@@ -62,11 +62,22 @@ def _window(df: pd.DataFrame, lookback: int) -> pd.DataFrame:
 
 
 def _recent_extreme_pos(df: pd.DataFrame, direction: str, lookback: int) -> int | None:
+    """Posizione del massimo (long) / minimo (short) piu' recente nella
+    finestra.
+
+    Aritmetica sulle POSIZIONI, non sulle etichette dell'indice: con
+    `idxmax()` + `index.get_loc()` una data duplicata nei dati -- capita
+    con i dati Yahoo -- fa restituire a get_loc uno slice invece di un
+    intero, e tutto il resto della funzione salta. Il risultato e'
+    identico su dati ben formati."""
     w = _window(df, lookback)
     if len(w) == 0:
         return None
-    idx = w["high"].idxmax() if direction == "long" else w["low"].idxmin()
-    return df.index.get_loc(idx)
+    values = (w["high"] if direction == "long" else w["low"]).to_numpy(dtype=float)
+    if np.all(np.isnan(values)):
+        return None
+    pos = int(np.nanargmax(values)) if direction == "long" else int(np.nanargmin(values))
+    return len(df) - len(w) + pos
 
 
 def _pullback_segment(df: pd.DataFrame, direction: str, peak_pos: int) -> tuple[list[int], int | None]:

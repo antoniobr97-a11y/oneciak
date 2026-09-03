@@ -7,7 +7,6 @@ Senza ALERT_WEBHOOK_URL configurato, alert() non fa nulla (no-op) --
 il bot resta utilizzabile anche senza notifiche configurate."""
 import json
 import logging
-import urllib.error
 import urllib.request
 
 from common import config
@@ -28,14 +27,19 @@ def alert(message: str, level: str = "info") -> None:
     # Formato compatibile sia con webhook generici ({"text": ...}, usato da
     # Slack/Discord-compatibili) sia con un endpoint personalizzato che
     # legge lo stesso campo "text".
-    payload = json.dumps({"text": text}).encode("utf-8")
-    request = urllib.request.Request(
-        config.ALERT_WEBHOOK_URL,
-        data=payload,
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
+    # Tutto dentro il try, compresa la costruzione della richiesta: un URL
+    # malformato in .env fa sollevare ValueError gia' a Request(), cioe'
+    # PRIMA di urlopen, e farebbe fallire il ciclo di trading che sta solo
+    # cercando di mandare una notifica. except Exception e' deliberato: la
+    # promessa di questa funzione e' "non solleva mai".
     try:
+        payload = json.dumps({"text": text}).encode("utf-8")
+        request = urllib.request.Request(
+            config.ALERT_WEBHOOK_URL,
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
         urllib.request.urlopen(request, timeout=10)
-    except (urllib.error.URLError, urllib.error.HTTPError, OSError) as exc:
+    except Exception as exc:
         log.warning("Notifica webhook fallita (ignorata): %s", exc)

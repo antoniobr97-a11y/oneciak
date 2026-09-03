@@ -1,4 +1,5 @@
 import logging
+import logging.handlers
 import os
 
 
@@ -12,7 +13,14 @@ def setup_logging() -> None:
     # all'avvio per un problema di permessi sui log.
     try:
         os.makedirs("logs", exist_ok=True)
-        handlers.append(logging.FileHandler("logs/bot.log"))
+        # A rotazione: il bot logga ogni giorno una scansione di centinaia
+        # di titoli e resta acceso per mesi. Un file unico crescerebbe
+        # senza limite finche' non riempie il disco.
+        handlers.append(
+            logging.handlers.RotatingFileHandler(
+                "logs/bot.log", maxBytes=5_000_000, backupCount=5, encoding="utf-8"
+            )
+        )
     except OSError as exc:
         print(f"Attenzione: impossibile scrivere logs/bot.log ({exc}), loggo solo su stdout.")
 

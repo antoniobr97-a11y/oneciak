@@ -122,6 +122,7 @@ def _advanced_monthly_cycle(broker: Broker, execute: bool, today: date) -> None:
 
     weights = risk_profile.advanced_target_weights()
     cash_available = broker.get_cash()
+    failed = False
     print(f"\n=== Advanced -- ciclo mensile {month_key} (capitale max ${config.LONG_TERM_CAPITAL:,.0f}) ===")
 
     for asset_class, ticker in zip(advanced_portfolio.ASSET_CLASSES, config.ADVANCED_TICKERS):
@@ -157,9 +158,17 @@ def _advanced_monthly_cycle(broker: Broker, execute: bool, today: date) -> None:
         except Exception:
             log.exception("Advanced: errore su %s (%s), passo al prossimo asset.", ticker, asset_class)
             notify.alert(f"Lungo termine (Advanced): errore su {ticker}", level="error")
+            failed = True
 
-    if execute:
+    # Il mese si segna come fatto solo se e' andato tutto a buon fine.
+    # Segnandolo comunque, un errore su un asset (rete, ordine rifiutato)
+    # lo lascerebbe fuori posizione per un mese intero senza riprovare.
+    # Riprovare e' sicuro: la decisione e' ricalcolata sulle posizioni
+    # reali, quindi un asset gia' sistemato risulta "invariato".
+    if execute and not failed:
         position_state.set_meta("advanced_last_month", month_key)
+    elif failed:
+        log.warning("Advanced: mese %s NON segnato come completato (errori sopra), si riprova al prossimo ciclo.", month_key)
 
 
 def _harry_browne_rebalance_cycle(broker: Broker, execute: bool, today: date) -> None:
@@ -180,6 +189,7 @@ def _harry_browne_rebalance_cycle(broker: Broker, execute: bool, today: date) ->
 
     orders = harry_browne.rebalance_orders(current, prices, config.LONG_TERM_CAPITAL)
     cash_available = broker.get_cash()
+    failed = False
     print(f"\n=== Harry Browne -- ribilanciamento {today.isoformat()} (capitale ${config.LONG_TERM_CAPITAL:,.0f}) ===")
 
     # Prima le vendite (liberano cassa), poi gli acquisti.
@@ -205,10 +215,17 @@ def _harry_browne_rebalance_cycle(broker: Broker, execute: bool, today: date) ->
         except Exception:
             log.exception("Harry Browne: errore su %s, passo al prossimo ETF.", ticker)
             notify.alert(f"Lungo termine (Harry Browne): errore su {ticker}", level="error")
+            failed = True
 
-    if execute:
+    # Come per Advanced: segnare il ribilanciamento come fatto nonostante un
+    # errore lascerebbe il portafoglio sbilanciato per un TRIMESTRE intero.
+    # Riprovare e' sicuro: gli ordini sono ricalcolati come differenza dalle
+    # quote realmente possedute, quindi cio' che e' gia' a target da 0.
+    if execute and not failed:
         position_state.set_meta("harry_browne_last_rebalance", today.isoformat())
         notify.alert(f"Lungo termine (Harry Browne): ribilanciamento eseguito il {today.isoformat()}")
+    elif failed:
+        log.warning("Harry Browne: ribilanciamento NON segnato come completato (errori sopra), si riprova al prossimo ciclo.")
 
 
 def run_long_term_cycle(broker: Broker, execute: bool, today: date | None = None) -> None:
@@ -312,13 +329,8 @@ def _pending_entries_value() -> float:
 
 
 def cmd_short_term_screen(args: argparse.Namespace) -> None:
-    open_positions_count = 0
-    broker = None
-    if args.execute:
-        broker = Broker()
-        open_positions_count = len(_short_term_positions(broker)) + len(_pending_symbols())
-
-    candidates = screen_universe(open_positions_count=open_positions_count, broker=broker)
+    broker = Broker() if args.execute else None
+    candidates = screen_universe(broker=broker)
     if not candidates:
         print("Nessun candidato trovato.")
         return
@@ -556,7 +568,15 @@ def manage_open_short_term_positions(broker: Broker) -> None:
                         last_close = float(bars["close"].iloc[-1])
                         reversed_trend = last_close < long_ma.iloc[-1] if direction == "long" else last_close > long_ma.iloc[-1]
                 if reversed_trend:
-                    broker.flatten(symbol)
+                    try:
+                        broker.flatten(symbol)
+                    except Exception:
+                        # flatten cancella gli stop PRIMA di chiudere: se la
+                        # chiusura fallisce la posizione resta aperta e
+                        # scoperta. Si rimette la protezione e si lascia lo
+                        # stato intatto, cosi' il ciclo dopo riprova.
+                        _fallback_protect(broker, symbol, direction, abs_qty, entry_price)
+                        raise
                     position_state.clear(symbol)
                     notify.alert(f"{symbol}: runner chiuso per inversione sulla SMA{LONG_TERM_MA_PERIOD}")
                 elif _exit_structure_incomplete(open_orders, expects_limit=False):
@@ -682,13 +702,14 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
         return
 
     equity = _short_term_equity(broker)
-    open_positions_count = len(_short_term_positions(broker)) + len(_pending_symbols())
-    candidates = screen_universe(capital=equity, open_positions_count=open_positions_count, broker=broker)
+    candidates = screen_universe(capital=equity, broker=broker)
 
     if args.execute:
         # Cancella ordini veri al broker: anche questa non e' un'anteprima.
         reconcile_pending_entries(broker, {c.symbol for c in candidates if c.is_actionable}, today)
-        open_positions_count = len(_short_term_positions(broker)) + len(_pending_symbols())
+
+    # Dopo la riconciliazione: i pendenti cancellati hanno liberato posti.
+    open_positions_count = len(_short_term_positions(broker)) + len(_pending_symbols())
 
     if _drawdown_brake_active(broker, today):
         return
