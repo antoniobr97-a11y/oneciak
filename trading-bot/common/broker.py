@@ -130,6 +130,24 @@ def _data_feed() -> DataFeed:
         return DataFeed.IEX
 
 
+def order_type_name(order) -> str:
+    """Tipo di un ordine in minuscolo ("limit", "stop", "stop_limit", ...),
+    stringa vuota se non determinabile.
+
+    Il modello di alpaca-py espone sia `type` sia `order_type` (deprecato) e
+    a seconda della forma dell'ordine uno dei due puo' essere vuoto: si
+    guardano entrambi. Qui un controllo sul tipo che fallisce in silenzio
+    non da' un errore, fa una cosa sbagliata -- non cancellare uno stop
+    prima di una vendita (ordine poi rifiutato), o non accorgersi che manca
+    la presa di profitto."""
+    for attr in ("type", "order_type"):
+        raw = getattr(order, attr, None)
+        name = str(getattr(raw, "value", raw) or "").strip().lower()
+        if name and name != "none":
+            return name
+    return ""
+
+
 def _is_leveraged_or_inverse(name: str) -> bool:
     upper = f" {name.upper()} "
     return any(marker in upper for marker in _LEVERAGED_NAME_MARKERS)
@@ -420,7 +438,7 @@ class Broker:
 
     def _open_stop_orders(self, symbol: str) -> list:
         orders = self.list_open_orders(symbol)
-        return [o for o in orders if o.order_type is not None and "stop" in str(o.order_type).lower()]
+        return [o for o in orders if "stop" in order_type_name(o)]
 
     def get_open_stop_order(self, symbol: str):
         stops = self._open_stop_orders(symbol)

@@ -13,6 +13,12 @@ echo.
 echo  Il bot parte adesso con un ciclo, poi si rimette in attesa
 echo  e riparte da solo ogni giorno feriale alle 22:15 italiane.
 echo.
+echo  Se lo avvii a mercato APERTO (15:30-22:00) sistema solo le
+echo  posizioni gia' aperte: la candela di oggi non e' ancora
+echo  chiusa e analizzarla darebbe risultati che cambiano di
+echo  minuto in minuto. La ricerca di nuove occasioni la fa da
+echo  sola alle 22:15, a mercato chiuso.
+echo.
 echo  LASCIA QUESTA FINESTRA APERTA. Per fermarlo: chiudila,
 echo  oppure premi Ctrl+C.
 echo.

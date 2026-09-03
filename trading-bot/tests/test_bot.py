@@ -84,6 +84,7 @@ def _broker(positions=(), open_orders=None):
     broker.list_open_positions.return_value = list(positions)
     broker.list_open_orders.return_value = [] if open_orders is None else open_orders
     broker.get_open_position.return_value = None
+    broker.is_market_open.return_value = False  # ciclo dopo la chiusura: barre definitive
     return broker
 
 
@@ -431,7 +432,9 @@ def test_pending_entry_left_alone_once_position_exists():
 
 def _cycle_broker(cash=1_000_000.0, equity=10_000.0):
     broker = _broker()
-    broker.is_market_open.return_value = True
+    # Il ciclo gira DOPO la chiusura (RUN_TIME 16:15 New York): c'e' stata
+    # una seduta oggi, ma il mercato ora e' chiuso e la barra e' definitiva.
+    broker.is_market_open.return_value = False
     broker.is_trading_day.return_value = True
     broker.get_equity.return_value = equity
     broker.get_cash.return_value = cash
@@ -457,7 +460,8 @@ def test_cmd_short_term_once_submits_stop_entries_and_stops_at_aggregate_risk_ca
     assert state.data["SYM0"]["entry"] == 100.0 and state.data["SYM0"]["stop_price"] == 95.0
 
 
-def test_pending_entries_count_toward_aggregate_risk_cap():
+def test_pending_entries_count_toward_aggregate_risk_cap(monkeypatch):
+    monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 0.0)  # si isola il tetto di RISCHIO da quello di cassa
     pending = {f"PEND{i}": {**PENDING, "entry": 100.0, "stop_price": 95.0} for i in range(11)}
     # i pendenti restano candidati con gli STESSI livelli (quindi non vengono ne' cancellati ne' risottomessi)
     candidates = [_candidate(f"PEND{i}") for i in range(11)] + [_candidate(f"SYM{i}") for i in range(20)]
@@ -1036,3 +1040,97 @@ def test_has_open_limit_tolerates_enum_types_and_missing_legs():
     assert bot._has_open_limit([_order(_Enum())])
     assert not bot._has_open_limit([_order("stop")])
     assert not bot._has_open_limit([])
+
+
+# --- Niente analisi su una barra non ancora chiusa ------------------------
+# Regressione trovata in esercizio: due avvii manuali a 10 minuti di
+# distanza DURANTE la seduta hanno prodotto liste di candidati
+# completamente diverse e cancellato tutti e 10 gli ordini in attesa
+# piazzati dal primo. common/data.py prende barre giornaliere da yfinance:
+# a mercato aperto l'ultima e' quella di oggi, ancora in formazione.
+
+def test_open_market_manages_positions_but_does_not_screen_or_cancel_pendings():
+    broker = _cycle_broker()
+    broker.is_market_open.return_value = True
+
+    with patch("bot.Broker", return_value=broker), \
+         patch("bot.screen_universe") as screen, \
+         patch("bot.manage_open_short_term_positions") as manage, \
+         patch("bot.reconcile_pending_entries") as reconcile, \
+         _patched_state():
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    manage.assert_called_once()      # le posizioni aperte si gestiscono sempre
+    screen.assert_not_called()       # ...ma non si analizza una barra in formazione
+    reconcile.assert_not_called()    # ...e non si cancellano gli ordini in attesa
+    broker.submit_stop_entry.assert_not_called()
+
+
+def test_closed_market_screens_normally():
+    broker = _cycle_broker()
+
+    with patch("bot.Broker", return_value=broker), \
+         patch("bot.screen_universe", return_value=[]) as screen, \
+         patch("bot.manage_open_short_term_positions"), \
+         _patched_state():
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    screen.assert_called_once()
+
+
+def test_runner_exit_is_not_decided_on_an_unfinished_bar():
+    """Un affondo intraday sotto la SMA200 chiuderebbe il runner su un
+    livello che a fine giornata potrebbe non essere mai stato rotto. Lo
+    stop a pareggio resta comunque depositato al broker."""
+    broker = _broker([_position("AAPL", 2, 100.0, 130.0)], open_orders=[_order("stop")])
+    broker.is_market_open.return_value = True
+
+    with _patched_state({"AAPL": {**ENTERED_10, "stage": "3R_done"}}), \
+         patch.object(bot, "get_daily_bars") as bars:
+        bot.manage_open_short_term_positions(broker)
+
+    bars.assert_not_called()
+    broker.flatten.assert_not_called()
+
+
+# --- La cassa impegnata dagli ordini in attesa vale anche nei cicli dopo ---
+# Un buy stop non tocca la cassa del conto finche' non viene eseguito:
+# Alpaca riporta il saldo intero. Contando solo dentro il singolo ciclo, il
+# giorno dopo il bot ripartirebbe dal saldo pieno e potrebbe impegnare piu'
+# cassa di quella che ha -- la garanzia "nessuna leva" salterebbe.
+
+def test_pending_orders_from_previous_cycles_consume_the_cash_budget(monkeypatch):
+    monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 0.0)
+    # 2 ordini in attesa da 10 azioni a 100 = 2.000 gia' impegnati su 2.500 di cassa
+    pending = {f"PEND{i}": {**PENDING, "entry": 100.0, "stop_price": 95.0} for i in range(2)}
+    candidates = [_candidate(f"PEND{i}") for i in range(2)] + [_candidate("NEW")]
+    broker = _cycle_broker(cash=2_500.0)
+    broker.list_open_orders.return_value = [_order("stop")]
+
+    with patch("bot.Broker", return_value=broker), \
+         patch("bot.screen_universe", return_value=candidates), \
+         patch("bot._print_candidate"), \
+         _patched_state(pending):
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    # restano 500: 5 azioni a 100, non le 10 piene
+    broker.submit_stop_entry.assert_called_once_with("NEW", 5, "long", 100.0, 95.0)
+
+
+def test_replacing_a_pending_order_reuses_the_cash_it_already_held(monkeypatch):
+    """Aggiornare i livelli di un ordine in attesa non e' una spesa nuova:
+    la cancellazione libera la cassa che quell'ordine impegnava."""
+    monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 0.0)
+    pending = {"AAPL": {**PENDING, "entry": 100.0, "stop_price": 95.0}}
+    candidates = [_candidate("AAPL", entry=102.0, stop=97.0)]  # barra di setup spostata
+    broker = _cycle_broker(cash=1_050.0)  # 1.000 gia' impegnati -> 50 liberi
+    broker.list_open_orders.return_value = [_order("stop")]
+
+    with patch("bot.Broker", return_value=broker), \
+         patch("bot.screen_universe", return_value=candidates), \
+         patch("bot._print_candidate"), \
+         _patched_state(pending):
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    # 1.050 disponibili per il nuovo ordine (50 liberi + 1.000 liberati), non 50
+    broker.submit_stop_entry.assert_called_once_with("AAPL", 10, "long", 102.0, 97.0)

@@ -1039,6 +1039,47 @@ precedente.
     cieca l'invio di un ordine: solo richieste mai partite o di sola
     lettura.
 
+12. **Analisi su una barra non ancora chiusa.** Avviando il bot a
+    mercato aperto, `common/data.py` restituisce come ultima barra
+    giornaliera quella di **oggi, ancora in formazione**: massimo, minimo
+    e chiusura cambiano di minuto in minuto. Due avvii manuali a 10
+    minuti di distanza durante la seduta hanno prodotto liste di
+    candidati completamente diverse e — molto peggio — **cancellato tutti
+    e 10 gli ordini in attesa** piazzati dal primo, con la motivazione
+    "setup non più valido" quando era solo cambiato il prezzo negli
+    ultimi minuti. Il ciclo era guardato da `is_trading_day` ("oggi c'è
+    stata una seduta"), che è la condizione giusta per operare la sera ma
+    non impedisce di girare *durante* la seduta. Fix: screening e
+    riconciliazione dei pendenti solo a mercato chiuso; la gestione delle
+    posizioni aperte continua sempre, perché lavora sulle quantità
+    realmente eseguite e non sulle barre. Stesso motivo per cui l'uscita
+    del runner sulla SMA200 non viene più valutata a mercato aperto: un
+    affondo intraday chiuderebbe il runner su un livello che a fine
+    giornata potrebbe non essere mai stato rotto.
+13. **Cassa impegnata dagli ordini in attesa non contata tra un ciclo e
+    l'altro.** Un buy stop non tocca la cassa del conto finché non viene
+    eseguito: Alpaca continua a riportare il saldo intero. Il bot
+    scalava la cassa solo *dentro* il singolo ciclo, quindi il giorno
+    dopo ripartiva dal saldo pieno ignorando gli ordini già in coda e
+    poteva impegnare più cassa di quella disponibile — la garanzia
+    "nessuna leva" valeva solo per un ciclo, e i riempimenti in eccesso
+    sarebbero stati rifiutati dal broker. Fix:
+    `bot.py:_pending_entries_value` sottrae il controvalore dei pendenti
+    dalla cassa spendibile. Con esso serve il complementare: sostituire
+    un pendente **libera** la cassa che quell'ordine impegnava, altrimenti
+    un semplice aggiornamento di livelli sembrerebbe una spesa aggiuntiva
+    e ridurrebbe la size a zero.
+14. **Tipo dell'ordine letto da un solo campo (near-miss).** alpaca-py
+    espone sia `type` sia `order_type` (deprecato) e, a seconda della
+    forma dell'ordine, uno dei due può essere vuoto. Il codice usava
+    `order_type` per trovare gli stop da cancellare e `type` per trovare
+    il limit di presa di profitto: due letture diverse dello stesso dato,
+    ognuna in grado di fallire **in silenzio** su una forma di ordine
+    diversa — e qui un controllo che fallisce in silenzio non dà errore,
+    fa la cosa sbagliata (non cancellare uno stop prima di una vendita,
+    che il broker poi rifiuta). Unificate in
+    `common/broker.py:order_type_name`, che legge entrambi i campi.
+
 ## Storico minimo per analizzare un titolo (assunzione esplicita)
 
 `short_term/screener.py:MIN_HISTORY_BARS = 250` — un titolo con meno di

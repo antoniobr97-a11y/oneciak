@@ -27,7 +27,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 from common import config, notify, position_state
-from common.broker import Broker
+from common.broker import Broker, order_type_name
 from common.data import get_daily_bars, get_monthly_bars
 from common.logger_setup import setup_logging
 from long_term import advanced_portfolio, harry_browne, pac, risk_profile
@@ -286,14 +286,29 @@ def _short_term_cash(broker: Broker) -> float:
     Nel backtest il limite era implicito -- la cassa simulata ERA il
     capitale della strategia."""
     cash = broker.get_cash()
-    if config.SHORT_TERM_CAPITAL <= 0:
-        return max(0.0, cash)
-    room = config.SHORT_TERM_CAPITAL - _short_term_positions_value(broker)
-    return max(0.0, min(cash, room))
+    if config.SHORT_TERM_CAPITAL > 0:
+        cash = min(cash, config.SHORT_TERM_CAPITAL - _short_term_positions_value(broker))
+    return max(0.0, cash - _pending_entries_value())
 
 
 def _pending_symbols() -> list[str]:
     return [s for s in position_state.tracked_symbols() if position_state.get(s).get("stage") == "pending"]
+
+
+def _pending_entries_value() -> float:
+    """Cassa gia' impegnata dagli ordini d'ingresso ancora in attesa.
+
+    Un buy stop non tocca la cassa del conto finche' non viene eseguito:
+    Alpaca continua a riportare il saldo intero. Senza sottrarla, ogni
+    ciclo ripartirebbe dal saldo pieno ignorando gli ordini dei giorni
+    precedenti, e il bot potrebbe impegnare piu' cassa di quella che ha --
+    la garanzia "nessuna leva" varrebbe solo dentro il singolo ciclo. I
+    riempimenti in eccesso verrebbero poi rifiutati dal broker."""
+    total = 0.0
+    for symbol in _pending_symbols():
+        state = position_state.get(symbol)
+        total += float(state.get("entry", 0.0) or 0.0) * int(state.get("original_qty", 0) or 0)
+    return total
 
 
 def cmd_short_term_screen(args: argparse.Namespace) -> None:
@@ -345,8 +360,7 @@ def _has_open_limit(open_orders) -> bool:
     for order in open_orders:
         legs = getattr(order, "legs", None)
         for leg in (order, *(legs if isinstance(legs, (list, tuple)) else ())):
-            raw = getattr(leg, "type", None)
-            if str(getattr(raw, "value", raw) or "").lower() == "limit":
+            if order_type_name(leg) == "limit":
                 return True
     return False
 
@@ -426,6 +440,13 @@ def manage_open_short_term_positions(broker: Broker) -> None:
     isolata in un try/except."""
     open_positions = _short_term_positions(broker)
     open_symbols = {pos["symbol"] for pos in open_positions}
+    # L'uscita del runner si decide sulla CHIUSURA rispetto alla SMA200: a
+    # mercato aperto l'ultima barra giornaliera e' quella di oggi, ancora in
+    # formazione, e un affondo intraday chiuderebbe il runner in anticipo su
+    # un livello che a fine giornata potrebbe non essere mai stato rotto.
+    # Rimandare non lascia nulla di scoperto: lo stop a pareggio e' un
+    # ordine depositato al broker.
+    bars_are_final = not broker.is_market_open()
 
     for pos in open_positions:
         symbol = pos["symbol"]
@@ -497,17 +518,18 @@ def manage_open_short_term_positions(broker: Broker) -> None:
                     notify.alert(f"{symbol}: ordini di uscita mancanti, riemessi", level="warning")
 
             elif stage == "3R_done":
-                bars = get_daily_bars(symbol, period="1y")
-                long_ma = sma(bars["close"], LONG_TERM_MA_PERIOD)
                 reversed_trend = False
-                if len(long_ma) and not pd.isna(long_ma.iloc[-1]):
-                    last_close = float(bars["close"].iloc[-1])
-                    reversed_trend = last_close < long_ma.iloc[-1] if direction == "long" else last_close > long_ma.iloc[-1]
+                if bars_are_final:
+                    bars = get_daily_bars(symbol, period="1y")
+                    long_ma = sma(bars["close"], LONG_TERM_MA_PERIOD)
+                    if len(long_ma) and not pd.isna(long_ma.iloc[-1]):
+                        last_close = float(bars["close"].iloc[-1])
+                        reversed_trend = last_close < long_ma.iloc[-1] if direction == "long" else last_close > long_ma.iloc[-1]
                 if reversed_trend:
                     broker.flatten(symbol)
                     position_state.clear(symbol)
                     notify.alert(f"{symbol}: runner chiuso per inversione sulla SMA{LONG_TERM_MA_PERIOD}")
-                elif not open_orders:
+                elif _exit_structure_incomplete(open_orders, expects_limit=False):
                     _place_runner_structure(broker, symbol, direction, abs_qty, entry_price)
                     notify.alert(f"{symbol}: stop del runner mancante, riemesso", level="warning")
         except Exception:
@@ -600,6 +622,27 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
 
     manage_open_short_term_positions(broker)
 
+    # Screening e riconciliazione dei pendenti SOLO a mercato chiuso.
+    # common/data.py prende le barre giornaliere da yfinance: a mercato
+    # aperto l'ultima barra e' quella di OGGI, ancora in formazione --
+    # massimo, minimo e chiusura cambiano di minuto in minuto. Analizzarla
+    # vuol dire (a) valutare pattern e livelli su un dato che non e' ancora
+    # un dato, cosa che il backtest non ha mai testato, e soprattutto (b)
+    # cancellare gli ordini in attesa perche' "il setup non c'e' piu'",
+    # quando e' solo cambiato il prezzo negli ultimi minuti.
+    # Successo davvero: due avvii manuali a 10 minuti di distanza durante
+    # la seduta hanno dato liste di candidati completamente diverse e
+    # cancellato tutti e 10 gli ordini in attesa piazzati dal primo.
+    # La gestione delle posizioni aperte qui sopra resta invece sempre
+    # valida: lavora sulle quantita' realmente eseguite, non sulle barre.
+    if broker.is_market_open():
+        log.info(
+            "Mercato ancora aperto: posizioni gestite, screening rimandato alla "
+            "chiusura (la barra di oggi non e' definitiva). Il ciclo automatico "
+            "delle %s (New York) la trovera' completa.", config.RUN_TIME,
+        )
+        return
+
     equity = _short_term_equity(broker)
     open_positions_count = len(_short_term_positions(broker)) + len(_pending_symbols())
     candidates = screen_universe(capital=equity, open_positions_count=open_positions_count, broker=broker)
@@ -636,9 +679,18 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
             log.info("Tetto di rischio aggregato raggiunto, salto i candidati restanti.")
             break
 
+        # Sostituire un pendente libera la cassa che quell'ordine
+        # impegnava (gia' sottratta dal saldo iniziale in
+        # _short_term_cash): torna disponibile per il nuovo ordine sullo
+        # stesso titolo, altrimenti un semplice aggiornamento di livelli
+        # sembrerebbe una spesa aggiuntiva e ridurrebbe la size a vuoto.
+        freed = 0.0
+        if replacing:
+            freed = float(existing.get("entry", 0.0) or 0.0) * int(existing.get("original_qty", 0) or 0)
+
         qty = c.qty
         if c.levels.entry > 0:
-            qty = min(qty, math.floor(cash_available / c.levels.entry))
+            qty = min(qty, math.floor((cash_available + freed) / c.levels.entry))
         if qty <= 0:
             log.info("Cassa insufficiente per %s (serve ~%.2f/azione), salto.", c.symbol, c.levels.entry)
             continue
@@ -687,14 +739,21 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
                 notify.alert(f"Errore inviando l'ordine per {c.symbol}", level="error")
                 opened = False
 
-        # Si incrementa anche in modalita' report-only (candidato che
+        # Si aggiorna anche in modalita' report-only (candidato che
         # verrebbe messo in attesa rispettando il tetto di rischio
         # aggregato, cosi' l'anteprima riflette cosa accadrebbe con
-        # --execute) -- ma NON se l'invio ordine e' effettivamente fallito
-        # e NON per un pendente sostituito (gia' contato).
-        if opened and not replacing:
-            open_positions_count += 1
-            cash_available -= qty * c.levels.entry
+        # --execute) -- ma NON se l'invio ordine e' effettivamente fallito.
+        # Il CONTEGGIO delle posizioni non cresce per un pendente
+        # sostituito (gia' contato), la CASSA invece cambia comunque: il
+        # nuovo ordine impegna una cifra diversa dal vecchio.
+        if opened:
+            cash_available -= qty * c.levels.entry - freed
+            if not replacing:
+                open_positions_count += 1
+        elif replacing:
+            # Il vecchio ordine e' stato cancellato ma il nuovo non e'
+            # partito: quella cassa e' di nuovo libera.
+            cash_available += freed
 
 
 # Attese (secondi) tra i tentativi quando una fase del ciclo fallisce

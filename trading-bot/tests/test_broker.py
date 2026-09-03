@@ -77,10 +77,14 @@ def test_volatility_snapshot_skips_symbols_missing_from_response(monkeypatch):
 
 # --- audit: ordine delle operazioni sugli stop ---------------------------------
 
-def _stop_order(order_id="stop-1"):
+def _stop_order(order_id="stop-1", kind="stop", deprecated_field_only=False):
+    """Ordine come lo restituisce Alpaca: `type` e `order_type` (deprecato)
+    portano lo stesso valore. Con deprecated_field_only si simula la forma
+    in cui `type` non e' valorizzato."""
     o = MagicMock()
     o.id = order_id
-    o.order_type = "stop"
+    o.type = None if deprecated_field_only else kind
+    o.order_type = kind
     return o
 
 
@@ -307,3 +311,33 @@ def test_harden_session_is_a_no_op_when_the_client_has_no_requests_session():
     sentinel = client._session
     _harden_session(client)
     assert client._session is sentinel
+
+
+def test_order_type_is_read_from_either_field():
+    """alpaca-py espone `type` e `order_type` (deprecato) e a seconda della
+    forma dell'ordine uno dei due puo' essere vuoto. Leggerne uno solo
+    significherebbe, in silenzio, non riconoscere uno stop da cancellare
+    prima di una vendita -- che il broker poi rifiuterebbe."""
+    from common.broker import order_type_name
+
+    assert order_type_name(_stop_order()) == "stop"
+    assert order_type_name(_stop_order(deprecated_field_only=True)) == "stop"
+    assert order_type_name(_stop_order(kind="limit")) == "limit"
+    assert order_type_name(object()) == ""
+
+
+def test_open_stop_orders_found_via_the_deprecated_field(monkeypatch):
+    broker, client = _broker_with_client(monkeypatch, [_stop_order(deprecated_field_only=True)])
+
+    broker.place_stop("AAPL", 5, 100.0, "long")
+
+    client.cancel_order_by_id.assert_called_once_with("stop-1")
+
+
+def test_limit_orders_are_not_mistaken_for_stops(monkeypatch):
+    """cancel_open_stop_orders non deve toccare il limit di presa di
+    profitto: cancellarlo lascerebbe la posizione senza uscita in guadagno."""
+    broker, client = _broker_with_client(monkeypatch, [_stop_order("lim-1", kind="limit")])
+
+    assert broker.cancel_open_stop_orders("AAPL") == 0
+    client.cancel_order_by_id.assert_not_called()
