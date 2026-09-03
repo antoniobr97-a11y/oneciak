@@ -6,6 +6,7 @@ from datetime import date, timedelta
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
+import requests
 
 import bot
 from short_term import levels as levels_mod
@@ -828,3 +829,117 @@ def test_long_term_cycle_none_does_nothing(monkeypatch):
 
     broker.buy_market.assert_not_called()
     broker.sell_market.assert_not_called()
+
+
+# --- Ciclo resistente alla mancanza di connessione -------------------------
+# Regressione: bot lanciato subito dopo l'accensione del PC, connessione non
+# ancora pronta -> ConnectTimeout -> l'intero giro del giorno perso (nessuna
+# gestione delle posizioni aperte, nessun ordine nuovo).
+
+def _connect_timeout():
+    return requests.exceptions.ConnectTimeout("paper-api.alpaca.markets timed out")
+
+
+def test_network_failure_is_recognised_through_the_cause_chain():
+    try:
+        try:
+            raise _connect_timeout()
+        except Exception as exc:
+            raise RuntimeError("ciclo fallito") from exc
+    except RuntimeError as wrapper:
+        assert bot._is_network_failure(wrapper)
+
+
+def test_api_error_is_not_treated_as_a_network_failure():
+    from alpaca.common.exceptions import APIError
+
+    assert not bot._is_network_failure(APIError("stop price must be greater than current price"))
+    assert not bot._is_network_failure(ValueError("bug"))
+
+
+def test_step_retries_while_the_broker_is_unreachable_then_succeeds():
+    calls = []
+
+    def run():
+        calls.append(1)
+        if len(calls) < 3:
+            raise _connect_timeout()
+
+    with patch.object(bot.time, "sleep") as slept:
+        bot._run_step_with_retry("breve termine", run)
+
+    assert len(calls) == 3
+    assert [c.args[0] for c in slept.call_args_list] == list(bot.CYCLE_RETRY_WAITS[:2])
+
+
+def test_step_gives_up_after_the_last_attempt_without_raising():
+    calls = []
+
+    def run():
+        calls.append(1)
+        raise _connect_timeout()
+
+    with patch.object(bot.time, "sleep"), patch.object(bot.notify, "alert") as alert:
+        bot._run_step_with_retry("breve termine", run)
+
+    assert len(calls) == len(bot.CYCLE_RETRY_WAITS) + 1
+    assert alert.called
+
+
+def test_step_does_not_retry_a_non_network_failure():
+    """Un ordine rifiutato o un bug non migliorano aspettando: riprovare
+    ritarderebbe solo il resto del ciclo."""
+    calls = []
+
+    def run():
+        calls.append(1)
+        raise ValueError("bug")
+
+    with patch.object(bot.time, "sleep") as slept, patch.object(bot.notify, "alert"):
+        bot._run_step_with_retry("breve termine", run)
+
+    assert len(calls) == 1
+    assert not slept.called
+
+
+def test_a_failing_short_term_step_still_lets_the_long_term_run():
+    order = []
+    with patch.object(bot, "cmd_short_term_once", side_effect=ValueError("bug")), \
+         patch.object(bot, "cmd_long_term_once", side_effect=lambda a: order.append("lungo")), \
+         patch.object(bot.notify, "alert"):
+        bot._run_cycle_safely()
+    assert order == ["lungo"]
+
+
+def test_cycles_never_overlap():
+    """Il giro iniziale e quello schedulato sono due job distinti: se il
+    primo e' ancora in attesa di rete alle 16:15, farli partire insieme
+    manderebbe ordini doppi."""
+    reentered = []
+
+    def run_short(_args):
+        reentered.append(bot._run_cycle_safely())
+
+    with patch.object(bot, "cmd_short_term_once", side_effect=run_short), \
+         patch.object(bot, "cmd_long_term_once"), \
+         patch.object(bot.log, "warning") as warned:
+        bot._run_cycle_safely()
+
+    assert warned.called
+    assert bot._cycle_lock.acquire(blocking=False)
+    bot._cycle_lock.release()
+
+
+def test_schedule_registers_the_daily_job_before_running_the_first_cycle():
+    """La rete assente puo' tenere il primo giro in attesa per minuti:
+    l'appuntamento quotidiano deve essere gia' registrato, non dopo."""
+    scheduler = MagicMock()
+    with patch.object(bot, "BlockingScheduler", return_value=scheduler), \
+         patch.object(bot.notify, "alert"):
+        bot.cmd_schedule(argparse.Namespace())
+
+    triggers = [c.args[1] if len(c.args) > 1 else None for c in scheduler.add_job.call_args_list]
+    assert len(triggers) == 2
+    assert isinstance(triggers[0], bot.CronTrigger)  # prima il quotidiano
+    assert triggers[1] is None                       # poi il giro immediato
+    assert scheduler.start.called

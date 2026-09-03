@@ -14,6 +14,10 @@ import math
 import statistics
 from datetime import datetime, timedelta, timezone
 
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
 from alpaca.data.enums import DataFeed
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest, StockSnapshotRequest
@@ -52,6 +56,69 @@ _LEVERAGED_NAME_MARKERS = (
 )
 
 
+# --- Robustezza di rete ---------------------------------------------------
+# Il bot gira su un PC di casa, dove la connessione non e' sempre pronta:
+# lanciato subito dopo l'accensione, i primi secondi la rete puo' non
+# esserci ancora. E' successo davvero (ConnectTimeout su /v2/calendar) e ha
+# fatto fallire l'intero ciclo giornaliero.
+#
+# alpaca-py non protegge da questo: ritenta solo sui codici HTTP di rate
+# limit (429), mai sugli errori di connessione, e chiama requests senza
+# alcun timeout -- quindi una connessione che non risponde resta appesa
+# finche' non interviene il sistema operativo (su Windows anche minuti).
+HTTP_CONNECT_TIMEOUT = 10.0
+HTTP_READ_TIMEOUT = 60.0
+HTTP_CONNECT_RETRIES = 5
+HTTP_READ_RETRIES = 2
+HTTP_BACKOFF_FACTOR = 2.0
+
+
+class _ResilientSession(requests.Session):
+    """Sessione HTTP con timeout espliciti.
+
+    alpaca-py chiama ``session.request(...)`` senza ``timeout``: senza
+    questo default una connessione appesa blocca il bot a tempo
+    indeterminato invece di fallire e lasciar partire un nuovo tentativo.
+    """
+
+    def request(self, method, url, **kwargs):  # type: ignore[override]
+        kwargs.setdefault("timeout", (HTTP_CONNECT_TIMEOUT, HTTP_READ_TIMEOUT))
+        return super().request(method, url, **kwargs)
+
+
+def _harden_session(client) -> None:
+    """Installa sul client Alpaca una sessione che ritenta da sola gli
+    errori di rete transitori (attese 0s, 2s, 4s, 8s, 16s).
+
+    Distinzione importante per non duplicare ordini:
+      - errori di CONNESSIONE: ritentati per qualsiasi metodo HTTP, perche'
+        la richiesta non e' mai partita e non puo' aver creato nulla;
+      - errori di LETTURA (richiesta inviata, risposta mai arrivata):
+        urllib3 li ritenta solo sui metodi idempotenti, POST escluso --
+        cioe' un invio ordine non viene MAI ripetuto alla cieca.
+    """
+    if not isinstance(getattr(client, "_session", None), requests.Session):
+        log.warning(
+            "%s non espone una sessione requests: niente retry di rete automatici.",
+            type(client).__name__,
+        )
+        return
+    retry = Retry(
+        total=HTTP_CONNECT_RETRIES,
+        connect=HTTP_CONNECT_RETRIES,
+        read=HTTP_READ_RETRIES,
+        status=HTTP_READ_RETRIES,
+        status_forcelist=(502, 503, 504),
+        backoff_factor=HTTP_BACKOFF_FACTOR,
+        raise_on_status=False,
+    )
+    session = _ResilientSession()
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+    client._session = session
+
+
 def _data_feed() -> DataFeed:
     """Canale dati configurato (default IEX, incluso negli account gratuiti).
     Senza specificarlo Alpaca usa SIP e rifiuta i dati recenti a chi non ha
@@ -73,6 +140,8 @@ class Broker:
         config.require_alpaca_keys()
         self.client = TradingClient(config.ALPACA_API_KEY, config.ALPACA_SECRET_KEY, paper=config.ALPACA_PAPER)
         self.data_client = StockHistoricalDataClient(config.ALPACA_API_KEY, config.ALPACA_SECRET_KEY)
+        _harden_session(self.client)
+        _harden_session(self.data_client)
         if not config.ALPACA_PAPER:
             log.warning("ALPACA_PAPER=false -- this bot will trade with REAL MONEY.")
 

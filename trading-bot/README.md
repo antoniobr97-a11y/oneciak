@@ -284,6 +284,36 @@ Un guasto sistemico (es. Alpaca irraggiungibile) non uccide lo scheduler:
 viene loggato/notificato e il ciclo successivo (il giorno dopo) riparte
 normalmente.
 
+### Connessione assente o instabile
+
+Su un PC di casa la rete non e' sempre pronta quando il bot parte (caso
+reale al primo avvio: `ConnectTimeout` su `/v2/calendar` perche' il PC era
+appena stato acceso). Senza protezione un solo scatto di rete fa perdere
+l'intero giro del giorno. Tre livelli, dal piu' fine al piu' grosso:
+
+1. **Timeout espliciti** (`common/broker.py`): alpaca-py chiama `requests`
+   senza timeout, quindi una connessione appesa bloccherebbe il bot finche'
+   non interviene il sistema operativo. Default: 10s per connettersi, 60s
+   per la risposta.
+2. **Retry HTTP automatici** sulla stessa sessione (attese 0s, 2s, 4s, 8s,
+   16s). Gli errori di *connessione* sono ritentati per qualsiasi metodo --
+   la richiesta non e' mai partita, non puo' aver creato un ordine. Gli
+   errori di *lettura* (richiesta inviata, risposta persa) solo sui metodi
+   idempotenti: un `POST` di invio ordine non viene mai ripetuto alla cieca.
+3. **Retry di ciclo** (`bot.py:_run_step_with_retry`): se la fase fallisce
+   comunque perche' il broker e' irraggiungibile, riprova dopo 1, 5 e 15
+   minuti invece di saltare il giorno. Solo per errori di rete: un ordine
+   rifiutato o un bug non migliorano aspettando. Ripetere e' sicuro perche'
+   il ciclo rilegge posizioni e ordini pendenti dal broker e riconcilia lo
+   stato invece di accodare ordini nuovi.
+
+Il giro iniziale all'avvio e' registrato **come job dello scheduler**, non
+eseguito prima di `start()`: se la rete manca, i suoi tentativi possono
+durare minuti e nel frattempo l'appuntamento quotidiano deve essere gia'
+armato. I due job non possono sovrapporsi (lucchetto in `_run_cycle_safely`),
+altrimenti un giro iniziale ancora in attesa potrebbe partire insieme a
+quello delle 16:15 e mandare ordini doppi.
+
 ## Cosa implementa (in breve)
 
 Vedi STRATEGY.md per i dettagli e le soglie esatte. Riassunto:

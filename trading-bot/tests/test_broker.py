@@ -1,6 +1,7 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
+import requests
 
 from common import config
 from common.broker import Broker
@@ -238,3 +239,71 @@ def test_submit_stop_does_not_cancel_other_orders(monkeypatch):
     client.cancel_order_by_id.assert_not_called()
     submitted = client.submit_order.call_args[0][0]
     assert submitted.stop_price == 95.0 and submitted.qty == 5
+
+
+# --- Robustezza di rete ---------------------------------------------------
+# Regressione: al primo avvio reale su PC di casa il bot e' partito prima
+# che la connessione fosse pronta e un ConnectTimeout su /v2/calendar ha
+# fatto fallire l'intero ciclo giornaliero. alpaca-py non ritenta gli
+# errori di connessione e non imposta timeout.
+
+def test_harden_session_retries_connection_errors():
+    from common.broker import HTTP_CONNECT_RETRIES, _harden_session
+
+    class _Client:
+        _session = requests.Session()
+
+    client = _Client()
+    _harden_session(client)
+
+    retry = client._session.get_adapter("https://paper-api.alpaca.markets").max_retries
+    assert retry.connect == HTTP_CONNECT_RETRIES
+    assert retry.backoff_factor > 0
+
+
+def test_resilient_session_sends_a_default_timeout():
+    """alpaca-py chiama request() senza timeout: senza un default una
+    connessione appesa blocca il bot invece di fallire e riprovare."""
+    from common.broker import HTTP_CONNECT_TIMEOUT, HTTP_READ_TIMEOUT, _ResilientSession
+
+    session = _ResilientSession()
+    with patch.object(requests.Session, "request", return_value="ok") as sent:
+        session.request("GET", "https://example.invalid")
+    assert sent.call_args.kwargs["timeout"] == (HTTP_CONNECT_TIMEOUT, HTTP_READ_TIMEOUT)
+
+
+def test_resilient_session_keeps_an_explicit_timeout():
+    from common.broker import _ResilientSession
+
+    session = _ResilientSession()
+    with patch.object(requests.Session, "request", return_value="ok") as sent:
+        session.request("GET", "https://example.invalid", timeout=5)
+    assert sent.call_args.kwargs["timeout"] == 5
+
+
+def test_harden_session_never_retries_a_post_on_a_read_error():
+    """Un ordine e' un POST: se la richiesta e' partita ma la risposta non
+    arriva, ripeterla alla cieca puo' creare un secondo ordine. urllib3
+    ritenta gli errori di lettura solo sui metodi idempotenti."""
+    from common.broker import _harden_session
+
+    class _Client:
+        _session = requests.Session()
+
+    client = _Client()
+    _harden_session(client)
+    retry = client._session.get_adapter("https://paper-api.alpaca.markets").max_retries
+    assert "POST" not in retry.allowed_methods
+    assert "GET" in retry.allowed_methods
+
+
+def test_harden_session_is_a_no_op_when_the_client_has_no_requests_session():
+    from common.broker import _harden_session
+
+    class _Client:
+        _session = object()
+
+    client = _Client()
+    sentinel = client._session
+    _harden_session(client)
+    assert client._session is sentinel

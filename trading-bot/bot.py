@@ -16,9 +16,12 @@ stampano solo un report -- nessun ordine viene inviato.
 import argparse
 import logging
 import math
+import threading
+import time
 from datetime import date
 
 import pandas as pd
+import requests
 from alpaca.common.exceptions import APIError
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -655,33 +658,95 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
             cash_available -= qty * c.levels.entry
 
 
+# Attese (secondi) tra i tentativi quando una fase del ciclo fallisce
+# perche' il broker e' irraggiungibile. Caso reale: il bot viene lanciato
+# subito dopo l'accensione del PC e la connessione non e' ancora pronta.
+# Senza questi tentativi il giro del giorno andrebbe perso del tutto --
+# nessuna gestione delle posizioni aperte, nessun nuovo ordine.
+CYCLE_RETRY_WAITS = (60, 300, 900)
+
+# I retry di broker.py coprono il singolo scatto di rete (secondi); questi
+# coprono l'assenza di connessione vera e propria (minuti).
+
+# Un ciclo alla volta: il giro iniziale all'avvio e quello schedulato sono
+# due job distinti, quindi senza questo lucchetto un giro iniziale ancora
+# in attesa di rete potrebbe sovrapporsi a quello delle 16:15 e mandare
+# ordini doppi.
+_cycle_lock = threading.Lock()
+
+
+def _is_network_failure(exc: BaseException) -> bool:
+    """Vero se l'eccezione (o una delle sue cause) e' un problema di rete:
+    broker irraggiungibile o che non risponde. Sono gli unici errori per
+    cui ha senso riprovare -- un ordine rifiutato o un bug non migliorano
+    aspettando."""
+    seen: set[int] = set()
+    current: BaseException | None = exc
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        if isinstance(current, (requests.exceptions.ConnectionError, requests.exceptions.Timeout)):
+            return True
+        current = current.__cause__ or current.__context__
+    return False
+
+
+def _run_step_with_retry(name: str, run) -> None:
+    """Esegue una fase del ciclo senza mai propagare eccezioni, riprovando
+    se il broker e' irraggiungibile.
+
+    Ripetere e' sicuro: il ciclo e' idempotente per costruzione -- rilegge
+    posizioni e ordini pendenti dal broker e riconcilia lo stato invece di
+    accodare nuovi ordini (vedi reconcile_pending_entries)."""
+    attempts = len(CYCLE_RETRY_WAITS) + 1
+    for attempt in range(1, attempts + 1):
+        try:
+            run()
+            return
+        except Exception as exc:
+            if attempt == attempts or not _is_network_failure(exc):
+                log.exception("Ciclo %s fallito.", name)
+                notify.alert(f"Ciclo {name} fallito, controlla i log", level="error")
+                return
+            wait = CYCLE_RETRY_WAITS[attempt - 1]
+            log.warning(
+                "Ciclo %s: broker irraggiungibile (%s). Riprovo tra %d secondi "
+                "(tentativo %d di %d).",
+                name, type(exc).__name__, wait, attempt + 1, attempts,
+            )
+            time.sleep(wait)
+
+
 def _run_cycle_safely() -> None:
     """Un ciclo schedulato non deve mai propagare un'eccezione: un guasto
     sistemico (broker irraggiungibile, errore imprevisto) va notificato e
     registrato, non deve far morire lo scheduler o saltare i cicli futuri.
     Breve e lungo termine sono isolati l'uno dall'altro."""
+    if not _cycle_lock.acquire(blocking=False):
+        log.warning("Un ciclo e' gia' in corso: salto questa esecuzione per non duplicare ordini.")
+        return
     try:
-        cmd_short_term_once(argparse.Namespace(execute=True))
-    except Exception:
-        log.exception("Ciclo breve termine fallito.")
-        notify.alert("Ciclo breve termine fallito, controlla i log", level="error")
-    try:
-        cmd_long_term_once(argparse.Namespace(execute=True))
-    except Exception:
-        log.exception("Ciclo lungo termine fallito.")
-        notify.alert("Ciclo lungo termine fallito, controlla i log", level="error")
+        _run_step_with_retry("breve termine", lambda: cmd_short_term_once(argparse.Namespace(execute=True)))
+        _run_step_with_retry("lungo termine", lambda: cmd_long_term_once(argparse.Namespace(execute=True)))
+    finally:
+        _cycle_lock.release()
 
 
 def cmd_schedule(args: argparse.Namespace) -> None:
     notify.alert("Bot avviato, scheduler attivo")
-    _run_cycle_safely()
 
     hour, minute = (int(x) for x in config.RUN_TIME.split(":"))
     scheduler = BlockingScheduler(timezone="America/New_York")
     scheduler.add_job(
         _run_cycle_safely,
         CronTrigger(day_of_week="mon-fri", hour=hour, minute=minute),
+        misfire_grace_time=3600,
+        coalesce=True,
     )
+    # Il giro iniziale e' un job dello scheduler, non una chiamata prima di
+    # start(): se la rete non c'e' ancora, i suoi tentativi possono durare
+    # minuti, e facendolo prima terrebbero l'appuntamento quotidiano non
+    # ancora registrato per tutto quel tempo.
+    scheduler.add_job(_run_cycle_safely, misfire_grace_time=None)
     log.info(
         "Scheduler avviato: ciclo breve + lungo termine (%s) ogni giorno feriale alle %s America/New_York.",
         config.LONG_TERM_AUTO_STRATEGY, config.RUN_TIME,
