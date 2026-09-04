@@ -1219,6 +1219,59 @@ diversa da quella che gli veniva posta.
 I numeri di riferimento del sistema diventano quindi quelli della colonna
 v11.
 
+### v12 — filtri di rischio severi o permissivi? (misurato)
+
+Emerso guardando un ciclo reale: **il bot dal vivo non e' il sistema che i
+backtest misuravano.** Conferma settoriale, livello S/R troppo vicino e
+divergenza prezzo/MACD nel backtest **scartano** l'operazione; nel bot dal
+vivo sono note informative (le righe con `!`) e l'ordine parte comunque.
+Sul ciclo del 4 settembre, 9 dei 10 ordini piazzati sarebbero stati
+scartati dalle regole severe. Tutti i numeri documentati fino a qui
+descrivevano quindi un sistema diverso da quello in esecuzione.
+
+Misurate entrambe le versioni, stessa configurazione del confronto v11:
+
+| Metrica | SEVERA (come il backtest) | PERMISSIVA (come il bot dal vivo) |
+|---|---|---|
+| Operazioni in 26 anni | 630 | **817** |
+| Operazioni all'anno | 23.6 | 30.6 |
+| Capitale finale (da 10.000) | 76.592 | **120.214** |
+| CAGR | +7.94%/anno | **+9.78%/anno** |
+| Max drawdown | **-18.5%** | -19.4% |
+| Sharpe | 0.72 | **0.87** |
+| Win rate | 57.0% | **58.9%** |
+| Profit Factor | 1.68 | **1.72** |
+
+**Esito: si tiene la versione permissiva, cioe' il comportamento attuale
+del bot.** Rende quasi due punti in piu' all'anno (capitale finale +57% su
+26 anni), con Sharpe nettamente migliore, win rate e Profit Factor
+migliori, a fronte di 0.9 punti di drawdown in piu'. Non e' un
+compromesso rischio/rendimento: e' meglio quasi ovunque.
+
+**La previsione sbagliata, e perche'.** L'attesa era "regole severe =
+molte meno operazioni". Invece le operazioni passano solo da 630 a 817,
+non da 630 a 63. Il motivo e' il tetto di rischio aggregato: scartare un
+candidato non lascia lo slot vuoto, lo passa al candidato successivo in
+graduatoria. Le regole severe quindi non riducono quanto si opera, ma
+**cambiano cosa si compra** -- e storicamente scelgono peggio. Sul singolo
+giorno l'effetto sembra enorme (9 ordini su 10 scartati); su 26 anni si
+riduce al 23% di operazioni in meno.
+
+Perche' filtri pensati per ridurre il rischio peggiorano i risultati? Due
+ragioni plausibili, entrambe gia' dichiarate nel codice: la conferma
+settoriale richiede **quattro** condizioni allineate insieme
+(`sector.py:SectorAnalysis.passes`) ed e' quindi molto restrittiva, e il
+livello S/R e' un'approssimazione dichiarata coi soli massimi swing
+settimanali, senza il volume e l'ampiezza del movimento che il corso
+considera. Il corso stesso li descrive come fattori che *aumentano o
+diminuiscono il rischio percepito, da valutare insieme agli altri* -- non
+come divieti. Il bot dal vivo li tratta cosi', ed e' la lettura corretta.
+
+**I numeri di riferimento del sistema diventano quelli della colonna
+permissiva**, ed e' la prima volta che i numeri documentati descrivono
+davvero cio' che il bot esegue: CAGR +9.78%, max drawdown -19.4%, Sharpe
+0.87, Profit Factor 1.72, ~31 posizioni l'anno.
+
 ## Storico minimo per analizzare un titolo (assunzione esplicita)
 
 `short_term/screener.py:MIN_HISTORY_BARS = 250` — un titolo con meno di
