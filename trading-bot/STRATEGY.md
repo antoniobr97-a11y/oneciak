@@ -1172,6 +1172,53 @@ cinque metodi del broker non erano usati da nessuna parte, tra cui un
 `enter_with_stop` che compra **a mercato**, cioe' il comportamento che il
 corso esclude e che era gia' stato corretto altrove.
 
+### v11 — swing point corretti (misurato, 26 anni, universo di 120 titoli)
+
+La correzione del punto 18 (picchi e valli non piu' mescolati) tocca tre
+regole contemporaneamente, quindi non bastava dire "adesso e' giusto":
+andava misurata. Confronto A/B sulla configurazione esatta del bot dal
+vivo (regime ON, solo long, priorita' 52 settimane, rischio 1%), stesso
+motore e stessi dati di tutte le misure precedenti.
+
+**Validazione del confronto:** l'esecuzione con la funzione difettosa
+riproduce esattamente i numeri gia' documentati per v9 (CAGR 8.40%,
+drawdown -20.2%). Il confronto e' quindi sulla stessa base delle misure
+precedenti, non su un motore diverso.
+
+| Metrica | swing point difettosi (v9) | swing point corretti (v11) |
+|---|---|---|
+| Posizioni in 26 anni | 669 | 630 |
+| CAGR | +8.40%/anno | **+7.94%/anno** |
+| Max drawdown | -20.2% | **-18.5%** |
+| Sharpe | 0.73 | 0.72 |
+| Win rate | 56.9% | 57.0% |
+| Profit Factor | 1.60 | **1.68** |
+
+**Esito: correzione adottata.** Il rendimento scende di mezzo punto
+l'anno, ma il drawdown massimo migliora di 1.7 punti, il Profit Factor
+sale da 1.60 a 1.68 e lo Sharpe resta invariato: a parita' di rischio
+corso, le operazioni fatte sono di qualita' migliore.
+
+Il segno era controintuitivo — rimettendo in funzione un qualificatore
+(l'armonia) ci si aspettano *piu* operazioni, invece sono 39 in meno. Il
+motivo e' che la stessa funzione alimenta anche il controllo di divergenza
+prezzo/MACD, che prima confrontava un picco con una valle e quindi
+segnalava a caso; ora confronta due picchi consecutivi e scarta davvero le
+operazioni con divergenza contraria — che sono peggiori della media, come
+si vede dal Profit Factor che sale proprio mentre il numero di operazioni
+scende.
+
+**Onesta' sulla misura:** e' un singolo percorso storico, non una prova.
+Mezzo punto di CAGR su 26 anni rientra nel rumore di un backtest, e lo
+stesso vale per 1.7 punti di drawdown. Cio' che la misura esclude e' l'
+ipotesi peggiore, cioe' che correggere la funzione peggiori
+sensibilmente il sistema: non lo fa. Il motivo principale per tenere la
+correzione resta che il codice precedente rispondeva a una domanda
+diversa da quella che gli veniva posta.
+
+I numeri di riferimento del sistema diventano quindi quelli della colonna
+v11.
+
 ## Storico minimo per analizzare un titolo (assunzione esplicita)
 
 `short_term/screener.py:MIN_HISTORY_BARS = 250` — un titolo con meno di
