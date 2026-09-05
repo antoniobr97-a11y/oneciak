@@ -7,7 +7,6 @@ entrata, stop e size, cioe' l'ultimo passaggio prima che parta un ordine
 vero. Qui si usa una serie sintetica costruita per qualificare il trend e
 formare un ritracciamento pulito; le chiamate di rete (settore,
 trimestrali) sono sostituite."""
-from unittest.mock import patch
 
 import numpy as np
 import pandas as pd

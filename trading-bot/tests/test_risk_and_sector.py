@@ -6,7 +6,6 @@ veniva mai eseguito da un test. Non e' un dettaglio -- il bug degli swing
 point e' vissuto proprio qui, invisibile, perche' nessun test guardava
 cosa quelle funzioni rispondessero davvero."""
 import pandas as pd
-import pytest
 
 from common import config
 from short_term import risk_checks, sector
