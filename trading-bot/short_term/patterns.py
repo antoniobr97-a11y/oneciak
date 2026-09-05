@@ -27,6 +27,9 @@ BOWAI_INVERSION_WINDOW = 5  # "inverte l'ordine in <=5 giorni"
 # barra dopo barra. True = regola del corso; False = solo i massimi (la
 # versione con cui sono stati fatti i backtest v1-v6, vedi STRATEGY.md v10).
 PULLBACK_REQUIRE_LOWS = True
+# Finestra su cui si misura "ADX crescente", la stessa convenzione di
+# trend.adx_qualifier: il concetto e' uno solo e va misurato in un modo solo.
+ADX_TREND_LOOKBACK = 10
 
 
 @dataclass
@@ -229,17 +232,30 @@ def detect_sacro_graal(df: pd.DataFrame, direction: str, lookback: int | None = 
     lookback = lookback or config.TREND_LOOKBACK_DAYS
     if len(df) < 2:
         return None
-    adx_series = adx(df["high"], df["low"], df["close"], 14)
-    if adx_series.isna().iloc[-1] or adx_series.isna().iloc[-2]:
-        return None
-    if not (adx_series.iloc[-1] > config.TREND_ADX_THRESHOLD and adx_series.iloc[-1] > adx_series.iloc[-2]):
-        return None
-
     peak_pos = _recent_extreme_pos(df, direction, lookback)
     if peak_pos is None:
         return None
     non_inside, _ = _pullback_segment(df, direction, peak_pos)
     if not non_inside:
+        return None
+
+    # "ADX >30 e crescente" descrive il TREND, quindi si misura al picco --
+    # prima del ritracciamento -- e su una finestra, come fa
+    # trend.adx_qualifier per lo stesso identico concetto.
+    #
+    # Misurarlo invece da una barra all'altra SULLA barra di ritracciamento
+    # rendeva il pattern autocontraddittorio: durante un ritracciamento
+    # l'ADX scende sempre, per costruzione. Verificato su 240 setup
+    # sintetici da manuale: falliscono tutti e 240 su questa sola
+    # condizione, e su 26 anni di storico il Sacro Graal scattava 5 volte
+    # in tutto -- per rumore, non perche' il setup ci fosse.
+    adx_series = adx(df["high"], df["low"], df["close"], 14)
+    reference = min(peak_pos, len(adx_series) - 1)
+    earlier = reference - ADX_TREND_LOOKBACK
+    if earlier < 0 or adx_series.isna().iloc[reference] or adx_series.isna().iloc[earlier]:
+        return None
+    if not (adx_series.iloc[reference] > config.TREND_ADX_THRESHOLD
+            and adx_series.iloc[reference] > adx_series.iloc[earlier]):
         return None
 
     ema20 = ema(df["close"], 20)
@@ -304,6 +320,27 @@ CONTINUATION_DETECTORS = {
 }
 
 
+def _collapse_persistent_pullback(matches: list[PatternMatch]) -> list[PatternMatch]:
+    """Il Pullback Persistente e' per costruzione un Pullback Semplice che
+    supera in piu' il test di persistenza (lo chiama al suo interno):
+    stessa barra di setup, stessi livelli, stessa operazione. Tenerli
+    entrambi produceva due candidati identici sullo stesso titolo -- e
+    misurato sui dati storici accadeva nel 100% dei casi in cui il
+    Persistente scattava (40 su 40 nel campione).
+
+    Costava due volte il lavoro di screener._build_candidate, che include
+    chiamate di rete per settore e trimestrali, e soprattutto faceva
+    sparire il nome piu' informativo: a parita' di punteggio la deduplica
+    tiene il primo della lista, e "Pullback Semplice" viene prima. Su 26
+    anni di backtest il Pullback Persistente non compare MAI fra le
+    operazioni, pur essendo stato rilevato. Qui si tiene la
+    classificazione piu' specifica; l'operazione non cambia di una virgola."""
+    persistent = {m.setup_bar_index for m in matches if m.pattern == "Pullback Persistente"}
+    if not persistent:
+        return matches
+    return [m for m in matches if not (m.pattern == "Pullback Semplice" and m.setup_bar_index in persistent)]
+
+
 def detect_all(df: pd.DataFrame, direction: str, lookback: int | None = None) -> list[PatternMatch]:
     matches = []
     for detector in CONTINUATION_DETECTORS.values():
@@ -313,4 +350,4 @@ def detect_all(df: pd.DataFrame, direction: str, lookback: int | None = None) ->
     bowai = detect_bowai(df, direction)
     if bowai is not None:
         matches.append(bowai)
-    return matches
+    return _collapse_persistent_pullback(matches)
