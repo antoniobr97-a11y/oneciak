@@ -1245,3 +1245,41 @@ def test_a_failed_runner_close_keeps_the_state_and_re_protects():
 
     assert "AAPL" in state.data                       # lo stato NON va perso
     broker.submit_stop.assert_called_with("AAPL", 2, 100.0, "long")  # protezione rimessa
+
+
+# --- L'orario del ciclo e' quello del MERCATO, non quello del PC ------------
+# Bug reale trovato nel log di un PC italiano: il ciclo quotidiano partiva
+# alle 16:15 ORA ITALIANA, cioe' 45 minuti dopo l'APERTURA di Wall Street
+# invece che 15 minuti dopo la chiusura. APScheduler applica il fuso dello
+# scheduler solo ai trigger creati da stringa; un CronTrigger costruito
+# come oggetto tiene il fuso locale della macchina.
+
+def test_the_daily_cycle_is_scheduled_in_market_time_not_machine_time():
+    from zoneinfo import ZoneInfo
+
+    scheduler = MagicMock()
+    with patch.object(bot, "BlockingScheduler", return_value=scheduler) as ctor, \
+         patch.object(bot.notify, "alert"):
+        bot.cmd_schedule(argparse.Namespace())
+        scheduler_timezone = ctor.call_args.kwargs["timezone"]
+
+    cron = scheduler.add_job.call_args_list[0].args[1]
+    assert isinstance(cron, bot.CronTrigger)
+    assert cron.timezone == ZoneInfo("America/New_York")
+    assert scheduler_timezone == "America/New_York"
+
+
+def test_run_time_lands_after_the_us_close_not_during_the_session():
+    """RUN_TIME di default (16:15 New York) deve cadere DOPO la chiusura
+    delle 16:00, qualunque sia il fuso della macchina."""
+    from datetime import datetime, time
+    from zoneinfo import ZoneInfo
+
+    hour, minute = (int(x) for x in bot.config.RUN_TIME.split(":"))
+    assert time(hour, minute) > time(16, 0), "il ciclo girerebbe a mercato aperto"
+
+    ny = ZoneInfo("America/New_York")
+    fire = bot.CronTrigger(day_of_week="mon-fri", hour=hour, minute=minute, timezone=ny)
+    nxt = fire.get_next_fire_time(None, datetime(2026, 9, 4, 12, 0, tzinfo=ny))
+    assert nxt.hour == 16 and nxt.minute == 15
+    assert nxt.tzinfo == ny

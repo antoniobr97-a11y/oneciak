@@ -1272,6 +1272,25 @@ permissiva**, ed e' la prima volta che i numeri documentati descrivono
 davvero cio' che il bot esegue: CAGR +9.78%, max drawdown -19.4%, Sharpe
 0.87, Profit Factor 1.72, ~31 posizioni l'anno.
 
+25. **Il ciclo quotidiano partiva a mercato APERTO (il piu' grave della
+    serie).** Lo scheduler era creato con `timezone="America/New_York"`,
+    ma il fuso va passato **al trigger**: APScheduler lo applica solo ai
+    trigger creati da stringa, mentre un `CronTrigger` costruito come
+    oggetto tiene il fuso locale della macchina
+    (`BaseScheduler._create_trigger` lo restituisce invariato). Su un PC
+    italiano il ciclo partiva quindi alle **16:15 ora italiana**, cioe' le
+    10:15 di New York: 45 minuti dopo l'**apertura** di Wall Street invece
+    che 15 minuti dopo la chiusura. Ogni analisi automatica girava sulla
+    barra del giorno ancora in formazione — proprio cio' che il punto 12
+    vieta. Trovato nel log di un PC reale (`scheduled at 2026-09-04
+    16:15:00+02:00`: il `+02:00` e' il fuso italiano, non quello di New
+    York). La correzione del punto 12 lo ha reso visibile invece che
+    silenzioso: da quel momento il ciclo schedulato rilevava il mercato
+    aperto e rimandava, quindi il bot **non piazzava piu' alcun ordine per
+    conto proprio**. Fix: `timezone` esplicito sul `CronTrigger`, piu' un
+    test che simula una macchina non americana e il fuso stampato nel log
+    all'avvio.
+
 ## Storico minimo per analizzare un titolo (assunzione esplicita)
 
 `short_term/screener.py:MIN_HISTORY_BARS = 250` — un titolo con meno di

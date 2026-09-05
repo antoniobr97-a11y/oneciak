@@ -18,7 +18,8 @@ import logging
 import math
 import threading
 import time
-from datetime import date
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 import requests
@@ -37,6 +38,11 @@ from short_term.indicators import sma
 from short_term.screener import Candidate, screen_universe
 
 log = logging.getLogger("bot")
+
+# RUN_TIME e' sempre inteso nel fuso del MERCATO, mai in quello del PC:
+# il ciclo deve girare dopo la chiusura di Wall Street ovunque si trovi la
+# macchina che lo esegue.
+MARKET_TIMEZONE = "America/New_York"
 
 # Gli ETF dei portafogli di lungo termine vivono nello stesso conto Alpaca
 # delle azioni di breve termine: vanno tenuti fuori dalla gestione a
@@ -894,10 +900,18 @@ def cmd_schedule(args: argparse.Namespace) -> None:
     notify.alert("Bot avviato, scheduler attivo")
 
     hour, minute = (int(x) for x in config.RUN_TIME.split(":"))
-    scheduler = BlockingScheduler(timezone="America/New_York")
+    scheduler = BlockingScheduler(timezone=MARKET_TIMEZONE)
+    # Il fuso va passato AL TRIGGER, non solo allo scheduler. APScheduler
+    # applica il fuso dello scheduler solo ai trigger creati da stringa
+    # ("cron"); un CronTrigger costruito come oggetto usa il fuso locale
+    # della macchina (BaseScheduler._create_trigger lo restituisce
+    # invariato). Su un PC italiano il ciclo partiva quindi alle 16:15
+    # ITALIANE, cioe' 45 minuti dopo l'APERTURA di Wall Street invece che
+    # 15 minuti dopo la chiusura: ogni giorno l'analisi girava sulla barra
+    # del giorno ancora in formazione. Trovato nel log di un PC reale.
     scheduler.add_job(
         _run_cycle_safely,
-        CronTrigger(day_of_week="mon-fri", hour=hour, minute=minute),
+        CronTrigger(day_of_week="mon-fri", hour=hour, minute=minute, timezone=MARKET_TIMEZONE),
         misfire_grace_time=3600,
         coalesce=True,
     )
@@ -907,8 +921,10 @@ def cmd_schedule(args: argparse.Namespace) -> None:
     # ancora registrato per tutto quel tempo.
     scheduler.add_job(_run_cycle_safely, misfire_grace_time=None)
     log.info(
-        "Scheduler avviato: ciclo breve + lungo termine (%s) ogni giorno feriale alle %s America/New_York.",
-        config.LONG_TERM_AUTO_STRATEGY, config.RUN_TIME,
+        "Scheduler avviato: ciclo breve + lungo termine (%s) ogni giorno feriale alle %s %s "
+        "(prossima esecuzione: %s).",
+        config.LONG_TERM_AUTO_STRATEGY, config.RUN_TIME, MARKET_TIMEZONE,
+        scheduler.get_jobs()[0].trigger.get_next_fire_time(None, datetime.now(ZoneInfo(MARKET_TIMEZONE))),
     )
     scheduler.start()
 
