@@ -62,3 +62,22 @@ def test_the_shipped_defaults_are_valid():
     assert config.RUN_TIME == "16:15"
     assert config.SHORT_TERM_RISK_PER_TRADE_PCT == 1.0
     assert config.SHORT_TERM_MAX_AGGREGATE_RISK_PCT == 12.0
+
+
+def test_a_wrong_number_of_harry_browne_etfs_is_rejected(monkeypatch):
+    """I pesi sono per POSIZIONE nella lista. Con 3 ETF invece di 4 il bot
+    investirebbe il 75% lasciando un quarto in liquidita', senza dirlo."""
+    message = _reload_expecting_error(monkeypatch, HARRY_BROWNE_TICKERS="VT,TLT,SHY")
+    assert "HARRY_BROWNE_TICKERS" in message and "4" in message
+
+
+def test_a_wrong_number_of_advanced_etfs_is_rejected(monkeypatch):
+    """zip() accoppia in silenzio solo i primi: una classe di attivo
+    resterebbe senza soldi e nessuno se ne accorgerebbe."""
+    message = _reload_expecting_error(monkeypatch, ADVANCED_TICKERS="VTI,EDV,VGSH,IAU")
+    assert "ADVANCED_TICKERS" in message and "5" in message
+
+
+def test_duplicate_etfs_are_rejected(monkeypatch):
+    message = _reload_expecting_error(monkeypatch, HARRY_BROWNE_TICKERS="VT,VT,SHY,GLD")
+    assert "diversi" in message

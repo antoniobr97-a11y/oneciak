@@ -93,14 +93,32 @@ def swing_points(series: pd.Series, order: int = 3, kind: str = "high") -> list[
     serie passata."""
     if kind not in ("high", "low"):
         raise ValueError(f"kind deve essere 'high' o 'low', non {kind!r}")
-    points: list[tuple[int, float]] = []
     values = series.to_numpy()
+    raw: list[tuple[int, float]] = []
     for i in range(order, len(values) - order):
         window = values[i - order: i + order + 1]
         extreme = window.max() if kind == "high" else window.min()
         if values[i] == extreme:
-            points.append((i, float(values[i])))
-    return points
+            raw.append((i, float(values[i])))
+
+    # Un solo punto per inversione. Barre adiacenti possono essere entrambe
+    # "il massimo della loro finestra" (cima piatta, doppio massimo, o
+    # semplicemente due barre vicine attorno allo stesso picco), e senza
+    # questo raggruppamento la stessa inversione compare due volte di
+    # seguito. Chi legge "gli ultimi due massimi" -- risk_checks.
+    # divergence_check -- finiva cosi' per confrontare un picco con SE
+    # STESSO: prezzo uguale, nessuna divergenza, controllo inutile.
+    # Punti a meno di `order` barre di distanza sono la stessa inversione:
+    # si tiene il piu' estremo (il primo, a parita').
+    grouped: list[tuple[int, float]] = []
+    for point in raw:
+        if grouped and point[0] - grouped[-1][0] <= order:
+            better = point[1] > grouped[-1][1] if kind == "high" else point[1] < grouped[-1][1]
+            if better:
+                grouped[-1] = point
+        else:
+            grouped.append(point)
+    return grouped
 
 
 def ribbon_alignment(ribbon_row: pd.Series, price: float | None = None) -> str:

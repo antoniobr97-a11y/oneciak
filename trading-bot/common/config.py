@@ -289,8 +289,26 @@ def _validate() -> None:
         raise ConfigError(f"SHORT_TERM_MAX_DRAWDOWN_PCT={SHORT_TERM_MAX_DRAWDOWN_PCT}: usa un valore fra 0 e 100 (0 = disattivato).")
     if SHORT_TERM_FX_RATE <= 0:
         raise ConfigError(f"SHORT_TERM_FX_RATE={SHORT_TERM_FX_RATE}: deve essere maggiore di zero.")
-    if not HARRY_BROWNE_TICKERS or not ADVANCED_TICKERS:
-        raise ConfigError("HARRY_BROWNE_TICKERS e ADVANCED_TICKERS non possono essere vuoti.")
+    # Il numero di ETF non e' libero: i pesi sono per POSIZIONE nella lista
+    # (Harry Browne 25% x4; Advanced un peso per classe di attivo). Il
+    # codice li accoppia con zip(), che in caso di lunghezze diverse
+    # accoppia in silenzio solo i primi e ignora il resto: una classe di
+    # attivo resterebbe senza soldi senza un errore, oppure Harry Browne
+    # investirebbe il 75% lasciando un quarto in liquidita'.
+    if len(HARRY_BROWNE_TICKERS) != 4:
+        raise ConfigError(
+            f"HARRY_BROWNE_TICKERS deve avere esattamente 4 ETF (25% ciascuno), ne ha "
+            f"{len(HARRY_BROWNE_TICKERS)}: {', '.join(HARRY_BROWNE_TICKERS) or '(vuoto)'}. "
+            "Ordine atteso: azionario, obbligazionario lungo, obbligazionario breve, oro."
+        )
+    if len(ADVANCED_TICKERS) != 5:
+        raise ConfigError(
+            f"ADVANCED_TICKERS deve avere esattamente 5 ETF, ne ha {len(ADVANCED_TICKERS)}: "
+            f"{', '.join(ADVANCED_TICKERS) or '(vuoto)'}. Ordine atteso: azionario, "
+            "obbligazionario lungo, obbligazionario breve, oro, immobiliare."
+        )
+    if len(set(HARRY_BROWNE_TICKERS)) != 4 or len(set(ADVANCED_TICKERS)) != 5:
+        raise ConfigError("Gli ETF di ciascun portafoglio devono essere diversi fra loro.")
 
 
 _validate()

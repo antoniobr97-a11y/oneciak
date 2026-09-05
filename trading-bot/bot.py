@@ -18,8 +18,7 @@ import logging
 import math
 import threading
 import time
-from datetime import date, datetime
-from zoneinfo import ZoneInfo
+from datetime import date
 
 import pandas as pd
 import requests
@@ -28,6 +27,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 from common import config, notify, position_state
+from common.market_time import MARKET_TIMEZONE, market_now, market_today
 from common.broker import Broker, order_type_name
 from common.data import get_daily_bars, get_monthly_bars
 from common.logger_setup import setup_logging
@@ -38,23 +38,6 @@ from short_term.indicators import sma
 from short_term.screener import Candidate, screen_universe
 
 log = logging.getLogger("bot")
-
-# RUN_TIME e' sempre inteso nel fuso del MERCATO, mai in quello del PC:
-# il ciclo deve girare dopo la chiusura di Wall Street ovunque si trovi la
-# macchina che lo esegue.
-MARKET_TIMEZONE = "America/New_York"
-
-
-def market_today() -> date:
-    """La data di BORSA corrente, non quella del PC.
-
-    `date.today()` usa il fuso locale della macchina. Su un PC italiano,
-    ogni istante fra mezzanotte e le 6 del mattino e' gia' "domani" mentre
-    a New York e' ancora la sera del giorno prima: il bot vedeva una data
-    diversa da quella della seduta appena chiusa e, di sabato notte,
-    concludeva "borsa chiusa" saltando la seduta di venerdi'. Stessa
-    famiglia del fuso sbagliato sullo scheduler."""
-    return datetime.now(ZoneInfo(MARKET_TIMEZONE)).date()
 
 # Gli ETF dei portafogli di lungo termine vivono nello stesso conto Alpaca
 # delle azioni di breve termine: vanno tenuti fuori dalla gestione a
@@ -82,7 +65,7 @@ def cmd_long_term_status(args: argparse.Namespace) -> None:
         print(f"  {asset_class}: {weight * 100:.1f}%")
 
     print("\nSegnale mensile SMA10 per asset (Advanced, solo mesi chiusi):")
-    for asset_class, ticker in zip(advanced_portfolio.ASSET_CLASSES, config.ADVANCED_TICKERS):
+    for asset_class, ticker in zip(advanced_portfolio.ASSET_CLASSES, config.ADVANCED_TICKERS, strict=True):
         monthly = closed_monthly_closes(get_monthly_bars(ticker, period="10y")["close"])
         signal = advanced_portfolio.monthly_signal(monthly)
         above = advanced_portfolio.is_above_sma(monthly)
@@ -100,7 +83,7 @@ def cmd_long_term_pac(args: argparse.Namespace) -> None:
     else:
         tickers = config.ADVANCED_TICKERS
         weights_by_class = risk_profile.advanced_target_weights()
-        target_weights = dict(zip(tickers, weights_by_class.values()))
+        target_weights = dict(zip(tickers, weights_by_class.values(), strict=True))
 
     current_value = {t: 0.0 for t in tickers}
     if broker is not None:
@@ -143,7 +126,7 @@ def _advanced_monthly_cycle(broker: Broker, execute: bool, today: date) -> None:
     failed = False
     print(f"\n=== Advanced -- ciclo mensile {month_key} (capitale max ${config.LONG_TERM_CAPITAL:,.0f}) ===")
 
-    for asset_class, ticker in zip(advanced_portfolio.ASSET_CLASSES, config.ADVANCED_TICKERS):
+    for asset_class, ticker in zip(advanced_portfolio.ASSET_CLASSES, config.ADVANCED_TICKERS, strict=True):
         try:
             monthly = closed_monthly_closes(get_monthly_bars(ticker, period="10y")["close"], today)
             desired_in = advanced_portfolio.is_above_sma(monthly)
@@ -624,7 +607,7 @@ def reconcile_pending_entries(broker: Broker, candidate_symbols: set[str], today
                 continue  # eseguito: lo gestisce manage_open_short_term_positions
             state = position_state.get(symbol)
             since = state.get("pending_since")
-            expired = bool(since) and (today - date.fromisoformat(since)).days > config.SHORT_TERM_PENDING_MAX_DAYS
+            expired = bool(since) and (today - date.fromisoformat(str(since))).days > config.SHORT_TERM_PENDING_MAX_DAYS
             order_alive = len(broker.list_open_orders(symbol)) > 0
             if symbol not in candidate_symbols or expired or not order_alive:
                 reason = "setup non piu' valido" if symbol not in candidate_symbols else ("scaduto" if expired else "ordine non piu' aperto")
@@ -936,7 +919,7 @@ def cmd_schedule(args: argparse.Namespace) -> None:
         "Scheduler avviato: ciclo breve + lungo termine (%s) ogni giorno feriale alle %s %s "
         "(prossima esecuzione: %s).",
         config.LONG_TERM_AUTO_STRATEGY, config.RUN_TIME, MARKET_TIMEZONE,
-        scheduler.get_jobs()[0].trigger.get_next_fire_time(None, datetime.now(ZoneInfo(MARKET_TIMEZONE))),
+        scheduler.get_jobs()[0].trigger.get_next_fire_time(None, market_now()),
     )
     scheduler.start()
 

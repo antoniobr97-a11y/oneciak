@@ -4,7 +4,7 @@ import os
 
 
 def setup_logging() -> None:
-    handlers = [logging.StreamHandler()]
+    handlers: list[logging.Handler] = [logging.StreamHandler()]
 
     # Il file di log su disco e' un extra, non un requisito: se la cartella
     # "logs" (es. montata da host in Docker con un utente non-root) non e'

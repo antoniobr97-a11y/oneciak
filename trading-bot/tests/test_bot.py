@@ -1292,16 +1292,30 @@ def test_the_trading_date_is_the_market_date_not_the_machine_date():
     from datetime import datetime
     from zoneinfo import ZoneInfo
 
+    from common import market_time
+
     roma, ny = ZoneInfo("Europe/Rome"), ZoneInfo("America/New_York")
     notte = datetime(2026, 9, 5, 0, 47, tzinfo=roma)
 
-    assert notte.date().weekday() == 5              # sabato in Italia -> "borsa chiusa"
+    assert notte.date().weekday() == 5                 # sabato in Italia -> "borsa chiusa"
     assert notte.astimezone(ny).date().weekday() == 4  # venerdi' a New York -> seduta valida
 
-    class _Now:
-        @staticmethod
-        def now(tz=None):
-            return notte.astimezone(tz)
+    with patch.object(market_time, "market_now", lambda: notte.astimezone(ny)):
+        assert market_time.market_today() == date(2026, 9, 4)  # il venerdi' di New York
 
-    with patch.object(bot, "datetime", _Now):
-        assert bot.market_today() == date(2026, 9, 4)  # il venerdi' di New York
+
+def test_a_failed_cancellation_blocks_the_replacement_order():
+    """Il caso concreto: sostituire un ordine in attesa quando la
+    cancellazione fallisce non deve mai lasciare due ordini d'ingresso."""
+    pending = {"AAPL": {**PENDING, "entry": 100.0, "stop_price": 95.0}}
+    broker = _cycle_broker()
+    broker.list_open_orders.return_value = [_order("stop")]
+    broker.cancel_open_orders.side_effect = RuntimeError("cancellazione rifiutata")
+
+    with patch("bot.Broker", return_value=broker), \
+         patch("bot.screen_universe", return_value=[_candidate("AAPL", entry=102.0, stop=97.0)]), \
+         patch("bot._print_candidate"), patch.object(bot.notify, "alert"), \
+         _patched_state(pending):
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    broker.submit_stop_entry.assert_not_called()

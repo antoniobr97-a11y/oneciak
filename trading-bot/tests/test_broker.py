@@ -340,3 +340,24 @@ def test_flatten_raises_instead_of_pretending_the_position_is_closed(monkeypatch
 
     with pytest.raises(RuntimeError):
         broker.flatten("AAPL")
+
+
+def test_a_failed_cancellation_raises_instead_of_being_only_logged(monkeypatch):
+    """Chi chiama cancella per rimpiazzare. Con il vecchio ordine ancora
+    vivo si finisce con DUE ordini d'ingresso sullo stesso titolo: se
+    scattano entrambi si compra il doppio e si rischia il doppio."""
+    broker, client = _broker_with_client(monkeypatch, [_stop_order("a"), _stop_order("b")])
+    client.cancel_order_by_id.side_effect = [None, RuntimeError("rifiutato")]
+
+    with pytest.raises(RuntimeError):
+        broker.cancel_open_orders("AAPL")
+
+    assert client.cancel_order_by_id.call_count == 2  # le tenta comunque tutte
+
+
+def test_a_failed_stop_cancellation_raises(monkeypatch):
+    broker, client = _broker_with_client(monkeypatch, [_stop_order()])
+    client.cancel_order_by_id.side_effect = RuntimeError("rifiutato")
+
+    with pytest.raises(RuntimeError):
+        broker.cancel_open_stop_orders("AAPL")

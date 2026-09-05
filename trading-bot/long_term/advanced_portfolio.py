@@ -8,6 +8,7 @@ from datetime import date
 import pandas as pd
 
 from common import config
+from common.market_time import market_today
 from short_term.indicators import sma
 
 ASSET_CLASSES = ["equity", "bond_long", "bond_short", "gold", "real_estate"]
@@ -23,7 +24,7 @@ def closed_monthly_closes(monthly_closes: pd.Series, today: date | None = None) 
     si decide il primo giorno del mese sulla chiusura del mese PRECEDENTE."""
     if monthly_closes.empty:
         return monthly_closes
-    today = today or date.today()
+    today = today or market_today()
     last = monthly_closes.index[-1]
     if last.year == today.year and last.month == today.month:
         return monthly_closes.iloc[:-1]

@@ -333,14 +333,25 @@ class Broker:
 
     def cancel_open_orders(self, symbol: str) -> int:
         """Cancella TUTTI gli ordini aperti sul titolo (entrata pendente,
-        stop di protezione, limit di take-profit). Ritorna quanti."""
-        cancelled = 0
+        stop di protezione, limit di take-profit). Ritorna quanti.
+
+        Se anche una sola cancellazione fallisce, SOLLEVA dopo aver
+        tentato le altre. Ingoiare il fallimento era pericoloso: chi
+        chiama cancella per poi rimpiazzare, e con il vecchio ordine
+        ancora vivo si finisce con DUE ordini d'ingresso sullo stesso
+        titolo -- se scattano entrambi si compra il doppio e si rischia il
+        doppio. Sollevare fa saltare quel titolo per oggi lasciando in
+        piedi gli ordini che c'erano: sicuro in entrambe le direzioni."""
+        cancelled, failures = 0, []
         for order in self.list_open_orders(symbol):
             try:
                 self.client.cancel_order_by_id(order.id)
                 cancelled += 1
             except Exception as exc:
                 log.warning("Could not cancel order %s for %s: %s", order.id, symbol, exc)
+                failures.append(f"{order.id}: {exc}")
+        if failures:
+            raise RuntimeError(f"{symbol}: {len(failures)} ordini non cancellati ({'; '.join(failures)})")
         return cancelled
 
     def submit_stop_entry(self, symbol: str, qty: int, side: str, entry_price: float, stop_price: float):
@@ -419,13 +430,18 @@ class Broker:
         con "insufficient qty available" finche' lo stop non e' cancellato
         -- bug trovato nell'audit, vedi STRATEGY.md. Ritorna il numero di
         ordini cancellati."""
-        cancelled = 0
+        cancelled, failures = 0, []
         for order in self._open_stop_orders(symbol):
             try:
                 self.client.cancel_order_by_id(order.id)
                 cancelled += 1
             except Exception as exc:
                 log.warning("Could not cancel stop order %s for %s: %s", order.id, symbol, exc)
+                failures.append(f"{order.id}: {exc}")
+        if failures:
+            # Come cancel_open_orders: uno stop non cancellato riserva le
+            # azioni e fa rifiutare la vendita che sta per essere inviata.
+            raise RuntimeError(f"{symbol}: {len(failures)} stop non cancellati ({'; '.join(failures)})")
         return cancelled
 
     def submit_stop(self, symbol: str, qty: float, stop_price: float, side: str):
