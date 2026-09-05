@@ -44,6 +44,18 @@ log = logging.getLogger("bot")
 # macchina che lo esegue.
 MARKET_TIMEZONE = "America/New_York"
 
+
+def market_today() -> date:
+    """La data di BORSA corrente, non quella del PC.
+
+    `date.today()` usa il fuso locale della macchina. Su un PC italiano,
+    ogni istante fra mezzanotte e le 6 del mattino e' gia' "domani" mentre
+    a New York e' ancora la sera del giorno prima: il bot vedeva una data
+    diversa da quella della seduta appena chiusa e, di sabato notte,
+    concludeva "borsa chiusa" saltando la seduta di venerdi'. Stessa
+    famiglia del fuso sbagliato sullo scheduler."""
+    return datetime.now(ZoneInfo(MARKET_TIMEZONE)).date()
+
 # Gli ETF dei portafogli di lungo termine vivono nello stesso conto Alpaca
 # delle azioni di breve termine: vanno tenuti fuori dalla gestione a
 # scaglioni, dal conteggio del tetto di rischio e dall'equity usata per il
@@ -235,7 +247,7 @@ def _harry_browne_rebalance_cycle(broker: Broker, execute: bool, today: date) ->
 
 
 def run_long_term_cycle(broker: Broker, execute: bool, today: date | None = None) -> None:
-    today = today or date.today()
+    today = today or market_today()
     strategy = config.LONG_TERM_AUTO_STRATEGY
     if strategy == "advanced":
         _advanced_monthly_cycle(broker, execute, today)
@@ -247,7 +259,7 @@ def run_long_term_cycle(broker: Broker, execute: bool, today: date | None = None
 
 def cmd_long_term_once(args: argparse.Namespace) -> None:
     broker = Broker()
-    today = date.today()
+    today = market_today()
     if args.execute and not broker.is_trading_day(today):
         log.info("Oggi la borsa USA e' chiusa (weekend o festivo), salto il ciclo di lungo termine.")
         return
@@ -642,7 +654,7 @@ def _drawdown_brake_active(broker: Broker, today: date | None = None) -> bool:
     picco esce dalla finestra e il freno si rilascia da solo."""
     if config.SHORT_TERM_MAX_DRAWDOWN_PCT <= 0:
         return False
-    today = today or date.today()
+    today = today or market_today()
     equity = broker.get_equity()
 
     history = list(position_state.get_meta("equity_history", []) or [])
@@ -665,7 +677,7 @@ def _drawdown_brake_active(broker: Broker, today: date | None = None) -> bool:
 
 def cmd_short_term_once(args: argparse.Namespace) -> None:
     broker = Broker()
-    today = date.today()
+    today = market_today()
     # Il ciclo gira DOPO la chiusura di Wall Street (vedi RUN_TIME): la
     # barra del giorno e' definitiva, come nel backtest e come nel corso
     # ("si analizza la sera, si piazzano gli ordini per il giorno dopo").

@@ -1283,3 +1283,25 @@ def test_run_time_lands_after_the_us_close_not_during_the_session():
     nxt = fire.get_next_fire_time(None, datetime(2026, 9, 4, 12, 0, tzinfo=ny))
     assert nxt.hour == 16 and nxt.minute == 15
     assert nxt.tzinfo == ny
+
+
+def test_the_trading_date_is_the_market_date_not_the_machine_date():
+    """Su un PC italiano, l'una di notte di sabato e' ancora venerdi' sera a
+    New York. Con date.today() il bot vedeva sabato e concludeva "borsa
+    chiusa", saltando la seduta di venerdi' appena finita."""
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    roma, ny = ZoneInfo("Europe/Rome"), ZoneInfo("America/New_York")
+    sabato_notte_a_roma = datetime(2026, 9, 6, 0, 47, tzinfo=roma)
+
+    assert sabato_notte_a_roma.date().weekday() == 5           # sabato in Italia
+    assert sabato_notte_a_roma.astimezone(ny).date().weekday() == 4  # venerdi' a New York
+
+    class _Now:
+        @staticmethod
+        def now(tz=None):
+            return sabato_notte_a_roma.astimezone(tz)
+
+    with patch.object(bot, "datetime", _Now):
+        assert bot.market_today() == sabato_notte_a_roma.astimezone(ny).date()
