@@ -27,9 +27,6 @@ BOWAI_INVERSION_WINDOW = 5  # "inverte l'ordine in <=5 giorni"
 # barra dopo barra. True = regola del corso; False = solo i massimi (la
 # versione con cui sono stati fatti i backtest v1-v6, vedi STRATEGY.md v10).
 PULLBACK_REQUIRE_LOWS = True
-# Finestra su cui si misura "ADX crescente", la stessa convenzione di
-# trend.adx_qualifier: il concetto e' uno solo e va misurato in un modo solo.
-ADX_TREND_LOOKBACK = 10
 
 
 @dataclass
@@ -232,30 +229,35 @@ def detect_sacro_graal(df: pd.DataFrame, direction: str, lookback: int | None = 
     lookback = lookback or config.TREND_LOOKBACK_DAYS
     if len(df) < 2:
         return None
+    # "ADX >30 e crescente" misurato da una barra all'altra SULLA barra di
+    # ritracciamento. Letteralmente e' una contraddizione -- durante un
+    # ritracciamento l'ADX scende per costruzione, e infatti 240 setup
+    # sintetici da manuale falliscono tutti e 240 su questa condizione --
+    # e il risultato e' che il Sacro Graal quasi non scatta mai: 5
+    # operazioni in 26 anni di backtest.
+    #
+    # E' STATO CORRETTO E MISURATO (STRATEGY.md "v13"): misurando l'ADX al
+    # picco, prima del ritracciamento, sulla stessa finestra di 10 barre
+    # usata da trend.adx_qualifier, il pattern scatta 500 volte e diventa
+    # il piu' frequente -- ma il capitale finale su 26 anni scende da
+    # 120.214 a 102.349, lo Sharpe da 0.87 a 0.81, il Profit Factor da
+    # 1.72 a 1.60. Il motivo e' che quei 500 setup occupano i posti del
+    # tetto di rischio a scapito di pattern storicamente migliori (Second
+    # Entry passa da 496 a 394, Pullback Semplice da 329 a 239).
+    #
+    # Si tiene quindi la versione restrittiva: non per svista, ma perche'
+    # la misura dice che l'alternativa fedele alla lettera rende meno.
+    adx_series = adx(df["high"], df["low"], df["close"], 14)
+    if adx_series.isna().iloc[-1] or adx_series.isna().iloc[-2]:
+        return None
+    if not (adx_series.iloc[-1] > config.TREND_ADX_THRESHOLD and adx_series.iloc[-1] > adx_series.iloc[-2]):
+        return None
+
     peak_pos = _recent_extreme_pos(df, direction, lookback)
     if peak_pos is None:
         return None
     non_inside, _ = _pullback_segment(df, direction, peak_pos)
     if not non_inside:
-        return None
-
-    # "ADX >30 e crescente" descrive il TREND, quindi si misura al picco --
-    # prima del ritracciamento -- e su una finestra, come fa
-    # trend.adx_qualifier per lo stesso identico concetto.
-    #
-    # Misurarlo invece da una barra all'altra SULLA barra di ritracciamento
-    # rendeva il pattern autocontraddittorio: durante un ritracciamento
-    # l'ADX scende sempre, per costruzione. Verificato su 240 setup
-    # sintetici da manuale: falliscono tutti e 240 su questa sola
-    # condizione, e su 26 anni di storico il Sacro Graal scattava 5 volte
-    # in tutto -- per rumore, non perche' il setup ci fosse.
-    adx_series = adx(df["high"], df["low"], df["close"], 14)
-    reference = min(peak_pos, len(adx_series) - 1)
-    earlier = reference - ADX_TREND_LOOKBACK
-    if earlier < 0 or adx_series.isna().iloc[reference] or adx_series.isna().iloc[earlier]:
-        return None
-    if not (adx_series.iloc[reference] > config.TREND_ADX_THRESHOLD
-            and adx_series.iloc[reference] > adx_series.iloc[earlier]):
         return None
 
     ema20 = ema(df["close"], 20)

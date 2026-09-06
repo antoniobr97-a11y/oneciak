@@ -1291,6 +1291,56 @@ davvero cio' che il bot esegue: CAGR +9.78%, max drawdown -19.4%, Sharpe
     test che simula una macchina non americana e il fuso stampato nel log
     all'avvio.
 
+### v13 — il Sacro Graal alla lettera: corretto, misurato, scartato
+
+Contando i pattern sulle operazioni di 26 anni sono emersi due casi
+sospetti: **Sacro Graal 5 operazioni** e **Pullback Persistente zero**.
+Entrambi difetti di implementazione, non fedelta' al corso.
+
+**Pullback Persistente** era sempre rilevato e mai riportato. Chiama al suo
+interno il Pullback Semplice, quindi entrambi scattano sulla stessa barra
+con livelli e punteggio identici, e la deduplica tiene il primo del
+dizionario. Misurato: 40 rilevamenti, 40 oscurati, il 100%. Ora si tiene
+la classificazione piu' specifica. **Verificato che le curve di equity
+prima e dopo sono identiche al centesimo**: e' puro cambio di etichetta,
+piu' il risparmio di un `_build_candidate` duplicato (che include chiamate
+di rete per settore e trimestrali).
+
+**Sacro Graal** chiede "ADX >30 e crescente", ma misurava "crescente" da
+una barra all'altra **sulla barra di ritracciamento** -- dove l'ADX scende
+per costruzione. Su 240 setup sintetici da manuale falliscono tutti e 240
+su quella sola condizione. Lo stesso concetto, altrove nello stesso
+codice (`trend.adx_qualifier`), e' misurato su una finestra di 10 barre:
+il programma era in disaccordo con se stesso.
+
+Corretto (ADX misurato al picco, prima del ritracciamento, sulla finestra
+di 10 barre) e **misurato in A/B su 26 anni**, entrambi i bracci dallo
+stesso codice con la versione precedente reinstallata via patch:
+
+| Metrica | ADX come prima | ADX corretto alla lettera |
+|---|---|---|
+| Operazioni in 26 anni | 817 | 878 |
+| Capitale finale (da 10.000) | **120.214** | 102.349 |
+| CAGR | **+9.78%/anno** | +9.12%/anno |
+| Max drawdown | -19.4% | **-18.5%** |
+| Sharpe | **0.87** | 0.81 |
+| Profit Factor | **1.72** | 1.60 |
+
+Mix dei pattern: Sacro Graal passa da 5 a **500** operazioni e diventa il
+piu' frequente, mentre tutti gli altri calano (Second Entry 496 -> 394,
+Pullback Semplice 329 -> 239, TKO 214 -> 163). E' il meccanismo del danno:
+il tetto di rischio aggregato limita le posizioni contemporanee, quindi
+500 setup nuovi non si aggiungono agli altri, **prendono il loro posto** --
+e la graduatoria che decide chi entra e' la vicinanza al massimo a 52
+settimane, non la qualita' del pattern.
+
+**Esito: correzione scartata, comportamento precedente mantenuto.** Non
+per svista -- e' scritto nel codice, con questi numeri accanto -- ma
+perche' la versione fedele alla lettera rende il 15% in meno di capitale
+finale su 26 anni. Il Sacro Graal resta quindi di fatto inattivo: il
+sistema opera su 6 pattern, non 7, e i numeri documentati sono quelli di
+quel sistema.
+
 ## Storico minimo per analizzare un titolo (assunzione esplicita)
 
 `short_term/screener.py:MIN_HISTORY_BARS = 250` — un titolo con meno di
