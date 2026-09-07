@@ -1341,6 +1341,45 @@ finale su 26 anni. Il Sacro Graal resta quindi di fatto inattivo: il
 sistema opera su 6 pattern, non 7, e i numeri documentati sono quelli di
 quel sistema.
 
+### Simulazione a guasti iniettati (il bot contro un broker finto)
+
+Rileggere il codice aveva gia' fatto passare due bug gravi. Metodo diverso:
+un **broker simulato fedele alle regole di Alpaca** -- soprattutto quella
+che ha gia' morso, "un ordine di vendita aperto riserva le azioni" -- e il
+ciclo VERO del bot fatto girare per centinaia di giorni con guasti
+iniettati: cancellazioni rifiutate, invii rifiutati, errori di rete in
+lettura, **file di stato cancellato**, posizioni comparse dal nulla.
+
+Dopo ogni ciclo si verificano sette invarianti (`tests/test_chaos.py`).
+Non "il codice fa cio' che ho scritto", ma "il bot non viola mai le sue
+regole", che e' la domanda utile.
+
+**Bug trovato: con la memoria persa, ordini d'ingresso doppi.** Il bot
+leggeva dal proprio file di stato l'elenco degli ordini in attesa. Se il
+file si perde -- cancellato, disco pieno, cartella spostata -- il bot
+dimentica di avere ordini aperti e ne piazza un SECONDO sugli stessi
+titoli: se scattano entrambi, **doppia posizione e doppio rischio**. Nella
+simulazione compariva in ogni scenario, con tre sintomi diversi (ordini
+doppi, posizione + ordine d'ingresso insieme, tetto di 12 posizioni
+sforato). Una causa sola: **il bot si fidava della propria memoria per
+sapere cose che il broker gia' sa**. Fix: gli ordini d'ingresso aperti si
+chiedono al broker (`broker.open_entry_symbols`); il file di stato tiene
+solo cio' che il broker non puo' sapere (size originale, rischio per
+azione, stadio della scala di uscita).
+
+**Secondo fix: "senza memoria" e "senza protezione" non sono la stessa
+cosa.** Una posizione di cui il bot non conosce lo stop originale non e'
+gestibile a scaglioni, e il codice giustamente si rifiuta di inventare un
+livello. Ma se al broker non c'e' NEMMENO uno stop, quella posizione e'
+scoperta -- la situazione peggiore in cui questo bot possa trovarsi -- e
+prima produceva lo stesso avviso sommesso del caso innocuo. Ora e' un
+allarme di errore esplicito.
+
+Risultato finale: **zero violazioni su 480 giorni simulati** con tutti i
+guasti attivi. Una versione ridotta della simulazione e' entrata nella
+suite come test permanente, e fallisce se si reintroduce il bug della
+memoria.
+
 ## Storico minimo per analizzare un titolo (assunzione esplicita)
 
 `short_term/screener.py:MIN_HISTORY_BARS = 250` — un titolo con meno di

@@ -85,6 +85,7 @@ def _broker(positions=(), open_orders=None):
     broker.list_open_orders.return_value = [] if open_orders is None else open_orders
     broker.get_open_position.return_value = None
     broker.is_market_open.return_value = False  # ciclo dopo la chiusura: barre definitive
+    broker.open_entry_symbols.return_value = set()
     return broker
 
 
@@ -467,6 +468,7 @@ def test_pending_entries_count_toward_aggregate_risk_cap(monkeypatch):
     candidates = [_candidate(f"PEND{i}") for i in range(11)] + [_candidate(f"SYM{i}") for i in range(20)]
     broker = _cycle_broker()
     broker.list_open_orders.return_value = [MagicMock()]  # ordini pendenti vivi
+    broker.open_entry_symbols.return_value = {f"PEND{i}" for i in range(11)}
 
     with patch("bot.Broker", return_value=broker), \
          patch("bot.screen_universe", return_value=candidates), \
@@ -1319,3 +1321,59 @@ def test_a_failed_cancellation_blocks_the_replacement_order():
         bot.cmd_short_term_once(argparse.Namespace(execute=True))
 
     broker.submit_stop_entry.assert_not_called()
+
+
+# --- Mai silenzio su una posizione scoperta --------------------------------
+
+def test_a_position_with_no_state_but_a_stop_is_only_a_warning():
+    """Il bot non puo' ricostruire il rischio originale, quindi salta la
+    gestione a scaglioni. Ma lo stop c'e': non e' un'emergenza."""
+    broker = _broker([_position("AAPL", 10, 100.0, 101.0)], open_orders=[_order("stop")])
+
+    with _patched_state({}), patch.object(bot.notify, "alert") as alert:
+        bot.manage_open_short_term_positions(broker)
+
+    assert not any(c.kwargs.get("level") == "error" for c in alert.call_args_list)
+
+
+def test_a_position_with_neither_state_nor_stop_raises_the_alarm():
+    """Posizione SCOPERTA: e' la situazione peggiore in cui questo bot possa
+    trovarsi. Prima era un avviso sommesso nel log, indistinguibile dal
+    caso innocuo qui sopra."""
+    broker = _broker([_position("AAPL", 10, 100.0, 101.0)], open_orders=[])
+
+    with _patched_state({}), patch.object(bot.notify, "alert") as alert:
+        bot.manage_open_short_term_positions(broker)
+
+    errors = [c for c in alert.call_args_list if c.kwargs.get("level") == "error"]
+    assert errors, "una posizione senza stop deve produrre un allarme di errore"
+    assert "SCOPERTA" in errors[0].args[0]
+
+
+def test_an_entry_order_is_not_mistaken_for_protection():
+    """Uno stop di ACQUISTO e' un ordine d'ingresso, non una protezione."""
+    buy_stop = _order("stop")
+    buy_stop.side = "buy"
+    assert bot._has_protective_stop([buy_stop]) is False
+    sell_stop = _order("stop")
+    sell_stop.side = "sell"
+    assert bot._has_protective_stop([sell_stop]) is True
+
+
+def test_pending_entries_are_counted_from_the_broker_not_the_state_file():
+    """Il file di stato puo' perdersi; il broker sa sempre quali ordini ha.
+    Fidandosi del file, uno stato perso faceva piazzare un SECONDO ordine
+    d'ingresso sugli stessi titoli."""
+    broker = _cycle_broker()
+    broker.open_entry_symbols.return_value = {"AAPL"}
+    broker.list_open_orders.return_value = [_order("stop")]
+
+    with patch("bot.Broker", return_value=broker), \
+         patch("bot.screen_universe", return_value=[_candidate("AAPL", entry=102.0, stop=97.0)]), \
+         patch("bot._print_candidate"), patch.object(bot.notify, "alert"), \
+         _patched_state({}):                      # memoria vuota: il bot "non sa" di AAPL
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    # deve cancellare il vecchio prima di piazzare, non affiancarlo
+    broker.cancel_open_orders.assert_called_once_with("AAPL")
+    assert broker.submit_stop_entry.call_count == 1

@@ -331,6 +331,18 @@ class Broker:
         request = GetOrdersRequest(status=QueryOrderStatus.OPEN, symbols=[symbol])
         return list(self.client.get_orders(request))
 
+    def open_entry_symbols(self) -> set[str]:
+        """Titoli su cui c'e' un ordine d'ACQUISTO aperto, chiesto al broker.
+
+        E' la verita' su "ho gia' un ordine in attesa qui", e il broker la
+        conosce sempre; il file di stato locale invece puo' perdersi. Chi
+        decide se piazzare un nuovo ingresso deve guardare questa, non
+        solo lo stato: fidandosi solo del file, uno stato perso faceva
+        piazzare un SECONDO ordine d'ingresso sullo stesso titolo --
+        doppia posizione e doppio rischio se scattano entrambi."""
+        request = GetOrdersRequest(status=QueryOrderStatus.OPEN)
+        return {o.symbol for o in self.client.get_orders(request) if str(getattr(o.side, "value", o.side)).lower() == "buy"}
+
     def cancel_open_orders(self, symbol: str) -> int:
         """Cancella TUTTI gli ordini aperti sul titolo (entrata pendente,
         stop di protezione, limit di take-profit). Ritorna quanti.

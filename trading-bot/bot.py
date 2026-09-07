@@ -378,6 +378,18 @@ def _has_open_limit(open_orders) -> bool:
     return False
 
 
+def _has_protective_stop(open_orders) -> bool:
+    """Vero se fra gli ordini aperti c'e' uno stop di protezione, cioe' uno
+    stop che NON sia un ordine d'ingresso (quelli sono acquisti)."""
+    for order in open_orders:
+        legs = getattr(order, "legs", None)
+        for leg in (order, *(legs if isinstance(legs, (list, tuple)) else ())):
+            side = str(getattr(getattr(leg, "side", None), "value", getattr(leg, "side", ""))).lower()
+            if "stop" in order_type_name(leg) and "buy" not in side:
+                return True
+    return False
+
+
 def _exit_structure_incomplete(open_orders, expects_limit: bool) -> bool:
     """La struttura di uscita va (ri)emessa se al broker non c'e' NESSUN
     ordine aperto, oppure se manca la gamba di presa di profitto prevista
@@ -507,7 +519,21 @@ def manage_open_short_term_positions(broker: Broker) -> None:
                 # stato perso): il rischio originale non e' ricostruibile in
                 # modo affidabile -- si segnala e si salta, non si inventa un
                 # numero su cui poi si baserebbero ordini reali.
-                log.warning("Nessuno stato di rischio salvato per %s, gestione a scaglioni saltata (va seguita a mano).", symbol)
+                #
+                # Ma "senza memoria" e "senza protezione" sono due cose
+                # diverse, e prima erano lo stesso avviso sommesso. Se al
+                # broker non c'e' nemmeno uno stop, quella posizione e'
+                # SCOPERTA: e' la situazione peggiore in cui questo bot
+                # possa trovarsi, e va gridata. Trovato con la simulazione
+                # a guasti iniettati (vedi STRATEGY.md).
+                if _has_protective_stop(broker.list_open_orders(symbol)):
+                    log.warning("Nessuno stato di rischio salvato per %s, gestione a scaglioni saltata (va seguita a mano). Lo stop al broker c'e'.", symbol)
+                else:
+                    log.error("%s: posizione di %s azioni SENZA STOP e senza stato salvato. Va protetta a mano, subito.", symbol, abs_qty)
+                    notify.alert(
+                        f"{symbol}: posizione SCOPERTA ({abs_qty} azioni), nessuno stop al broker e nessun livello salvato. Intervenire a mano.",
+                        level="error",
+                    )
                 continue
 
             stage = state.get("stage", "entered")
@@ -710,7 +736,16 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
         reconcile_pending_entries(broker, {c.symbol for c in candidates if c.is_actionable}, today)
 
     # Dopo la riconciliazione: i pendenti cancellati hanno liberato posti.
-    open_positions_count = len(_short_term_positions(broker)) + len(_pending_symbols())
+    #
+    # Gli ordini d'ingresso in attesa si contano chiedendoli al BROKER, non
+    # leggendoli dal file di stato: il file puo' perdersi (cancellato,
+    # disco pieno, cartella spostata) e in quel caso il bot dimenticava di
+    # avere ordini aperti, sforando il tetto di posizioni e piazzando un
+    # secondo ordine d'ingresso sugli stessi titoli. Trovato con la
+    # simulazione a guasti iniettati (vedi STRATEGY.md).
+    position_symbols = {p["symbol"] for p in _short_term_positions(broker)}
+    entry_symbols = set(broker.open_entry_symbols()) - position_symbols - LONG_TERM_TICKERS
+    open_positions_count = len(position_symbols) + len(entry_symbols)
 
     if _drawdown_brake_active(broker, today):
         return
@@ -728,7 +763,10 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
             continue  # gia' in posizione su questo titolo
 
         existing = position_state.get(c.symbol)
-        replacing = existing.get("stage") == "pending"
+        # "Sto sostituendo" vale anche quando l'ordine esiste al broker ma
+        # lo stato locale non lo sa: cancellare-e-rimpiazzare e' sempre
+        # meglio che affiancare un secondo ordine allo stesso titolo.
+        replacing = existing.get("stage") == "pending" or c.symbol in entry_symbols
         if replacing:
             same_levels = (
                 abs(float(existing.get("entry", 0.0)) - c.levels.entry) < 0.01
