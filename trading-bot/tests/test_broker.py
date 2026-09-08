@@ -438,3 +438,31 @@ def test_a_failed_stop_cancellation_raises(monkeypatch):
 
     with pytest.raises(RuntimeError):
         broker.cancel_open_stop_orders("AAPL")
+
+
+# --- ordini a mercato (li usa il lungo termine) -------------------------------
+
+def test_market_buy_and_sell_shape(monkeypatch):
+    """Sono gli ordini con cui il lungo termine compra e vende davvero:
+    lato giusto, quantita' giusta, validita' giornaliera."""
+    broker, client = _broker_with_client(monkeypatch, [])
+
+    broker.buy_market("VTI", 12)
+    order = client.submit_order.call_args[0][0]
+    assert order.symbol == "VTI" and order.qty == 12
+    assert str(order.side).lower().endswith("buy")
+    assert str(order.time_in_force).lower().endswith("day")
+
+    broker.sell_market("VTI", 5)
+    order = client.submit_order.call_args[0][0]
+    assert str(order.side).lower().endswith("sell") and order.qty == 5
+
+
+def test_market_orders_of_zero_or_less_are_not_sent(monkeypatch):
+    """Un ribilanciamento che calcola 0 quote non deve mandare niente al
+    broker: sarebbe un ordine rifiutato per nulla."""
+    broker, client = _broker_with_client(monkeypatch, [])
+
+    assert broker.buy_market("VTI", 0) is None
+    assert broker.sell_market("VTI", -3) is None
+    client.submit_order.assert_not_called()

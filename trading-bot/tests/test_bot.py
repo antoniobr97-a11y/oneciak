@@ -304,6 +304,21 @@ def test_runner_exits_on_long_term_ma_reversal():
     assert "AAPL" not in state.data
 
 
+def test_the_runner_holds_and_says_so_when_the_long_average_cannot_be_computed():
+    """Con meno di 200 barre la SMA200 non esiste. "Media non calcolabile"
+    significa "il runner non esce mai": va detto, non subito in silenzio.
+    E lo stop a pareggio resta comunque depositato al broker."""
+    broker = _broker([_position("AAPL", 2, 100.0, 130.0)], open_orders=[MagicMock()])
+    bars = pd.DataFrame({"close": pd.Series(list(range(100, 150)))})   # 50 barre soltanto
+
+    with _patched_state({"AAPL": {**ENTERED_10, "stage": "3R_done"}}) as state, \
+         patch("bot.get_daily_bars", return_value=bars):
+        bot.manage_open_short_term_positions(broker)
+
+    broker.flatten.assert_not_called()
+    assert state.data["AAPL"]["stage"] == "3R_done"
+
+
 def test_runner_holds_without_reversal_and_replaces_missing_stop():
     broker = _broker([_position("AAPL", 2, 100.0, 130.0)])  # nessun ordine aperto
     bars = pd.DataFrame({"close": pd.Series(list(range(100, 300)))})  # salente -> sopra SMA200
