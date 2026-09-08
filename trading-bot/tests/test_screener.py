@@ -131,6 +131,16 @@ def test_widespread_volatility_data_failure_skips_the_filter_and_alerts(monkeypa
     assert any(kw.get("level") == "error" for _, kw in alert.call_args_list), "il guasto va segnalato"
 
 
+@pytest.fixture(autouse=True)
+def _no_batch_downloads(monkeypatch):
+    """Di default i test non passano dallo scaricamento a lotti: un lotto
+    vuoto fa ricadere screen_universe sul percorso per singolo titolo, che
+    e' quello che questi test simulano con get_daily_bars. I test del lotto
+    lo sostituiscono esplicitamente."""
+    monkeypatch.setattr(screener, "get_daily_bars_batch", lambda symbols, period="2y": {})
+    monkeypatch.setattr(screener, "get_weekly_bars_batch", lambda symbols, period="6y": {})
+
+
 def test_screen_universe_uses_full_market_when_enabled(monkeypatch):
     monkeypatch.setattr(config, "SHORT_TERM_USE_FULL_MARKET", True)
     monkeypatch.setattr(config, "SHORT_TERM_MIN_PRICE_FULL_MARKET", 0.0)
@@ -438,3 +448,70 @@ def test_a_few_scan_failures_are_not_escalated(monkeypatch):
         screener.screen_universe(symbols=["BAD"] + [f"OK{i}" for i in range(9)])
 
     assert not alert.called
+
+
+# --- scaricamento a lotti -----------------------------------------------------
+
+def test_batched_bars_are_passed_to_scan_instead_of_refetching(monkeypatch):
+    """Il punto dello scaricamento a lotti: scan_symbol deve RICEVERE le
+    barre, non riscaricarle una per una -- altrimenti si paga il lotto e
+    poi anche tutti i download singoli."""
+    daily = _index_bars(range(100, 400))
+    weekly = _index_bars(range(100, 200))
+    monkeypatch.setattr(screener, "get_daily_bars_batch", lambda symbols, period="2y": {"AAPL": daily})
+    monkeypatch.setattr(screener, "get_weekly_bars_batch", lambda symbols, period="6y": {"AAPL": weekly})
+    monkeypatch.setattr(screener, "get_daily_bars", lambda symbol, period="2y": _index_bars(range(100, 400)))
+    monkeypatch.setattr(
+        screener, "get_weekly_bars",
+        lambda symbol, period="6y": pytest.fail("i settimanali erano gia' nel lotto, non vanno riscaricati"),
+    )
+
+    seen = {}
+    def _scan(symbol, *a, **kw):
+        seen[symbol] = (kw.get("daily") is daily, kw.get("weekly") is weekly)
+        return []
+    monkeypatch.setattr(screener, "scan_symbol", _scan)
+
+    screener.screen_universe(symbols=["AAPL"])
+
+    assert seen["AAPL"] == (True, True)
+
+
+def test_a_symbol_missing_from_the_batch_is_still_scanned(monkeypatch):
+    """Un titolo che il lotto non ha restituito non e' un titolo senza
+    setup: va riprovato da solo. Trattarlo come "nessuna occasione"
+    trasformerebbe un guasto sui dati in una decisione di trading."""
+    monkeypatch.setattr(screener, "get_daily_bars_batch", lambda symbols, period="2y": {})
+    monkeypatch.setattr(screener, "get_weekly_bars_batch", lambda symbols, period="6y": {})
+    monkeypatch.setattr(screener, "get_daily_bars", lambda symbol, period="2y": _empty_bars())
+
+    scanned = []
+    monkeypatch.setattr(screener, "scan_symbol", lambda symbol, *a, **kw: scanned.append((symbol, kw.get("daily"))) or [])
+
+    screener.screen_universe(symbols=["MANCANTE"])
+
+    assert scanned == [("MANCANTE", None)]      # None = scan_symbol se le scarica da solo
+
+
+def test_weekly_bars_are_only_batched_for_symbols_whose_trend_qualifies(monkeypatch):
+    """I settimanali servono solo ai controlli di rischio, cioe' solo se un
+    trend qualifica. Scaricarli per tutti significherebbe un download per
+    ogni titolo dell'universo, quasi sempre buttato."""
+    trending = _index_bars(range(100, 400))          # salita netta: qualifica
+    flat = _index_bars([100.0] * 300)                # piatto: non qualifica
+    monkeypatch.setattr(
+        screener, "get_daily_bars_batch",
+        lambda symbols, period="2y": {"SALE": trending, "PIATTO": flat},
+    )
+    monkeypatch.setattr(screener, "get_daily_bars", lambda symbol, period="2y": _index_bars(range(100, 400)))
+
+    asked = []
+    monkeypatch.setattr(
+        screener, "get_weekly_bars_batch",
+        lambda symbols, period="6y": asked.extend(symbols) or {},
+    )
+    monkeypatch.setattr(screener, "scan_symbol", lambda symbol, *a, **kw: [])
+
+    screener.screen_universe(symbols=["SALE", "PIATTO"])
+
+    assert asked == ["SALE"]

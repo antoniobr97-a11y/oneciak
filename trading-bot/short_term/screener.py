@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 import pandas as pd
 
 from common import config, notify, symbol_cache
-from common.data import get_daily_bars, get_weekly_bars
+from common.data import get_daily_bars, get_daily_bars_batch, get_weekly_bars, get_weekly_bars_batch
 from short_term import money_management, risk_checks, sector
 from short_term.indicators import ema_ribbon, ribbon_alignment, sma
 from short_term.levels import EntryLevels, levels_for_setup_bar
@@ -185,6 +185,8 @@ def scan_symbol(
     sp500_df: pd.DataFrame,
     russell_df: pd.DataFrame,
     directions: tuple[str, ...] = ALL_DIRECTIONS,
+    daily: pd.DataFrame | None = None,
+    weekly: pd.DataFrame | None = None,
 ) -> list[Candidate]:
     """Setup validi sul titolo, indipendentemente da quanti posti liberi ci
     siano.
@@ -206,7 +208,8 @@ def scan_symbol(
     # (SMA200 e vicinanza al massimo a 52 settimane guardano comunque solo
     # le ultime 200/252 barre; le medie esponenziali partono da piu'
     # lontano, cioe' esattamente come nel backtest storico).
-    daily = get_daily_bars(symbol, period="2y")
+    if daily is None:
+        daily = get_daily_bars(symbol, period="2y")
 
     # Storico minimo: i qualificatori guardano 60 giorni, la SMA200
     # dell'uscita ne vuole 200, e la vicinanza al massimo "a 52 settimane"
@@ -227,7 +230,8 @@ def scan_symbol(
     if not qualified:
         return []
 
-    weekly = get_weekly_bars(symbol, period="6y")
+    if weekly is None:
+        weekly = get_weekly_bars(symbol, period="6y")
     candidates: list[Candidate] = []
     ribbon = ema_ribbon(daily["close"])
     ribbon_state = ribbon_alignment(ribbon.iloc[-1], price=float(daily["close"].iloc[-1]))
@@ -457,13 +461,43 @@ def screen_universe(
         log.info("Direzioni ammesse oggi (regime %s vs SMA%d, short=%s): %s.",
                  sector.SP500_PROXY, config.MARKET_REGIME_MA_PERIOD, config.SHORT_TERM_ALLOW_SHORTS, ", ".join(d.upper() for d in directions))
 
+    # Scaricamento a lotti, il vero abilitatore di un universo ampio.
+    # Con un download per titolo, uno dopo l'altro, il numero di titoli
+    # analizzabili in una sera e' fissato dalla RETE, non dalla strategia:
+    # e' per questo che l'universo full-market era tagliato ai piu' scambiati.
+    #
+    # Due passate, per non buttare banda:
+    #   1. giornaliere per tutti -- servono comunque a decidere chi qualifica;
+    #   2. settimanali SOLO per chi ha qualificato -- servono ai controlli
+    #      di rischio, e chi non qualifica non ci arriva mai.
+    # La qualificazione del trend viene cosi' calcolata due volte, ma e'
+    # aritmetica su dati gia' in memoria: si paga qualche millisecondo di
+    # CPU per risparmiare centinaia di chiamate di rete.
+    daily_bars = get_daily_bars_batch(symbols, period="2y")
+    log.info("Barre giornaliere scaricate a lotti per %d titoli su %d.", len(daily_bars), len(symbols))
+
+    needs_weekly = [
+        s for s, daily in daily_bars.items()
+        if len(daily.dropna()) >= MIN_HISTORY_BARS
+        and any(qualify_trend(daily, d).qualifies for d in directions)
+    ]
+    weekly_bars = get_weekly_bars_batch(needs_weekly, period="6y") if needs_weekly else {}
+    log.info("Trend qualificato su %d titoli; barre settimanali scaricate per %d.", len(needs_weekly), len(weekly_bars))
+
     all_candidates: list[Candidate] = []
     failed: list[str] = []
     try:
         for symbol in symbols:
             try:
+                # Un titolo mancante dal lotto non e' un titolo senza
+                # setup: si riprova da solo, e se fallisce anche cosi'
+                # finisce fra i falliti (che fanno scattare l'avviso di
+                # scansione incompleta), non fra i "nessuna occasione".
                 all_candidates.extend(
-                    scan_symbol(symbol, capital, sp500_df, russell_df, directions=directions)
+                    scan_symbol(
+                        symbol, capital, sp500_df, russell_df, directions=directions,
+                        daily=daily_bars.get(symbol), weekly=weekly_bars.get(symbol),
+                    )
                 )
             except Exception:
                 log.exception("Error screening %s", symbol)
