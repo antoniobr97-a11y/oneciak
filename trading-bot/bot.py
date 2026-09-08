@@ -182,7 +182,36 @@ def _harry_browne_rebalance_cycle(broker: Broker, execute: bool, today: date) ->
         return
 
     tickers = config.HARRY_BROWNE_TICKERS
-    prices = {t: _last_close(t) for t in tickers}
+    # I prezzi si leggono uno per uno con l'errore isolato. Prima era una
+    # sola espressione: bastava che il prezzo di UN ETF non arrivasse
+    # perche' l'eccezione uscisse da questa funzione PRIMA del ciclo
+    # protetto piu' sotto, quindi senza il log per ETF e senza notifica --
+    # il ribilanciamento trimestrale saltava e si vedeva solo come una riga
+    # di errore generica.
+    prices, missing = {}, []
+    for t in tickers:
+        try:
+            prices[t] = _last_close(t)
+        except Exception:
+            log.exception("Harry Browne: prezzo non disponibile per %s.", t)
+            missing.append(t)
+
+    # Se manca anche un solo prezzo si rinuncia per oggi, invece di
+    # ribilanciare a meta': con tre ETF su quattro portati al 25% e il
+    # quarto fermo, il portafoglio andrebbe comunque sistemato domani, cioe'
+    # si pagherebbero due giri di operazioni per un solo ribilanciamento.
+    # Non segnando la data, il ciclo di domani riprova da solo.
+    if missing:
+        log.error(
+            "Harry Browne: ribilanciamento rimandato, prezzi mancanti per %s. Si riprova al prossimo ciclo.",
+            ", ".join(missing),
+        )
+        notify.alert(
+            f"Harry Browne: ribilanciamento rimandato (prezzi mancanti per {', '.join(missing)})",
+            level="warning",
+        )
+        return
+
     current = {}
     for t in tickers:
         pos = broker.get_open_position(t)

@@ -98,6 +98,40 @@ def test_harry_browne_rebalance_is_not_marked_done_when_an_etf_fails(monkeypatch
     assert marked == {}
 
 
+def test_harry_browne_skips_the_rebalance_when_a_price_is_missing(monkeypatch):
+    """Prima i prezzi erano una sola espressione: un ETF senza prezzo faceva
+    uscire l'eccezione PRIMA del ciclo protetto, quindi senza notifica. E
+    ribilanciare tre ETF su quattro non e' meglio: il portafoglio andrebbe
+    sistemato comunque domani, pagando due giri di operazioni per uno."""
+    import bot
+    from unittest.mock import MagicMock, patch
+    from datetime import date
+
+    monkeypatch.setattr(bot.config, "LONG_TERM_AUTO_STRATEGY", "harry_browne")
+    broker = MagicMock()
+    broker.get_cash.return_value = 100_000.0
+    broker.get_open_position.return_value = None
+
+    rotto = bot.config.HARRY_BROWNE_TICKERS[1]
+
+    def _price(ticker):
+        if ticker == rotto:
+            raise RuntimeError("dati non disponibili")
+        return 100.0
+
+    marked, alerts = {}, []
+    with patch.object(bot, "_last_close", side_effect=_price), \
+         patch.object(bot.position_state, "get_meta", return_value=None), \
+         patch.object(bot.position_state, "set_meta", side_effect=lambda k, v: marked.update({k: v})), \
+         patch.object(bot.notify, "alert", side_effect=lambda m, level="info": alerts.append((level, m))):
+        bot.run_long_term_cycle(broker, execute=True, today=date(2026, 9, 3))
+
+    broker.buy_market.assert_not_called()
+    broker.sell_market.assert_not_called()
+    assert marked == {}                                    # si riprova domani
+    assert any(rotto in m and level == "warning" for level, m in alerts)
+
+
 def test_harry_browne_rebalance_is_marked_done_when_it_succeeds(monkeypatch):
     import bot
     from unittest.mock import MagicMock, patch
