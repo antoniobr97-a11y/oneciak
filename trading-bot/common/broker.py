@@ -11,6 +11,7 @@ Covers what both strategies need:
 """
 import logging
 import math
+import re
 import statistics
 from datetime import datetime, timedelta, timezone
 
@@ -51,9 +52,29 @@ _ALLOWED_EXCHANGES = {AssetExchange.NYSE, AssetExchange.NASDAQ, AssetExchange.AR
 # esclude (nessuna leva, vedi STRATEGY.md). In piu' il decadimento
 # giornaliero li rende inadatti a posizioni tenute settimane. Alpaca non
 # ha un flag per identificarli: si riconoscono dal nome del prodotto.
-_LEVERAGED_NAME_MARKERS = (
-    "2X", "3X", "-1X", "1.5X", "ULTRA", "ULTRASHORT", "ULTRAPRO",
-    "LEVERAGED", "INVERSE", "BEAR", "BULL ", " BULL", "SHORT ", "DAILY ",
+#
+# ATTENZIONE ALLA PRECISIONE. La versione precedente cercava sottostringhe
+# libere ("ULTRA", "BEAR", "DAILY ", " BULL") e buttava fuori dall'universo
+# AZIONI VERE, in silenzio: Ultragenyx (RARE), Ultra Clean Holdings (UCTT),
+# Ultralife (ULBI), RBC Bearings (RBC, per "BEARings"), Daily Journal
+# (DJCO), Bullfrog AI (per "BULLfrog"). Sei su quattordici nomi reali di
+# prova. Un titolo escluso qui non viene mai analizzato e non compare in
+# nessun log: e' il tipo di perdita di opportunita' che non si vede.
+#
+# Ora la regola e' a due livelli:
+#   1. marcatori inequivocabili, sufficienti da soli -- il moltiplicatore
+#      (2X/3X/-1X/1.5X, limitato a 1-4 per non colpire "10x Genomics") e le
+#      parole che esistono solo nei nomi dei prodotti a leva;
+#   2. parole ambigue (BULL, BEAR, ULTRA, SHORT, DAILY, LONG), che valgono
+#      solo insieme a un emittente noto di prodotti a leva o a un'altra
+#      parola ambigua -- "Direxion Daily ... Bull" si', "Daily Journal" no.
+# Il confronto e' sempre su PAROLA INTERA, mai su sottostringa.
+_LEVERAGE_MULTIPLIER = re.compile(r"(?<![A-Z0-9.])-?[1-4](?:\.5)?X(?![A-Z0-9])")
+_UNAMBIGUOUS_MARKERS = ("ULTRAPRO", "ULTRASHORT", "LEVERAGED", "INVERSE")
+_AMBIGUOUS_MARKERS = ("BULL", "BEAR", "ULTRA", "SHORT", "DAILY", "LONG")
+_LEVERAGED_ISSUERS = (
+    "DIREXION", "PROSHARES", "GRANITESHARES", "MICROSECTORS", "TRADR",
+    "DEFIANCE", "TREX", "T-REX", "VOLATILITYSHARES", "AXS", "MAX",
 )
 
 
@@ -150,8 +171,30 @@ def order_type_name(order) -> str:
 
 
 def _is_leveraged_or_inverse(name: str) -> bool:
-    upper = f" {name.upper()} "
-    return any(marker in upper for marker in _LEVERAGED_NAME_MARKERS)
+    """Vero se il NOME del prodotto lo identifica come a leva o inverso.
+
+    Sbagliare in difetto costa una posizione a leva 3 presa per un titolo
+    normale; sbagliare in eccesso cancella un'azione vera dall'universo
+    senza lasciare traccia. Per questo il confronto e' su parola intera e le
+    parole ambigue da sole non bastano (vedi il commento sui marcatori)."""
+    upper = name.upper()
+    if _LEVERAGE_MULTIPLIER.search(upper):
+        return True
+
+    # Parole intere: "BEARINGS" non contiene la parola "BEAR", "ULTRAGENYX"
+    # non contiene la parola "ULTRA".
+    words = set(re.split(r"[^A-Z0-9.+-]+", upper))
+    if any(marker in words for marker in _UNAMBIGUOUS_MARKERS):
+        return True
+
+    ambiguous = [marker for marker in _AMBIGUOUS_MARKERS if marker in words]
+    if not ambiguous:
+        return False
+    # Una parola ambigua vale solo se accompagnata: da un emittente noto di
+    # prodotti a leva ("ProShares Short S&P500") oppure da una seconda
+    # parola ambigua ("Direxion Daily ... Bull"). "Daily Journal
+    # Corporation" e "Short Squeeze Inc" restano azioni.
+    return bool(words & set(_LEVERAGED_ISSUERS)) or len(ambiguous) >= 2
 
 
 class Broker:
@@ -374,7 +417,16 @@ class Broker:
         accetta un padre di tipo stop per l'OTO, invia lo stop d'ingresso
         da solo e lo stop-loss viene messo dal ciclo successivo
         (auto-riparazione in bot.py) -- finestra scoperta al massimo di una
-        seduta, segnalata nel log."""
+        seduta, segnalata nel log.
+
+        Il ripiego scatta SOLO su APIError, cioe' su un rifiuto esplicito
+        del broker: quello e' l'unico caso in cui si sa per certo che il
+        primo ordine non e' stato creato. Su un errore di RETE la richiesta
+        POST puo' essere arrivata comunque (urllib3 non ritenta i POST
+        proprio per questo): reinviarla significherebbe piazzare un SECONDO
+        ordine d'ingresso sullo stesso titolo, cioe' comprare il doppio e
+        rischiare il doppio. Meglio far fallire il ciclo, che riprova da
+        solo dopo aver riletto lo stato reale dal broker."""
         if qty <= 0:
             return None
         order_side = OrderSide.BUY if side == "long" else OrderSide.SELL
@@ -389,7 +441,7 @@ class Broker:
         )
         try:
             result = self.client.submit_order(request)
-        except Exception as exc:
+        except APIError as exc:
             # Il ripiego ha senso solo se il rifiuto riguarda la struttura
             # OTO. Se e' il livello stesso a essere invalido (es. "stop
             # price must be greater than current price"), riprovare senza

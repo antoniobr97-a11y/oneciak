@@ -4,11 +4,13 @@ corso li descrive come aumento/diminuzione del rischio percepito, da
 valutare insieme agli altri fattori."""
 import logging
 from dataclasses import dataclass
+from datetime import date
 
 import pandas as pd
 import yfinance as yf
 
-from common import config
+from common import config, symbol_cache
+from common.market_time import market_today
 from short_term.indicators import macd, swing_points
 
 log = logging.getLogger("bot")
@@ -66,10 +68,16 @@ class EarningsCheck:
         return 0 <= self.days_until <= config.EARNINGS_WARNING_DAYS
 
 
-def earnings_check(symbol: str) -> EarningsCheck:
-    """Best-effort: yfinance non garantisce sempre la prossima data
-    trimestrale. In caso di dati mancanti, si assume nessun avviso invece
-    di bloccare l'operazione su un dato che potremmo non avere."""
+def _fetch_next_earnings_iso(symbol: str) -> str | None:
+    """Prossima data di trimestrale come stringa ISO, o None.
+
+    TUTTA la lettura e la conversione stanno dentro il try, conversione di
+    fuso compresa. Prima l'aritmetica sulla data era FUORI: yfinance puo'
+    restituire un timestamp con fuso orario, e sottrarre una data senza
+    fuso da una con fuso solleva TypeError -- eccezione che risaliva fino
+    allo screener e faceva scartare l'INTERA analisi di quel titolo per un
+    dettaglio di formato in un controllo che, per sua stessa definizione,
+    "in caso di dati mancanti non blocca l'operazione"."""
     try:
         calendar = yf.Ticker(symbol).calendar
         next_date = None
@@ -79,15 +87,47 @@ def earnings_check(symbol: str) -> EarningsCheck:
                 next_date = pd.Timestamp(dates[0] if isinstance(dates, list) else dates)
         elif calendar is not None and "Earnings Date" in getattr(calendar, "index", []):
             next_date = pd.Timestamp(calendar.loc["Earnings Date"].iloc[0])
+        if next_date is None:
+            return None
+        return next_date.date().isoformat()
     except Exception as exc:
         log.warning("Could not fetch earnings calendar for %s: %s", symbol, exc)
-        return EarningsCheck(None, None)
+        return None
 
-    if next_date is None:
-        return EarningsCheck(None, None)
 
-    days_until = (next_date.normalize() - pd.Timestamp.now().normalize()).days
-    return EarningsCheck(next_earnings_date=next_date, days_until=days_until)
+def _earnings_from_iso(next_iso: str | None, today: date) -> EarningsCheck:
+    if not next_iso:
+        return EarningsCheck(None, None)
+    try:
+        next_date = date.fromisoformat(next_iso)
+    except ValueError:
+        return EarningsCheck(None, None)
+    return EarningsCheck(next_earnings_date=pd.Timestamp(next_date), days_until=(next_date - today).days)
+
+
+def earnings_check(symbol: str, today: date | None = None) -> EarningsCheck:
+    """Best-effort: yfinance non garantisce sempre la prossima data
+    trimestrale. In caso di dati mancanti, si assume nessun avviso invece
+    di bloccare l'operazione su un dato che potremmo non avere.
+
+    Il conteggio dei giorni parte dalla data di BORSA, non da quella del
+    PC: `pd.Timestamp.now()` di notte in Italia e' gia' il giorno dopo
+    rispetto a New York, e spostava di un giorno la finestra di avviso --
+    lo stesso errore di fuso gia' corretto due volte altrove (vedi
+    common/market_time.py).
+
+    La data trovata resta in cache su disco finche' non e' passata (nuovo
+    trimestre da annunciare) o finche' non invecchia oltre il TTL: i giorni
+    mancanti si ricalcolano ogni volta dalla data odierna, quindi la cache
+    non puo' far scadere un avviso."""
+    today = today or market_today()
+    cached = symbol_cache.get(symbol, "next_earnings", today, symbol_cache.EARNINGS_TTL_DAYS)
+    if cached is not symbol_cache.MISSING and (cached is None or str(cached) >= today.isoformat()):
+        return _earnings_from_iso(cached, today)
+
+    next_iso = _fetch_next_earnings_iso(symbol)
+    symbol_cache.put(symbol, "next_earnings", next_iso, today)
+    return _earnings_from_iso(next_iso, today)
 
 
 @dataclass

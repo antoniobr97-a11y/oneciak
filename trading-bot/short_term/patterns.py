@@ -19,7 +19,7 @@ import pandas as pd
 
 from common import config
 from short_term.indicators import adx, ema, sma
-from short_term.trend import is_wide_range_bar
+from short_term.trend import is_wide_range_bar, persistence_qualifier
 
 BOWAI_EXTREME_LOOKBACK = 126  # ~6 mesi di borsa
 BOWAI_INVERSION_WINDOW = 5  # "inverte l'ordine in <=5 giorni"
@@ -155,8 +155,6 @@ def detect_pullback_persistente(df: pd.DataFrame, direction: str, lookback: int 
     if peak_pos is None:
         return None
     pre_peak = df.iloc[: peak_pos + 1]
-    from short_term.trend import persistence_qualifier
-
     if not persistence_qualifier(pre_peak, direction):
         return None
 

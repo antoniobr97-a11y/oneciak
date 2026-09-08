@@ -84,6 +84,14 @@ ALERT_WEBHOOK_URL = os.getenv("ALERT_WEBHOOK_URL", "")
 # common/position_state.py. Va su un volume persistente in Docker.
 POSITION_STATE_PATH = os.getenv("POSITION_STATE_PATH", "state/positions.json")
 
+# Cache su disco per settore GICS e prossima trimestrale di ogni titolo
+# (common/symbol_cache.py): sono le due chiamate yfinance piu' lente della
+# scansione e riguardano dati che non cambiano quasi mai. Cancellare questo
+# file non rompe nulla, si ricostruisce da solo alla scansione successiva.
+SYMBOL_CACHE_PATH = os.getenv("SYMBOL_CACHE_PATH", "state/symbols.json")
+SYMBOL_CACHE_SECTOR_TTL_DAYS = _int("SYMBOL_CACHE_SECTOR_TTL_DAYS", 30)
+SYMBOL_CACHE_EARNINGS_TTL_DAYS = _int("SYMBOL_CACHE_EARNINGS_TTL_DAYS", 7)
+
 
 def require_alpaca_keys() -> None:
     if not ALPACA_API_KEY or not ALPACA_SECRET_KEY:

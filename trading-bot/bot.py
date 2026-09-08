@@ -451,27 +451,73 @@ def _place_entered_structure(broker, symbol, direction, abs_qty, entry, risk, st
         _fallback_protect(broker, symbol, direction, abs_qty, stop_price)
 
 
-def _place_1r_done_structure(broker, symbol, direction, abs_qty, entry, risk, second) -> None:
+def _place_1r_done_structure(broker, symbol, direction, abs_qty, entry, risk, second, current_price=None, initial_stop=None) -> None:
     """Stadio '1R_done': stop a pareggio su tutto il residuo; sulla quota
     da vendere a 3R un OCO (sell limit a entrata+3R / sell stop a
     pareggio), sul runner un sell stop a pareggio."""
+    stop = _protective_stop_price(direction, entry, current_price, initial_stop)
     broker.cancel_open_orders(symbol)
     oco_qty = min(second, abs_qty)
     rest = abs_qty - oco_qty
     try:
         if oco_qty > 0:
-            broker.submit_oco_exit(symbol, oco_qty, direction, _target(entry, risk, SECOND_SCALE_OUT_R, direction), entry)
+            broker.submit_oco_exit(symbol, oco_qty, direction, _target(entry, risk, SECOND_SCALE_OUT_R, direction), stop)
         if rest > 0:
-            broker.submit_stop(symbol, rest, entry, direction)
+            broker.submit_stop(symbol, rest, stop, direction)
     except Exception:
-        _fallback_protect(broker, symbol, direction, abs_qty, entry)
+        _fallback_protect(broker, symbol, direction, abs_qty, stop)
 
 
-def _place_runner_structure(broker, symbol, direction, abs_qty, entry) -> None:
+def _protective_stop_price(direction: str, wanted: float, current_price: float | None, fallback: float | None) -> float:
+    """Il prezzo da usare per uno stop di protezione.
+
+    Uno stop di vendita va SOTTO il prezzo corrente (per un long); sopra,
+    il broker lo rifiuta -- e' un ordine che scatterebbe subito. Lo stop a
+    pareggio nasce proprio cosi' quando la posizione, dopo aver superato il
+    primo obiettivo, e' tornata sotto il prezzo d'ingresso.
+
+    Senza questo controllo la sequenza era: cancella gli ordini esistenti ->
+    prova il pareggio -> rifiutato -> ripiego che riprova lo stesso
+    pareggio -> rifiutato di nuovo -> la posizione resta SCOPERTA e il
+    ciclo dopo ricomincia identico. Un pareggio irrealizzabile va sostituito
+    con lo stop di partenza, che protegge davvero."""
+    if current_price is None or current_price <= 0:
+        return wanted
+    protective = wanted < current_price if direction == "long" else wanted > current_price
+    if protective:
+        return wanted
+    if fallback is not None and ((fallback < current_price) if direction == "long" else (fallback > current_price)):
+        log.warning(
+            "%s: stop a pareggio %.2f non piazzabile (prezzo %.2f), uso lo stop iniziale %.2f.",
+            direction.upper(), wanted, current_price, fallback,
+        )
+        return fallback
+    # Ne' il pareggio ne' lo stop iniziale stanno dalla parte giusta del
+    # prezzo: il titolo li ha superati entrambi in gap, senza che lo stop
+    # potesse eseguire. Non esiste uno stop piazzabile -- si lascia che il
+    # rifiuto del broker faccia scattare l'allarme, invece di far finta.
+    log.error(
+        "Nessuno stop piazzabile: pareggio %.2f e stop iniziale %s sono dalla parte sbagliata "
+        "del prezzo %.2f (gap oltre lo stop). Serve una decisione a mano.",
+        wanted, "assente" if fallback is None else f"{fallback:.2f}", current_price,
+    )
+    return wanted
+
+
+def _place_runner_structure(broker, symbol, direction, abs_qty, entry, current_price=None, initial_stop=None) -> None:
     """Stadio '3R_done': solo lo stop a pareggio sul runner; l'uscita e'
-    decisa dal ciclo giornaliero sull'inversione della SMA200."""
+    decisa dal ciclo giornaliero sull'inversione della SMA200.
+
+    Come le altre due strutture, la cancellazione che precede l'invio apre
+    una finestra in cui la posizione e' senza protezione: se l'invio
+    fallisce si ripiega (e si urla) invece di lasciarla scoperta in
+    silenzio fino al ciclo del giorno dopo."""
+    stop = _protective_stop_price(direction, entry, current_price, initial_stop)
     broker.cancel_open_orders(symbol)
-    broker.submit_stop(symbol, abs_qty, entry, direction)
+    try:
+        broker.submit_stop(symbol, abs_qty, stop, direction)
+    except Exception:
+        _fallback_protect(broker, symbol, direction, abs_qty, stop)
 
 
 def manage_open_short_term_positions(broker: Broker) -> None:
@@ -553,13 +599,13 @@ def manage_open_short_term_positions(broker: Broker) -> None:
             if stage == "entered":
                 if half > 0 and abs_qty <= original_qty - half:
                     # T1 eseguito: venduta meta', da qui il resto lavora a rischio zero
-                    _place_1r_done_structure(broker, symbol, direction, abs_qty, entry_price, risk, second)
+                    _place_1r_done_structure(broker, symbol, direction, abs_qty, entry_price, risk, second, current_price, stop_price)
                     position_state.set_fields(symbol, stage="1R_done")
                     notify.alert(f"{symbol}: 1R raggiunto, venduta meta' posizione, stop a pareggio sul resto")
                 elif half == 0 and current_price is not None and _r_multiple(current_price, entry_price, risk, direction) >= 1.0:
                     # Size 1: niente da vendere a meta'; lo stop va comunque
                     # al pareggio (unico modo di applicare "zero rischio dopo 1R").
-                    _place_runner_structure(broker, symbol, direction, abs_qty, entry_price)
+                    _place_runner_structure(broker, symbol, direction, abs_qty, entry_price, current_price, stop_price)
                     position_state.set_fields(symbol, stage="1R_done")
                 elif _exit_structure_incomplete(open_orders, expects_limit=half > 0):
                     if not stop_price:
@@ -579,21 +625,30 @@ def manage_open_short_term_positions(broker: Broker) -> None:
 
             elif stage == "1R_done":
                 if second > 0 and abs_qty <= runner:
-                    _place_runner_structure(broker, symbol, direction, abs_qty, entry_price)
+                    _place_runner_structure(broker, symbol, direction, abs_qty, entry_price, current_price, stop_price)
                     position_state.set_fields(symbol, stage="3R_done")
                     notify.alert(f"{symbol}: 3R raggiunto, venduta seconda quota, runner in corsa")
                 elif _exit_structure_incomplete(open_orders, expects_limit=second > 0):
-                    _place_1r_done_structure(broker, symbol, direction, abs_qty, entry_price, risk, second)
+                    _place_1r_done_structure(broker, symbol, direction, abs_qty, entry_price, risk, second, current_price, stop_price)
                     notify.alert(f"{symbol}: ordini di uscita mancanti, riemessi", level="warning")
 
             elif stage == "3R_done":
                 reversed_trend = False
                 if bars_are_final:
-                    bars = get_daily_bars(symbol, period="1y")
+                    # Due anni di barre per una media a 200: con un solo
+                    # anno (~252 barre) bastava un buco nei dati perche' la
+                    # media non esistesse, e "media non calcolabile" qui
+                    # significa "il runner non esce mai" -- in silenzio.
+                    bars = get_daily_bars(symbol, period="2y")
                     long_ma = sma(bars["close"], LONG_TERM_MA_PERIOD)
                     if len(long_ma) and not pd.isna(long_ma.iloc[-1]):
                         last_close = float(bars["close"].iloc[-1])
                         reversed_trend = last_close < long_ma.iloc[-1] if direction == "long" else last_close > long_ma.iloc[-1]
+                    else:
+                        log.warning(
+                            "%s: SMA%d non calcolabile (%d barre), uscita del runner rimandata; "
+                            "lo stop a pareggio resta al broker.", symbol, LONG_TERM_MA_PERIOD, len(bars),
+                        )
                 if reversed_trend:
                     try:
                         broker.flatten(symbol)
@@ -602,12 +657,15 @@ def manage_open_short_term_positions(broker: Broker) -> None:
                         # chiusura fallisce la posizione resta aperta e
                         # scoperta. Si rimette la protezione e si lascia lo
                         # stato intatto, cosi' il ciclo dopo riprova.
-                        _fallback_protect(broker, symbol, direction, abs_qty, entry_price)
+                        _fallback_protect(
+                            broker, symbol, direction, abs_qty,
+                            _protective_stop_price(direction, entry_price, current_price, stop_price),
+                        )
                         raise
                     position_state.clear(symbol)
                     notify.alert(f"{symbol}: runner chiuso per inversione sulla SMA{LONG_TERM_MA_PERIOD}")
                 elif _exit_structure_incomplete(open_orders, expects_limit=False):
-                    _place_runner_structure(broker, symbol, direction, abs_qty, entry_price)
+                    _place_runner_structure(broker, symbol, direction, abs_qty, entry_price, current_price, stop_price)
                     notify.alert(f"{symbol}: stop del runner mancante, riemesso", level="warning")
         except Exception:
             log.exception("Errore gestendo la posizione aperta su %s, salto al prossimo titolo.", symbol)
@@ -746,6 +804,14 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
     position_symbols = {p["symbol"] for p in _short_term_positions(broker)}
     entry_symbols = set(broker.open_entry_symbols()) - position_symbols - LONG_TERM_TICKERS
     open_positions_count = len(position_symbols) + len(entry_symbols)
+    # Titoli su cui NON si apre un ingresso di breve termine: quelli su cui
+    # c'e' gia' una posizione (di qualunque strategia) e gli ETF dei
+    # portafogli di lungo termine. Con l'universo full-market lo screening
+    # vede anche gli ETF, quindi VTI o GLD possono uscire come candidati
+    # mentre il lungo termine li tiene in portafoglio: comprarli di nuovo
+    # qui significherebbe raddoppiare quella posizione e gestirla con due
+    # logiche diverse.
+    off_limits = {p["symbol"] for p in broker.list_open_positions()} | LONG_TERM_TICKERS
 
     if _drawdown_brake_active(broker, today):
         return
@@ -759,8 +825,8 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
     for c in candidates:
         if not c.is_actionable:
             continue
-        if broker.get_open_position(c.symbol) is not None:
-            continue  # gia' in posizione su questo titolo
+        if c.symbol in off_limits:
+            continue  # gia' in posizione, o ETF del lungo termine
 
         existing = position_state.get(c.symbol)
         # "Sto sostituendo" vale anche quando l'ordine esiste al broker ma
@@ -942,7 +1008,7 @@ def cmd_schedule(args: argparse.Namespace) -> None:
     # ITALIANE, cioe' 45 minuti dopo l'APERTURA di Wall Street invece che
     # 15 minuti dopo la chiusura: ogni giorno l'analisi girava sulla barra
     # del giorno ancora in formazione. Trovato nel log di un PC reale.
-    scheduler.add_job(
+    daily_job = scheduler.add_job(
         _run_cycle_safely,
         CronTrigger(day_of_week="mon-fri", hour=hour, minute=minute, timezone=MARKET_TIMEZONE),
         misfire_grace_time=3600,
@@ -957,7 +1023,7 @@ def cmd_schedule(args: argparse.Namespace) -> None:
         "Scheduler avviato: ciclo breve + lungo termine (%s) ogni giorno feriale alle %s %s "
         "(prossima esecuzione: %s).",
         config.LONG_TERM_AUTO_STRATEGY, config.RUN_TIME, MARKET_TIMEZONE,
-        scheduler.get_jobs()[0].trigger.get_next_fire_time(None, market_now()),
+        daily_job.trigger.get_next_fire_time(None, market_now()),
     )
     scheduler.start()
 
@@ -980,7 +1046,7 @@ def main() -> None:
     p.set_defaults(func=cmd_long_term_once)
 
     p = sub.add_parser("short-term-screen", help="Report candidati (nessun ordine)")
-    p.add_argument("--execute", action="store_true", help="considera anche le posizioni aperte nel tetto di rischio")
+    p.add_argument("--execute", action="store_true", help="usa le chiavi Alpaca per l'universo full-market (nessun ordine viene comunque inviato)")
     p.set_defaults(func=cmd_short_term_screen)
 
     p = sub.add_parser("short-term-once", help="Un ciclo: gestione posizioni aperte + screening + (opzionale) ordini")

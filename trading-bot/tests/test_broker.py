@@ -3,6 +3,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
+from alpaca.common.exceptions import APIError
+
 from common import config
 from common.broker import Broker
 
@@ -122,13 +124,39 @@ def test_submit_stop_entry_is_a_gtc_stop_order_with_oto_stop_loss(monkeypatch):
 
 def test_submit_stop_entry_falls_back_to_plain_stop_if_oto_rejected(monkeypatch):
     broker, client = _broker_with_client(monkeypatch, [])
-    client.submit_order.side_effect = [ValueError("order class not supported for stop"), MagicMock(id="x")]
+    client.submit_order.side_effect = [APIError("order class not supported for stop"), MagicMock(id="x")]
 
     broker.submit_stop_entry("AAPL", 10, "long", 101.5, 95.0)
 
     assert client.submit_order.call_count == 2
     fallback = client.submit_order.call_args_list[1][0][0]
     assert fallback.stop_price == 101.5 and fallback.stop_loss is None
+
+
+def test_submit_stop_entry_never_resends_after_a_network_error(monkeypatch):
+    """Un errore di rete non dice che l'ordine NON e' stato creato: la POST
+    puo' essere arrivata comunque. Reinviarla piazzerebbe un SECONDO ordine
+    d'ingresso sullo stesso titolo -- doppia posizione, doppio rischio."""
+    broker, client = _broker_with_client(monkeypatch, [])
+    client.submit_order.side_effect = [
+        requests.exceptions.ConnectionError("connessione persa"),
+        MagicMock(id="ordine-doppio"),
+    ]
+
+    with pytest.raises(requests.exceptions.ConnectionError):
+        broker.submit_stop_entry("AAPL", 10, "long", 101.5, 95.0)
+
+    assert client.submit_order.call_count == 1
+
+
+def test_submit_stop_entry_reraises_an_invalid_level_without_retrying(monkeypatch):
+    broker, client = _broker_with_client(monkeypatch, [])
+    client.submit_order.side_effect = APIError("stop price must be greater than current price")
+
+    with pytest.raises(APIError):
+        broker.submit_stop_entry("AAPL", 10, "long", 101.5, 95.0)
+
+    assert client.submit_order.call_count == 1
 
 
 def test_submit_stop_entry_short_uses_sell_side(monkeypatch):
@@ -173,12 +201,44 @@ def test_leveraged_and_inverse_products_are_recognised():
     assert _is_leveraged_or_inverse("ProShares UltraShort 20+ Year Treasury")
     assert _is_leveraged_or_inverse("Direxion Daily Financial Bear 3X")
 
+    # emittenti piu' recenti di prodotti a leva su singolo titolo
+    assert _is_leveraged_or_inverse("GraniteShares 2x Long NVDA Daily ETF")
+    assert _is_leveraged_or_inverse("T-Rex 2X Long Tesla Daily Target ETF")
+    assert _is_leveraged_or_inverse("Tradr 2X Long NVDA Daily ETF")
+    assert _is_leveraged_or_inverse("MicroSectors FANG+ Index -3X Inverse Leveraged ETN")
+    assert _is_leveraged_or_inverse("ProShares Ultra S&P500")
+    assert _is_leveraged_or_inverse("ProShares Short VIX Short-Term Futures ETF")
+
     # ammessi: azioni e ETF normali, compresi obbligazionari e oro
     assert not _is_leveraged_or_inverse("Apple Inc. Common Stock")
     assert not _is_leveraged_or_inverse("SPDR S&P 500 ETF Trust")
     assert not _is_leveraged_or_inverse("iShares 20+ Year Treasury Bond ETF")
     assert not _is_leveraged_or_inverse("SPDR Gold Shares")
     assert not _is_leveraged_or_inverse("Vanguard Total Stock Market ETF")
+
+
+def test_real_stocks_are_not_mistaken_for_leveraged_products():
+    """Un titolo escluso qui non viene MAI analizzato e non compare in
+    nessun log: e' una perdita di opportunita' invisibile. La versione a
+    sottostringhe libere buttava fuori sei di questi nomi reali."""
+    from common.broker import _is_leveraged_or_inverse
+
+    for name in (
+        "Ultragenyx Pharmaceutical Inc.",   # conteneva "ULTRA"
+        "Ultra Clean Holdings, Inc.",       # "Ultra" come parola, ma non e' un ETF
+        "Ultralife Corporation",            # conteneva "ULTRA"
+        "Ultratech Inc",                    # conteneva "ULTRA"
+        "RBC Bearings Incorporated",        # "BEARings"
+        "Daily Journal Corporation",        # "Daily" come parola, nessun emittente a leva
+        "Bullfrog AI Holdings, Inc.",       # "BULLfrog"
+        "Short Squeeze Inc",                # "Short" come parola, nessun emittente a leva
+        "10x Genomics, Inc.",               # il moltiplicatore e' limitato a 1-4x
+        "Longboard Pharmaceuticals, Inc.",  # "LONGboard"
+        "Bear Creek Mining Corporation",    # "Bear" come parola, nessun emittente a leva
+        "Apple Inc.",
+        "NVIDIA Corporation",
+    ):
+        assert not _is_leveraged_or_inverse(name), f"{name} escluso per errore dall'universo"
 
 
 def test_list_tradable_symbols_includes_etfs_and_drops_leveraged(monkeypatch):

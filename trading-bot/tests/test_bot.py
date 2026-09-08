@@ -166,6 +166,61 @@ def test_t1_filled_moves_to_1r_done_with_3r_oco_and_breakeven_stop():
     assert state.data["AAPL"]["stage"] == "1R_done"
 
 
+def test_breakeven_stop_falls_back_when_price_slipped_below_entry():
+    """Il pareggio (100) e' SOPRA il prezzo corrente (97): come stop di
+    vendita il broker lo rifiuterebbe, il ripiego riproverebbe lo stesso
+    prezzo e la posizione resterebbe SCOPERTA, ciclo dopo ciclo. Si usa lo
+    stop iniziale, che protegge davvero."""
+    broker = _broker([_position("AAPL", 5, 100.0, 97.0)], open_orders=[MagicMock()])
+
+    with _patched_state({"AAPL": ENTERED_10}) as state:
+        bot.manage_open_short_term_positions(broker)
+
+    broker.submit_oco_exit.assert_called_once_with("AAPL", 3, "long", 115.0, 95.0)
+    broker.submit_stop.assert_called_once_with("AAPL", 2, 95.0, "long")
+    assert state.data["AAPL"]["stage"] == "1R_done"
+
+
+def test_breakeven_stop_is_used_when_it_actually_protects():
+    broker = _broker([_position("AAPL", 5, 100.0, 106.0)], open_orders=[MagicMock()])
+
+    with _patched_state({"AAPL": ENTERED_10}):
+        bot.manage_open_short_term_positions(broker)
+
+    broker.submit_stop.assert_called_once_with("AAPL", 2, 100.0, "long")
+
+
+def test_protective_stop_price_rules():
+    # long: lo stop di vendita deve stare SOTTO il prezzo
+    assert bot._protective_stop_price("long", 100.0, 106.0, 95.0) == 100.0
+    assert bot._protective_stop_price("long", 100.0, 97.0, 95.0) == 95.0
+    # short: lo stop di riacquisto deve stare SOPRA il prezzo
+    assert bot._protective_stop_price("short", 100.0, 94.0, 105.0) == 100.0
+    assert bot._protective_stop_price("short", 100.0, 103.0, 105.0) == 105.0
+    # senza prezzo corrente, o senza un ripiego migliore, si tiene il pareggio
+    assert bot._protective_stop_price("long", 100.0, None, 95.0) == 100.0
+    assert bot._protective_stop_price("long", 100.0, 97.0, None) == 100.0
+    # nemmeno il ripiego e' sotto il prezzo (il titolo ha gia' superato in
+    # gap anche lo stop iniziale): non esiste uno stop piazzabile, si tiene
+    # il pareggio e il rifiuto del broker fa scattare l'allarme.
+    assert bot._protective_stop_price("long", 100.0, 97.0, 99.0) == 100.0
+
+
+def test_runner_structure_falls_back_if_the_stop_is_rejected():
+    """Anche qui la cancellazione precede l'invio: se l'invio salta, la
+    posizione e' senza protezione e non deve restarci in silenzio."""
+    broker = _broker([_position("AAPL", 2, 100.0, 130.0)], open_orders=[])
+    broker.submit_stop.side_effect = [RuntimeError("rifiutato"), MagicMock()]
+    bars = pd.DataFrame({"close": pd.Series(list(range(100, 300)))})  # salente: nessuna inversione
+
+    with _patched_state({"AAPL": {**ENTERED_10, "stage": "3R_done"}}), \
+         patch("bot.get_daily_bars", return_value=bars):
+        bot.manage_open_short_term_positions(broker)
+
+    assert broker.submit_stop.call_count == 2       # invio + ripiego
+    assert broker.cancel_open_orders.call_count == 2
+
+
 def test_t1_filled_short_math():
     # short: entrata 100, rischio 5 -> T3 = 85, pareggio 100
     broker = _broker([_position("TSLA", -5, 100.0, 94.0)], open_orders=[MagicMock()])
@@ -500,7 +555,26 @@ def test_pending_entry_with_new_levels_is_replaced_not_duplicated():
 def test_cmd_short_term_once_skips_symbol_already_in_position():
     candidates = [_candidate("AAPL"), _candidate("MSFT")]
     broker = _cycle_broker()
-    broker.get_open_position.side_effect = lambda s: {"symbol": "AAPL", "qty": 10.0} if s == "AAPL" else None
+    broker.list_open_positions.return_value = [_position("AAPL", 10, 100.0, 105.0)]
+
+    with patch("bot.Broker", return_value=broker), \
+         patch("bot.screen_universe", return_value=candidates), \
+         patch("bot._print_candidate"), \
+         _patched_state():
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    broker.submit_stop_entry.assert_called_once()
+    assert broker.submit_stop_entry.call_args[0][0] == "MSFT"
+
+
+def test_cmd_short_term_once_never_buys_a_long_term_etf_as_a_short_term_trade():
+    """Con l'universo full-market lo screening vede anche gli ETF: VTI puo'
+    uscire come candidato mentre il portafoglio di lungo termine lo tiene.
+    Comprarlo qui raddoppierebbe quella posizione e la farebbe gestire da
+    due logiche diverse."""
+    long_term_etf = sorted(bot.LONG_TERM_TICKERS)[0]
+    candidates = [_candidate(long_term_etf), _candidate("MSFT")]
+    broker = _cycle_broker()
 
     with patch("bot.Broker", return_value=broker), \
          patch("bot.screen_universe", return_value=candidates), \

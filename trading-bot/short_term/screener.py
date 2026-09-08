@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 
 import pandas as pd
 
-from common import config, notify
+from common import config, notify, symbol_cache
 from common.data import get_daily_bars, get_weekly_bars
 from short_term import money_management, risk_checks, sector
 from short_term.indicators import ema_ribbon, ribbon_alignment, sma
@@ -197,7 +197,16 @@ def scan_symbol(
     candidati, e il ciclo lo interpretava come "nessun setup e' piu'
     valido" cancellando TUTTI gli ordini d'ingresso in attesa -- successo
     davvero, 10 ordini cancellati in un colpo (vedi STRATEGY.md)."""
-    daily = get_daily_bars(symbol, period="1y")
+    # Due anni, non uno. Il minimo richiesto qui sotto e' 250 barre e un
+    # anno solare ne contiene ~252: bastavano due festivi in piu' del
+    # solito, o un buco nei dati, perche' un titolo perfettamente normale
+    # venisse scartato per "storico insufficiente" -- un filtro che
+    # dipendeva dal calendario invece che dal titolo. Con due anni il
+    # margine e' largo e gli indicatori all'ultima barra non cambiano
+    # (SMA200 e vicinanza al massimo a 52 settimane guardano comunque solo
+    # le ultime 200/252 barre; le medie esponenziali partono da piu'
+    # lontano, cioe' esattamente come nel backtest storico).
+    daily = get_daily_bars(symbol, period="2y")
 
     # Storico minimo: i qualificatori guardano 60 giorni, la SMA200
     # dell'uscita ne vuole 200, e la vicinanza al massimo "a 52 settimane"
@@ -223,10 +232,21 @@ def scan_symbol(
     ribbon = ema_ribbon(daily["close"])
     ribbon_state = ribbon_alignment(ribbon.iloc[-1], price=float(daily["close"].iloc[-1]))
 
+    # Settore e trimestrali si leggono una volta per TITOLO, non una volta
+    # per pattern: sono proprieta' dell'azienda, non del grafico, e un
+    # titolo puo' formare piu' pattern nello stesso giorno (fino a sei) in
+    # entrambe le direzioni. Prima erano dentro _build_candidate, quindi la
+    # stessa domanda "che settore ha AAPL?" partiva verso Yahoo anche sei
+    # volte di fila -- con le due chiamate piu' lente e piu' limitate
+    # dell'intera scansione.
+    sector_etf = sector.get_sector_etf(symbol)
+    earnings = risk_checks.earnings_check(symbol)
+
     for direction, trend in qualified:
         for match in detect_all(daily, direction):
             candidate = _build_candidate(
-                symbol, direction, match, trend, daily, weekly, capital, ribbon_state, sp500_df, russell_df
+                symbol, direction, match, trend, daily, weekly, capital, ribbon_state,
+                sp500_df, russell_df, sector_etf, earnings,
             )
             if candidate is not None:
                 candidates.append(candidate)
@@ -245,6 +265,8 @@ def _build_candidate(
     ribbon_state: str,
     sp500_df: pd.DataFrame,
     russell_df: pd.DataFrame,
+    sector_etf: str | None,
+    earnings: risk_checks.EarningsCheck,
 ) -> Candidate | None:
     levels = levels_for_setup_bar(daily, match.setup_bar_index, direction, stop_bar_index=match.stop_bar_index)
     if levels.risk_per_share <= 0:
@@ -257,7 +279,6 @@ def _build_candidate(
     if not ribbon_aligned:
         notes.append(f"fascio EMA non allineato ({ribbon_state}), trend meno pulito")
 
-    sector_etf = sector.get_sector_etf(symbol)
     sector_passes = False
     if sector_etf is not None:
         try:
@@ -275,7 +296,6 @@ def _build_candidate(
         # Quasi obbligatoria per il Bowai (STRATEGY.md 2.3)
         return None
 
-    earnings = risk_checks.earnings_check(symbol)
     if earnings.warn:
         notes.append(f"earnings tra {earnings.days_until} giorni")
 
@@ -439,14 +459,20 @@ def screen_universe(
 
     all_candidates: list[Candidate] = []
     failed: list[str] = []
-    for symbol in symbols:
-        try:
-            all_candidates.extend(
-                scan_symbol(symbol, capital, sp500_df, russell_df, directions=directions)
-            )
-        except Exception:
-            log.exception("Error screening %s", symbol)
-            failed.append(symbol)
+    try:
+        for symbol in symbols:
+            try:
+                all_candidates.extend(
+                    scan_symbol(symbol, capital, sp500_df, russell_df, directions=directions)
+                )
+            except Exception:
+                log.exception("Error screening %s", symbol)
+                failed.append(symbol)
+    finally:
+        # Una sola scrittura per l'intera scansione, anche se la scansione
+        # si interrompe: quello che si e' imparato stasera su settori e
+        # trimestrali serve gia' domani sera.
+        symbol_cache.flush()
 
     # Un titolo che fallisce e' isolato e non blocca gli altri, ma se ne
     # fallisce una fetta consistente l'analisi di oggi e' incompleta e va

@@ -6,11 +6,13 @@ disponibili: qui si usano gli ETF settoriali SPDR come proxy (vedi
 STRATEGY.md, sezione finale)."""
 import logging
 from dataclasses import dataclass
+from datetime import date
 
 import pandas as pd
 import yfinance as yf
 
-from common import config
+from common import config, symbol_cache
+from common.market_time import market_today
 from short_term.indicators import historical_volatility
 
 log = logging.getLogger("bot")
@@ -38,17 +40,35 @@ SP500_PROXY = "SPY"
 RUSSELL2000_PROXY = "IWM"
 
 
-def get_sector_etf(symbol: str) -> str | None:
+def get_sector_etf(symbol: str, today: date | None = None) -> str | None:
     """Best-effort: legge il settore GICS da yfinance e lo mappa sull'ETF
     SPDR corrispondente. Ritorna None se il settore non è disponibile o non
-    è mappato (nessun dato fittizio)."""
+    è mappato (nessun dato fittizio).
+
+    Il risultato viene messo in cache su disco (common/symbol_cache.py). Non
+    e' solo velocita': `yf.Ticker(symbol).info` e' la chiamata piu' lenta e
+    piu' limitata da Yahoo dell'intera scansione, e quando veniva rifiutata
+    per rate-limit questa funzione restituiva None -- cioe' il candidato
+    perdeva la conferma settoriale per un motivo che non ha niente a che
+    fare con il suo settore. Con la cache la risposta e' la stessa fra un
+    ciclo e l'altro, quindi l'analisi e' ripetibile."""
+    today = today or market_today()
+    cached = symbol_cache.get(symbol, "sector_etf", today, symbol_cache.SECTOR_TTL_DAYS)
+    if cached is not symbol_cache.MISSING:
+        return cached
+
     try:
         info = yf.Ticker(symbol).info
         sector = info.get("sector")
     except Exception as exc:
+        # Non si mette in cache un fallimento di rete: sarebbe come
+        # decidere per 30 giorni che questo titolo non ha settore.
         log.warning("Could not fetch sector info for %s: %s", symbol, exc)
         return None
-    return SPDR_SECTOR_ETFS.get(sector)
+
+    etf = SPDR_SECTOR_ETFS.get(sector)
+    symbol_cache.put(symbol, "sector_etf", etf, today)
+    return etf
 
 
 def relative_strength(price_a: pd.Series, price_b: pd.Series) -> pd.Series:

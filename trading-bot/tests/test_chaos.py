@@ -29,7 +29,7 @@ from common import position_state
 from short_term.levels import EntryLevels
 from short_term.screener import Candidate
 from short_term.trend import TrendQualification
-from tests.fake_broker import FakeBroker, Position
+from tests.fake_broker import FakeBroker, Position, Rejected
 
 SYMBOLS = [f"SYM{i}" for i in range(30)]
 
@@ -140,3 +140,55 @@ def test_the_bot_never_breaks_its_own_rules_under_injected_failures(tmp_path):
     file di stato cancellato, posizioni comparse dal nulla."""
     for seed in range(3):
         assert _run(seed, days=30, chaos=True, tmp_path=tmp_path) == []
+
+
+# --- Lungo termine sotto guasti --------------------------------------------
+# Anche Harry Browne manda ordini veri (acquisti e vendite a mercato) e non
+# era mai stato messo sotto stress. Le sue regole: non ribilanciare piu' di
+# una volta per periodo, non segnare come fatto un ciclo fallito, non
+# spendere piu' della cassa disponibile.
+
+def _long_term_run(seed, days, tmp_path):
+    rng = random.Random(seed)
+    broker = FakeBroker(cash=30_000.0)
+    violations, marked_days = [], []
+    position_state.STATE_PATH = str(tmp_path / f"lt-{seed}.json")
+    day = date(2026, 1, 5)
+    prices = {t: rng.uniform(50, 400) for t in bot.config.HARRY_BROWNE_TICKERS}
+
+    for d in range(days):
+        for t in prices:
+            prices[t] = max(1.0, prices[t] * (1 + rng.gauss(0, 0.01)))
+        broker.last_prices.update(prices)
+        if rng.random() < 0.15:
+            broker.fail_next_submit = True          # un ordine rifiutato
+        cash_before = broker.cash
+        with patch.object(bot, "_last_close", side_effect=lambda t: prices[t]), \
+             patch.object(bot.notify, "alert"), \
+             patch.object(bot.config, "LONG_TERM_AUTO_STRATEGY", "harry_browne"):
+            try:
+                bot.run_long_term_cycle(broker, execute=True, today=day)
+            except Exception as exc:
+                violations.append(f"giorno {d}: il ciclo di lungo termine ha sollevato {exc}")
+        last = position_state.get_meta("harry_browne_last_rebalance")
+        if last and last not in marked_days:
+            marked_days.append(last)
+        if broker.cash < -0.01:
+            violations.append(f"giorno {d}: cassa negativa nel lungo termine")
+        if broker.rejections:
+            violations.append(f"giorno {d}: rifiuti dal broker {broker.rejections[:2]}")
+            broker.rejections.clear()
+        invested = sum(p.qty * prices.get(p.symbol, p.current_price) for p in broker.positions.values())
+        if invested > bot.config.LONG_TERM_CAPITAL * 1.5:
+            violations.append(f"giorno {d}: investiti {invested:.0f} contro un capitale di {bot.config.LONG_TERM_CAPITAL:.0f}")
+        day += timedelta(days=1)
+
+    # un solo ribilanciamento per trimestre, non uno al giorno
+    if len(marked_days) > 1 + days // 90:
+        violations.append(f"{len(marked_days)} ribilanciamenti in {days} giorni: troppi")
+    return violations
+
+
+def test_the_long_term_cycle_holds_under_rejected_orders(tmp_path):
+    for seed in range(3):
+        assert _long_term_run(seed, days=120, tmp_path=tmp_path) == []

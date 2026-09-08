@@ -48,6 +48,7 @@ class FakeBroker:
         self.fail_next_cancel = False
         self.fail_next_submit = False
         self.fail_next_read = False
+        self.last_prices: dict[str, float] = {}
 
     # --- lettura -----------------------------------------------------------
     def is_trading_day(self, day): return self.trading_day
@@ -150,8 +151,42 @@ class FakeBroker:
         if p: self.cash += p.qty * p.current_price
         return p
 
-    def buy_market(self, symbol, qty): return None
-    def sell_market(self, symbol, qty): return None
+    def buy_market(self, symbol, qty):
+        """Acquisto a mercato: usato dal lungo termine (Harry Browne,
+        Advanced). Muove davvero cassa e posizioni, altrimenti un test che
+        lo esercita non proverebbe nulla."""
+        if qty <= 0: return None
+        if self.fail_next_submit:
+            self.fail_next_submit = False
+            raise Rejected(f"{symbol}: acquisto rifiutato")
+        price = self.last_prices.get(symbol, 100.0)
+        cost = qty * price
+        if cost > self.cash:
+            self.rejections.append(f"{symbol}: cassa insufficiente")
+            raise Rejected(f"{symbol}: insufficient buying power")
+        self.cash -= cost
+        pos = self.positions.get(symbol)
+        if pos is None:
+            self.positions[symbol] = Position(symbol, int(qty), price, price)
+        else:
+            pos.avg_entry_price = (pos.avg_entry_price * pos.qty + cost) / (pos.qty + qty)
+            pos.qty += int(qty)
+        return True
+
+    def sell_market(self, symbol, qty):
+        if qty <= 0: return None
+        if self.fail_next_submit:
+            self.fail_next_submit = False
+            raise Rejected(f"{symbol}: vendita rifiutata")
+        pos = self.positions.get(symbol)
+        if pos is None or qty > pos.qty:
+            self.rejections.append(f"{symbol}: vendita oltre le azioni possedute")
+            raise Rejected(f"{symbol}: insufficient qty available")
+        price = self.last_prices.get(symbol, pos.current_price)
+        pos.qty -= int(qty)
+        self.cash += qty * price
+        if pos.qty <= 0: del self.positions[symbol]
+        return True
 
     # --- simulazione del mercato -------------------------------------------
     def advance(self, prices: dict[str, float]):
@@ -180,5 +215,6 @@ class FakeBroker:
                             del self.positions[sym]
                             self.orders = [x for x in self.orders if x.symbol != sym]
                             break
+        self.last_prices.update(prices)
         for sym, price in prices.items():
             if sym in self.positions: self.positions[sym].current_price = price
