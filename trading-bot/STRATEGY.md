@@ -1474,6 +1474,209 @@ leva (moltiplica i drawdown), ottimizzazione fine dei parametri sul
 passato, aggiunta di indicatori per "confermare" (il corso stesso, video
 39, li vuole solo come conferma, mai come segnale).
 
+## Revisione riga per riga, seconda passata (8 settembre 2026)
+
+Rilettura completa di tutti i moduli, non a caccia di un bug noto ma
+cercando cosa nessuno aveva ancora guardato. Sei cose trovate, tutte con un
+test che fallisce senza la correzione.
+
+### 1. L'universo perdeva azioni vere, in silenzio
+
+`_is_leveraged_or_inverse` serve a tenere fuori gli ETF a leva 2x/3x e
+inversi: comprarli rischiando l'1% significherebbe avere leva indiretta,
+cioè esattamente il rischio che la strategia esclude. Alpaca non li segnala
+con un flag, quindi si riconoscono dal nome del prodotto — e il confronto
+era su **sottostringhe libere**.
+
+Su quattordici nomi reali di prova, sei venivano esclusi per errore:
+
+| Nome reale | Escluso perché conteneva |
+|---|---|
+| Ultragenyx Pharmaceutical (RARE) | `ULTRA` dentro "ULTRAgenyx" |
+| Ultra Clean Holdings (UCTT) | `ULTRA` |
+| Ultralife (ULBI) | `ULTRA` dentro "ULTRAlife" |
+| Ultratech | `ULTRA` |
+| RBC Bearings (RBC) | `BEAR` dentro "BEARings" |
+| Daily Journal (DJCO) | `DAILY ` |
+| Bullfrog AI | ` BULL` dentro " BULLfrog" |
+
+Un titolo escluso lì non viene **mai** analizzato e non compare in nessun
+log: è una perdita di opportunità che non si vede, proprio nel punto in cui
+la strategia dovrebbe guardare tutto il mercato.
+
+Ora la regola è a due livelli, sempre su **parola intera**:
+- marcatori inequivocabili, sufficienti da soli: il moltiplicatore
+  (`2X`, `3X`, `-1X`, `1.5X`, limitato a 1–4x per non colpire *10x
+  Genomics*), `ULTRAPRO`, `ULTRASHORT`, `LEVERAGED`, `INVERSE`;
+- parole ambigue (`BULL`, `BEAR`, `ULTRA`, `SHORT`, `DAILY`, `LONG`) che
+  valgono **solo** insieme a un emittente noto di prodotti a leva
+  (Direxion, ProShares, GraniteShares, MicroSectors, Tradr, T-Rex,
+  Defiance…) o a una seconda parola ambigua.
+
+Verificata su 18 nomi di azioni reali e 15 prodotti a leva: nessun errore
+in nessuna delle due direzioni.
+
+### 2. Un errore di rete poteva raddoppiare la posizione
+
+`submit_stop_entry` prova a mandare l'ingresso con lo stop attaccato (OTO);
+se il broker rifiuta quella struttura, ripiega su uno stop d'ingresso
+semplice. Catturava però **ogni** eccezione, errori di rete compresi.
+
+Un rifiuto del broker dice con certezza che l'ordine non è stato creato.
+Un errore di rete no: la richiesta POST può essere arrivata lo stesso — è
+esattamente il motivo per cui urllib3 non ritenta mai i POST. Reinviarla
+significava piazzare un **secondo** ordine d'ingresso sullo stesso titolo:
+doppia posizione e doppio rischio se scattavano entrambi.
+
+Ora il ripiego scatta solo su `APIError`.
+
+### 3. Uno stop a pareggio irrealizzabile lasciava la posizione scoperta
+
+Dopo il primo obiettivo lo stop va al pareggio. Se nel frattempo il prezzo
+è tornato **sotto** il prezzo d'ingresso, quello stop di vendita starebbe
+sopra il mercato e Alpaca lo rifiuta. Il ripiego riprovava lo stesso
+prezzo, veniva rifiutato di nuovo, e la posizione restava senza protezione
+— con il ciclo del giorno dopo che ricominciava identico.
+
+Ora il prezzo viene verificato contro il prezzo corrente e, se il pareggio
+non è piazzabile, si usa lo stop iniziale, che protegge davvero. Se non è
+piazzabile nemmeno quello (il titolo li ha superati entrambi in gap) la
+cosa viene **detta**, invece di essere ritentata in silenzio.
+
+### 4. Una struttura di uscita senza rete di sicurezza
+
+Le tre funzioni che armano l'uscita cancellano gli ordini esistenti prima
+di inviare i nuovi (su Alpaca un ordine di vendita aperto riserva le
+azioni). Due avevano il ripiego per il caso "cancellato ma non
+rimpiazzato"; `_place_runner_structure` no.
+
+### 5. Una data di trimestrale con fuso orario buttava via l'intero titolo
+
+In `earnings_check` l'aritmetica sulla data stava **fuori** dal `try`. Una
+data con fuso orario solleva `TypeError`, che risaliva fino allo screener e
+faceva contare il titolo fra i falliti — in un controllo il cui contratto
+dichiarato è "in caso di dati mancanti non si blocca l'operazione".
+Il conteggio dei giorni usava inoltre l'orologio del PC invece della data
+di borsa: lo stesso errore di fuso già corretto due volte altrove.
+
+### 6. Il breve termine poteva ricomprare un ETF del lungo termine
+
+Emerso mentre si toglieva una chiamata di rete per candidato. Con
+l'universo full-market lo screening vede anche gli ETF: VTI o GLD possono
+uscire come candidati mentre il portafoglio di lungo termine li tiene in
+mano. Comprarli di nuovo dal lato breve termine avrebbe raddoppiato quella
+posizione e l'avrebbe fatta gestire da due logiche diverse.
+
+## Velocità: perché l'universo era tagliato, e cosa lo teneva tagliato
+
+Il bot scansiona già **tutto** il mercato USA negoziabile su Alpaca, non
+una watchlist (`SHORT_TERM_USE_FULL_MARKET=true` di default). Ma dopo i
+prefiltri di liquidità e volatilità teneva solo i primi 300 per volume$, e
+quel 300 non veniva dalla strategia: veniva dalla **rete**.
+
+Tre sprechi, tutti rimossi:
+
+1. **Il settore e le trimestrali venivano chiesti a Yahoo una volta per
+   PATTERN, non per titolo.** Un titolo può formare fino a sei pattern
+   nello stesso giorno, in due direzioni: la stessa domanda "che settore ha
+   questo titolo?" partiva anche sei volte di fila. Sono le due chiamate
+   più lente (`.info` e `.calendar`, endpoint diversi da quello delle
+   barre) e le più limitate da Yahoo.
+2. **Nessuna delle due era in cache**, pur riguardando dati che cambiano
+   una volta in anni (il settore) o una volta a trimestre (le trimestrali).
+   Ora stanno in `state/symbols.json` (`common/symbol_cache.py`), tenute in
+   memoria per il processo e scritte una volta a fine scansione. Al di là
+   della velocità questo rende l'analisi **ripetibile**: quando Yahoo
+   rispondeva con un rate-limit, il settore tornava `None` e il candidato
+   perdeva la conferma settoriale per un motivo che non aveva niente a che
+   fare con il suo settore.
+3. **Le barre si scaricavano un titolo alla volta.** È questo — non la CPU,
+   non la logica dei pattern — a fissare quanti titoli si possono
+   analizzare in una sera. yfinance accetta una lista e scarica il lotto in
+   parallelo: `get_daily_bars_batch`. Due passate, per non sprecare banda:
+   giornaliere per tutti (servono comunque a decidere chi qualifica),
+   settimanali solo per chi ha qualificato.
+
+Attenzione alle giunture, perché un guasto qui si legge come "stasera il
+mercato non offriva niente": un titolo mancante dal lotto viene riprovato
+da solo e solo dopo conta come fallito (dove lo raccoglie l'allarme di
+scansione incompleta); le colonne di soli NaN che Yahoo restituisce per un
+ticker che non conosce vengono scartate invece di diventare un "grafico
+piatto"; un lotto fallito perde solo i suoi titoli.
+
+Correzione collegata: le barre giornaliere si scaricano su **due** anni,
+non uno. Il minimo richiesto è 250 barre e un anno solare ne contiene ~252:
+bastavano due festivi in più del solito perché un titolo perfettamente
+normale venisse scartato per "storico insufficiente" — un filtro che
+dipendeva dal calendario invece che dal titolo.
+
+## Test di mutazione: la suite passa, ma protegge?
+
+Una suite che passa non è la stessa cosa di una suite che protegge. Per
+distinguerle il bot è stato rotto **apposta**, in sette modi, controllando
+quali guasti la suite notasse. Tre passavano indisturbati:
+
+| Sabotaggio | Perché non veniva visto |
+|---|---|
+| "non riemettere mai la struttura di uscita mancante" | nessuna regola guardava la presa di profitto: un bot capace solo di andare a stop o correre all'infinito — metà strategia spenta — passava pulito |
+| "togliere la gamba stop-loss dall'ordine d'ingresso" | il controllo girava DOPO il ciclo, che aveva già rimesso lo stop: la notte fra l'esecuzione in seduta e il ciclo dopo la chiusura non veniva mai osservata |
+| "ingoiare i fallimenti di cancellazione" | mutazione nel posto sbagliato: la simulazione a guasti guida il broker finto, quindi non poteva raggiungerla. Apparteneva ai test unitari, e lì c'era solo a metà |
+
+Due invarianti nuove nella simulazione a guasti:
+
+8. una posizione allo stadio `entered`/`1R_done` ha al broker anche la
+   **gamba di presa di profitto** prevista, non solo lo stop;
+9. una posizione aperta prima del ciclo di oggi è protetta **prima** che
+   quel ciclo giri, non solo dopo che ha rimediato.
+
+L'invariante 8 ha richiesto due passate per essere onesta. Rinunciare alla
+presa di profitto per un ciclo è legittimo — `_fallback_protect` la baratta
+con uno stop garantito, e un errore isolato su un titolo lo salta fino al
+giorno dopo — ma mai in silenzio. La prima esenzione accettava qualsiasi
+avviso che nominasse il titolo, compreso quello informativo di "uscita
+armata": e questo rendeva la regola di nuovo cieca, tanto che il sabotaggio
+continuava a passare. Ora l'esenzione richiede un avviso di livello
+**warning o error**, che è quello che i percorsi di rinuncia mandano
+davvero e che un bot sano non manda mai su una posizione a posto.
+
+Trovato dallo stesso esercizio: ogni nome di ETF a leva nei test
+soddisfaceva due regole insieme, quindi cancellare il controllo sul
+moltiplicatore non cambiava nulla. E il ritorno di `None` da
+`get_open_position` era testato solo per il 404: qualunque altro `APIError`
+poteva tornare `None` — e far aprire una **seconda** posizione su un titolo
+già in portafoglio — senza che nessun test se ne accorgesse.
+
+Tutte e sette le mutazioni sono ora intercettate.
+
+## Test fuori campione: il 9,78% è la strategia o la scelta dei titoli?
+
+È la domanda più importante che si possa fare a un backtest, e finora non
+era stata fatta. L'universo di 42 titoli è stato scelto **dopo** aver visto
+come erano andati: un risultato misurato su quei titoli non distingue fra
+"la strategia funziona" e "sono stati scelti i titoli giusti".
+
+Stessa strategia, stessi parametri, stesso codice, su **68 azioni mai usate
+per costruirla o sceglierla** (farmaceutico, industriale, finanziario,
+consumo, energia, utility, materiali — 26,7 anni, 1313 operazioni):
+
+| | Messo a punto (42) | **Fuori campione (68)** |
+|---|---|---|
+| CAGR | 8,40% | **7,12%** |
+| Drawdown massimo | −20,2% | **−20,6%** |
+| Sharpe | 0,73 | **0,80** |
+| Operazioni | 1189 | **1313** |
+
+Il rendimento scende di circa un punto e mezzo — un calo normale e atteso
+passando fuori campione — ma **non crolla**, il profilo di rischio resta
+identico e lo Sharpe è addirittura più alto. Con 1313 operazioni non è
+rumore.
+
+Conclusione onesta: il vantaggio misurato **non è** soltanto un artefatto
+della scelta dei titoli. Non è nemmeno una promessa di guadagno futuro —
+resta un risultato storico su dati passati, con tutti i limiti già scritti
+in questo documento — ma è la prova che mancava e il risultato è a favore
+della strategia, non contro.
+
 ## Cosa NON è coperto da questo codice
 
 - Le due componenti proprietarie del corso (screener "Barchart"/"ProScreener"

@@ -144,6 +144,17 @@ In modalità full-market il bot, a ogni ciclo:
 5. passa questi titoli alla pipeline completa a 4 stadi (trend → pattern →
    settore → livelli), esattamente come farebbe con la watchlist fissa.
 
+**Il riconoscimento dei prodotti a leva è su parola intera.** Prima era su
+sottostringhe libere, e questo cancellava dall'universo **azioni vere**, in
+silenzio: `ULTRA` catturava Ultragenyx, Ultra Clean e Ultralife, `BEAR`
+catturava RBC Bearings, `DAILY ` catturava Daily Journal, ` BULL`
+catturava Bullfrog AI — sei nomi reali su quattordici di prova. Un titolo
+escluso lì non viene mai analizzato e non compare in nessun log. Ora il
+moltiplicatore (2X/3X/1.5X, limitato a 1–4x per non colpire *10x
+Genomics*), `UltraPro`, `UltraShort`, `Leveraged` e `Inverse` bastano da
+soli; le parole ambigue (`Bull`, `Bear`, `Ultra`, `Short`, `Daily`, `Long`)
+contano solo insieme a un emittente noto di prodotti a leva.
+
 I prefiltri esistono perché far girare la pipeline completa ogni giorno su
 migliaia di titoli sarebbe troppo lento e colpirebbe i rate-limit di
 yfinance/Alpaca — è concettualmente lo stesso "Step 1: screening" del corso
@@ -168,12 +179,34 @@ motivata dal problema trovato, non una garanzia di risultato migliore.
 Se vuoi il rischio più prevedibile possibile, la watchlist curata di
 default resta la scelta più testata.
 
+**Quanto ci mette una scansione.** Il tetto di 300 titoli non veniva dalla
+strategia, veniva dalla rete: le barre si scaricavano un titolo alla volta,
+e settore e trimestrali venivano chiesti a Yahoo una volta per *pattern*
+invece che per titolo (un titolo può formare fino a sei pattern lo stesso
+giorno). Ora:
+
+- le barre si scaricano **a lotti** (`common/data.py:get_daily_bars_batch`):
+  giornaliere per tutti, settimanali solo per i titoli il cui trend ha
+  qualificato;
+- settore e trimestrali stanno in **cache su disco**
+  (`state/symbols.json`, `common/symbol_cache.py`): sono dati che cambiano
+  una volta in anni o una volta a trimestre, e riscaricarli ogni sera era
+  sia il costo maggiore sia la principale causa di rate-limit. Cancellare
+  quel file non rompe niente: si ricostruisce da solo alla scansione
+  successiva.
+
+La cache ha anche un effetto sulla **ripetibilità**: quando Yahoo
+rispondeva con un rate-limit, il settore tornava sconosciuto e il candidato
+perdeva la conferma settoriale per un motivo che non c'entrava niente con
+il suo settore. Con la cache la risposta resta la stessa fra un ciclo e
+l'altro.
+
 **Test:**
 ```bash
 pip install pytest
 pytest tests/
 ```
-147 test unitari (money management, formule dei livelli, qualificatori di
+288 test (money management, formule dei livelli, qualificatori di
 trend, i 7 pattern e la loro fedeltà al corso, screener/universo
 full-market/filtro di regime, broker
 (volatilità, ordini stop/OCO, ordine delle operazioni), macchina a stati
@@ -182,7 +215,20 @@ termine, orchestrazione di `bot.py` con broker mockato). La
 pipeline completa è stata anche sottoposta a uno stress-test con centinaia
 di scenari sintetici multi-regime (vedi STRATEGY.md, "Calibrazione delle
 soglie non specificate dal corso") per cercare bug non coperti dai singoli
-test unitari.
+test unitari, e a una **simulazione a guasti iniettati** contro un broker
+finto che rifiuta come rifiuterebbe Alpaca (`tests/test_chaos.py`): nove
+regole che il bot non deve mai violare, verificate giorno per giorno su
+centinaia di giorni simulati.
+
+I test non toccano mai la rete: una chiamata a yfinance dimenticata senza
+sostituto fallisce subito con un messaggio che dice come rimediare, invece
+di aspettare il timeout per ogni titolo.
+
+La suite è stata a sua volta verificata con un **test di mutazione**: il
+bot è stato rotto apposta in sette modi (niente presa di profitto, nessuno
+stop sull'ingresso, cancellazioni ingoiate, prodotti a leva ammessi…) per
+controllare quali guasti la suite notasse davvero. Tre passavano
+indisturbati e ora sono coperti — vedi STRATEGY.md, "Test di mutazione".
 
 ## Deploy automatico (server sempre acceso)
 
