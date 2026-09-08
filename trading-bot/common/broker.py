@@ -74,8 +74,14 @@ _UNAMBIGUOUS_MARKERS = ("ULTRAPRO", "ULTRASHORT", "LEVERAGED", "INVERSE")
 _AMBIGUOUS_MARKERS = ("BULL", "BEAR", "ULTRA", "SHORT", "DAILY", "LONG")
 _LEVERAGED_ISSUERS = (
     "DIREXION", "PROSHARES", "GRANITESHARES", "MICROSECTORS", "TRADR",
-    "DEFIANCE", "TREX", "T-REX", "VOLATILITYSHARES", "AXS", "MAX",
+    "DEFIANCE", "TREX", "T-REX", "VOLATILITYSHARES", "AXS",
 )
+# Nota su TREX e AXS: sono nomi che esistono anche come azioni vere (Trex
+# Company, AXS-One). Non e' un problema perche' un emittente da solo non
+# basta mai: serve accanto a una parola direzionale, e "Trex Company, Inc."
+# non ne ha nessuna. "MAX" era in questa lista ed e' stato tolto: e' una
+# parola troppo comune e i prodotti che la usano portano comunque il
+# moltiplicatore, che li intercetta da solo.
 
 
 # --- Robustezza di rete ---------------------------------------------------

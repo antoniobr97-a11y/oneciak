@@ -461,42 +461,6 @@ def _fallback_protect(broker, symbol, direction, abs_qty, stop_price) -> None:
     )
 
 
-def _place_entered_structure(broker, symbol, direction, abs_qty, entry, risk, stop_price, half) -> None:
-    """Stadio 'entered' (corso, video 44 scenario A/B): sulla meta' da
-    vendere a T1 un OCO (sell limit a entrata+1R / sell stop allo stop
-    iniziale); sull'altra meta' un sell stop allo stop iniziale. Se il
-    prezzo tocca T1 la meta' viene venduta dal limit (come nel backtest,
-    che riempie a 1R quando il massimo di giornata lo tocca); se tocca lo
-    stop, entrambi gli stop chiudono tutto."""
-    broker.cancel_open_orders(symbol)
-    oco_qty = min(half, abs_qty)
-    rest = abs_qty - oco_qty
-    try:
-        if oco_qty > 0:
-            broker.submit_oco_exit(symbol, oco_qty, direction, _target(entry, risk, 1.0, direction), stop_price)
-        if rest > 0:
-            broker.submit_stop(symbol, rest, stop_price, direction)
-    except Exception:
-        _fallback_protect(broker, symbol, direction, abs_qty, stop_price)
-
-
-def _place_1r_done_structure(broker, symbol, direction, abs_qty, entry, risk, second, current_price=None, initial_stop=None) -> None:
-    """Stadio '1R_done': stop a pareggio su tutto il residuo; sulla quota
-    da vendere a 3R un OCO (sell limit a entrata+3R / sell stop a
-    pareggio), sul runner un sell stop a pareggio."""
-    stop = _protective_stop_price(direction, entry, current_price, initial_stop)
-    broker.cancel_open_orders(symbol)
-    oco_qty = min(second, abs_qty)
-    rest = abs_qty - oco_qty
-    try:
-        if oco_qty > 0:
-            broker.submit_oco_exit(symbol, oco_qty, direction, _target(entry, risk, SECOND_SCALE_OUT_R, direction), stop)
-        if rest > 0:
-            broker.submit_stop(symbol, rest, stop, direction)
-    except Exception:
-        _fallback_protect(broker, symbol, direction, abs_qty, stop)
-
-
 def _protective_stop_price(direction: str, wanted: float, current_price: float | None, fallback: float | None) -> float:
     """Il prezzo da usare per uno stop di protezione.
 
@@ -531,6 +495,42 @@ def _protective_stop_price(direction: str, wanted: float, current_price: float |
         wanted, "assente" if fallback is None else f"{fallback:.2f}", current_price,
     )
     return wanted
+
+
+def _place_entered_structure(broker, symbol, direction, abs_qty, entry, risk, stop_price, half) -> None:
+    """Stadio 'entered' (corso, video 44 scenario A/B): sulla meta' da
+    vendere a T1 un OCO (sell limit a entrata+1R / sell stop allo stop
+    iniziale); sull'altra meta' un sell stop allo stop iniziale. Se il
+    prezzo tocca T1 la meta' viene venduta dal limit (come nel backtest,
+    che riempie a 1R quando il massimo di giornata lo tocca); se tocca lo
+    stop, entrambi gli stop chiudono tutto."""
+    broker.cancel_open_orders(symbol)
+    oco_qty = min(half, abs_qty)
+    rest = abs_qty - oco_qty
+    try:
+        if oco_qty > 0:
+            broker.submit_oco_exit(symbol, oco_qty, direction, _target(entry, risk, 1.0, direction), stop_price)
+        if rest > 0:
+            broker.submit_stop(symbol, rest, stop_price, direction)
+    except Exception:
+        _fallback_protect(broker, symbol, direction, abs_qty, stop_price)
+
+
+def _place_1r_done_structure(broker, symbol, direction, abs_qty, entry, risk, second, current_price=None, initial_stop=None) -> None:
+    """Stadio '1R_done': stop a pareggio su tutto il residuo; sulla quota
+    da vendere a 3R un OCO (sell limit a entrata+3R / sell stop a
+    pareggio), sul runner un sell stop a pareggio."""
+    stop = _protective_stop_price(direction, entry, current_price, initial_stop)
+    broker.cancel_open_orders(symbol)
+    oco_qty = min(second, abs_qty)
+    rest = abs_qty - oco_qty
+    try:
+        if oco_qty > 0:
+            broker.submit_oco_exit(symbol, oco_qty, direction, _target(entry, risk, SECOND_SCALE_OUT_R, direction), stop)
+        if rest > 0:
+            broker.submit_stop(symbol, rest, stop, direction)
+    except Exception:
+        _fallback_protect(broker, symbol, direction, abs_qty, stop)
 
 
 def _place_runner_structure(broker, symbol, direction, abs_qty, entry, current_price=None, initial_stop=None) -> None:

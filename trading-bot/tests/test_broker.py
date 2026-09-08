@@ -243,6 +243,11 @@ def test_real_stocks_are_not_mistaken_for_leveraged_products():
         "Bear Creek Mining Corporation",    # "Bear" come parola, nessun emittente a leva
         "Apple Inc.",
         "NVIDIA Corporation",
+        # Nomi che coincidono con emittenti di prodotti a leva ma non hanno
+        # nessuna parola direzionale: l'emittente da solo non deve bastare.
+        "Trex Company, Inc.",
+        "MaxLinear, Inc.",
+        "MAXIMUS, Inc.",
     ):
         assert not _is_leveraged_or_inverse(name), f"{name} escluso per errore dall'universo"
 
