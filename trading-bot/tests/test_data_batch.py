@@ -103,3 +103,77 @@ def test_weekly_batch_drops_the_week_in_progress(monkeypatch):
     weekly = data.get_weekly_bars_batch(["AAPL"])["AAPL"]
 
     assert len(weekly) == 1          # solo la prima settimana, chiusa
+
+
+# --- scaricamento per singolo titolo (il ripiego) -----------------------------
+
+def test_single_download_normalises_the_columns(monkeypatch):
+    monkeypatch.setattr(data.yf, "download", lambda symbol, **kw: _frame())
+
+    df = data.get_daily_bars("AAPL")
+
+    assert list(df.columns) == ["open", "high", "low", "close", "volume"]
+    assert df.index.name == "date"
+    assert df["close"].iloc[-1] == 101.0
+
+
+def test_single_download_flattens_a_multiindex(monkeypatch):
+    """Con un solo ticker yfinance restituisce comunque colonne a due
+    livelli: senza appiattirle il resto della pipeline non troverebbe
+    "close" e il titolo sparirebbe."""
+    raw = _grouped_by_ticker({"AAPL": _frame()})
+    monkeypatch.setattr(data.yf, "download", lambda symbol, **kw: raw.swaplevel(axis=1))
+
+    df = data.get_daily_bars("AAPL")
+
+    assert df["close"].iloc[-1] == 101.0
+
+
+def test_an_empty_answer_raises_instead_of_returning_an_empty_frame(monkeypatch):
+    """Un DataFrame vuoto passato alla pipeline diventerebbe "nessun
+    setup". Deve invece essere un errore, cosi' lo screener lo conta fra i
+    titoli falliti e fa scattare l'avviso di scansione incompleta."""
+    monkeypatch.setattr(data.yf, "download", lambda symbol, **kw: pd.DataFrame())
+
+    with pytest.raises(ValueError):
+        data.get_daily_bars("FANTASMA")
+
+
+# --- barre settimanali/mensili ------------------------------------------------
+
+def test_resample_aggregates_ohlcv_correctly():
+    idx = pd.date_range("2026-01-05", periods=5, freq="B")   # una settimana intera
+    df = pd.DataFrame(
+        {"open": [10, 11, 12, 13, 14], "high": [20, 21, 30, 23, 24],
+         "low": [5, 4, 6, 7, 8], "close": [15, 16, 17, 18, 19], "volume": [1, 1, 1, 1, 1]},
+        index=idx, dtype=float,
+    )
+
+    weekly = data.resample(df, "W")
+
+    assert len(weekly) == 1
+    assert weekly["open"].iloc[0] == 10      # la prima
+    assert weekly["high"].iloc[0] == 30      # la piu' alta
+    assert weekly["low"].iloc[0] == 4        # la piu' bassa
+    assert weekly["close"].iloc[0] == 19     # l'ultima
+    assert weekly["volume"].iloc[0] == 5     # la somma
+
+
+def test_a_closed_week_is_kept_whole():
+    idx = pd.date_range("2026-01-05", periods=5, freq="B")   # lun-ven: settimana chiusa
+    df = pd.DataFrame(
+        {"open": 10.0, "high": 20.0, "low": 5.0, "close": 15.0, "volume": 1.0}, index=idx
+    )
+
+    assert len(data.closed_weekly_bars(df)) == 1
+
+
+def test_the_week_in_progress_is_dropped():
+    idx = pd.date_range("2026-01-05", periods=8, freq="B")   # arriva a mercoledi' 14
+    df = pd.DataFrame(
+        {"open": 10.0, "high": 20.0, "low": 5.0, "close": 15.0, "volume": 1.0}, index=idx
+    )
+
+    # due settimane grezze, ma la seconda non e' finita
+    assert len(data.resample(df, "W")) == 2
+    assert len(data.closed_weekly_bars(df)) == 1
