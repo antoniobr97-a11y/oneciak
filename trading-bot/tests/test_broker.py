@@ -209,6 +209,12 @@ def test_leveraged_and_inverse_products_are_recognised():
     assert _is_leveraged_or_inverse("ProShares Ultra S&P500")
     assert _is_leveraged_or_inverse("ProShares Short VIX Short-Term Futures ETF")
 
+    # Il moltiplicatore da solo deve bastare: non tutti i prodotti a leva
+    # nominano un emittente noto o una parola direzionale.
+    assert _is_leveraged_or_inverse("Bitcoin 2X Strategy ETF")
+    assert _is_leveraged_or_inverse("Some Index 1.5X Fund")
+    assert _is_leveraged_or_inverse("Something -1X ETN")
+
     # ammessi: azioni e ETF normali, compresi obbligazionari e oro
     assert not _is_leveraged_or_inverse("Apple Inc. Common Stock")
     assert not _is_leveraged_or_inverse("SPDR S&P 500 ETF Trust")
@@ -387,6 +393,12 @@ def test_missing_position_is_none_but_a_broker_failure_is_raised(monkeypatch):
 
     broker.client.get_open_position.side_effect = requests.exceptions.ConnectTimeout("rete assente")
     with pytest.raises(requests.exceptions.ConnectTimeout):
+        broker.get_open_position("AAPL")
+
+    # Anche un errore del broker che ARRIVA come APIError, ma non e' un
+    # "questa posizione non esiste": solo il 404 significa "non ce l'ho".
+    broker.client.get_open_position.side_effect = APIError('{"code":50010000,"message":"internal server error"}')
+    with pytest.raises(APIError):
         broker.get_open_position("AAPL")
 
 

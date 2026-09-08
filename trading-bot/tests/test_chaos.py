@@ -11,10 +11,27 @@ le sue regole", che e' una domanda diversa e piu' utile. Le regole:
   5. mai piu' di 12 fra posizioni e ordini in attesa
   6. mai cassa negativa (nessuna leva)
   7. mai silenzio su una posizione scoperta che il bot non ha aperto
+  8. una posizione allo stadio "entered"/"1R_done" ha al broker anche la
+     gamba di PRESA DI PROFITTO prevista, non solo lo stop
+  9. una posizione aperta ieri e' protetta gia' PRIMA del ciclo di oggi
 
 Ha gia' trovato un bug vero: con il file di stato perso il bot piazzava un
 SECONDO ordine d'ingresso sui titoli che aveva gia' in attesa, perche'
-leggeva i pendenti dalla propria memoria invece che dal broker."""
+leggeva i pendenti dalla propria memoria invece che dal broker.
+
+Le regole 8 e 9 sono nate da un test di mutazione su questa stessa suite.
+Tre guasti gravi introdotti apposta nel codice NON venivano visti:
+  - "non riemettere mai la struttura di uscita mancante": nessuna regola
+    guardava la presa di profitto, quindi un bot che sa solo andare a stop
+    o correre all'infinito -- meta' della strategia spenta -- passava;
+  - "togliere la gamba stop-loss dall'ordine d'ingresso": il controllo
+    girava DOPO il ciclo, che nel frattempo aveva rimesso lo stop, quindi
+    la notte scoperta fra l'esecuzione e il ciclo successivo non veniva
+    mai osservata;
+  - "ingoiare i fallimenti di cancellazione": non c'era abbastanza
+    campione perche' il caso si presentasse.
+Una suite che non vede un guasto introdotto apposta non sta verificando
+quel guasto: e' la differenza fra "i test passano" e "i test proteggono"."""
 import argparse
 import os
 import random
@@ -58,12 +75,36 @@ def _check(broker, day, violations, foreign, alerts):
             if sym in foreign:
                 # Il bot non puo' proteggere cio' che non ha aperto (non ne
                 # conosce lo stop), ma non deve tacere.
-                if not any(sym in a for a in alerts):
+                if not any(sym in m for _, m in alerts):
                     violations.append(f"giorno {day}: {sym} scoperta e il bot ha taciuto")
             else:
                 violations.append(f"giorno {day}: {sym} ha {pos.qty} azioni ma stop per {stops}")
         if broker._reserved_sell_qty(sym) > pos.qty:
             violations.append(f"giorno {day}: {sym} vendite riservate oltre le azioni possedute")
+        # Regola 8: lo stop protegge dalla perdita, ma il limit a 1R e'
+        # il modo in cui la strategia incassa. Senza questo controllo un
+        # bot che non arma mai la presa di profitto passava la suite.
+        state = position_state.get(sym)
+        stage = state.get("stage")
+        original = int(state.get("original_qty") or 0)
+        if stage in ("entered", "1R_done") and original:
+            half, second, _ = bot._tranches(original)
+            expected = half if stage == "entered" else second
+            limits = [o for o in broker.orders
+                      if o.symbol == sym and o.side == "sell" and o.type == "limit"]
+            # Rinunciare alla presa di profitto per un ciclo e' previsto
+            # (_fallback_protect: meglio il solo stop che niente), ma non
+            # in silenzio -- e' la stessa regola delle posizioni scoperte.
+            # Restare senza presa di profitto per un ciclo e' previsto --
+            # _fallback_protect ci rinuncia per garantire almeno lo stop, e
+            # un errore isolato su un titolo lo salta fino al giorno dopo --
+            # ma sempre dicendolo. Un avviso INFORMATIVO non basta: e' quello
+            # che il bot manda anche quando la struttura e' andata a buon
+            # fine, e usarlo come esenzione rendeva la regola cieca.
+            reported = any(sym in m and level in ("warning", "error") for level, m in alerts)
+            if expected > 0 and not limits and not reported:
+                violations.append(f"giorno {day}: {sym} stadio {stage} senza presa di profitto al broker")
+
     for sym in {o.symbol for o in broker.orders}:
         buys = [o for o in broker.orders if o.symbol == sym and o.side == "buy"]
         if len(buys) > 1:
@@ -85,6 +126,7 @@ def _run(seed, days, chaos, tmp_path):
     broker = FakeBroker(cash=20_000.0)
     prices = {s: rng.uniform(20, 300) for s in SYMBOLS}
     violations, foreign, alerts = [], set(), []
+    opened_before: set[str] = set()
     position_state.STATE_PATH = str(tmp_path / f"positions-{seed}.json")
     falling = pd.DataFrame({"close": [500.0] * 250 + [1.0]})
     day = date(2026, 1, 5)
@@ -112,19 +154,33 @@ def _run(seed, days, chaos, tmp_path):
                     broker.positions[sym] = Position(sym, rng.randint(1, 20), prices[sym], prices[sym])
                     foreign.add(sym)
 
+        # Regola 9: le esecuzioni avvengono in seduta, il ciclo gira dopo la
+        # chiusura. Una posizione eseguita ieri e' rimasta scoperta tutta la
+        # notte se il suo stop non era gia' al broker: va guardata PRIMA che
+        # il ciclo di oggi abbia occasione di rimediare.
+        for sym, pos in broker.positions.items():
+            if sym in foreign or sym in bot.LONG_TERM_TICKERS or sym not in opened_before:
+                continue
+            stops = sum(o.qty for o in broker.orders
+                        if o.symbol == sym and o.side == "sell" and o.type == "stop")
+            if stops < pos.qty:
+                violations.append(
+                    f"giorno {d}: {sym} ha passato la notte con {pos.qty} azioni e stop per {stops}")
+
         cands = [_candidate(s, prices[s], rng) for s in rng.sample(SYMBOLS, rng.randint(0, 12))]
         with patch.object(bot, "Broker", return_value=broker), \
              patch.object(bot, "screen_universe", return_value=cands), \
              patch.object(bot, "_print_candidate"), \
              patch.object(bot, "get_daily_bars", return_value=falling), \
              patch.object(bot, "market_today", return_value=day), \
-             patch.object(bot.notify, "alert", side_effect=lambda m, level="info": alerts.append(m)):
+             patch.object(bot.notify, "alert", side_effect=lambda m, level="info": alerts.append((level, m))):
             try:
                 bot.cmd_short_term_once(argparse.Namespace(execute=True))
             except Exception as exc:
                 violations.append(f"giorno {d}: il ciclo ha sollevato {type(exc).__name__}: {exc}")
         _check(broker, d, violations, foreign, alerts)
         foreign &= set(broker.positions)
+        opened_before = set(broker.positions)
         alerts.clear()
         day += timedelta(days=1)
     return violations
