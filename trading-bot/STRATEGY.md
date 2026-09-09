@@ -1646,36 +1646,132 @@ moltiplicatore non cambiava nulla. E il ritorno di `None` da
 poteva tornare `None` — e far aprire una **seconda** posizione su un titolo
 già in portafoglio — senza che nessun test se ne accorgesse.
 
-Tutte e sette le mutazioni sono ora intercettate.
+Stesso esercizio sul **lungo termine**, e qui il buco era piu' grosso: la
+simulazione fissava `LONG_TERM_AUTO_STRATEGY="harry_browne"`, quindi
+`_advanced_monthly_cycle` non veniva mai eseguito — ed e' la strategia che
+gira **di default**, cioe' quella che l'utente ha davvero attiva. Tre
+sabotaggi passavano indisturbati: togliere il tetto di cassa, vendere piu'
+quote di quante se ne possiedono, e segnare il mese come completato anche
+quando un asset e' fallito (che lo lascerebbe fuori posizione per un mese
+intero senza che nessuno riprovi). Aggiunto un secondo ramo alla
+simulazione che esegue davvero il ciclo Advanced, con i segnali mensili che
+incrociano la SMA10 in entrambe le direzioni.
 
-## Test fuori campione: il 9,78% è la strategia o la scelta dei titoli?
+L'ultimo dei tre ha richiesto un'invariante scritta apposta: contare i mesi
+processati non basta, perche' segnare il mese "comunque" non ne aumenta il
+numero. La regola giusta e' che un ciclo che ha mandato un avviso di errore
+su un asset non puo' segnare quel mese come fatto.
+
+Tutte e dieci le mutazioni sono ora intercettate.
+
+## Test fuori campione: il risultato è la strategia o la scelta dei titoli?
 
 È la domanda più importante che si possa fare a un backtest, e finora non
 era stata fatta. L'universo di 42 titoli è stato scelto **dopo** aver visto
 come erano andati: un risultato misurato su quei titoli non distingue fra
 "la strategia funziona" e "sono stati scelti i titoli giusti".
 
-Stessa strategia, stessi parametri, stesso codice, su **68 azioni mai usate
-per costruirla o sceglierla** (farmaceutico, industriale, finanziario,
-consumo, energia, utility, materiali — 26,7 anni, 1313 operazioni):
+Stessa strategia, stessi parametri, **stesso codice**, su **68 azioni mai
+usate per costruirla o sceglierla** (farmaceutico, industriale,
+finanziario, consumo, energia, utility, materiali). 26,7 anni, dal 2000.
+
+Il controllo sulle 42 è stato **rifatto oggi** con lo stesso codice: i
+risultati salvati in precedenza vengono da una versione anteriore dei
+pattern e mescolerebbero due variabili (universo diverso *e* codice
+diverso).
 
 | | Messo a punto (42) | **Fuori campione (68)** |
 |---|---|---|
-| CAGR | 8,40% | **7,12%** |
-| Drawdown massimo | −20,2% | **−20,6%** |
-| Sharpe | 0,73 | **0,80** |
-| Operazioni | 1189 | **1313** |
+| Capitale finale (da 10.000) | 117.367 | **62.540** |
+| CAGR | 9,68% | **7,12%** |
+| Drawdown massimo | −17,2% | **−20,6%** |
+| Sharpe | 1,00 | **0,80** |
+| Operazioni | 1308 | **1313** |
 
-Il rendimento scende di circa un punto e mezzo — un calo normale e atteso
-passando fuori campione — ma **non crolla**, il profilo di rischio resta
-identico e lo Sharpe è addirittura più alto. Con 1313 operazioni non è
-rumore.
+**Il costo della selezione dei titoli è di circa 2,5 punti di CAGR
+all'anno**, più 3 punti di drawdown e 0,20 di Sharpe. È un calo
+significativo — più grande di quanto sarebbe comodo ammettere — ma la
+strategia **resta profittevole** su titoli che non ha mai visto, con un
+profilo di rischio confrontabile e 1313 operazioni, cioè non per caso.
 
-Conclusione onesta: il vantaggio misurato **non è** soltanto un artefatto
-della scelta dei titoli. Non è nemmeno una promessa di guadagno futuro —
-resta un risultato storico su dati passati, con tutti i limiti già scritti
-in questo documento — ma è la prova che mancava e il risultato è a favore
-della strategia, non contro.
+Conclusione onesta, in due parti:
+1. il vantaggio misurato **non è** soltanto un artefatto della scelta dei
+   titoli: se lo fosse, fuori campione il rendimento sarebbe sparito, e
+   invece resta il 7,12%;
+2. il **9,68% non è la cifra da aspettarsi**. Dal vivo il bot incontra
+   titoli su cui nessuno ha messo a punto niente, quindi la stima realistica
+   è quella fuori campione, non quella in campione.
+
+*(Correzione: una prima stesura di questa sezione confrontava il fuori
+campione con un risultato salvato mesi fa, 8,40%, e ne concludeva che lo
+Sharpe fosse addirittura più alto fuori campione. Sbagliato: con il
+controllo corretto, a parità di codice, lo Sharpe scende da 1,00 a 0,80. Il
+divario reale è più ampio di quanto scritto la prima volta.)*
+
+## Conviene allargare l'universo oltre i titoli più scambiati?
+
+La richiesta è chiara: il bot deve guardare **tutti** i titoli e cercare
+quelli appetibili. Lo fa già (`SHORT_TERM_USE_FULL_MARKET=true`), ma dopo i
+prefiltri teneva i primi 300 per volume$, e quel 300 veniva dalla rete, non
+dalla strategia. Tolto il collo di bottiglia (scaricamento a lotti), la
+domanda diventa: **conviene**? STRATEGY.md "v4" diceva di no.
+
+Stesso codice, stessi parametri, su **188 azioni** (tutte quelle del
+dataset) contro le 42 messe a punto:
+
+| | Messo a punto (42) | Ampio (188) | Fuori campione (68) |
+|---|---|---|---|
+| CAGR | 9,68% | **9,20%** | 7,12% |
+| Drawdown massimo | −17,2% | **−21,4%** | −20,6% |
+| Sharpe | 1,00 | **0,87** | 0,80 |
+| Operazioni | 1308 | **1485** | 1313 |
+
+Allargare **non fa guadagnare di più**: rendimento quasi uguale, drawdown
+peggiore di 4 punti, Sharpe più basso.
+
+Ma la lettura importante è un'altra. Le 188 **includono** le 42 messe a
+punto, quindi l'universo ampio è una miscela di titoli in campione e fuori
+campione — e infatti finisce **esattamente in mezzo** fra i due (9,20% fra
+9,68% e 7,12%). Cioè: il vantaggio dell'universo ristretto sull'universo
+ampio è in buona parte **la distorsione della selezione stessa**, non una
+proprietà dei titoli larghi.
+
+Conseguenza pratica: 9,20% con drawdown −21,4% è probabilmente **più vicino
+al vero** di 9,68% con −17,2%, perché dal vivo il bot guarda comunque
+centinaia di titoli su cui nessuno ha messo a punto niente.
+
+**Decisione: il tetto resta a 300.** I dati non mostrano nessun guadagno
+nell'allargare, e mostrano un drawdown peggiore. Ora però è una scelta di
+strategia sostenuta da una misura, non un limite tecnico: cambiare
+`SHORT_TERM_FULL_MARKET_MAX_SYMBOLS` in `.env` è una riga, e il costo di
+rete di un universo più ampio non c'è più.
+
+## Robustezza dei parametri: l'1% per operazione è un altopiano o una scogliera?
+
+Un parametro che rende bene solo esattamente al suo valore, e crolla se lo
+sposti di poco, non è una scoperta: è rumore su cui ci si è adagiati. Il
+rischio per operazione non era mai stato messo alla prova così.
+
+Stesso universo (42), stesso codice, solo il rischio per operazione cambia:
+
+| Rischio per operazione | Capitale finale | CAGR | Drawdown max | Sharpe | Operazioni |
+|---|---|---|---|---|---|
+| 0,5% | 89.207 | 8,55% | **−14,1%** | **1,00** | 2069 |
+| **1,0% (attuale)** | **117.367** | **9,68%** | −17,2% | **1,00** | 1308 |
+| 2,0% | 78.437 | 8,03% | −20,5% | 0,78 | 675 |
+
+**È un altopiano, non una scogliera.** Una curva a campana pulita con l'1%
+in cima, e sia lo 0,5% sia il 2% restano solidamente profittevoli: la
+scelta non poggia su un numero fortunato. Il drawdown cresce in modo
+regolare con il rischio, come deve.
+
+Da notare per chi vuole perdere il meno possibile: **a 0,5% lo Sharpe è
+identico (1,00) e il drawdown scende da −17,2% a −14,1%**, al costo di
+circa un punto di CAGR. Se la priorità è dormire la notte più che il
+massimo rendimento, è un baratto ragionevole — una riga in `.env`
+(`SHORT_TERM_RISK_PER_TRADE_PCT=0.5`). Il 2% invece peggiora tutto insieme:
+meno rendimento, più drawdown, Sharpe più basso. Non è una direzione da
+prendere.
 
 ## Cosa NON è coperto da questo codice
 

@@ -245,6 +245,85 @@ def _long_term_run(seed, days, tmp_path):
     return violations
 
 
+def _monthly_frame(ticker, today, rng):
+    """Chiusure mensili su ~5 anni, cammino casuale abbastanza mosso da
+    incrociare la SMA10 in entrambe le direzioni durante la simulazione:
+    servono sia i mesi "dentro" sia quelli "fuori"."""
+    months = pd.date_range(end=pd.Timestamp(today).to_period("M").to_timestamp("M"), periods=64, freq="ME")
+    price, closes = rng.uniform(50, 300), []
+    for _ in months:
+        price = max(1.0, price * (1 + rng.gauss(0.004, 0.06)))
+        closes.append(price)
+    return pd.DataFrame({"close": closes}, index=months)
+
+
+def _advanced_run(seed, days, tmp_path):
+    """L'altro ramo del lungo termine -- e quello che gira davvero, visto
+    che LONG_TERM_AUTO_STRATEGY vale "advanced" di default. La simulazione
+    lo saltava del tutto: fissava "harry_browne" e lasciava scoperta la
+    strategia realmente in uso."""
+    rng = random.Random(1000 + seed)
+    broker = FakeBroker(cash=30_000.0)
+    violations, months_marked = [], []
+    position_state.STATE_PATH = str(tmp_path / f"adv-{seed}.json")
+    day = date(2026, 1, 5)
+    tickers = list(bot.config.ADVANCED_TICKERS)
+    prices = {t: rng.uniform(50, 300) for t in tickers}
+    frames = {t: _monthly_frame(t, day + timedelta(days=days), rng) for t in tickers}
+
+    for d in range(days):
+        for t in prices:
+            prices[t] = max(1.0, prices[t] * (1 + rng.gauss(0, 0.012)))
+        broker.last_prices.update(prices)
+        if rng.random() < 0.15:
+            broker.fail_next_submit = True          # un ordine rifiutato
+        marked_before = position_state.get_meta("advanced_last_month")
+        alerts: list[tuple[str, str]] = []
+        with patch.object(bot, "_last_close", side_effect=lambda t: prices[t]), \
+             patch.object(bot, "get_monthly_bars", side_effect=lambda t, period="10y": frames[t]), \
+             patch.object(bot.notify, "alert", side_effect=lambda m, level="info": alerts.append((level, m))), \
+             patch.object(bot.config, "LONG_TERM_AUTO_STRATEGY", "advanced"):
+            try:
+                bot.run_long_term_cycle(broker, execute=True, today=day)
+            except Exception as exc:
+                violations.append(f"giorno {d}: il ciclo Advanced ha sollevato {type(exc).__name__}: {exc}")
+
+        marked = position_state.get_meta("advanced_last_month")
+        # Un mese con un asset andato storto NON va segnato come fatto:
+        # segnandolo, quell'asset resterebbe fuori posizione per un mese
+        # intero senza che nessuno riprovi. Il ciclo lo dice con un avviso
+        # di errore, quindi le due cose non possono coesistere nello stesso
+        # giro. Senza questo controllo la simulazione non vedeva la
+        # differenza fra "segna solo se e' andato tutto bene" e "segna
+        # comunque".
+        if marked != marked_before and any(level == "error" for level, _ in alerts):
+            violations.append(
+                f"giorno {d}: mese {marked} segnato come completato nonostante un errore su un asset")
+        if marked and marked not in months_marked:
+            months_marked.append(marked)
+        if broker.cash < -0.01:
+            violations.append(f"giorno {d}: cassa negativa nel ciclo Advanced ({broker.cash:.2f})")
+        if broker.rejections:
+            violations.append(f"giorno {d}: rifiuti dal broker {broker.rejections[:2]}")
+            broker.rejections.clear()
+        invested = sum(p.qty * prices.get(p.symbol, p.current_price) for p in broker.positions.values())
+        if invested > bot.config.LONG_TERM_CAPITAL * 1.5:
+            violations.append(
+                f"giorno {d}: investiti {invested:.0f} contro un capitale di {bot.config.LONG_TERM_CAPITAL:.0f}")
+        day += timedelta(days=1)
+
+    # Una decisione al mese, non una al giorno: il mese si segna come fatto
+    # e non si riapre.
+    if len(months_marked) > days // 28 + 1:
+        violations.append(f"{len(months_marked)} mesi processati in {days} giorni: troppi")
+    return violations
+
+
+def test_the_advanced_cycle_holds_under_rejected_orders(tmp_path):
+    for seed in range(3):
+        assert _advanced_run(seed, days=120, tmp_path=tmp_path) == []
+
+
 def test_the_long_term_cycle_holds_under_rejected_orders(tmp_path):
     for seed in range(3):
         assert _long_term_run(seed, days=120, tmp_path=tmp_path) == []
