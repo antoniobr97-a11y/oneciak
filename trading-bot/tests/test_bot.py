@@ -19,7 +19,19 @@ def _position(symbol, qty, entry_price, current_price):
     return {"symbol": symbol, "qty": qty, "avg_entry_price": entry_price, "current_price": current_price}
 
 
-def _candidate(symbol, direction="long", entry=100.0, stop=95.0, qty=10) -> Candidate:
+# Gli ETF settoriali veri: bastano per dare a ogni candidato finto un
+# settore diverso quando il test non vuole che il limite di concentrazione
+# interferisca.
+_SECTORS = ["XLK", "XLF", "XLE", "XLV", "XLY", "XLP", "XLI", "XLU", "XLRE", "XLB", "XLC"]
+
+
+def _spread_candidates(n, **kw):
+    """n candidati, ognuno in un settore diverso: isola il tetto che si sta
+    testando dal limite di concentrazione per settore."""
+    return [_candidate(f"SYM{i}", sector_etf=_SECTORS[i % len(_SECTORS)], **kw) for i in range(n)]
+
+
+def _candidate(symbol, direction="long", entry=100.0, stop=95.0, qty=10, sector_etf="XLK") -> Candidate:
     tq = TrendQualification(direction=direction, score=3, satisfied={})
     match = PatternMatch("Pullback Semplice", direction, setup_bar_index=0, pullback_bar_count=3)
     lv = levels_mod.EntryLevels(direction=direction, entry=entry, stop_loss=stop, risk_per_share=abs(entry - stop))
@@ -31,7 +43,7 @@ def _candidate(symbol, direction="long", entry=100.0, stop=95.0, qty=10) -> Cand
         levels=lv,
         qty=qty,
         ribbon_aligned=True,
-        sector_etf="XLK",
+        sector_etf=sector_etf,
         sector_passes=True,
         earnings_warn=False,
         sr_too_close=False,
@@ -514,7 +526,9 @@ def _cycle_broker(cash=1_000_000.0, equity=10_000.0):
 
 def test_cmd_short_term_once_submits_stop_entries_and_stops_at_aggregate_risk_cap(monkeypatch):
     monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 0.0)  # nessun tetto di capitale: si testa quello di rischio
-    candidates = [_candidate(f"SYM{i}") for i in range(20)]  # ben oltre il tetto (12% / 1% = 12)
+    # Settori diversi: qui si testa il tetto di RISCHIO, non quello di
+    # concentrazione per settore (che ha un test suo).
+    candidates = _spread_candidates(20)  # ben oltre il tetto (12% / 1% = 12)
     broker = _cycle_broker()
 
     with patch("bot.Broker", return_value=broker), \
@@ -667,7 +681,7 @@ def test_allocated_capital_can_bind_before_the_aggregate_risk_cap(monkeypatch):
     controvalore, la cassa finisce alla decima: il tetto di rischio (12)
     non viene nemmeno raggiunto."""
     monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 10_000.0)
-    candidates = [_candidate(f"SYM{i}", entry=100.0, stop=95.0, qty=10) for i in range(20)]
+    candidates = _spread_candidates(20, entry=100.0, stop=95.0, qty=10)
     broker = _cycle_broker(cash=1_000_000.0)
 
     with patch("bot.Broker", return_value=broker), \
@@ -681,7 +695,7 @@ def test_allocated_capital_can_bind_before_the_aggregate_risk_cap(monkeypatch):
 
 def test_short_term_position_count_excludes_long_term_etfs(monkeypatch):
     monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 0.0)
-    candidates = [_candidate(f"SYM{i}") for i in range(20)]
+    candidates = _spread_candidates(20)
     etf = bot.config.ADVANCED_TICKERS[0]
     broker = _cycle_broker()
     broker.list_open_positions.return_value = [_position(etf, 1, 1.0, 1.0)] * 11  # ETF: non contano nel tetto
@@ -1466,3 +1480,103 @@ def test_pending_entries_are_counted_from_the_broker_not_the_state_file():
     # deve cancellare il vecchio prima di piazzare, non affiancarlo
     broker.cancel_open_orders.assert_called_once_with("AAPL")
     assert broker.submit_stop_entry.call_count == 1
+
+
+# --- limite di concentrazione per settore -------------------------------------
+
+def test_only_three_positions_per_sector_are_opened(monkeypatch):
+    """Dodici posizioni tutte tecnologiche non sono dodici scommesse: sono
+    una scommessa moltiplicata per dodici, e perdono insieme lo stesso
+    giorno. E' quello che rende profondi i drawdown."""
+    monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 0.0)
+    monkeypatch.setattr(bot.config, "SHORT_TERM_MAX_PER_SECTOR", 3)
+    candidates = [_candidate(f"TECH{i}", sector_etf="XLK") for i in range(10)]
+    broker = _cycle_broker()
+
+    with patch("bot.Broker", return_value=broker), \
+         patch("bot.screen_universe", return_value=candidates), \
+         patch("bot._print_candidate"), \
+         patch.object(bot.sector, "get_sector_etf", return_value="XLK"), \
+         _patched_state():
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    assert broker.submit_stop_entry.call_count == 3
+
+
+def test_a_full_sector_does_not_block_the_other_sectors(monkeypatch):
+    """Un settore pieno non dice niente sui candidati degli altri settori --
+    che anzi sono esattamente quelli che servono. Si salta il titolo, non
+    si interrompe il ciclo."""
+    monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 0.0)
+    monkeypatch.setattr(bot.config, "SHORT_TERM_MAX_PER_SECTOR", 2)
+    candidates = (
+        [_candidate(f"TECH{i}", sector_etf="XLK") for i in range(5)]
+        + [_candidate("BANCA", sector_etf="XLF"), _candidate("PETROLIO", sector_etf="XLE")]
+    )
+    broker = _cycle_broker()
+
+    with patch("bot.Broker", return_value=broker), \
+         patch("bot.screen_universe", return_value=candidates), \
+         patch("bot._print_candidate"), \
+         patch.object(bot.sector, "get_sector_etf", return_value=None), \
+         _patched_state():
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    inviati = [c[0][0] for c in broker.submit_stop_entry.call_args_list]
+    assert inviati == ["TECH0", "TECH1", "BANCA", "PETROLIO"]
+
+
+def test_positions_already_open_count_toward_the_sector_limit(monkeypatch):
+    """Le posizioni gia' aperte e gli ordini in attesa concentrano quanto
+    quelle nuove: se non si contassero, il limite si azzererebbe a ogni
+    ciclo."""
+    monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 0.0)
+    monkeypatch.setattr(bot.config, "SHORT_TERM_MAX_PER_SECTOR", 3)
+    broker = _cycle_broker()
+    broker.list_open_positions.return_value = [
+        _position("GIA1", 10, 100.0, 105.0), _position("GIA2", 10, 100.0, 105.0),
+    ]
+    candidates = [_candidate(f"TECH{i}", sector_etf="XLK") for i in range(5)]
+
+    with patch("bot.Broker", return_value=broker), \
+         patch("bot.screen_universe", return_value=candidates), \
+         patch("bot._print_candidate"), \
+         patch.object(bot.sector, "get_sector_etf", return_value="XLK"), \
+         _patched_state():
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    assert broker.submit_stop_entry.call_count == 1      # 2 gia' aperte + 1 = 3
+
+
+def test_an_unknown_sector_never_blocks_a_trade(monkeypatch):
+    """Settore sconosciuto = nessun limite. Non si rinuncia a un'operazione
+    per un dato che manca (stessa regola di tutto il resto del bot)."""
+    monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 0.0)
+    monkeypatch.setattr(bot.config, "SHORT_TERM_MAX_PER_SECTOR", 2)
+    candidates = [_candidate(f"IGNOTO{i}", sector_etf=None) for i in range(6)]
+    broker = _cycle_broker()
+
+    with patch("bot.Broker", return_value=broker), \
+         patch("bot.screen_universe", return_value=candidates), \
+         patch("bot._print_candidate"), \
+         patch.object(bot.sector, "get_sector_etf", return_value=None), \
+         _patched_state():
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    assert broker.submit_stop_entry.call_count == 6
+
+
+def test_the_sector_limit_can_be_switched_off(monkeypatch):
+    monkeypatch.setattr(bot.config, "SHORT_TERM_CAPITAL", 0.0)
+    monkeypatch.setattr(bot.config, "SHORT_TERM_MAX_PER_SECTOR", 0)      # 0 = nessun limite
+    candidates = [_candidate(f"TECH{i}", sector_etf="XLK") for i in range(20)]
+    broker = _cycle_broker()
+
+    with patch("bot.Broker", return_value=broker), \
+         patch("bot.screen_universe", return_value=candidates), \
+         patch("bot._print_candidate"), \
+         patch.object(bot.sector, "get_sector_etf", return_value="XLK"), \
+         _patched_state():
+        bot.cmd_short_term_once(argparse.Namespace(execute=True))
+
+    assert broker.submit_stop_entry.call_count == 12     # torna a mordere il tetto di rischio

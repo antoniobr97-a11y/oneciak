@@ -176,6 +176,22 @@ SHORT_TERM_FULL_MARKET_MAX_SYMBOLS = _int("SHORT_TERM_FULL_MARKET_MAX_SYMBOLS", 
 # difensive più piatte, non i titoli con un minimo di movimento reale.
 SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT = _float("SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT", 25.0)
 
+# Massimo di posizioni contemporanee nello STESSO settore.
+#
+# Il tetto di rischio aggregato (SHORT_TERM_MAX_AGGREGATE_RISK_PCT) conta
+# quante posizioni ci sono, non quanto si assomigliano: dodici posizioni
+# tutte tecnologiche non sono dodici scommesse, sono una scommessa sola
+# moltiplicata per dodici. Quando quel settore gira, girano insieme -- ed e'
+# cosi' che nascono i drawdown profondi, non dalle singole operazioni
+# sbagliate.
+#
+# Misurato su 26 anni (STRATEGY.md, "Limite di concentrazione per
+# settore"): con max 3 il rendimento sale E il drawdown scende, su
+# entrambi gli universi. E' l'unica modifica trovata che migliora tutte e
+# due le cose insieme invece di barattarne una per l'altra.
+# 0 = nessun limite (comportamento precedente).
+SHORT_TERM_MAX_PER_SECTOR = _int("SHORT_TERM_MAX_PER_SECTOR", 3)
+
 SHORT_TERM_ACCOUNT_CURRENCY = os.getenv("SHORT_TERM_ACCOUNT_CURRENCY", "USD")
 SHORT_TERM_FX_RATE = _float("SHORT_TERM_FX_RATE", 1.0)  # unità valuta conto per 1 USD
 

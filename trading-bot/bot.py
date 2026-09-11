@@ -33,7 +33,7 @@ from common.data import get_daily_bars, get_monthly_bars
 from common.logger_setup import setup_logging
 from long_term import advanced_portfolio, harry_browne, pac, risk_profile
 from long_term.advanced_portfolio import closed_monthly_closes
-from short_term import money_management
+from short_term import money_management, sector
 from short_term.indicators import sma
 from short_term.screener import Candidate, screen_universe
 
@@ -336,6 +336,39 @@ def _short_term_cash(broker: Broker) -> float:
     if config.SHORT_TERM_CAPITAL > 0:
         cash = min(cash, config.SHORT_TERM_CAPITAL - _short_term_positions_value(broker))
     return max(0.0, cash - _pending_entries_value())
+
+
+def _sector_counts(symbols) -> dict[str, int]:
+    """Quante posizioni/ordini per settore. I titoli di cui non si conosce
+    il settore non vengono contati: meglio non limitare che limitare in
+    base a un dato che non c'e'."""
+    counts: dict[str, int] = {}
+    for symbol in symbols:
+        try:
+            etf = sector.get_sector_etf(symbol)
+        except Exception:
+            log.warning("Settore non determinato per %s, escluso dal conteggio di concentrazione.", symbol)
+            continue
+        if etf:
+            counts[etf] = counts.get(etf, 0) + 1
+    return counts
+
+
+def _sector_is_full(sector_etf: str | None, counts: dict[str, int]) -> bool:
+    """Vero se quel settore ha gia' il massimo di posizioni consentito.
+
+    Il tetto di rischio aggregato conta le posizioni, non la loro
+    parentela: dodici posizioni tutte nello stesso settore non sono dodici
+    scommesse diverse, sono una scommessa moltiplicata per dodici, e
+    perdono insieme nello stesso giorno. E' quello che rende profondi i
+    drawdown. Misurato su 26 anni e su due universi diversi (STRATEGY.md):
+    con il limite il rendimento sale E il drawdown scende.
+
+    Settore sconosciuto = nessun limite: non si blocca un'operazione per un
+    dato mancante."""
+    if config.SHORT_TERM_MAX_PER_SECTOR <= 0 or not sector_etf:
+        return False
+    return counts.get(sector_etf, 0) >= config.SHORT_TERM_MAX_PER_SECTOR
 
 
 def _pending_symbols() -> list[str]:
@@ -842,6 +875,13 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
     # logiche diverse.
     off_limits = {p["symbol"] for p in broker.list_open_positions()} | LONG_TERM_TICKERS
 
+    # Quante posizioni ci sono gia' per settore, contando anche gli ordini
+    # d'ingresso ancora in attesa (se scattano diventano posizioni, quindi
+    # concentrano esattamente allo stesso modo). Il settore si legge dalla
+    # cache su disco, quindi costa quasi nulla anche per una dozzina di
+    # titoli.
+    sector_counts = _sector_counts(position_symbols | entry_symbols)
+
     if _drawdown_brake_active(broker, today):
         return
 
@@ -873,6 +913,15 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
         elif not money_management.can_open_new_position(open_positions_count):
             log.info("Tetto di rischio aggregato raggiunto, salto i candidati restanti.")
             break
+        elif _sector_is_full(c.sector_etf, sector_counts):
+            # Si salta QUESTO titolo e si continua con gli altri: un
+            # settore pieno non dice niente sui candidati degli altri
+            # settori, che anzi sono proprio quelli che servono.
+            log.info(
+                "%s: settore %s gia' al massimo di %d posizioni, salto (concentrazione).",
+                c.symbol, c.sector_etf, config.SHORT_TERM_MAX_PER_SECTOR,
+            )
+            continue
 
         # Sostituire un pendente libera la cassa che quell'ordine
         # impegnava (gia' sottratta dal saldo iniziale in
@@ -945,6 +994,8 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
             cash_available -= qty * c.levels.entry - freed
             if not replacing:
                 open_positions_count += 1
+                if c.sector_etf:
+                    sector_counts[c.sector_etf] = sector_counts.get(c.sector_etf, 0) + 1
         elif replacing:
             # Il vecchio ordine e' stato cancellato ma il nuovo non e'
             # partito: quella cassa e' di nuovo libera.
