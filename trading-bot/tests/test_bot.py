@@ -1580,3 +1580,63 @@ def test_the_sector_limit_can_be_switched_off(monkeypatch):
         bot.cmd_short_term_once(argparse.Namespace(execute=True))
 
     assert broker.submit_stop_entry.call_count == 12     # torna a mordere il tetto di rischio
+
+
+# --- guasti transitori del server Alpaca --------------------------------------
+
+def _alpaca_500():
+    """L'eccezione esatta vista in esercizio: Alpaca risponde 500 su
+    GET /v2/calendar e alpaca-py la riveste in APIError."""
+    from alpaca.common.exceptions import APIError
+
+    response = MagicMock()
+    response.status_code = 500
+    http_error = requests.exceptions.HTTPError("500 Server Error", response=response)
+    return APIError('{"message":"Internal Server Error"}', http_error)
+
+
+def test_a_500_from_the_broker_is_retried_not_abandoned():
+    """Successo davvero: Alpaca ha risposto 500 sulla PRIMA chiamata del
+    ciclo (il calendario di borsa) e l'intero giro della giornata e' stato
+    abbandonato senza un solo tentativo -- breve e lungo termine insieme.
+    Un errore del loro server non e' un motivo per saltare una giornata di
+    gestione delle posizioni."""
+    assert bot._is_network_failure(_alpaca_500())
+
+
+def test_transient_statuses_are_retried_and_client_errors_are_not():
+    from alpaca.common.exceptions import APIError
+
+    def _api_error(code):
+        response = MagicMock()
+        response.status_code = code
+        return APIError("{}", requests.exceptions.HTTPError("x", response=response))
+
+    for code in (429, 500, 502, 503, 504):
+        assert bot._is_network_failure(_api_error(code)), f"{code} dovrebbe essere ritentato"
+    # Questi dicono "la tua richiesta e' sbagliata": riprovare non li aggiusta.
+    for code in (400, 401, 403, 404, 422):
+        assert not bot._is_network_failure(_api_error(code)), f"{code} NON va ritentato"
+
+
+def test_an_order_rejection_is_still_not_retried():
+    """Un rifiuto del broker e' una risposta, non un guasto: aspettare non
+    lo cambia."""
+    from alpaca.common.exceptions import APIError
+
+    assert not bot._is_network_failure(APIError("stop price must be greater than current price"))
+
+
+def test_the_cycle_retries_after_a_500_and_then_succeeds(monkeypatch):
+    monkeypatch.setattr(bot, "CYCLE_RETRY_WAITS", (0, 0, 0))     # niente attese nel test
+    tentativi = []
+
+    def _run():
+        tentativi.append(1)
+        if len(tentativi) < 3:
+            raise _alpaca_500()
+
+    with patch.object(bot.notify, "alert"):
+        bot._run_step_with_retry("breve termine", _run)
+
+    assert len(tentativi) == 3      # due 500, poi passa

@@ -1019,16 +1019,41 @@ CYCLE_RETRY_WAITS = (60, 300, 900)
 _cycle_lock = threading.Lock()
 
 
+# Codici HTTP che dicono "il server ha un problema adesso", non "la tua
+# richiesta e' sbagliata": ha senso riprovare fra qualche minuto.
+_TRANSIENT_HTTP_STATUSES = (429, 500, 502, 503, 504)
+
+
 def _is_network_failure(exc: BaseException) -> bool:
-    """Vero se l'eccezione (o una delle sue cause) e' un problema di rete:
-    broker irraggiungibile o che non risponde. Sono gli unici errori per
-    cui ha senso riprovare -- un ordine rifiutato o un bug non migliorano
-    aspettando."""
+    """Vero se l'eccezione (o una delle sue cause) e' un guasto TRANSITORIO
+    del broker: irraggiungibile, che non risponde, o che risponde con un
+    errore suo.
+
+    Sono gli unici errori per cui ha senso riprovare -- un ordine rifiutato
+    o un bug non migliorano aspettando.
+
+    Il caso del server che risponde 500 e' stato aggiunto dopo averlo visto
+    accadere: Alpaca ha risposto "500 Internal Server Error" sulla prima
+    chiamata del ciclo (il calendario di borsa) e l'intero giro della
+    giornata e' stato abbandonato senza un solo tentativo, breve e lungo
+    termine insieme. Un errore del loro server non e' un motivo per saltare
+    una giornata di gestione delle posizioni.
+
+    Riprovare il ciclo e' sicuro anche dopo un 500 su un invio ordine: il
+    ciclo rilegge posizioni e ordini dal broker e riconcilia, invece di
+    accodare ordini nuovi (vedi reconcile_pending_entries e
+    open_entry_symbols)."""
     seen: set[int] = set()
     current: BaseException | None = exc
     while current is not None and id(current) not in seen:
         seen.add(id(current))
         if isinstance(current, (requests.exceptions.ConnectionError, requests.exceptions.Timeout)):
+            return True
+        if isinstance(current, requests.exceptions.HTTPError):
+            response = getattr(current, "response", None)
+            if getattr(response, "status_code", None) in _TRANSIENT_HTTP_STATUSES:
+                return True
+        if isinstance(current, APIError) and current.status_code in _TRANSIENT_HTTP_STATUSES:
             return True
         current = current.__cause__ or current.__context__
     return False

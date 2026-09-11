@@ -136,7 +136,17 @@ def _harden_session(client) -> None:
         connect=HTTP_CONNECT_RETRIES,
         read=HTTP_READ_RETRIES,
         status=HTTP_READ_RETRIES,
-        status_forcelist=(502, 503, 504),
+        # 500 e 429 sono nell'elenco perche' sono successi davvero: Alpaca
+        # ha risposto "500 Internal Server Error" su GET /v2/calendar e il
+        # ciclo del giorno e' morto senza nemmeno un tentativo. Sono guasti
+        # transitori del server, esattamente come 502/503/504.
+        #
+        # Ritentare non puo' duplicare un ordine: urllib3 applica i retry
+        # sui CODICI DI STATO solo ai metodi idempotenti
+        # (Retry.DEFAULT_ALLOWED_METHODS: GET, HEAD, PUT, DELETE, OPTIONS,
+        # TRACE), e POST non c'e'. Un invio ordine che riceve 500 sale al
+        # chiamante, che decide -- non viene mai rispedito alla cieca.
+        status_forcelist=(429, 500, 502, 503, 504),
         backoff_factor=HTTP_BACKOFF_FACTOR,
         raise_on_status=False,
     )
