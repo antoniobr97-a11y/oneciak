@@ -1773,6 +1773,56 @@ massimo rendimento, è un baratto ragionevole — una riga in `.env`
 meno rendimento, più drawdown, Sharpe più basso. Non è una direzione da
 prendere.
 
+## E se i tre avvisi diventassero veti? (misurato: no)
+
+Il primo ciclo completo dal vivo ha piazzato cinque ordini, e **tutti e
+cinque** portavano almeno un avviso; quattro su cinque ne portavano due o
+tre:
+
+| | settore | resistenza | divergenza |
+|---|---|---|---|
+| CNH | non conferma | **0,0R** | — |
+| CTVA | non conferma | **0,2R** | contraria |
+| NVDA | non conferma | **0,8R** | — |
+| SNOW | non conferma | 1,8R | — |
+| GILD | conferma | 1,0R | — |
+
+La soglia "troppo vicino" è 3R: erano sotto tutti. E il dettaglio che
+faceva sospettare qualcosa è che **la presa di profitto è a 1R**, mentre in
+quattro casi su cinque una resistenza settimanale sta *prima* di quel
+livello. Il bot puntava a un obiettivo dietro un muro che aveva già visto.
+
+Ipotesi: quel calcolo viene buttato via, forse vale qualcosa. Misurata una
+volta sola, su entrambi gli universi, con l'unica differenza che i tre
+avvisi diventano veti (`STRICT_RISK_FILTERS=True`):
+
+| Universo messo a punto (42) | Capitale finale | CAGR | Drawdown max | Sharpe | Operazioni |
+|---|---|---|---|---|---|
+| avvisi ignorati (com'è ora) | 117.367 | **9,68%** | −17,2% | **1,00** | 1308 |
+| avvisi come veti | 23.959 | 3,33% | −13,6% | 0,50 | 580 |
+
+| Fuori campione (68) | Capitale finale | CAGR | Drawdown max | Sharpe | Operazioni |
+|---|---|---|---|---|---|
+| avvisi ignorati (com'è ora) | 62.540 | **7,12%** | −20,6% | **0,80** | 1313 |
+| avvisi come veti | 12.654 | **0,89%** | **−26,9%** | 0,16 | 722 |
+
+**L'ipotesi era sbagliata, e di molto.** Filtrare taglia il rendimento di
+due terzi sull'universo messo a punto e lo azzera quasi del tutto fuori
+campione — dove per giunta il drawdown *peggiora* (−26,9% contro −20,6%).
+Cioè i veti tolgono le operazioni buone senza togliere quelle cattive: il
+peggior risultato possibile per un filtro.
+
+Il corso aveva ragione: sono fattori di "rischio percepito", da pesare
+insieme agli altri, non divieti. Il comportamento attuale resta invariato —
+ma adesso è confermato da una misura, non solo ereditato.
+
+**Non si cercano varianti più morbide** (solo il filtro S/R, o una soglia
+più bassa, o due su tre). Provando abbastanza combinazioni una sembrerà
+buona per caso, ed è esattamente il modo in cui un backtest smette di dire
+qualcosa. L'ipotesi era una, dichiarata prima di guardare, ed è stata
+respinta con un margine che nessuna sotto-combinazione può ragionevolmente
+ribaltare.
+
 ## Cosa NON è coperto da questo codice
 
 - Le due componenti proprietarie del corso (screener "Barchart"/"ProScreener"
