@@ -1823,6 +1823,91 @@ qualcosa. L'ipotesi era una, dichiarata prima di guardare, ed è stata
 respinta con un margine che nessuna sotto-combinazione può ragionevolmente
 ribaltare.
 
+## I limiti dei numeri di questo documento (leggere prima di crederci)
+
+Tutte le cifre qui sopra sono misurate onestamente **dentro il perimetro
+del backtest**. Il perimetro però ha tre buchi, e due li avevo taciuti
+fino a ora. Vanno letti insieme ai risultati, non dopo.
+
+### 1. Survivorship bias: i numeri sono OTTIMISTI, e non so di quanto
+
+I 210 titoli del dataset sono **tutti aziende che esistono ancora oggi**.
+Verificato: zero fallite, zero delistate. Lehman Brothers non c'è. Enron
+non c'è. WorldCom non c'è.
+
+È come misurare quanto è sicuro un mestiere intervistando solo chi lo fa
+ancora. Un sistema long-only testato solo sui sopravvissuti non incontra
+mai il titolo che va a zero — e quello è esattamente il caso in cui uno
+stop-loss non ti salva, perché il salto avviene durante la notte.
+
+La letteratura stima il gonfiaggio in **1-4 punti percentuali l'anno** su
+strategie azionarie. Non posso quantificarlo qui: servirebbe un dataset
+*point-in-time* che contenga anche i morti, e quelli costano migliaia di
+euro l'anno. So il segno, non la misura.
+
+**Quindi il 7,79% fuori campione va letto come un tetto, non come una
+previsione.**
+
+### 2. Le tasse cambiano la conclusione, non solo il numero
+
+Il backtest è lordo. In Italia le plusvalenze si tassano al **26%**, e le
+due metà della strategia hanno un profilo fiscale opposto:
+
+- il **breve termine** chiude ogni posizione: realizza tutto, ogni anno;
+- **Harry Browne** realizza solo la quota venduta al ribilanciamento: il
+  resto continua a capitalizzare senza passare dal fisco.
+
+Misurato sulla stessa finestra (2008-2026, minusvalenze riportate a 4 anni
+per le azioni; per gli ETF i guadagni sono "redditi di capitale" e NON
+sono compensabili con le minusvalenze):
+
+| Su 10.000 iniziali | Tasse pagate in 18 anni |
+|---|---|
+| breve termine | **11.089** |
+| ETF (Harry Browne) | 2.414 |
+
+Il breve termine paga in tasse **più del capitale di partenza**, perché
+realizza e ripaga in continuazione per diciotto anni.
+
+Effetto sul mix ottimale:
+
+| | CAGR lordo | CAGR netto | DD netto | Sharpe netto |
+|---|---|---|---|---|
+| solo azioni | 8,97% | 8,31% | −25,5% | 0,75 |
+| solo ETF | 6,14% | 5,72% | −21,9% | 0,72 |
+| mix 30/70 | 7,11% | 6,65% | −17,9% | 0,90 |
+| **mix 40/60** | 7,41% | **6,93%** | **−17,0%** | **0,92** |
+| mix 50/50 | 7,70% | 7,20% | −16,1% | 0,91 |
+
+**Il miglior rapporto rendimento/rischio si sposta dal 50% al 40% di
+azioni una volta contate le tasse.** Non è una differenza drammatica — la
+curva è piatta fra il 40% e il 50% — ma la direzione è chiara e va nella
+direzione degli ETF.
+
+(Nota pratica, fuori dal codice: Alpaca è un broker USA. Per un residente
+italiano significa quadro RW, IVAFE e regime dichiarativo — le tasse se le
+calcola e dichiara l'investitore, nessuno le trattiene. È una cosa da
+verificare con un commercialista **prima** di usare denaro vero.)
+
+### 3. Il rischio di cambio non è modellato affatto
+
+Il conto è in **dollari** (`SHORT_TERM_ACCOUNT_CURRENCY=USD`) e il bot
+assume `SHORT_TERM_FX_RATE=1.0`, cioè che un dollaro sia un euro. Per un
+investitore che spende in euro, EUR/USD si muove del 10-15% in un anno:
+**più dell'intero rendimento annuo della strategia**. Un anno può chiudere
+bene in dollari e in pari in euro.
+
+C'è anche un'incoerenza con il corso, che per il lungo termine raccomanda
+esplicitamente strumenti "in EUR o hedged": i quattro ETF configurati (VT,
+TLT, SHY, GLD) sono tutti in dollari.
+
+### Perché è scritto qui e non corretto nel codice
+
+Il primo buco non è correggibile senza dati che non ho. Il secondo e il
+terzo si correggono cambiando *cosa si compra e dove*, non come — sono
+decisioni dell'investitore, non del programma. Quello che il codice può
+fare è non nascondere il problema: e questo è il punto di questa sezione.
+
 ## Cosa NON è coperto da questo codice
 
 - Le due componenti proprietarie del corso (screener "Barchart"/"ProScreener"

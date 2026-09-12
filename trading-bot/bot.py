@@ -1002,6 +1002,114 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
             cash_available += freed
 
 
+def _pnl_pct(current: float, entry: float, direction: str) -> float:
+    if entry <= 0:
+        return 0.0
+    return ((current - entry) / entry * 100) * (1 if direction == "long" else -1)
+
+
+_STAGE_LABEL = {
+    "pending": "ordine in attesa, non ancora eseguito",
+    "entered": "aperta, punta al primo obiettivo (1R)",
+    "1R_done": "primo obiettivo preso, stop a pareggio: non puo' piu' perdere",
+    "3R_done": "secondo obiettivo preso, corre libera",
+}
+
+
+def cmd_status(args: argparse.Namespace) -> None:
+    """Rendiconto leggibile: quanto c'e', come vanno le posizioni, cosa si
+    aspetta il bot.
+
+    Esisteva un buco banale ma reale: dopo mesi di lavoro sul motore non
+    c'era un modo di chiedere "come sto andando?" senza aprire il sito di
+    Alpaca o leggere i log. Questo comando non invia MAI ordini."""
+    broker = Broker()
+    account = broker.get_account_snapshot()
+    cur = account["currency"]
+    positions = broker.list_open_positions()
+
+    short_term = [p for p in positions if p["symbol"] not in LONG_TERM_TICKERS]
+    long_term = [p for p in positions if p["symbol"] in LONG_TERM_TICKERS]
+    investito = sum(abs(p["qty"]) * (p["current_price"] or p["avg_entry_price"]) for p in positions)
+
+    print(f"\n{'='*62}")
+    print(f" RENDICONTO  --  {market_now().strftime('%d/%m/%Y %H:%M')} (ora di New York)")
+    print(f"{'='*62}")
+    print(f"\n  Valore totale del conto : {account['equity']:>12,.2f} {cur}")
+    print(f"  di cui investito       : {investito:>12,.2f} {cur}")
+    print(f"  liquidita'             : {account['cash']:>12,.2f} {cur}")
+    if account["last_equity"] > 0:
+        giorno = account["equity"] - account["last_equity"]
+        # Il segno sta DENTRO la formattazione (+12,.2f), non incollato
+        # prima: incollandolo, l'allineamento a destra lo separava dal
+        # numero ("+     200.00").
+        print(f"  variazione di oggi     : {giorno:>+12,.2f} {cur}  ({giorno / account['last_equity'] * 100:+.2f}%)")
+
+    # --- breve termine
+    print(f"\n{'-'*62}")
+    print(f" AZIONI (breve termine) -- {len(short_term)} posizioni aperte")
+    print(f"{'-'*62}")
+    if not short_term:
+        print("  nessuna posizione aperta.")
+    for p in sorted(short_term, key=lambda x: x["symbol"]):
+        stato = position_state.get(p["symbol"])
+        direction = stato.get("direction") or ("long" if p["qty"] > 0 else "short")
+        price = p["current_price"] or p["avg_entry_price"]
+        pnl = _pnl_pct(price, p["avg_entry_price"], direction)
+        guadagno = (price - p["avg_entry_price"]) * p["qty"]
+        segno = "+" if guadagno >= 0 else ""
+        print(f"\n  {p['symbol']:<6} {int(abs(p['qty'])):>5} azioni a {p['avg_entry_price']:.2f}  ->  ora {price:.2f}")
+        print(f"         {segno}{guadagno:,.2f} {cur}  ({segno}{pnl:.1f}%)")
+        stadio = stato.get("stage")
+        if stadio:
+            print(f"         {_STAGE_LABEL.get(stadio, stadio)}")
+        if stato.get("pattern"):
+            print(f"         entrata per: {stato['pattern']}")
+
+    # --- ordini in attesa
+    attesa = sorted(set(broker.open_entry_symbols()) - {p["symbol"] for p in positions} - LONG_TERM_TICKERS)
+    print(f"\n{'-'*62}")
+    print(f" IN ATTESA -- {len(attesa)} ordini d'ingresso non ancora scattati")
+    print(f"{'-'*62}")
+    if not attesa:
+        print("  nessun ordine in attesa.")
+    for symbol in attesa:
+        stato = position_state.get(symbol)
+        livello = stato.get("entry")
+        stop = stato.get("stop_price")
+        if livello and stop:
+            print(f"  {symbol:<6} compra sopra {float(livello):.2f}, stop a {float(stop):.2f}  ({stato.get('pattern', 'n/d')})")
+        else:
+            print(f"  {symbol:<6} ordine al broker (livelli non salvati localmente)")
+
+    # --- lungo termine
+    print(f"\n{'-'*62}")
+    print(f" ETF (lungo termine, {config.LONG_TERM_AUTO_STRATEGY})")
+    print(f"{'-'*62}")
+    if not long_term:
+        print("  nessun ETF in portafoglio.")
+    valore_lt = sum(abs(p["qty"]) * (p["current_price"] or p["avg_entry_price"]) for p in long_term)
+    for p in sorted(long_term, key=lambda x: x["symbol"]):
+        price = p["current_price"] or p["avg_entry_price"]
+        valore = abs(p["qty"]) * price
+        quota = valore / valore_lt * 100 if valore_lt else 0
+        guadagno = (price - p["avg_entry_price"]) * p["qty"]
+        segno = "+" if guadagno >= 0 else ""
+        print(f"  {p['symbol']:<6} {valore:>10,.2f} {cur}  ({quota:>4.1f}% del portafoglio ETF)   {segno}{guadagno:,.2f}")
+    if config.LONG_TERM_AUTO_STRATEGY == "harry_browne":
+        ultimo = position_state.get_meta("harry_browne_last_rebalance")
+        if ultimo:
+            prossimo_dovuto = harry_browne.is_rebalance_due(date.fromisoformat(ultimo), market_today())
+            print(f"\n  Obiettivo: 25% ciascuno. Ultimo ribilanciamento: {ultimo}.")
+            ogni = {"quarterly": "ogni 3 mesi", "semiannual": "ogni 6 mesi", "annual": "una volta l'anno"}
+            cadenza = ogni.get(config.REBALANCE_FREQUENCY, config.REBALANCE_FREQUENCY)
+            print(f"  Prossimo: {'DOVUTO ORA' if prossimo_dovuto else f'non ancora ({cadenza})'}.")
+        else:
+            print("\n  Nessun ribilanciamento ancora registrato.")
+
+    print(f"\n{'='*62}\n")
+
+
 # Attese (secondi) tra i tentativi quando una fase del ciclo fallisce
 # perche' il broker e' irraggiungibile. Caso reale: il bot viene lanciato
 # subito dopo l'accensione del PC e la connessione non e' ancora pronta.
@@ -1157,6 +1265,9 @@ def main() -> None:
     p = sub.add_parser("short-term-once", help="Un ciclo: gestione posizioni aperte + screening + (opzionale) ordini")
     p.add_argument("--execute", action="store_true")
     p.set_defaults(func=cmd_short_term_once)
+
+    p = sub.add_parser("status", help="Rendiconto: quanto c'e', come vanno le posizioni, cosa si aspetta il bot")
+    p.set_defaults(func=cmd_status)
 
     p = sub.add_parser("schedule", help="Ciclo breve + lungo termine schedulato ogni giorno feriale")
     p.set_defaults(func=cmd_schedule)

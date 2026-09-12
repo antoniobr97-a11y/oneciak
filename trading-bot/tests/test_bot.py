@@ -1640,3 +1640,103 @@ def test_the_cycle_retries_after_a_500_and_then_succeeds(monkeypatch):
         bot._run_step_with_retry("breve termine", _run)
 
     assert len(tentativi) == 3      # due 500, poi passa
+
+
+# --- rendiconto ---------------------------------------------------------------
+
+def _status_broker(equity=12_500.0, cash=3_000.0, last_equity=12_300.0):
+    broker = _broker()
+    broker.get_account_snapshot.return_value = {
+        "equity": equity, "cash": cash, "last_equity": last_equity, "currency": "USD",
+    }
+    return broker
+
+
+def test_status_never_sends_orders(capsys):
+    """Un rendiconto che per sbaglio muovesse denaro sarebbe il peggior
+    tipo di bug: lo si chiede proprio quando si vuole solo guardare."""
+    broker = _status_broker()
+    broker.list_open_positions.return_value = [_position("AAPL", 10, 100.0, 112.0)]
+    broker.open_entry_symbols.return_value = set()
+
+    with patch("bot.Broker", return_value=broker), _patched_state({"AAPL": ENTERED_10}):
+        bot.cmd_status(argparse.Namespace())
+
+    broker.submit_stop_entry.assert_not_called()
+    broker.submit_stop.assert_not_called()
+    broker.submit_oco_exit.assert_not_called()
+    broker.cancel_open_orders.assert_not_called()
+    broker.flatten.assert_not_called()
+    broker.buy_market.assert_not_called()
+    broker.sell_market.assert_not_called()
+
+
+def test_status_shows_the_money_and_the_gain(capsys):
+    broker = _status_broker(equity=12_500.0, cash=3_000.0, last_equity=12_300.0)
+    broker.list_open_positions.return_value = [_position("AAPL", 10, 100.0, 112.0)]
+    broker.open_entry_symbols.return_value = set()
+
+    with patch("bot.Broker", return_value=broker), _patched_state({"AAPL": ENTERED_10}):
+        bot.cmd_status(argparse.Namespace())
+
+    out = capsys.readouterr().out
+    assert "12,500.00" in out                  # valore del conto
+    assert "3,000.00" in out                   # liquidita'
+    assert "+200.00" in out                    # guadagno di oggi
+    assert "AAPL" in out
+    assert "+120.00" in out                    # 10 azioni x (112 - 100)
+    assert "+12.0%" in out
+
+
+def test_status_separates_stocks_from_long_term_etfs():
+    etf = sorted(bot.LONG_TERM_TICKERS)[0]
+    broker = _status_broker()
+    broker.list_open_positions.return_value = [
+        _position("AAPL", 10, 100.0, 112.0), _position(etf, 20, 50.0, 55.0),
+    ]
+    broker.open_entry_symbols.return_value = set()
+
+    with patch("bot.Broker", return_value=broker), _patched_state({"AAPL": ENTERED_10}):
+        bot.cmd_status(argparse.Namespace())
+
+
+def test_status_lists_pending_entries_with_their_levels(capsys):
+    broker = _status_broker()
+    broker.list_open_positions.return_value = []
+    broker.open_entry_symbols.return_value = {"MSFT"}
+
+    stato = {"MSFT": {"entry": 420.5, "stop_price": 399.0, "stage": "pending", "pattern": "TKO"}}
+    with patch("bot.Broker", return_value=broker), _patched_state(stato):
+        bot.cmd_status(argparse.Namespace())
+
+    out = capsys.readouterr().out
+    assert "MSFT" in out and "420.50" in out and "399.00" in out and "TKO" in out
+
+
+def test_status_survives_a_position_with_no_saved_state(capsys):
+    """Una posizione aperta a mano, o con lo stato perso, non deve far
+    saltare il rendiconto: e' proprio quando qualcosa non torna che lo si
+    va a guardare."""
+    broker = _status_broker()
+    broker.list_open_positions.return_value = [_position("IGNOTO", 7, 30.0, 28.0)]
+    broker.open_entry_symbols.return_value = set()
+
+    with patch("bot.Broker", return_value=broker), _patched_state({}):
+        bot.cmd_status(argparse.Namespace())
+
+    out = capsys.readouterr().out
+    assert "IGNOTO" in out
+    assert "-14.00" in out                     # 7 x (28 - 30), perdita mostrata
+
+
+def test_status_with_an_empty_account(capsys):
+    broker = _status_broker(equity=10_000.0, cash=10_000.0, last_equity=10_000.0)
+    broker.list_open_positions.return_value = []
+    broker.open_entry_symbols.return_value = set()
+
+    with patch("bot.Broker", return_value=broker), _patched_state({}):
+        bot.cmd_status(argparse.Namespace())
+
+    out = capsys.readouterr().out
+    assert "nessuna posizione aperta" in out
+    assert "nessun ordine in attesa" in out

@@ -238,6 +238,21 @@ class Broker:
     def get_equity(self) -> float:
         return float(self.client.get_account().equity)
 
+    def get_account_snapshot(self) -> dict:
+        """Equity, cassa e valore di partenza del conto, in una chiamata
+        sola. Serve al rendiconto: chiedere separatamente equity e cassa
+        farebbe due giri di rete per due numeri che stanno nella stessa
+        risposta."""
+        account = self.client.get_account()
+        return {
+            "equity": float(account.equity),
+            "cash": float(account.cash),
+            # Alpaca fornisce l'equity dell'ultima chiusura: e' il modo per
+            # dire "quanto ho guadagnato o perso OGGI".
+            "last_equity": float(getattr(account, "last_equity", 0) or 0),
+            "currency": getattr(account, "currency", "USD"),
+        }
+
     def get_cash(self) -> float:
         """Cassa disponibile (non il buying power a margine): usata per
         limitare la size delle nuove posizioni al capitale davvero

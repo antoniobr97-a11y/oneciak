@@ -67,6 +67,20 @@ errore resta leggibile invece di sparire.
 
 ## Uso
 
+### Vedere come sta andando (RENDICONTO)
+
+Doppio clic su **RENDICONTO.bat** — oppure `python bot.py status`.
+
+Mostra, in una schermata: quanto c'è sul conto, quanto è investito e
+quanta liquidità resta, la variazione di oggi, ogni posizione aperta con il
+suo guadagno/perdita e a che punto è della scala di uscita, gli ordini
+d'ingresso ancora in attesa con i loro livelli, e il portafoglio ETF con le
+percentuali rispetto al 25% target.
+
+**Non invia mai ordini.** Si può lanciare in qualsiasi momento, anche con
+il bot acceso in un'altra finestra.
+
+
 I comandi di solo report (`long-term-status`, `short-term-screen` senza
 `--execute`) non richiedono le chiavi Alpaca, usano solo dati yfinance.
 
