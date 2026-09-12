@@ -220,3 +220,21 @@ saputo — **anche se il valore attuale è quello che rende di più.**
 
 La differenza è tutta qui: la sensibilità cerca la fragilità, non il
 massimo.
+
+### Esito (12 settembre 2026)
+
+Fatto su sei parametri. **Nessuno è fragile**: spostandoli di ±30% lo
+Sharpe resta fra 0,82 e 1,05 contro lo 0,93 di riferimento.
+
+Cinque alternative sembravano migliori dell'attuale. Non sono state
+adottate — e una di esse, la più promettente (secondo obiettivo a 2R,
+che in campione abbassava il drawdown di 4,5 punti), è stata messa alla
+prova fuori campione: **il segno si ribalta completamente**, da +0,71% a
+−1,30% di rendimento. Adottarla avrebbe peggiorato il bot.
+
+Dettagli e tabelle in STRATEGY.md, "Test di sensibilità".
+
+I restanti 12 parametri della lista non sono stati misurati: questo
+ambiente riavvia il container ogni ora e le misure lunghe non ci arrivano.
+Restano **non verificati e dichiarati tali**, che è il punto di questo
+documento.

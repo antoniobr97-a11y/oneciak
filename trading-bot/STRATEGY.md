@@ -1823,6 +1823,77 @@ qualcosa. L'ipotesi era una, dichiarata prima di guardare, ed è stata
 respinta con un margine che nessuna sotto-combinazione può ragionevolmente
 ribaltare.
 
+## Test di sensibilità: la strategia non poggia su numeri fortunati
+
+`ASSUNZIONI.md` ha contato 18 parametri scelti da me e mai verificati. La
+domanda giusta su quei numeri **non** è "quale valore rende di più" — con
+abbastanza tentativi qualcosa vince sempre per caso — ma "se lo sposto, il
+risultato regge?".
+
+Sei parametri, spostati di ±30%, misurati uno alla volta (42 titoli, dal
+2005, scansione ogni 5 giorni; il riferimento è misurato allo stesso modo,
+perché il confronto è relativo).
+
+**Riferimento (valori attuali): CAGR 8,70% · drawdown −17,5% · Sharpe 0,93**
+
+| Parametro | Attuale | Alternative | Sharpe |
+|---|---|---|---|
+| `TREND_MIN_QUALIFIERS` | 2 | 3 | 0,88 |
+| `TREND_PERFORMANCE_THRESHOLD_PCT` | 30 | 21 / 39 | 1,05 / 0,90 |
+| `WIDE_RANGE_ATR_MULT` | 1,5 | 1,05 / 1,95 | 0,82 / 0,95 |
+| `GAP_VOLATILITY_MULT` | 0,5 | 0,35 / 0,65 | 0,98 / 1,01 |
+| `TREND_ADX_THRESHOLD` | 30 | 21 / 39 | 1,01 / 0,86 |
+| `SECOND_SCALE_OUT_R` | 3,0 | 2,0 / 4,0 | 1,00 / 0,89 |
+
+**Nessun parametro è fragile.** Qualunque soglia si sposti del 30%, lo
+Sharpe resta fra 0,82 e 1,05. La strategia non dipende da un numero
+azzeccato: è il risultato che si voleva, ed è quello ottenuto.
+
+### La trappola, e perché non ci si è caduti
+
+Cinque alternative "sembrano" migliori dell'attuale. Con dodici tentativi
+è matematicamente atteso: alcuni vincono per rumore. Adottarle sarebbe
+scegliere i numeri che hanno funzionato meglio *nel passato appena
+guardato*, cioè la definizione del sovradattamento.
+
+In `ASSUNZIONI.md`, **prima** di vedere i risultati, era scritto: *"non si
+sposterà il valore verso quello che rende di più"*.
+
+Una sola ipotesi meritava una verifica vera — il secondo obiettivo a 2R
+invece di 3R — non per il rendimento (+0,08 di Sharpe è rumore) ma perché
+abbassava il drawdown di **4,5 punti**, un effetto grande, con un
+meccanismo evidente (si incassa prima, si restituisce meno) e nella
+direzione che conta di più. Messa alla prova sui 68 titoli che **non**
+l'avevano generata:
+
+| | CAGR | Drawdown | Sharpe |
+|---|---|---|---|
+| **In campione (42)** | | | |
+| 3R (attuale) | 8,70% | −17,5% | 0,93 |
+| 2R | **9,41%** | **−13,1%** | **1,00** |
+| **Fuori campione (68, mai visti)** | | | |
+| **3R (attuale)** | **8,14%** | **−14,1%** | **0,87** |
+| 2R | 6,84% | −17,5% | 0,75 |
+
+**Il segno si ribalta su tutto.** Il 2R passa da +0,71% a −1,30% di
+rendimento, e da 4,5 punti di drawdown in meno a 3,4 in più.
+
+Adottare il 2R — cioè fare quello che fa chi "ottimizza" — avrebbe
+peggiorato il bot di 1,3 punti di rendimento all'anno e 3,4 di drawdown.
+Per estensione, le altre quattro alternative che sembravano migliori sono
+quasi certamente la stessa illusione: non sono state adottate, e ora si sa
+perché era giusto.
+
+**Il corso aveva ragione sul 3R:** fuori campione batte il 2R su entrambi
+gli assi.
+
+### Cosa vale davvero questo esercizio
+
+Non ha prodotto un miglioramento. Ha prodotto qualcosa di più raro: la
+misura di quanto sarebbe costata la disciplina mancata. Una regola
+dichiarata in anticipo sembrava pedanteria; ora ha un prezzo scritto
+accanto.
+
 ## I limiti dei numeri di questo documento (leggere prima di crederci)
 
 Tutte le cifre qui sopra sono misurate onestamente **dentro il perimetro
