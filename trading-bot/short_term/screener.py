@@ -187,7 +187,6 @@ def scan_symbol(
     directions: tuple[str, ...] = ALL_DIRECTIONS,
     daily: pd.DataFrame | None = None,
     weekly: pd.DataFrame | None = None,
-    risk_scale: float | None = None,
 ) -> list[Candidate]:
     """Setup validi sul titolo, indipendentemente da quanti posti liberi ci
     siano.
@@ -251,7 +250,7 @@ def scan_symbol(
         for match in detect_all(daily, direction):
             candidate = _build_candidate(
                 symbol, direction, match, trend, daily, weekly, capital, ribbon_state,
-                sp500_df, russell_df, sector_etf, earnings, risk_scale,
+                sp500_df, russell_df, sector_etf, earnings,
             )
             if candidate is not None:
                 candidates.append(candidate)
@@ -272,7 +271,6 @@ def _build_candidate(
     russell_df: pd.DataFrame,
     sector_etf: str | None,
     earnings: risk_checks.EarningsCheck,
-    risk_scale: float | None = None,
 ) -> Candidate | None:
     levels = levels_for_setup_bar(daily, match.setup_bar_index, direction, stop_bar_index=match.stop_bar_index)
     if levels.risk_per_share <= 0:
@@ -317,14 +315,8 @@ def _build_candidate(
     if divergence.has_divergence:
         notes.append("divergenza prezzo/MACD settimanale contraria")
 
-    # Freno di volatilita' di mercato: 1.0 (nessun effetto) quando la
-    # regola e' spenta o il mercato e' tranquillo. Calcolato una volta per
-    # ciclo dal chiamante; qui si ricalcola solo per le chiamate singole.
-    if risk_scale is None:
-        risk_scale = money_management.market_risk_scale(sp500_df["close"])
     qty = money_management.position_size(
-        capital, config.SHORT_TERM_RISK_PER_TRADE_PCT * risk_scale,
-        levels.risk_per_share, config.SHORT_TERM_FX_RATE
+        capital, config.SHORT_TERM_RISK_PER_TRADE_PCT, levels.risk_per_share, config.SHORT_TERM_FX_RATE
     )
 
     last_close = float(daily["close"].iloc[-1])
@@ -462,10 +454,6 @@ def screen_universe(
     russell_df = get_daily_bars(sector.RUSSELL2000_PROXY, period="1y")
 
     directions = allowed_directions(sp500_df)
-    risk_scale = money_management.market_risk_scale(sp500_df["close"])
-    if risk_scale < 1.0:
-        log.info("Volatilita' di mercato elevata: rischio per operazione ridotto al %.0f%% del normale.",
-                 risk_scale * 100)
     if not directions:
         log.info("Nessuna direzione ammessa oggi (regime ribassista, short disattivati): nessuna nuova entrata.")
         return []
@@ -509,7 +497,6 @@ def screen_universe(
                     scan_symbol(
                         symbol, capital, sp500_df, russell_df, directions=directions,
                         daily=daily_bars.get(symbol), weekly=weekly_bars.get(symbol),
-                        risk_scale=risk_scale,
                     )
                 )
             except Exception:

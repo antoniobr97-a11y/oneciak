@@ -13,45 +13,6 @@ def position_size(capital: float, risk_pct: float, risk_per_share: float, fx_rat
     return max(0, math.floor(risk_amount / (risk_per_share / fx_rate)))
 
 
-def market_risk_scale(index_closes) -> float:
-    """Fattore (0, 1] per cui moltiplicare il rischio per operazione, in
-    base alla volatilita' realizzata del MERCATO (non del singolo titolo).
-
-    Il sizing a rischio fisso gia' si adatta alla volatilita' del SINGOLO
-    titolo, perche' lo stop e' piu' largo su un titolo nervoso e la size
-    scende di conseguenza. Quello che NON fa e' accorgersi di quando e'
-    tutto il mercato a essere nervoso -- ed e' li' che il momentum subisce
-    i suoi crolli peggiori (Barroso & Santa-Clara 2015; Daniel & Moskowitz
-    2016: i "momentum crash" si concentrano nelle fasi di alta volatilita'
-    dell'indice, e scalare l'esposizione sulla volatilita' realizzata li
-    attenua).
-
-    Regola: fattore = obiettivo / volatilita' realizzata, limitato in
-    [floor, 1.0]. Il tetto a 1.0 e' deliberato: e' un FRENO, mai un
-    acceleratore. Nei mercati tranquilli il fattore e' 1.0 e la regola non
-    tocca niente; taglia solo nelle fasi di stress vero.
-
-    Ritorna 1.0 (nessun effetto) se la regola e' disattivata o se lo
-    storico non basta: nessun freno "per sicurezza" non motivato dai dati,
-    stessa scelta gia' fatta per il filtro di regime."""
-    target = config.MARKET_VOL_TARGET
-    if not target or target <= 0:
-        return 1.0
-    lookback = config.MARKET_VOL_LOOKBACK_DAYS
-    if index_closes is None or len(index_closes) < lookback + 2:
-        return 1.0
-    # Volatilita' annualizzata dei rendimenti giornalieri sull'ultima
-    # finestra CHIUSA. La barra di oggi non e' ancora finita quando il bot
-    # decide la size, quindi va esclusa: usarla sarebbe guardare il futuro.
-    returns = index_closes.pct_change().dropna()
-    if len(returns) < lookback + 1:
-        return 1.0
-    realised = float(returns.iloc[-(lookback + 1):-1].std()) * math.sqrt(252)
-    if not realised > 0 or math.isnan(realised):
-        return 1.0
-    return min(1.0, max(config.MARKET_VOL_SCALE_FLOOR, target / realised))
-
-
 def aggregate_risk_pct(open_positions_count: int, risk_pct_per_trade: float | None = None) -> float:
     risk_pct_per_trade = risk_pct_per_trade if risk_pct_per_trade is not None else config.SHORT_TERM_RISK_PER_TRADE_PCT
     return open_positions_count * risk_pct_per_trade

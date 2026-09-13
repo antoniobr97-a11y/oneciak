@@ -46,7 +46,7 @@ def no_network(monkeypatch):
     monkeypatch.setattr(screener.risk_checks, "earnings_check", lambda symbol: risk_checks.EarningsCheck(None, None))
 
 
-def _scan(daily, monkeypatch, capital=10_000.0, risk_scale=None):
+def _scan(daily, monkeypatch, capital=10_000.0):
     weekly = daily.resample("W-FRI").agg(
         {"open": "first", "high": "max", "low": "min", "close": "last", "volume": "sum"}
     ).dropna()
@@ -54,8 +54,7 @@ def _scan(daily, monkeypatch, capital=10_000.0, risk_scale=None):
     monkeypatch.setattr(screener, "get_weekly_bars", lambda s, period="6y": weekly)
     monkeypatch.setattr(screener, "_sector_bars", lambda etf: _flat())
     index = _flat()
-    return screener.scan_symbol("TEST", capital, index, index, directions=("long",),
-                                risk_scale=risk_scale)
+    return screener.scan_symbol("TEST", capital, index, index, directions=("long",))
 
 
 def test_a_qualifying_uptrend_becomes_a_candidate(monkeypatch, no_network):
@@ -122,24 +121,3 @@ def test_the_warnings_the_user_reads_are_attached_to_the_candidate(monkeypatch, 
     assert c.sector_passes is False
     assert any("settoriale" in n for n in c.notes)
     assert c.is_actionable is True   # nota, non divieto
-
-
-def test_the_market_volatility_brake_reaches_the_order_quantity(monkeypatch, no_network):
-    """Il freno di volatilita' non deve fermarsi in money_management: deve
-    arrivare fino alla quantita' che finisce nell'ordine. Mezzo rischio,
-    meta' azioni -- e nient'altro cambia, perche' e' una regola sulla SIZE,
-    non sul setup: entrata e stop restano quelli che il grafico detta."""
-    pieno = _scan(_uptrend_with_pullback(), monkeypatch, capital=100_000.0, risk_scale=1.0)[0]
-    frenato = _scan(_uptrend_with_pullback(), monkeypatch, capital=100_000.0, risk_scale=0.5)[0]
-    assert frenato.qty == pieno.qty // 2
-    assert frenato.levels.entry == pieno.levels.entry
-    assert frenato.levels.stop_loss == pieno.levels.stop_loss
-
-
-def test_without_the_brake_nothing_changes(monkeypatch, no_network):
-    """Con la regola spenta (default) il fattore e' 1.0 e la size e'
-    identica a quella di prima: nessuna regressione silenziosa."""
-    monkeypatch.setattr(config, "MARKET_VOL_TARGET", 0.0)
-    automatico = _scan(_uptrend_with_pullback(), monkeypatch, capital=100_000.0)[0]
-    esplicito = _scan(_uptrend_with_pullback(), monkeypatch, capital=100_000.0, risk_scale=1.0)[0]
-    assert automatico.qty == esplicito.qty

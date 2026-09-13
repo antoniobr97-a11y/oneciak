@@ -66,6 +66,21 @@ empirico più forte, (b) è realizzabile con i dati già disponibili, e (c)
 punta dritta al drawdown, che è la cosa che interessa di più a chi usa
 questo bot.
 
+**ESITO (13 settembre 2026): MISURATA E RESPINTA.**
+
+Fatta. In campione funzionava benissimo (drawdown da −17,5% a −12,4%).
+Fuori campione il drawdown **peggiora** di 3,1 punti — e il criterio
+scritto prima della misura chiedeva che migliorasse su entrambi gli
+universi. Non entra.
+
+Il dettaglio interessante: fuori campione rendimento e Sharpe migliorano
+entrambi, e nelle crisi vere (2020, 2022) il freno protegge esattamente
+come la letteratura promette. Tutto il peggioramento viene da un solo
+episodio, il 2015-2016. Tabelle e ragionamento completo in STRATEGY.md,
+"Freno di volatilità di mercato: misurato, respinto".
+
+---
+
 ### 2.2 Ordinare i candidati con il momentum a 12-1 mesi
 
 **Cosa dice la ricerca.** Jegadeesh & Titman (1993) è il lavoro fondativo:

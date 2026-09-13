@@ -255,15 +255,6 @@ SECTOR_RS_LOOKBACK_DAYS = _int("SECTOR_RS_LOOKBACK_DAYS", 60)
 MARKET_REGIME_FILTER = _bool("MARKET_REGIME_FILTER", True)
 MARKET_REGIME_MA_PERIOD = _int("MARKET_REGIME_MA_PERIOD", 200)
 
-# Volatility targeting (RICERCA.md 2.1): riduce il rischio per operazione
-# quando la volatilita' realizzata dell'indice supera l'obiettivo. Mai
-# sopra 1x: e' un freno, non una leva. 0 = disattivato.
-# Il valore di default e' deciso dalla misura fuori campione, non a
-# intuito: vedi STRATEGY.md, sezione volatility targeting.
-MARKET_VOL_TARGET = _float("MARKET_VOL_TARGET", 0.0)
-MARKET_VOL_LOOKBACK_DAYS = _int("MARKET_VOL_LOOKBACK_DAYS", 21)
-MARKET_VOL_SCALE_FLOOR = _float("MARKET_VOL_SCALE_FLOOR", 0.40)
-
 # Operazioni short (STRATEGY.md "v6"): il corso le prevede e il codice le
 # implementa per intero, ma in OGNI backtest 2000-2026 (v1-v5) il lato
 # short e' in perdita netta (Profit Factor ~0.7) anche col filtro di

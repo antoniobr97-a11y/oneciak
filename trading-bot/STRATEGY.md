@@ -1894,6 +1894,106 @@ misura di quanto sarebbe costata la disciplina mancata. Una regola
 dichiarata in anticipo sembrava pedanteria; ora ha un prezzo scritto
 accanto.
 
+## Freno di volatilità di mercato: misurato, respinto (13 settembre 2026)
+
+L'idea con il sostegno empirico più forte fra quelle in `RICERCA.md`, e
+quella che attaccava direttamente il problema che all'utente interessa:
+il drawdown.
+
+**Il ragionamento.** Il sizing a rischio fisso si adatta già alla
+volatilità del *singolo* titolo — su un titolo nervoso lo stop è più
+largo e la size scende da sola. Quello che non fa è accorgersi di quando
+è *tutto il mercato* a essere nervoso. La letteratura su questo è
+insolitamente concorde: i crolli del momentum non sono diffusi nel tempo,
+si concentrano nelle fasi di alta volatilità dell'indice, e scalare
+l'esposizione sulla volatilità realizzata li attenua (Barroso &
+Santa-Clara 2015; Daniel & Moskowitz 2016).
+
+**La regola, fissata prima della misura** (`IPOTESI_VOL.md`):
+fattore = 16% / volatilità realizzata di SPY a 21 giorni, limitato fra
+0,40 e 1,00. Mai sopra 1: un freno, mai un acceleratore. Nei mercati
+tranquilli il fattore è 1,00 e la regola non tocca niente — verificato
+prima di eseguire: il fattore è 1,00 nel 63% dei giorni.
+
+**Il criterio di promozione, anch'esso fissato prima:** drawdown massimo
+migliore di almeno 2 punti, rendimento peggiore di non più di 1 punto,
+Sharpe non peggiore — **su entrambi gli universi**.
+
+### I numeri
+
+| | CAGR | DD max | Sharpe | trade |
+|---|---|---|---|---|
+| **In campione** (42 titoli, dal 2005) | | | | |
+| senza freno | 8,70% | −17,5% | 0,93 | 1065 |
+| con freno | 9,27% | **−12,4%** | 0,99 | 1031 |
+| **Fuori campione** (68 titoli mai usati, dal 2010) | | | | |
+| senza freno | 8,14% | −14,1% | 0,87 | 1025 |
+| con freno | 9,53% | **−17,2%** | 1,04 | 934 |
+
+In campione: superato con ampio margine (drawdown migliore di 5,2 punti).
+Fuori campione: **il drawdown peggiora di 3,1 punti. Criterio fallito.**
+
+### Perché è stato respinto, anche se sembra un buon risultato
+
+Questo è il caso più insidioso incontrato finora, più del secondo
+obiettivo a 2R — perché quello fuori campione ribaltava il segno e la
+risposta era ovvia. Qui no. Fuori campione il freno migliora il
+rendimento di 1,4 punti, migliora lo Sharpe di 0,17, e porta il conto
+finale da 36.848 a 45.545. **Su entrambi gli universi** rendimento e
+Sharpe migliorano. Sarebbe bastato dire *"il criterio sul drawdown era
+troppo stretto, guardate lo Sharpe"* per adottarlo con argomenti
+rispettabili.
+
+È esattamente quello che il criterio scritto in anticipo serve a
+impedire. Se il traguardo si può spostare dopo aver visto dove è caduta
+la palla, allora non era un test: era una ricerca di conferme. Il
+criterio diceva drawdown, il drawdown fuori campione peggiora, la regola
+non entra. Il codice — scritto, testato con 12 test, e funzionante — è
+stato **rimosso** (commit 52692b8, poi revert): resta nella storia di git
+per chiunque voglia riprenderlo, ma non nel bot.
+
+### Cosa dicono davvero i dati (la parte che vale)
+
+Il totale nasconde il fatto interessante. Drawdown peggiore anno per
+anno, fuori campione:
+
+| Anno | senza freno | con freno | |
+|---|---|---|---|
+| 2018 | −11% | −10% | meglio |
+| **2020** | **−14%** | **−10%** | molto meglio |
+| **2022** | **−9%** | **−5%** | molto meglio |
+| 2023 | −14% | −11% | meglio |
+| 2024 | −9% | −7% | meglio |
+| **2016** | **−14%** | **−17%** | **peggio** |
+| 2017 | −5% | −9% | peggio |
+
+**Il freno fa esattamente quello che la teoria dice**: nelle crisi di
+volatilità vere (2020, 2022) protegge, e parecchio. L'intero
+peggioramento del drawdown massimo viene da **un solo episodio**, il
+2015-2016 — che non fu uno shock di volatilità ma un'emorragia lenta, il
+tipo di mercato in cui il freno taglia la size senza che ci sia niente da
+cui proteggersi, e poi partecipa meno alla ripresa.
+
+Questo è un limite del *modo* di misurare la volatilità (deviazione
+standard a 21 giorni), non necessariamente dell'idea. Ma dirlo e poi
+adottarla lo stesso sarebbe la stessa scorciatoia di prima con una scusa
+più elaborata. Se un giorno si riprende, si riparte da un'ipotesi nuova
+dichiarata prima, non da questa riscritta dopo.
+
+### Il conto aggiornato delle idee provate
+
+| Idea | In campione | Fuori campione | Esito |
+|---|---|---|---|
+| Tetto per settore | meglio | meglio | **adottata** |
+| Filtri di rischio come veti | peggio | — | respinta |
+| Secondo obiettivo a 2R | meglio | **segno ribaltato** | respinta |
+| Freno di volatilità | meglio | **drawdown peggiore** | respinta |
+
+**Una su quattro.** È il tasso realistico, e conviene ricordarlo la
+prossima volta che un'idea sembra ovvia.
+
+---
+
 ## I limiti dei numeri di questo documento (leggere prima di crederci)
 
 Tutte le cifre qui sopra sono misurate onestamente **dentro il perimetro
