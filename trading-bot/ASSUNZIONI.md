@@ -40,13 +40,15 @@ quelli che contano di più.
 | `SHORT_TERM_MAX_PER_SECTOR` | 3 | **M** | Testato contro nessun limite. **Unica modifica che migliora rendimento E drawdown insieme** |
 | `SHORT_TERM_CAPITAL` / `LONG_TERM_CAPITAL` | 10.000 / 10.000 | **M** | Il mix 50/50 misurato su 18 anni. Netto tasse l'ottimo è 40/60, ma la curva è piatta fra i due |
 | `SHORT_TERM_MAX_DRAWDOWN_PCT` | 0 (spento) | **M** | Acceso era una trappola senza uscita (backtest v8b). Spento deliberatamente |
-| `SECOND_SCALE_OUT_R` | 3.0 | **S** | *Costante nel codice.* Il corso dice "intorno a 3R/4R": 3 scelto, 4 mai provato |
+| `SECOND_SCALE_OUT_R` | 3.0 | **M** | *Costante nel codice.* Testato contro 2 e 4. A 2R il drawdown migliorava in campione di 4,5 punti, ma **fuori campione il segno si ribalta** (+0,71% → −1,30%): 3 confermato |
 | `SECOND_SCALE_OUT_FRACTION` | 0.30 | **S** | *Costante nel codice.* Mai confrontata con altre ripartizioni |
 | `RUNNER_FRACTION` | 0.20 | **S** | *Costante nel codice.* Mai confrontata |
 
-**Il buco qui:** la scala di uscita (metà a 1R, 30% a 3R, 20% corre) non è
-mai stata confrontata con nessuna alternativa. È presa dal corso come
-struttura, ma le tre frazioni precise sono mie.
+**Il buco qui:** della scala di uscita (metà a 1R, 30% a 3R, 20% corre)
+è stato misurato solo il livello del secondo obiettivo. Le due *frazioni*
+— quanto si vende a 3R e quanto resta a correre — non sono mai state
+confrontate con alternative. Sono prese dal corso come struttura, ma i
+numeri precisi sono miei.
 
 ---
 
