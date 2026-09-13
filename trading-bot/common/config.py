@@ -255,6 +255,15 @@ SECTOR_RS_LOOKBACK_DAYS = _int("SECTOR_RS_LOOKBACK_DAYS", 60)
 MARKET_REGIME_FILTER = _bool("MARKET_REGIME_FILTER", True)
 MARKET_REGIME_MA_PERIOD = _int("MARKET_REGIME_MA_PERIOD", 200)
 
+# Trailing stop dopo 1R (STRATEGY.md "Trailing stop"). Multiplo di ATR
+# sotto il massimo raggiunto ("Chandelier exit"). 0 = disattivato, cioe'
+# stop fermo al pareggio come prima.
+SHORT_TERM_TRAILING_ATR_MULT = _float("SHORT_TERM_TRAILING_ATR_MULT", 0.0)
+SHORT_TERM_TRAILING_ATR_PERIOD = _int("SHORT_TERM_TRAILING_ATR_PERIOD", 22)
+# Spostamento minimo perche' valga la pena cancellare e reinviare lo stop:
+# fra le due operazioni la posizione e' scoperta.
+SHORT_TERM_TRAILING_MIN_MOVE_ATR = _float("SHORT_TERM_TRAILING_MIN_MOVE_ATR", 0.25)
+
 # Operazioni short (STRATEGY.md "v6"): il corso le prevede e il codice le
 # implementa per intero, ma in OGNI backtest 2000-2026 (v1-v5) il lato
 # short e' in perdita netta (Profit Factor ~0.7) anche col filtro di

@@ -34,7 +34,7 @@ from common.logger_setup import setup_logging
 from long_term import advanced_portfolio, harry_browne, pac, risk_profile
 from long_term.advanced_portfolio import closed_monthly_closes
 from short_term import money_management, sector
-from short_term.indicators import sma
+from short_term.indicators import atr, sma
 from short_term.screener import Candidate, screen_universe
 
 log = logging.getLogger("bot")
@@ -406,6 +406,19 @@ SECOND_SCALE_OUT_FRACTION = 0.30  # frazione della size ORIGINALE venduta a 3R
 RUNNER_FRACTION = 0.20  # quota residua lasciata correre fino al segnale di inversione
 LONG_TERM_MA_PERIOD = 200  # SMA lunga per l'uscita del "runner" (il corso cita "tipo 100/200")
 
+# Trailing stop (STRATEGY.md "Trailing stop: misurato e adottato").
+# Dopo 1R lo stop andava a pareggio e restava li' finche' il prezzo non
+# chiudeva sotto la SMA200: fra il massimo e quell'incrocio il guadagno
+# maturato si restituiva tutto. Ora lo stop sale col massimo raggiunto.
+# "Chandelier exit" (Chuck LeBeau): massimo - 3 x ATR(22).
+TRAIL_ATR_MULT = config.SHORT_TERM_TRAILING_ATR_MULT
+TRAIL_ATR_PERIOD = config.SHORT_TERM_TRAILING_ATR_PERIOD
+# Soglia minima di movimento. Nel backtest lo stop e' un numero che si
+# aggiorna gratis; qui ogni spostamento e' una cancellazione seguita da un
+# reinvio, e fra le due la posizione e' scoperta. Si sposta solo quando la
+# protezione guadagnata vale il viaggio. Misurata, non assunta.
+TRAIL_MIN_MOVE_ATR = config.SHORT_TERM_TRAILING_MIN_MOVE_ATR
+
 
 def _r_multiple(price: float, entry: float, risk_per_share: float, direction: str) -> float:
     if risk_per_share <= 0:
@@ -530,7 +543,52 @@ def _protective_stop_price(direction: str, wanted: float, current_price: float |
     return wanted
 
 
-def _place_entered_structure(broker, symbol, direction, abs_qty, entry, risk, stop_price, half) -> None:
+def _trailing_stop_level(bars, direction: str, since: str | None) -> tuple[float, float] | None:
+    """(livello di trailing, ATR) dalle barre giornaliere, o None se non
+    calcolabile.
+
+    Il massimo si misura dal giorno DOPO l'esecuzione di 1R, non
+    dall'entrata: e' quello che e' stato misurato nel backtest, e la
+    differenza non e' cosmetica -- partire dall'entrata alzerebbe subito lo
+    stop molto di piu'.
+
+    `since` e' la data in cui la posizione e' passata a '1R_done'. Se manca
+    (stato scritto da una versione precedente del bot) si usa tutta la
+    finestra disponibile, che e' la scelta prudente: un massimo piu' alto
+    non puo' che dare uno stop piu' alto, e _protective_stop_price rifiuta
+    comunque qualsiasi livello non protettivo."""
+    if not TRAIL_ATR_MULT:
+        return None
+    if bars is None or len(bars) < TRAIL_ATR_PERIOD + 1:
+        return None
+    finestra = bars
+    if since:
+        successive = bars[bars.index > pd.Timestamp(since)]
+        # L'ATR ha bisogno della sua finestra: si taglia solo il calcolo del
+        # massimo, non la serie su cui si misura la volatilita'.
+        if len(successive) == 0:
+            return None
+        finestra = successive
+    valore_atr = atr(bars["high"], bars["low"], bars["close"], TRAIL_ATR_PERIOD)
+    if not len(valore_atr) or pd.isna(valore_atr.iloc[-1]) or valore_atr.iloc[-1] <= 0:
+        return None
+    a = float(valore_atr.iloc[-1])
+    if direction == "long":
+        return float(finestra["high"].max()) - TRAIL_ATR_MULT * a, a
+    return float(finestra["low"].min()) + TRAIL_ATR_MULT * a, a
+
+
+def _trail_improves(direction: str, nuovo: float, attuale: float, valore_atr: float) -> bool:
+    """Vero solo se lo spostamento vale la finestra di scopertura che apre.
+    Lo stop non torna MAI indietro: e' la garanzia che rende un trailing
+    una protezione e non una scommessa."""
+    margine = TRAIL_MIN_MOVE_ATR * valore_atr
+    if direction == "long":
+        return nuovo > attuale + margine
+    return nuovo < attuale - margine
+
+
+def _place_entered_structure(broker, symbol, direction, abs_qty, entry, risk, stop_price, half) -> bool:
     """Stadio 'entered' (corso, video 44 scenario A/B): sulla meta' da
     vendere a T1 un OCO (sell limit a entrata+1R / sell stop allo stop
     iniziale); sull'altra meta' un sell stop allo stop iniziale. Se il
@@ -547,13 +605,15 @@ def _place_entered_structure(broker, symbol, direction, abs_qty, entry, risk, st
             broker.submit_stop(symbol, rest, stop_price, direction)
     except Exception:
         _fallback_protect(broker, symbol, direction, abs_qty, stop_price)
+        return False
+    return True
 
 
-def _place_1r_done_structure(broker, symbol, direction, abs_qty, entry, risk, second, current_price=None, initial_stop=None) -> None:
+def _place_1r_done_structure(broker, symbol, direction, abs_qty, entry, risk, second, current_price=None, initial_stop=None, wanted_stop=None) -> bool:
     """Stadio '1R_done': stop a pareggio su tutto il residuo; sulla quota
     da vendere a 3R un OCO (sell limit a entrata+3R / sell stop a
     pareggio), sul runner un sell stop a pareggio."""
-    stop = _protective_stop_price(direction, entry, current_price, initial_stop)
+    stop = _protective_stop_price(direction, wanted_stop if wanted_stop is not None else entry, current_price, initial_stop)
     broker.cancel_open_orders(symbol)
     oco_qty = min(second, abs_qty)
     rest = abs_qty - oco_qty
@@ -564,9 +624,11 @@ def _place_1r_done_structure(broker, symbol, direction, abs_qty, entry, risk, se
             broker.submit_stop(symbol, rest, stop, direction)
     except Exception:
         _fallback_protect(broker, symbol, direction, abs_qty, stop)
+        return False
+    return True
 
 
-def _place_runner_structure(broker, symbol, direction, abs_qty, entry, current_price=None, initial_stop=None) -> None:
+def _place_runner_structure(broker, symbol, direction, abs_qty, entry, current_price=None, initial_stop=None, wanted_stop=None) -> bool:
     """Stadio '3R_done': solo lo stop a pareggio sul runner; l'uscita e'
     decisa dal ciclo giornaliero sull'inversione della SMA200.
 
@@ -574,12 +636,55 @@ def _place_runner_structure(broker, symbol, direction, abs_qty, entry, current_p
     una finestra in cui la posizione e' senza protezione: se l'invio
     fallisce si ripiega (e si urla) invece di lasciarla scoperta in
     silenzio fino al ciclo del giorno dopo."""
-    stop = _protective_stop_price(direction, entry, current_price, initial_stop)
+    stop = _protective_stop_price(direction, wanted_stop if wanted_stop is not None else entry, current_price, initial_stop)
     broker.cancel_open_orders(symbol)
     try:
         broker.submit_stop(symbol, abs_qty, stop, direction)
     except Exception:
         _fallback_protect(broker, symbol, direction, abs_qty, stop)
+        return False
+    return True
+
+
+def _maybe_trail(broker, symbol, direction, abs_qty, entry, risk, second, current_price,
+                 initial_stop, state, stage, bars) -> bool:
+    """Alza lo stop se il massimo raggiunto lo consente. Vero se spostato.
+
+    Lo stop di riferimento e' quello gia' applicato (`trail_stop` in stato),
+    non il pareggio: altrimenti a ogni ciclo si ripartirebbe da capo e lo
+    stop non salirebbe mai davvero.
+
+    Se il reinvio fallisce, lo stato NON viene aggiornato: il ciclo dopo
+    ritrova lo stop vecchio e riprova, invece di credere di aver protetto
+    a un livello che al broker non esiste."""
+    livello = _trailing_stop_level(bars, direction, state.get("trail_since"))
+    if livello is None:
+        return False
+    nuovo, valore_atr = livello
+    attuale = float(state.get("trail_stop") or entry)
+    if not _trail_improves(direction, nuovo, attuale, valore_atr):
+        return False
+    # Uno stop non protettivo (gia' oltre il prezzo corrente) verrebbe
+    # rifiutato dal broker e chiuderebbe subito la posizione al mercato:
+    # _protective_stop_price lo intercetta, ma e' meglio non arrivarci.
+    if current_price is not None:
+        if (direction == "long" and nuovo >= current_price) or (direction == "short" and nuovo <= current_price):
+            return False
+    if stage == "1R_done":
+        riuscito = _place_1r_done_structure(broker, symbol, direction, abs_qty, entry, risk, second,
+                                            current_price, initial_stop, wanted_stop=nuovo)
+    else:
+        riuscito = _place_runner_structure(broker, symbol, direction, abs_qty, entry,
+                                           current_price, initial_stop, wanted_stop=nuovo)
+    if not riuscito:
+        # Il ripiego ha rimesso una protezione, ma NON a questo livello.
+        # Registrarlo direbbe una bugia allo stato, e il ciclo di domani
+        # non riproverebbe credendo di essere gia' protetto piu' in alto.
+        log.warning("%s: il broker ha rifiutato lo stop a %.2f, si riprova al prossimo ciclo.", symbol, nuovo)
+        return False
+    position_state.set_fields(symbol, trail_stop=nuovo)
+    log.info("%s: stop alzato a %.2f (massimo - %.1f x ATR%d).", symbol, nuovo, TRAIL_ATR_MULT, TRAIL_ATR_PERIOD)
+    return True
 
 
 def manage_open_short_term_positions(broker: Broker) -> None:
@@ -662,13 +767,13 @@ def manage_open_short_term_positions(broker: Broker) -> None:
                 if half > 0 and abs_qty <= original_qty - half:
                     # T1 eseguito: venduta meta', da qui il resto lavora a rischio zero
                     _place_1r_done_structure(broker, symbol, direction, abs_qty, entry_price, risk, second, current_price, stop_price)
-                    position_state.set_fields(symbol, stage="1R_done")
+                    position_state.set_fields(symbol, stage="1R_done", trail_since=str(market_today()))
                     notify.alert(f"{symbol}: 1R raggiunto, venduta meta' posizione, stop a pareggio sul resto")
                 elif half == 0 and current_price is not None and _r_multiple(current_price, entry_price, risk, direction) >= 1.0:
                     # Size 1: niente da vendere a meta'; lo stop va comunque
                     # al pareggio (unico modo di applicare "zero rischio dopo 1R").
                     _place_runner_structure(broker, symbol, direction, abs_qty, entry_price, current_price, stop_price)
-                    position_state.set_fields(symbol, stage="1R_done")
+                    position_state.set_fields(symbol, stage="1R_done", trail_since=str(market_today()))
                 elif _exit_structure_incomplete(open_orders, expects_limit=half > 0):
                     if not stop_price:
                         log.error("%s: nessun ordine di uscita e nessuno stop salvato -- VA MESSO A MANO.", symbol)
@@ -693,9 +798,18 @@ def manage_open_short_term_positions(broker: Broker) -> None:
                 elif _exit_structure_incomplete(open_orders, expects_limit=second > 0):
                     _place_1r_done_structure(broker, symbol, direction, abs_qty, entry_price, risk, second, current_price, stop_price)
                     notify.alert(f"{symbol}: ordini di uscita mancanti, riemessi", level="warning")
+                elif bars_are_final:
+                    # Solo a mercato chiuso: il massimo di una giornata in
+                    # corso non e' ancora il massimo della giornata, e uno
+                    # stop alzato su un massimo provvisorio non si puo'
+                    # abbassare quando il titolo scende nel pomeriggio.
+                    _maybe_trail(broker, symbol, direction, abs_qty, entry_price, risk, second,
+                                 current_price, stop_price, state, "1R_done",
+                                 get_daily_bars(symbol, period="1y"))
 
             elif stage == "3R_done":
                 reversed_trend = False
+                bars = None
                 if bars_are_final:
                     # Due anni di barre per una media a 200: con un solo
                     # anno (~252 barre) bastava un buco nei dati perche' la
@@ -729,6 +843,9 @@ def manage_open_short_term_positions(broker: Broker) -> None:
                 elif _exit_structure_incomplete(open_orders, expects_limit=False):
                     _place_runner_structure(broker, symbol, direction, abs_qty, entry_price, current_price, stop_price)
                     notify.alert(f"{symbol}: stop del runner mancante, riemesso", level="warning")
+                elif bars_are_final and bars is not None:
+                    _maybe_trail(broker, symbol, direction, abs_qty, entry_price, risk, second,
+                                 current_price, stop_price, state, "3R_done", bars)
         except Exception:
             log.exception("Errore gestendo la posizione aperta su %s, salto al prossimo titolo.", symbol)
             notify.alert(f"Errore gestendo la posizione {symbol}", level="error")
