@@ -29,7 +29,7 @@ def trailing_acceso(monkeypatch):
     documentata e non qualcosa che i test impongono di nascosto."""
     monkeypatch.setattr(bot, "TRAIL_ATR_MULT", 3.0)
     monkeypatch.setattr(bot, "TRAIL_ATR_PERIOD", 22)
-    monkeypatch.setattr(bot, "TRAIL_MIN_MOVE_ATR", 0.25)
+    monkeypatch.setattr(bot, "TRAIL_MIN_MOVE_ATR", 0.0)
 
 
 def test_spento_di_default_non_tocca_nessuno_stop(monkeypatch):
@@ -107,12 +107,25 @@ def test_lo_stop_non_torna_mai_indietro():
     assert bot._trail_improves("short", 110.0, 100.0, 2.0) is False
 
 
-def test_i_movimenti_minuscoli_non_valgono_il_viaggio():
-    """Sotto la soglia non si tocca niente: ogni spostamento apre una
-    finestra in cui la posizione e' senza stop al broker."""
-    margine = bot.TRAIL_MIN_MOVE_ATR * 2.0
+def test_la_soglia_di_movimento_e_configurabile_ma_di_default_e_zero(monkeypatch):
+    """Di default lo stop si sposta a ogni miglioramento, come e' stato
+    misurato: il trailing gira solo a mercato chiuso, quindi la finestra
+    fra cancellazione e reinvio non ha prezzo. La soglia resta disponibile
+    in configurazione, e quando c'e' deve essere rispettata."""
+    from common import config as cfg
+    assert cfg.SHORT_TERM_TRAILING_MIN_MOVE_ATR == 0.0
+    monkeypatch.setattr(bot, "TRAIL_MIN_MOVE_ATR", 0.25)
+    margine = 0.25 * 2.0
     assert bot._trail_improves("long", 100.0 + margine * 0.5, 100.0, 2.0) is False
     assert bot._trail_improves("long", 100.0 + margine * 1.5, 100.0, 2.0) is True
+
+
+def test_il_trailing_e_acceso_di_default():
+    """La misura ha superato in campione E fuori campione: l'interruttore
+    e' acceso. Se questo test fallisce, qualcuno ha spento una funzione
+    validata senza passare da una nuova misura."""
+    from common import config as cfg
+    assert cfg.SHORT_TERM_TRAILING_ATR_MULT == 3.0
 
 
 # --- dentro il ciclo giornaliero -----------------------------------------

@@ -1894,6 +1894,100 @@ misura di quanto sarebbe costata la disciplina mancata. Una regola
 dichiarata in anticipo sembrava pedanteria; ora ha un prezzo scritto
 accanto.
 
+## Trailing stop: misurato e ADOTTATO (13 settembre 2026)
+
+**Il problema.** Dopo 1R lo stop andava a pareggio e ci restava finché il
+prezzo non chiudeva sotto la SMA200. Fra il massimo di un movimento e
+quell'incrocio possono passare mesi, e il guadagno maturato si restituiva
+tutto.
+
+**La regola, fissata prima della misura** (`IPOTESI_TRAIL.md`): Chandelier
+exit (LeBeau) — stop = massimo dal giorno dopo 1R meno 3 × ATR(22). Sale e
+non scende mai. Attivo solo dopo 1R: prima, lo stop è quanto si rischia
+sull'operazione e non si tocca.
+
+**Il criterio, anch'esso fissato prima:** rendimento +0,5 punti, drawdown
+non peggiore di 1 punto, Sharpe non peggiore, **su entrambi gli universi**.
+
+### I numeri
+
+| | CAGR | DD max | Sharpe | trade |
+|---|---|---|---|---|
+| **In campione** (42 titoli, dal 2005) | | | | |
+| senza trailing | 8,70% | −17,5% | 0,93 | 1065 |
+| con trailing | **9,98%** | **−13,5%** | **1,02** | 1881 |
+| **Fuori campione** (68 titoli mai usati, dal 2010) | | | | |
+| senza trailing | 8,14% | −14,1% | 0,87 | 1025 |
+| con trailing | **8,89%** | **−12,7%** | **0,93** | 1809 |
+
+Tutti e tre i criteri superati su entrambi. **Adottato.**
+
+### Il meccanismo non è quello che avevo ipotizzato
+
+Scomposizione delle uscite, fuori campione:
+
+| | senza trailing | con trailing |
+|---|---|---|
+| arrivi a 1R | 331 | **588** |
+| uscite su SMA200 | 108 (+15.743) | 11 (+668) |
+| uscite su stop | 462 (−39.579) | 1072 (**−31.275**) |
+| **P/L totale** | **+23.554** | **+30.605** |
+
+Il trailing **non protegge il runner: lo sostituisce** — le uscite sulla
+SMA200 quasi spariscono. Il guadagno viene da altro: il capitale si libera
+molto prima, il bot apre molte più posizioni e arriva a 1R su 588 invece
+che su 331. E le perdite complessive *calano* nonostante più del doppio di
+uscite per stop, perché molte scattano sopra il prezzo d'ingresso.
+
+### Robustezza
+
+Moltiplicatore, fuori campione: 2× → 8,89% / Sharpe 0,92; **3× → 8,89% /
+0,93**; 4× → 11,03% / 1,12. L'effetto non poggia su un numero fortunato.
+Il 4 renderebbe di più ma ha un drawdown peggiore (−14,6%), e soprattutto
+**il 3 era il valore dichiarato prima**: sceglierlo dopo aver visto le
+tabelle sarebbe stato barare.
+
+### Tasse
+
+Le operazioni quasi raddoppiano (1025 → 1809), e il backtest è al lordo.
+Verificato a parte col 26% italiano e il riporto delle minusvalenze a
+quattro anni: **netto +22.647 contro +17.430**. Si pagano 1.833 € di
+imposte in più e se ne guadagnano 7.051. Il vantaggio resta.
+*(Limite del calcolo: applica l'imposta al flusso di utili senza rifare la
+simulazione col capitale ridotto dalle tasse pagate prima.)*
+
+### La soglia di movimento: un errore mio, trovato e corretto
+
+Nel backtest lo stop è un numero che si aggiorna gratis. Nel bot vero ogni
+spostamento è una cancellazione seguita da un reinvio, e temevo la
+finestra in cui la posizione resta scoperta. Ho quindi aggiunto una soglia
+minima di 0,25 × ATR — e l'ho misurata, invece di darla per innocua.
+
+**Fuori campione peggiorava il drawdown di 5,8 punti** (−14,1% → −19,9%).
+
+Prima di respingere tutto ho ricontrollato *perché* avevo messo la soglia,
+e il motivo era sbagliato: il trailing gira solo quando `bars_are_final`,
+cioè **a mercato chiuso**, e a mercato chiuso non si scambia. Quella
+finestra non ha prezzo. La soglia risolveva un problema inesistente e
+costava cinque punti di drawdown.
+
+Soglia rimossa (resta configurabile, default 0). Nel bot gira esattamente
+la regola che è stata misurata — non qualcosa che le somiglia.
+
+### Il conto delle idee provate
+
+| Idea | In campione | Fuori campione | Esito |
+|---|---|---|---|
+| Tetto per settore | meglio | meglio | **adottata** |
+| Filtri di rischio come veti | peggio | — | respinta |
+| Secondo obiettivo a 2R | meglio | segno ribaltato | respinta |
+| Freno di volatilità | meglio | drawdown peggiore | respinta |
+| **Trailing stop** | **meglio** | **meglio** | **adottata** |
+
+**Due su cinque.**
+
+---
+
 ## Freno di volatilità di mercato: misurato, respinto (13 settembre 2026)
 
 L'idea con il sostegno empirico più forte fra quelle in `RICERCA.md`, e
