@@ -35,7 +35,7 @@ quelli che contano di più.
 
 | Parametro | Valore | | Note |
 |---|---|---|---|
-| `SHORT_TERM_RISK_PER_TRADE_PCT` | 1.0 | **M** | Testato 0,25 / 0,5 / 1 / 2. Altopiano, non scogliera. Sharpe identico a 0,5% con drawdown migliore |
+| `SHORT_TERM_RISK_PER_TRADE_PCT` | 1.0 | **M+C** | Testato 0,25 / 0,5 / 1 / 2: altopiano, non scogliera. Il corso (video 45) dice *"all'inizio non rischiare oltre lo 0,5, al massimo l'1%"*: l'1% è il **tetto** concesso, non una violazione. Scelta confermata dall'utente il 14/09 con la citazione davanti |
 | `SHORT_TERM_MAX_AGGREGATE_RISK_PCT` | 12.0 | **M** | Testato contro 6. A 6 lo Sharpe peggiora (0,92 contro 1,00) |
 | `SHORT_TERM_MAX_PER_SECTOR` | 3 | **M** | Testato contro nessun limite. **Unica modifica che migliora rendimento E drawdown insieme** |
 | `SHORT_TERM_CAPITAL` / `LONG_TERM_CAPITAL` | 10.000 / 10.000 | **M** | Il mix 50/50 misurato su 18 anni. Netto tasse l'ottimo è 40/60, ma la curva è piatta fra i due |

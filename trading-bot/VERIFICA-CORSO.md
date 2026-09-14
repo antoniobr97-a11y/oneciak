@@ -39,6 +39,12 @@ l'informazione davanti.
 Le due fonti concordano: il backtest dice che a 0,5% il drawdown scende da
 −17,2% a −14,1% con Sharpe identico. Il corso dice *"tienilo basso"*.
 
+**DECISIONE (14 settembre 2026): l'utente conferma l'1%**, questa volta con
+la citazione del corso davanti. Non è una violazione: la frase è *"non
+rischiare oltre lo 0,5, **al massimo l'1%**"*, quindi l'1% è il tetto che
+il corso concede a chi inizia, e il bot ci sta esattamente sopra, non
+oltre. Questione chiusa: non va riaperta senza un motivo nuovo.
+
 # ERRORE 2 — il trailing stop NON contraddiceva il corso
 
 Il 13 settembre il trailing è stato spento per due motivi. Il secondo era
