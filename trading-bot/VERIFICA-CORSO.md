@@ -9,8 +9,37 @@ trovava. Recuperate dal registro: **27 video, 1,2 MB**.
 
 Materiale a pagamento: restano in locale, non vengono committate.
 
-**Mancano** i video 21, 22, 24, 26, 28, 35, 37, 42, 43. Tutto quanto segue
-vale per i 27 recuperati.
+**La copertura della strategia è completa.** I numeri non consegnati (21,
+22, 24, 26, 28, 35, 37, 42, 43) non sono buchi: la strategia si chiude da
+sola. Il video 34 dice *"l'ultimo pattern di continuazione del trend"*, il
+36 *"l'ultimo pattern della collana"*, il 46 è il riepilogo generale con
+la checklist operativa. Ogni componente implementata nel bot ha la sua
+lezione presente:
+
+| Componente | Video |
+|---|---|
+| Qualificazione del trend | 27 |
+| Pullback Semplice | 29 |
+| Trend Knockout (TKO) | 30 |
+| Pullback Persistente | 31 |
+| Trend Pivot Pullback | 32 |
+| Second Entry Pullback | 33 |
+| Sacro Graal (pullback su EMA20) | 34 |
+| Bowai | 36 |
+| Analisi settoriale | 38 |
+| Indicatori e volatilità | 39 |
+| Screen automatici | 40 |
+| Calcolo di entrata e stop | 41 |
+| Money management e Profit Factor | 44 |
+| Rischio percentuale e drawdown | 45 |
+| Checklist operativa finale | 46 |
+| Errori da non fare mai | 47 |
+| Lungo termine: ETF, Harry Browne, PAC | lezioni iniziali |
+
+**I sette pattern del codice corrispondono uno a uno ai sette del corso**
+(`patterns.py`: pullback_semplice, tko, pullback_persistente,
+trend_pivot_pullback, second_entry_pullback, sacro_graal, bowai).
+Nessuno inventato, nessuno mancante.
 
 **Avvertenza sulla fonte.** Sono sottotitoli automatici di YouTube, con
 errori: *"votai"* per Bowai, *"AD"/"DX"* per ADX, *"Drwdrown"* per
@@ -137,5 +166,6 @@ bot lo tratta come un veto assoluto. Più severo del corso.
 
 # Ancora da fare
 
-- I video 21, 22, 24, 26, 28, 35, 37, 42, 43 non sono disponibili
-- Il PAC e le regole ETF non sono ancora stati confrontati riga per riga
+- Il PAC e le regole ETF non sono ancora stati confrontati riga per riga:
+  la verifica si è concentrata sulla parte azionaria, che è quella che
+  opera ogni giorno.
