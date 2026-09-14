@@ -1974,6 +1974,40 @@ costava cinque punti di drawdown.
 Soglia rimossa (resta configurabile, default 0). Nel bot gira esattamente
 la regola che è stata misurata — non qualcosa che le somiglia.
 
+### Costi: il trailing raddoppia le operazioni, quanto costa davvero
+
+Domanda posta dall'utente, e giusta: 1.809 operazioni invece di 1.025
+costano di più. Il conto completo, fuori campione, 16 anni:
+
+| | senza trailing | con trailing | differenza |
+|---|---|---|---|
+| operazioni | 1.025 | 1.809 | 1,76× |
+| controvalore scambiato | 4,16 M$ | 6,72 M$ | +2,56 M$ |
+| slippage 0,05% (**già nel backtest**) | 2.080 $ | 3.361 $ | +1.282 $ |
+| commissioni Alpaca | 0 $ | 0 $ | 0 $ |
+| SEC + FINRA (non nel backtest) | 65 $ | 105 $ | +40 $ |
+| imposta italiana 26% | 6.124 $ | 7.957 $ | +1.833 $ |
+| **utile netto** | **17.365 $** | **22.543 $** | **+5.178 $** |
+
+Tre precisazioni che cambiano la lettura:
+
+1. **Lo slippage era già sottratto.** Il backtest toglie lo 0,05% a ogni
+   eseguito, in entrata e in uscita: il 9,98% e l'8,89% riportati sopra
+   sono già al netto. Non è un costo che spunta dopo.
+2. **Alpaca non fa pagare commissioni sulle azioni USA.** È la condizione
+   che rende praticabile questa modifica: con un broker a 5 € a
+   operazione, 1.809 operazioni farebbero 9.045 € e il vantaggio
+   sparirebbe. **Su un broker a commissione fissa il trailing è da
+   respingere** — va scritto, perché il giorno che si cambia broker questa
+   riga smette di valere.
+3. **Punto di rottura.** Lo 0,05% è una stima, non un dato. Il vantaggio
+   netto si azzera quando lo slippage raggiunge lo **0,25% per eseguito**,
+   cioè cinque volte la stima: l'extra di controvalore scambiato
+   (2,56 M$) moltiplicato per l'eccesso di slippage eguaglia i 5.178 $ di
+   vantaggio. Il bot filtra per liquidità e compra titoli molto scambiati,
+   dove lo 0,25% sarebbe enorme — ma il margine ora è un numero, non una
+   rassicurazione.
+
 ### Il conto delle idee provate
 
 | Idea | In campione | Fuori campione | Esito |
