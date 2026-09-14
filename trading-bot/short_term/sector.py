@@ -60,6 +60,7 @@ def get_sector_etf(symbol: str, today: date | None = None) -> str | None:
     try:
         info = yf.Ticker(symbol).info
         sector = info.get("sector")
+        quote_type = info.get("quoteType")
     except Exception as exc:
         # Non si mette in cache un fallimento di rete: sarebbe come
         # decidere per 30 giorni che questo titolo non ha settore.
@@ -68,7 +69,36 @@ def get_sector_etf(symbol: str, today: date | None = None) -> str | None:
 
     etf = SPDR_SECTOR_ETFS.get(sector)
     symbol_cache.put(symbol, "sector_etf", etf, today)
+    # Stessa risposta di rete, nessuna chiamata in piu': si registra anche
+    # che tipo di strumento e', per poter tenere fuori gli ETF dal lato
+    # azionario (vedi is_equity).
+    symbol_cache.put(symbol, "quote_type", quote_type, today)
     return etf
+
+
+def is_equity(symbol: str, today: date | None = None) -> bool | None:
+    """True se lo strumento e' un'AZIONE, False se e' un ETF o altro, None
+    se non si sa.
+
+    Serve a tenere il lato di breve termine su quello che il corso insegna:
+    titoli azionari. Un ETF (esempio visto dal vivo: IBIT, che replica il
+    bitcoin) non ha settore, quindi salterebbe l'analisi settoriale -- che
+    il corso chiama "veramente fondamentale" -- e passerebbe comunque.
+
+    La distinzione NON e' "ha un settore": un'azione vera puo' non averlo
+    per un buco nei dati di Yahoo, e scartarla per quello sarebbe un
+    errore diverso. Si guarda il tipo di strumento dichiarato.
+
+    Il dato arriva dalla stessa risposta di rete gia' usata per il settore
+    ed e' nella stessa cache: nessuna chiamata aggiuntiva."""
+    today = today or market_today()
+    cached = symbol_cache.get(symbol, "quote_type", today, symbol_cache.SECTOR_TTL_DAYS)
+    if cached is symbol_cache.MISSING:
+        get_sector_etf(symbol, today)  # popola la cache (una sola chiamata per entrambi)
+        cached = symbol_cache.get(symbol, "quote_type", today, symbol_cache.SECTOR_TTL_DAYS)
+    if cached is symbol_cache.MISSING or cached is None:
+        return None
+    return str(cached).upper() == "EQUITY"
 
 
 def relative_strength(price_a: pd.Series, price_b: pd.Series) -> pd.Series:

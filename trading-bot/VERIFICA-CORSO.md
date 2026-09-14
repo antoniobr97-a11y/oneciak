@@ -346,6 +346,42 @@ mensile ✅ · PAC manuale ✅.
 
 ---
 
+# Trovato in esercizio: il bot comprava ETF (corretto il 14/09/2026)
+
+Il ciclo del 14 settembre ha piazzato un ordine su **IBIT**, un ETF che
+replica il bitcoin, come posizione più grande della serata:
+
+```
+IBIT LONG -- TKO   size=34 azioni
+  settore=n/d (conferma=no)
+  ! settore non determinato, analisi settoriale saltata
+```
+
+Non era un bug: l'universo includeva deliberatamente gli ETF, perché
+Alpaca classifica azioni ed ETF entrambi come `us_equity`. Ma:
+
+1. il corso insegna la strategia di breve sui **titoli azionari** (video 23
+   e seguenti); il bitcoin non compare da nessuna parte;
+2. un ETF non ha settore, quindi **salta l'analisi settoriale**, che il
+   corso chiama *"veramente fondamentale"*;
+3. era la posizione più grande della serata, senza quella conferma.
+
+**Corretto su scelta dell'utente**: `SHORT_TERM_STOCKS_ONLY=true`.
+
+Il modo importa. La regola **non** è "non ha settore, quindi è un ETF":
+un'azione vera può non avere il settore per un buco nei dati di Yahoo, e
+scartarla per quello sarebbe un errore peggiore di quello che si sta
+correggendo. Si guarda il **tipo di strumento dichiarato** (`quoteType`),
+che arriva nella stessa risposta di rete già usata per il settore —
+nessuna chiamata in più su 300 titoli a sera. Nel dubbio (tipo sconosciuto,
+Yahoo che non risponde) **non si scarta niente**.
+
+Nove test difendono la regola, compreso quello che verifica che
+un'azione senza settore NON venga scambiata per un ETF, e quello che
+conta le chiamate di rete.
+
+---
+
 # LE DUE UNICHE COSE NON IMPLEMENTATE
 
 Su 703 affermazioni numeriche, dopo tutte le verifiche, restano due

@@ -176,6 +176,16 @@ SHORT_TERM_FULL_MARKET_MAX_SYMBOLS = _int("SHORT_TERM_FULL_MARKET_MAX_SYMBOLS", 
 # difensive più piatte, non i titoli con un minimo di movimento reale.
 SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT = _float("SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT", 25.0)
 
+# Solo AZIONI nel lato di breve termine, niente ETF (scelta dell'utente,
+# 14 settembre 2026). Il corso insegna la strategia di breve sui titoli
+# azionari; l'universo Alpaca invece mescola azioni ed ETF perche' li
+# classifica tutti come "us_equity". Un ETF non ha settore, quindi salta
+# l'analisi settoriale -- che il corso chiama "veramente fondamentale" --
+# e verrebbe comprato senza quella conferma. Successo dal vivo il
+# 14/09/2026 con IBIT (bitcoin), la posizione piu' grande della serata.
+# false = torna a comprare anche ETF non a leva.
+SHORT_TERM_STOCKS_ONLY = _bool("SHORT_TERM_STOCKS_ONLY", True)
+
 # Massimo di posizioni contemporanee nello STESSO settore.
 #
 # Il tetto di rischio aggregato (SHORT_TERM_MAX_AGGREGATE_RISK_PCT) conta

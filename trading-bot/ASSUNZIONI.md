@@ -110,6 +110,7 @@ non vuol dire giuste.
 | `SHORT_TERM_USE_FULL_MARKET` | True | **M** | Scansiona tutto il mercato |
 | `SHORT_TERM_FULL_MARKET_MAX_SYMBOLS` | 300 | **M** | Allargare a 188 titoli nel backtest **non** migliora (drawdown peggiore) |
 | `SHORT_TERM_MIN_ANNUALIZED_VOLATILITY_PCT` | 25.0 | **M~** | Motivato dal backtest v4, ma il valore 25 non è mai stato confrontato con 20 o 30 |
+| `SHORT_TERM_STOCKS_ONLY` | True | **C** | Il corso insegna la strategia di breve sui **titoli azionari**. Alpaca classifica azioni ed ETF entrambi come `us_equity`, così un ETF (IBIT, bitcoin) è stato comprato il 14/09 saltando l'analisi settoriale. Scelta dell'utente |
 | `SHORT_TERM_MIN_PRICE_FULL_MARKET` | 10.0 | **S** | **Mai misurato** |
 | `SHORT_TERM_MIN_DOLLAR_VOLUME` | 5.000.000 | **S** | **Mai misurato** |
 | `SHORT_TERM_MIN_SHARE_VOLUME` | 100.000 | **C** | Corso, video 18 |

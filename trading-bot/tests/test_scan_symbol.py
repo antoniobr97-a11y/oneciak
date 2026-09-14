@@ -40,8 +40,8 @@ def _flat(n=300, value=100.0):
 
 @pytest.fixture
 def no_network(monkeypatch):
-    monkeypatch.setattr(sector, "get_sector_etf", lambda symbol: "XLK")
-    monkeypatch.setattr(screener.sector, "get_sector_etf", lambda symbol: "XLK")
+    monkeypatch.setattr(sector, "get_sector_etf", lambda symbol, today=None: "XLK")
+    monkeypatch.setattr(screener.sector, "get_sector_etf", lambda symbol, today=None: "XLK")
     monkeypatch.setattr(risk_checks, "earnings_check", lambda symbol: risk_checks.EarningsCheck(None, None))
     monkeypatch.setattr(screener.risk_checks, "earnings_check", lambda symbol: risk_checks.EarningsCheck(None, None))
 
@@ -97,7 +97,7 @@ def test_too_little_history_is_skipped(monkeypatch, no_network):
 
 
 def test_an_unknown_sector_is_noted_but_does_not_block(monkeypatch, no_network):
-    monkeypatch.setattr(screener.sector, "get_sector_etf", lambda symbol: None)
+    monkeypatch.setattr(screener.sector, "get_sector_etf", lambda symbol, today=None: None)
     candidates = _scan(_uptrend_with_pullback(), monkeypatch)
     assert candidates
     assert candidates[0].sector_passes is False
@@ -121,3 +121,18 @@ def test_the_warnings_the_user_reads_are_attached_to_the_candidate(monkeypatch, 
     assert c.sector_passes is False
     assert any("settoriale" in n for n in c.notes)
     assert c.is_actionable is True   # nota, non divieto
+
+
+def test_un_etf_non_diventa_mai_un_candidato(monkeypatch, no_network):
+    """Anche con un grafico perfetto, uno strumento che non e' un'azione non
+    deve produrre candidati: il corso insegna la strategia di breve sui
+    titoli azionari, e un ETF salta l'analisi settoriale."""
+    monkeypatch.setattr(screener.sector, "is_equity", lambda symbol, today=None: False)
+    assert _scan(_uptrend_with_pullback(), monkeypatch) == []
+
+
+def test_una_azione_con_tipo_sconosciuto_resta_un_candidato(monkeypatch, no_network):
+    """Nel dubbio non si scarta: un `None` (Yahoo non risponde, o non
+    dichiara il tipo) non deve far sparire un titolo valido."""
+    monkeypatch.setattr(screener.sector, "is_equity", lambda symbol, today=None: None)
+    assert _scan(_uptrend_with_pullback(), monkeypatch)

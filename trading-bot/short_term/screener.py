@@ -244,6 +244,16 @@ def scan_symbol(
     # volte di fila -- con le due chiamate piu' lente e piu' limitate
     # dell'intera scansione.
     sector_etf = sector.get_sector_etf(symbol)
+    if config.SHORT_TERM_STOCKS_ONLY:
+        # Il corso insegna la strategia di breve sui titoli AZIONARI. Un ETF
+        # non ha settore e salterebbe l'analisi settoriale, entrando senza
+        # quella conferma. `None` (tipo sconosciuto) non scarta: si scarta
+        # solo cio' che e' dichiarato non-azione, per non buttare via un
+        # titolo vero a causa di un buco nei dati.
+        if sector.is_equity(symbol) is False:
+            log.info("%s scartato: non e' un titolo azionario (SHORT_TERM_STOCKS_ONLY).", symbol)
+            return []
+
     earnings = risk_checks.earnings_check(symbol)
 
     for direction, trend in qualified:
