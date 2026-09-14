@@ -145,6 +145,57 @@ Il bot usa 12% (12 posizioni × 1%). L'esempio del corso (video 45) è
 
 ---
 
+# Parte ETF / lungo termine — verificata
+
+## Harry Browne
+
+| Regola del corso | Nel bot | Esito |
+|---|---|---|
+| Quattro parti uguali: **azioni, obbligazioni a lunga scadenza, obbligazioni a breve scadenza, oro** | `VT, TLT, SHY, GLD` | ✅ esatto |
+| 25% ciascuno | `WEIGHT_PER_ASSET = 0.25` | ✅ |
+| Replicato **tramite ETF** | ✅ | *"abbiamo replicato il portfolio di Harry Brown tramite l'utilizzo degli ETF"* |
+| Ribilanciamento **trimestrale, semestrale o annuale** | `REBALANCE_FREQUENCY = quarterly` | ✅ dentro le tre opzioni |
+| Allocazione fissa, non legata al profilo di rischio | ✅ | *"non c'è una ripartizione determinata dal proprio profilo di rischio"* |
+
+## Portafoglio Advanced
+
+| Regola del corso | Nel bot | Esito |
+|---|---|---|
+| **Una volta al mese** | ciclo mensile idempotente | ✅ |
+| *"il primo giorno del mese"* | agisce al primo avvio utile del mese | ✅ più robusto: se il PC è spento l'1, recupera senza saltare il mese |
+| Media mobile a **10 mesi**, time frame mensile | `ADVANCED_SMA_PERIOD = 10`, barre mensili | ✅ |
+| Segnale sulla **chiusura mensile** | `closed_monthly_closes` — solo mesi CHIUSI | ✅ |
+| Acquisto: prezzi sotto la media, la bucano dal basso e **chiudono sopra** | `is_above_sma` (stato sopra/sotto) | ✅ **equivalente**: comprare all'incrocio verso l'alto e vendere alla chiusura sotto significa essere investiti esattamente quando si è sopra la media |
+| Vendita: chiusura mensile **sotto** la media | ✅ | |
+| *"una volta costruita la propria squadra di ETF, non si cambia"* | lista fissa in configurazione | ✅ |
+
+## PAC
+
+Il corso lo descrive come *"un piano di azione organizzato che permette di
+investire una predeterminata cifra a intervalli regolari"*. Nel bot è un
+comando **manuale** (`pac` con `--deposit`), non automatico: coerente,
+perché è l'utente a decidere quando e quanto versare.
+
+## Valuta — una correzione a quello che si credeva
+
+L'utente aveva detto che *"gli ETF devono essere italiani o hedged"*. **Il
+corso non lo dice.** Dice (lezione sugli ETF):
+
+> *"se andiamo a negoziare ETF in euro non c'è rischio cambio… se andiamo
+> a negoziare ETF in valuta estera dobbiamo fare i conti con il cosiddetto
+> rischio cambio, **che può essere anche un'opportunità**… se ti gioca a
+> favore hai un extra rendimento… **è comunque un elemento da tenere in
+> considerazione**"*
+
+Quindi: **non è un divieto, è un fattore da sapere**. Gli ETF del bot
+(VT, TLT, SHY, GLD) sono quotati in dollari, quindi il rischio cambio
+euro/dollaro c'è ed è reale — può aiutare o danneggiare. Non è una
+violazione del corso, ma è un'esposizione che non era mai stata scelta
+consapevolmente. Resta una decisione aperta per l'utente, non una
+correzione da fare al codice.
+
+---
+
 # Divergenze da decidere
 
 **1. A 3R il corso è più aggressivo del bot.** Video 47: *"lì puoi optare
