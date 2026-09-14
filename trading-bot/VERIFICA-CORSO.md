@@ -1,106 +1,117 @@
-# Cosa credo che dica il corso — da verificare
+# Verifica contro il corso — prima passata
 
-## Perché questo documento esiste
+## Le trascrizioni sono state recuperate
 
-`STRATEGY.md` dichiara di essere "una sintesi originale, scritta da zero…
-**non una trascrizione del corso**". È vero: il corso non è mai stato
-consegnato a chi ha scritto il codice. Quel documento è stato ricostruito
-da quello che l'utente ha raccontato nella prima sessione.
+L'utente aveva ragione: le trascrizioni del corso ("Prendo il Controllo
+Advanced", Gabriele Cortigiani) **erano state consegnate**, incollate in
+chat nella prima sessione. Non erano su disco, quindi cercarle fra i file
+non le trovava. Sono state estratte dal registro della conversazione:
+**27 video, 1,2 MB di testo**.
 
-Quindi ogni frase di questo progetto che comincia con *"il corso dice…"*
-è in realtà **"il mio riassunto dice…"**, e nessuno l'ha mai controllata
-contro il materiale vero.
+Sono materiale a pagamento: restano in locale, **non vengono committate**.
 
-Non è un dettaglio accademico. Il 13 settembre il trailing stop è stato
-spento anche con la motivazione "contraddice il corso". Se la riga qui
-sotto sul pareggio fosse sbagliata, quella decisione poggiava sul nulla.
+### Cosa c'è e cosa manca
 
-**Solo l'utente può chiudere questo buco: il corso ce l'ha lui.**
+Video numerati presenti: 19, 20, 23, 25, 27, 29, 30, 31, 32, 33, 34, 36,
+38, 39, 40, 41, 44, 45, 46, 47 — più 7 lezioni iniziali senza numero
+(base del guadagno, lungo periodo, ETF, portafoglio, PAC, short selling).
 
-Istruzioni: leggi ogni riga, e segna ✅ se è giusta, ❌ se è sbagliata,
-❓ se il corso non lo dice affatto. Le righe ❌ e ❓ sono quelle che
-contano: indicano dove il bot sta seguendo un'invenzione.
+**Mancano** i video 21, 22, 24, 26, 28, 35, 37, 42, 43. Le conclusioni qui
+sotto valgono per quello che c'è.
 
 ---
 
-## A. Le regole che contano di più
-*(un errore qui cambia il comportamento del bot ogni singolo giorno)*
+## ERRORE 1 — grave: il corso dice 0,5% per chi inizia
 
-| # | Quello che credo dica il corso | ✅/❌/❓ |
-|---|---|---|
-| A1 | Si rischia **1%** del capitale per operazione (ammesso fino al 2%) | |
-| A2 | Massimo **12 posizioni aperte** insieme (12 × 1% = 12% nel peggiore dei casi) | |
-| A3 | A **+1R**: si vende il **50%** e si sposta lo stop **al prezzo d'ingresso** | |
-| A4 | A **+3R**: si vende il **30%** della quantità iniziale | |
-| A5 | Lo stop **resta fermo** al prezzo d'ingresso: **non** sale col prezzo | |
-| A6 | Il **20% residuo** corre finché la chiusura non scende sotto la **SMA200** del titolo | |
-| A7 | Si entra con un ordine **stop di acquisto** sopra il massimo del setup | |
-| A8 | Lo stop di protezione va messo **subito**, insieme all'ingresso | |
+**Il corso, video 45, parole sue:**
 
-## B. Quando un titolo è "in trend"
+> *"in genere si tende a non rischiare più dell'1-2% per singola
+> operazione, **ma all'inizio è ancora meno, cioè all'inizio che ti
+> avvicini in questo ambiente non rischiare oltre lo 0,5, al massimo l'1%
+> per operazione. Tienilo basso**"*
 
-| # | Quello che credo dica il corso | ✅/❌/❓ |
-|---|---|---|
-| B1 | Ci sono **6 criteri** di qualificazione del trend | |
-| B2 | Ne bastano **2-3 su 6** perché il titolo qualifichi | |
-| B3 | Si guardano gli **ultimi 2-3 mesi** (60 giorni) | |
-| B4 | L'indicatore di volatilità usa **10 periodi** | |
+Il bot rischia l'1%. Non è fuori dalle regole — è il tetto — ma il corso
+raccomanda **0,5% a chi comincia**, e questa raccomandazione non era mai
+stata riportata all'utente.
 
-## C. I pattern d'ingresso
+Il 14 settembre gli è stata proposta esattamente la scelta fra 1% e 0,5%,
+con le tabelle del backtest, e ha scelto 1%. **Ha scelto senza sapere che
+il corso consiglia 0,5% a chi è all'inizio.** La scelta va rifatta con
+questa informazione davanti.
 
-| # | Quello che credo dica il corso | ✅/❌/❓ |
-|---|---|---|
-| C1 | I pattern sono **7** | |
-| C2 | Nel "Bowai" il minimo deve essere di **almeno 6 mesi** | |
-| C3 | Nel "Bowai" il titolo deve invertire in **5 giorni o meno** | |
-| C4 | Nel pullback i **minimi devono essere decrescenti** | |
-| C5 | Per Pivot e Second Entry lo stop va **sotto il minimo del pullback** | |
-
-## D. Quali titoli si guardano
-
-| # | Quello che credo dica il corso | ✅/❌/❓ |
-|---|---|---|
-| D1 | Volume minimo **100.000 azioni al giorno** (video 18) | |
-| D2 | Gli short si fanno preferibilmente su titoli **sopra 80-100 $** | |
-| D3 | Il corso prevede **anche gli short**, non solo acquisti | |
-| D4 | Il titolo deve essere allineato al suo **settore** e al **mercato** | |
-
-## E. Gli ETF (lungo termine)
-
-| # | Quello che credo dica il corso | ✅/❌/❓ |
-|---|---|---|
-| E1 | Portafoglio "Harry Browne": **4 ETF al 25%** ciascuno | |
-| E2 | Si ribilancia **ogni 3 mesi** (o quando uno sfora) | |
-| E3 | Portafoglio "Advanced": si controlla **una volta al mese** | |
-| E4 | Advanced usa la media a **10 mesi** per decidere dentro/fuori | |
-| E5 | Gli ETF andrebbero **in euro o hedged**, non in dollari | |
-
-## F. Cose che il bot fa e che NON so se il corso dica
-
-*Queste le ho decise io o le ho prese dalla ricerca. Se il corso dice
-qualcosa di diverso, va cambiato il bot.*
-
-| # | Cosa fa il bot | il corso cosa dice? |
-|---|---|---|
-| F1 | Non compra se l'indice S&P 500 è sotto la sua media a 200 giorni | |
-| F2 | Massimo **3 posizioni per settore** | |
-| F3 | Gli short sono **disattivati** (perdevano in ogni test) | |
-| F4 | Fra più candidati, preferisce quelli **vicini al massimo dell'anno** | |
-| F5 | Scarta i titoli con volatilità annua **sotto il 25%** | |
-| F6 | Scarta i titoli **sotto i 10 $** | |
-| F7 | Controvalore minimo scambiato: **5 milioni $ al giorno** | |
-| F8 | Un ordine d'ingresso non eseguito si annulla dopo **20 giorni** | |
+Da notare che le due fonti concordano: il backtest dice che a 0,5% il
+drawdown scende da −17,2% a −14,1% con Sharpe identico. Il corso dice la
+stessa cosa in parole: *"tienilo basso"*.
 
 ---
 
-## Come mandarmi il corso
+## ERRORE 2 — il trailing stop NON contraddice il corso
 
-Qualunque di queste cose basta, anche parziale:
-- le **trascrizioni** dei video (testo)
-- i **PDF** o le slide
-- i tuoi **appunti**
-- anche solo l'**elenco dei titoli dei video**, per capire cosa copre
+Il 13 settembre il trailing stop è stato spento con due motivazioni. La
+seconda era: *"è una modifica contro il corso, che dice di lasciare lo
+stop fermo al pareggio"*.
 
-Più materiale arriva, più la verifica è vera. Con il testo completo si può
-fare il confronto riga per riga che è stato chiesto; senza, restano queste
-domande.
+**È falso.** Il corso, video 47:
+
+> *"Un'altra cosa da non fare mai, e ripeto mai, è spostare lo stop loss
+> **in difetto** dopo aver aperto l'operazione"*
+
+Vieta di **abbassare** lo stop, non di alzarlo. E il trailing implementato
+alzava soltanto: *"lo stop non scende MAI"* era la sua proprietà
+principale, coperta da test apposta.
+
+Non solo: il corso, sempre video 47, dice cosa fare se si lascia correre
+la posizione oltre 3R —
+
+> *"ricordati comunque di uscire dall'operazione se ci sono chiari segnali
+> di inversione. Esempio, un Bowai contrario... oppure **chiusure sotto
+> medie mobili importanti come la 200 periodi, la 100 periodi**"*
+
+Quindi l'uscita del runner sulla SMA200 è del corso (confermata), ma il
+corso **non vieta** di proteggere il guadagno alzando lo stop.
+
+**La prima motivazione resta valida**: fuori campione il trailing vince
+solo in 8 anni su 16. Quella misura non cambia. Ma la decisione era stata
+presentata all'utente come "due ragioni", e **una delle due non esisteva**.
+
+---
+
+## Verificato e CORRETTO
+
+| | Affermazione | Fonte |
+|---|---|---|
+| A1 | Rischio 1% per operazione (1-2% il tetto) | video 45 ✅ |
+| A3 | A +1R: vendi metà e porti lo stop a pareggio | video 47 ✅ *"venderai metà titoli e porterai lo stop loss a pareggio"* |
+| A4 | A +3R/4R si chiude | video 47 ✅ — ma dice *"chiudere **l'intera posizione** o gran parte"*, più aggressivo del 30% del bot |
+| A6 | Il residuo esce sotto la media a 200 (o 100) | video 47 ✅ |
+| A8 | Lo stop va messo sempre, subito | video 47 ✅ *"non si apre mai un'operazione senza stop loss"* |
+| B1 | Sei criteri di trend | video 34 ✅ *"sono sempre sei punti"* |
+| B4 | ADX sopra 30 e crescente | video 34 ✅ |
+| D1 | Volume minimo ~100.000 scambi al giorno | ✅ *"focalizzati intorno ad almeno i 100.000 volumi medi giornalieri"* |
+| D3 | Il corso insegna anche gli short | ✅ una lezione intera |
+
+## Verificato e SBAGLIATO
+
+| | Cosa era stato scritto | Cosa dice il corso |
+|---|---|---|
+| A5 | *"Lo stop resta fermo, non sale"* | **Falso.** Vieta solo di **abbassarlo** |
+| A2 | *"Massimo 12 posizioni (12%)"* | L'esempio del corso è **10 operazioni = 10%**. Il 12 non compare |
+
+## Ancora da verificare
+
+I 7 pattern e i loro dettagli, le soglie di volatilità, i filtri sul
+prezzo, l'allineamento col settore, il PAC, e le regole degli ETF. La
+parola "sette pattern" non compare come tale: i pattern vanno contati
+leggendo i video 29-41 uno per uno.
+
+---
+
+## Cosa cambia adesso
+
+1. **Riproporre all'utente la scelta 1% / 0,5%** con la citazione del
+   corso, che dice 0,5% per chi inizia. È la decisione più importante.
+2. **Correggere la motivazione del trailing** ovunque sia scritta:
+   STRATEGY.md dice "modifica contro il corso" e non è vero.
+3. **Verificare il tetto aggregato**: il bot usa 12%, l'esempio del corso
+   è 10%.
+4. Completare la lettura dei video su pattern e filtri.
