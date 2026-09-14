@@ -1133,6 +1133,48 @@ _STAGE_LABEL = {
 }
 
 
+def cmd_annulla(args: argparse.Namespace) -> None:
+    """Annulla l'ordine d'INGRESSO ancora in attesa su un titolo.
+
+    La protezione che conta: se la posizione e' GIA' APERTA il comando si
+    rifiuta di fare qualsiasi cosa. Cancellare gli ordini di un titolo in
+    portafoglio non annullerebbe un ingresso -- toglierebbe lo stop-loss e
+    la presa di profitto, lasciando la posizione scoperta. E' esattamente
+    il tipo di errore che un comando "annulla" invita a fare di fretta."""
+    symbol = args.symbol.upper()
+    broker = Broker()
+
+    posizione = broker.get_open_position(symbol)
+    if posizione is not None:
+        qty = posizione.get("qty")
+        print(f"\n  RIFIUTATO: su {symbol} c'e' gia' una posizione APERTA ({qty} azioni).")
+        print("  Cancellare gli ordini adesso toglierebbe lo stop-loss e la presa di")
+        print("  profitto, lasciando la posizione senza protezione.")
+        print(f"  Per uscire davvero dalla posizione serve venderla, non annullare un ordine.\n")
+        return
+
+    aperti = broker.list_open_orders(symbol)
+    if not aperti:
+        print(f"\n  Su {symbol} non c'e' nessun ordine in attesa: niente da annullare.\n")
+        position_state.clear(symbol)
+        return
+
+    print(f"\n  {symbol}: {len(aperti)} ordine/i in attesa, nessuna posizione aperta.")
+    for o in aperti:
+        prezzo = getattr(o, "stop_price", None) or getattr(o, "limit_price", None)
+        print(f"    - {order_type_name(o)} {getattr(o, 'side', '')} {getattr(o, 'qty', '')}"
+              + (f" a {float(prezzo):.2f}" if prezzo else ""))
+
+    if not args.execute:
+        print("\n  (prova: non e' stato cancellato niente. Riesegui con --execute per annullare.)\n")
+        return
+
+    cancellati = broker.cancel_open_orders(symbol)
+    position_state.clear(symbol)
+    print(f"\n  Annullati {cancellati} ordini su {symbol}. Il titolo torna libero.\n")
+    notify.alert(f"{symbol}: ordine d'ingresso annullato a mano ({cancellati} ordini)")
+
+
 def cmd_status(args: argparse.Namespace) -> None:
     """Rendiconto leggibile: quanto c'e', come vanno le posizioni, cosa si
     aspetta il bot.
@@ -1385,6 +1427,11 @@ def main() -> None:
 
     p = sub.add_parser("status", help="Rendiconto: quanto c'e', come vanno le posizioni, cosa si aspetta il bot")
     p.set_defaults(func=cmd_status)
+
+    p = sub.add_parser("annulla", help="Annulla l'ordine d'ingresso in attesa su un titolo (non tocca le posizioni aperte)")
+    p.add_argument("symbol", help="Il titolo, es. IBIT")
+    p.add_argument("--execute", action="store_true", help="Annulla davvero (senza, mostra solo cosa farebbe)")
+    p.set_defaults(func=cmd_annulla)
 
     p = sub.add_parser("schedule", help="Ciclo breve + lungo termine schedulato ogni giorno feriale")
     p.set_defaults(func=cmd_schedule)
