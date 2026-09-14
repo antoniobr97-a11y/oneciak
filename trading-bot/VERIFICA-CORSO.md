@@ -272,6 +272,101 @@ cattivo.
 
 ---
 
+# ESTRAZIONE MECCANICA COMPLETA — tutti e 27 i video
+
+Le verifiche precedenti cercavano per argomento, e cercare trova solo ciò
+che si sospetta. Per chiudere il buco sono state estratte
+**meccanicamente 703 affermazioni numeriche uniche** da tutti e 27 i
+video — ogni numero accompagnato da un'unità operativa (periodi, barre,
+mesi, %, scambi) o da una parola-parametro — e lette tutte.
+
+Questo è l'elenco completo dei parametri del corso e del loro esito.
+
+## Qualificazione del trend — tutti e sei, con la loro definizione
+
+> *"performance, gap, range, massimi e minimi, la DX e la persistenza
+> sono **i sei principali qualificatori di trend**"* (video 27)
+
+| Qualificatore | Corso | Codice | |
+|---|---|---|---|
+| Performance | ≥ **+30%** (o ≤ −30%) negli ultimi **2-3 mesi** | 30%, 60 giorni | ✅ |
+| Gap | in direzione del trend | `gap_qualifier` | ✅ |
+| Range | barre ampie **con chiusura nel 25% superiore/inferiore** | `close_position >= 0.75` | ✅ |
+| Massimi/minimi | armonia, crescenti o decrescenti | `harmony_qualifier` | ✅ |
+| ADX | **14 periodi**, sopra **30**, crescente | `period=14`, soglia 30 | ✅ |
+| Persistenza | almeno **20 barre** | 20 | ✅ |
+| Quanti servono | *"difficilmente ci saranno tutti e sei… già se riesci a identificarne **due o tre**"* | `TREND_MIN_QUALIFIERS=2` | ✅ |
+
+## I sette pattern e i loro numeri esatti
+
+| Pattern | Video | Numeri del corso | |
+|---|---|---|---|
+| Pullback Semplice | 29 | massimo di **2-3 mesi**; ritracciamento **min 2, max 7 barre** (*"oltre le sette il segnale si annulla"*) | ✅ |
+| Trend Knockout | 30 | sellof che rompe **2-3 minimi** precedenti | ✅ |
+| Pullback Persistente | 31 | persistenza **≥20 barre**, poi pullback 2-7 | ✅ |
+| Trend Pivot Pullback | 32 | ritracciamento **da 2 a 5 barre, non sette** | ✅ |
+| Second Entry Pullback | 33 | **da 2 a 5 barre** | ✅ |
+| Sacro Graal | 34 | pullback che tocca la **EMA 20**; entrata sopra il massimo della barra che l'ha toccata | ✅ |
+| Bowai | 36 | estremo di **almeno 6 mesi** (non 2-3); inversione **entro 5 giorni**; medie **SMA10 / EMA20 / EMA30** allineate | ✅ |
+
+Stop: *"qualsiasi pattern tu vada ad analizzare… lo stop loss va **sotto
+al minimo della barra di setup**"* (video 34) — ✅ in tutti e sette.
+
+## Indicatori — tutti e cinque
+
+| Indicatore | Corso | Codice | |
+|---|---|---|---|
+| MACD | **settimanale**, 12/26/9 — *"l'unico che si osserva sul settimanale"* | ✅ | ✅ |
+| ADX | giornaliero, **14 periodi** | ✅ | ✅ |
+| Medie mobili multiple | **esponenziali**: 3/5/8/10/12/15 e 30/35/40/45/50/60 | identiche | ✅ |
+| Estensione media giornaliera | *"intorno ai **10 periodi**"* — usata per entrata e stop | `VOLATILITY_PERIOD=10` | ✅ |
+| Historical Volatility | **20 periodi**; *"titoli che abbiano historical volatility **superiore al settore, e superiore il settore al mercato**"* | `hv_stock > hv_sector > hv_market`, periodo 20 | ✅ |
+
+## Entrata, stop e gestione
+
+| Regola | Corso | |
+|---|---|---|
+| Entrata long | chiusura barra di setup **+ volatilità** | ✅ |
+| Se cade dentro la barra | spostare **sopra il massimo** | ✅ |
+| Stop long | minimo **− volatilità** | ✅ |
+| A 1R | vendi metà, stop a pareggio | ✅ |
+| A 3R/4R | *"puoi optare per chiudere l'intera posizione o gran parte"* | ⚠️ il bot ne lascia correre il 20% |
+| Residuo | esce sotto la media **200 o 100** | ✅ |
+| Mai senza stop | *"non si apre mai un'operazione senza stop loss"* | ✅ auto-riparazione |
+| Mai abbassare lo stop | *"mai spostare lo stop loss **in difetto**"* | ✅ |
+
+## Universo, settore, rischio, ETF
+
+Volume ≥ **100.000** scambi medi ✅ · forza relativa titolo/settore/mercato
+✅ · conferma settoriale **obbligatoria per il Bowai** (`screener.py:299`)
+✅ · rischio **1%** per operazione (tetto del corso per chi inizia) ✅ ·
+Harry Browne quattro asset al 25% ✅ · ribilanciamento trimestrale (il
+corso ammette 3/4/6/12 mesi) ✅ · Advanced media **10 mesi** su chiusura
+mensile ✅ · PAC manuale ✅.
+
+---
+
+# LE DUE UNICHE COSE NON IMPLEMENTATE
+
+Su 703 affermazioni numeriche, dopo tutte le verifiche, restano due
+scostamenti — entrambi minori, entrambi ora dichiarati.
+
+**1. Le barre ad ampio range andrebbero pesate di più se recenti.**
+> *"La cosa fondamentale è trovare barre ad ampio range, **meglio ancora
+> nella seconda metà del periodo** che stiamo analizzando"* (video 27)
+
+Il codice le conta ovunque nella finestra, senza preferenza per la parte
+destra del grafico. Il corso dice che contano di più quelle vicine a oggi,
+*"perché noi operiamo dalla parte destra del grafico"*.
+
+**2. L'indicatore Domanda/Offerta non esiste nel bot.**
+Il corso lo cita fra gli indicatori (settaggio 14 periodi), ma è un
+indicatore proprietario di ProRealTime: non è ricostruibile dai dati
+pubblici di prezzo e volume che il bot scarica. Non è una svista, è un
+limite dei dati disponibili — ma va scritto.
+
+---
+
 # Divergenze da decidere
 
 **1. A 3R il corso è più aggressivo del bot.** Video 47: *"lì puoi optare
