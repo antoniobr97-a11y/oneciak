@@ -43,7 +43,7 @@ quelli che contano di più.
 | `SECOND_SCALE_OUT_R` | 3.0 | **M** | *Costante nel codice.* Testato contro 2 e 4. A 2R il drawdown migliorava in campione di 4,5 punti, ma **fuori campione il segno si ribalta** (+0,71% → −1,30%): 3 confermato |
 | `SECOND_SCALE_OUT_FRACTION` | 0.30 | **S** | *Costante nel codice.* Mai confrontata con altre ripartizioni |
 | `RUNNER_FRACTION` | 0.20 | **S** | *Costante nel codice.* Mai confrontata |
-| `SHORT_TERM_TRAILING_ATR_MULT` | 3.0 | **M** | Testato contro 0 (spento), 2 e 4, in campione e fuori. Adottato: migliora rendimento, drawdown e Sharpe su entrambi gli universi |
+| `SHORT_TERM_TRAILING_ATR_MULT` | 0.0 (spento) | **M** | Testato contro 2, 3 e 4, in campione e fuori. Sui totali migliora tutto, ma fuori campione vince solo in **8 anni su 16**: spento per scelta dell'utente, anche perché è una modifica contro il corso. Si riaccende con `=3` |
 | `SHORT_TERM_TRAILING_ATR_PERIOD` | 22 | **L** | Periodo classico del Chandelier exit (LeBeau). Non misurato |
 | `SHORT_TERM_TRAILING_MIN_MOVE_ATR` | 0.0 | **M** | Testato a 0,25: fuori campione peggiorava il drawdown di 5,8 punti. Zero perché il trailing gira a mercato chiuso e la finestra fra cancellazione e reinvio non ha prezzo |
 

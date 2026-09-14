@@ -1974,6 +1974,62 @@ costava cinque punti di drawdown.
 Soglia rimossa (resta configurabile, default 0). Nel bot gira esattamente
 la regola che è stata misurata — non qualcosa che le somiglia.
 
+### Anno per anno: il dato che ha ribaltato la decisione
+
+I totali dicevano una cosa, la scomposizione annuale ne dice un'altra. La
+richiesta dell'utente ("analizza perfettamente tutto") ha prodotto il
+controllo che mancava.
+
+**Quante volte il trailing batte il corso, anno per anno:**
+
+| | anni vinti |
+|---|---|
+| In campione (42 titoli, 21 anni) | 14 su 21 |
+| **Fuori campione (68 titoli, 16 anni)** | **8 su 16** |
+
+Fuori campione è **una moneta**. E il vantaggio aggregato non è diffuso:
+viene quasi tutto da quattro anni (2020 +9,7; 2022 +10,0; 2023 +6,7;
+2024 +14,0). Dal 2013 al 2019 il trailing perde in 5 anni su 7.
+
+Partendo da 10.000 €, fuori campione, il confronto lungo la strada:
+
+| anno | corso | trailing | differenza |
+|---|---|---|---|
+| 2011 | 10.107 | 10.201 | +95 |
+| 2014 | 16.957 | 16.086 | −872 |
+| 2017 | 21.091 | 19.194 | −1.897 |
+| 2020 | 26.627 | 23.257 | **−3.370** |
+| 2023 | 29.432 | 29.469 | +37 |
+| 2026 | 36.848 | 41.343 | +4.494 |
+
+**Per dieci anni su sedici il trailing è indietro.** Chi lo usa passa anni
+a vedere che la versione fedele al corso avrebbe fatto meglio.
+
+### Decisione: SPENTO (14 settembre 2026)
+
+Il criterio pre-dichiarato era stato superato, e resta superato: sui
+totali il trailing migliora rendimento, drawdown e Sharpe su entrambi gli
+universi. Non è stato spento perché la misura fosse sbagliata.
+
+È stato spento perché **il criterio era incompleto**. Misurava i totali su
+sedici anni e non chiedeva *con quale regolarità* il vantaggio si
+presenta. Otto anni su sedici è un'informazione diversa da "+0,75 punti
+l'anno", e la seconda nasconde la prima.
+
+A questo si somma il fatto che il trailing è una modifica **contro** il
+corso — il corso dice esplicitamente di lasciare lo stop fermo al
+pareggio, e il trailing non lo integra, lo sostituisce (le uscite su
+SMA200 passano da 108 a 11). Discostarsi dal materiale che l'utente ha
+pagato e capisce richiede un vantaggio solido, non un vantaggio da moneta
+truccata di poco.
+
+Il codice resta completo, testato (15 test) e a un parametro di distanza:
+`SHORT_TERM_TRAILING_ATR_MULT=3` lo riaccende.
+
+**Lezione per i criteri futuri:** un criterio di promozione deve chiedere
+anche la REGOLARITÀ del vantaggio, non solo la sua esistenza nei totali.
+Aggiunto all'elenco delle domande da fissare prima di ogni misura.
+
 ### Costi: il trailing raddoppia le operazioni, quanto costa davvero
 
 Domanda posta dall'utente, e giusta: 1.809 operazioni invece di 1.025

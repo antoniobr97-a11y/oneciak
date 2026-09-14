@@ -260,7 +260,16 @@ MARKET_REGIME_MA_PERIOD = _int("MARKET_REGIME_MA_PERIOD", 200)
 # 0 = disattivato, cioe' stop fermo al pareggio come nelle versioni
 # precedenti. 3 e' il valore misurato e adottato; il risultato regge anche
 # a 2 e a 4, quindi non poggia su un numero fortunato.
-SHORT_TERM_TRAILING_ATR_MULT = _float("SHORT_TERM_TRAILING_ATR_MULT", 3.0)
+# SPENTO per scelta dell'utente (14 settembre 2026). Non perche' la misura
+# sia sbagliata -- ha superato in campione e fuori campione -- ma perche'
+# l'analisi anno per anno ha mostrato che fuori campione l'idea vince in
+# 8 anni su 16, cioe' come una moneta, e il vantaggio aggregato viene da
+# quattro anni soli. Il corso dice di lasciare lo stop fermo al pareggio;
+# questa era una MIA modifica contro il corso, e un vantaggio da 0,75
+# punti l'anno con meta' degli anni in svantaggio non basta a giustificare
+# di discostarsi dal materiale che l'utente ha pagato e capisce.
+# Metterlo a 3.0 lo riaccende, senza altre modifiche.
+SHORT_TERM_TRAILING_ATR_MULT = _float("SHORT_TERM_TRAILING_ATR_MULT", 0.0)
 SHORT_TERM_TRAILING_ATR_PERIOD = _int("SHORT_TERM_TRAILING_ATR_PERIOD", 22)
 # Spostamento minimo perche' valga la pena cancellare e reinviare lo stop.
 # ZERO, deliberatamente. Era stata introdotta a 0.25 per non lasciare la

@@ -120,12 +120,16 @@ def test_la_soglia_di_movimento_e_configurabile_ma_di_default_e_zero(monkeypatch
     assert bot._trail_improves("long", 100.0 + margine * 1.5, 100.0, 2.0) is True
 
 
-def test_il_trailing_e_acceso_di_default():
-    """La misura ha superato in campione E fuori campione: l'interruttore
-    e' acceso. Se questo test fallisce, qualcuno ha spento una funzione
-    validata senza passare da una nuova misura."""
+def test_il_trailing_e_spento_di_default():
+    """SPENTO per scelta dell'utente: il corso dice di lasciare lo stop
+    fermo al pareggio, e l'analisi anno per anno ha mostrato che fuori
+    campione questa modifica vince solo in 8 anni su 16. Il codice resta
+    completo e testato; si riaccende con una riga in configurazione.
+
+    Se questo test fallisce, qualcuno ha riacceso una funzione che
+    l'utente ha deliberatamente scelto di non usare."""
     from common import config as cfg
-    assert cfg.SHORT_TERM_TRAILING_ATR_MULT == 3.0
+    assert cfg.SHORT_TERM_TRAILING_ATR_MULT == 0.0
 
 
 # --- dentro il ciclo giornaliero -----------------------------------------
