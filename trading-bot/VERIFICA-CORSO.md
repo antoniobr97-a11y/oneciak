@@ -196,6 +196,82 @@ correzione da fare al codice.
 
 ---
 
+# Lettura integrale dei video chiave (non solo ricerca per argomenti)
+
+La verifica precedente era fatta **cercando**: si interroga il testo su
+quello che si sospetta e si legge il passaggio. Cercare trova solo quello
+che si sospetta già. Leggere trova quello che non si sapeva di cercare.
+Questi video sono stati letti per intero.
+
+## Video 41 — il calcolo di entrata e stop (il più operativo di tutti)
+
+La formula esatta del corso:
+
+> entrata long = **chiusura della barra di setup + volatilità**
+> stop long = **minimo della barra di setup − volatilità**
+> *"può succedere che a causa dell'ampio range della barra di setup ti
+> cada dentro. Se cade dentro, dobbiamo necessariamente spostarlo comunque
+> sopra il massimo della barra"*
+
+Il codice (`levels.py:compute_levels`):
+
+```python
+entry = setup_bar["close"] + volatility
+if entry <= setup_bar["high"]:
+    entry = setup_bar["high"] + 0.01
+stop_loss = stop_bar["low"] - volatility
+```
+
+**Esatto, caso particolare compreso.** Lo short è speculare, come nel
+corso. La barra di setup è quella col minimo più basso del pullback
+(massimo più alto per gli short): confermato.
+
+Il motivo della formula, con le parole del corso: *"per evitare di essere
+eseguiti soltanto dal semplice rumore di fondo del titolo"*.
+
+## Video 39 — gli indicatori
+
+| Indicatore | Corso | Nel bot |
+|---|---|---|
+| MACD | **settimanale**, 12/26/9 | ✅ `macd(fast=12, slow=26, signal=9)` su barre settimanali |
+| ADX | **giornaliero, 14 periodi** | ✅ `adx_qualifier(df, period=14)` |
+| Medie mobili multiple | **esponenziali**, brevi **3/5/8/10/12/15**, lunghe **30/35/40/45/50/60**, giornaliero | ✅ identico in `ema_ribbon` |
+
+Nota: la ricerca per parola chiave non le aveva trovate perché il corso
+non dice mai "ribbon" né "nastro": dice *"medie mobili multiple"* e
+*"fascio di medie"*. È esattamente il tipo di cosa che solo la lettura
+integrale trova.
+
+## La divergenza più profonda, che non è un parametro
+
+Video 39, ripetuto tre volte con parole diverse:
+
+> *"gli indicatori vanno a supporto dell'investitore, **non lo devono
+> sostituire**, cioè la **decisione finale spetterà sempre
+> all'investitore** se andare a negoziare o meno un determinato strumento
+> finanziario"*
+
+> *"non prendere mai, e ripeto mai, una decisione operativa sulla base del
+> solo indicatore"*
+
+Il corso è costruito attorno a un investitore che **guarda e decide**. Gli
+indicatori sono conferme di un'analisi visiva già fatta a occhio, non
+sostituti di quell'analisi.
+
+Un bot automatico **rimuove quella persona**. Non è una regola violata --
+non esiste una riga del corso che vieti di automatizzare, il corso non si
+pone il problema -- ma è la differenza vera fra il metodo insegnato e
+quello che gira ogni sera, e conta più di qualunque soglia numerica.
+
+Va detto anche il rovescio, che è a favore dell'automazione: il corso
+avverte che *"la soggettività è nemica dell'investitore"* e dedica il
+video 47 alle cose da non fare mai, che sono tutte cedimenti umani
+(spostare lo stop, investire sul sentito dire, operare senza stop). Il bot
+quei cedimenti non li ha. Toglie il giudizio buono insieme a quello
+cattivo.
+
+---
+
 # Divergenze da decidere
 
 **1. A 3R il corso è più aggressivo del bot.** Video 47: *"lì puoi optare
