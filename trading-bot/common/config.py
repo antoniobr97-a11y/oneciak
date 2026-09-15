@@ -209,6 +209,21 @@ SHORT_TERM_FX_RATE = _float("SHORT_TERM_FX_RATE", 1.0)  # unità valuta conto pe
 SHORT_TERM_RISK_PER_TRADE_PCT = _float("SHORT_TERM_RISK_PER_TRADE_PCT", 1.0)
 SHORT_TERM_MAX_AGGREGATE_RISK_PCT = _float("SHORT_TERM_MAX_AGGREGATE_RISK_PCT", 12.0)
 
+# Numero MINIMO di azioni per aprire una posizione.
+# Il corso vuole un'uscita a scaglioni: meta' a 1R, il 30% a 3R, il resto
+# corre. Con poche azioni quella scala non esiste piu' -- e' aritmetica,
+# non un'opinione (vedi bot._tranches):
+#     1 azione  -> a 1R vende 0, a 3R vende 0   scala ROTTA
+#     2 azioni  -> a 1R vende 1, a 3R vende 0   scala ROTTA
+#     3 azioni  -> a 1R vende 1, a 3R vende 0   scala ROTTA
+#     4 azioni  -> a 1R vende 2, a 3R vende 1   scala COMPLETA
+# Sotto le 4 il bot terrebbe tutto fino alla SMA200: un'altra strategia,
+# non quella misurata nei backtest. Meglio non aprire e dirlo.
+# Conta su conti piccoli: con 1.500 EUR sul breve termine quasi tutti i
+# candidati sopra i 100 EUR ad azione finiscono qui.
+# 0 = nessun minimo (comportamento precedente).
+SHORT_TERM_MIN_SHARES = _int("SHORT_TERM_MIN_SHARES", 4)
+
 # Qualificazione trend (STRATEGY.md 2.1)
 TREND_LOOKBACK_DAYS = _int("TREND_LOOKBACK_DAYS", 60)  # ~2-3 mesi
 TREND_MIN_QUALIFIERS = _int("TREND_MIN_QUALIFIERS", 2)

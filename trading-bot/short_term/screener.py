@@ -66,7 +66,15 @@ class Candidate:
 
     @property
     def is_actionable(self) -> bool:
-        return self.qty > 0 and not self.price_blocks_trade and not self.entry_already_triggered
+        # Il minimo di azioni non e' un filtro sul grafico: e' la condizione
+        # perche' l'uscita a scaglioni del corso sia eseguibile. Sotto,
+        # il candidato resta VISIBILE nel report (con la nota che spiega
+        # perche') ma il ciclo non manda l'ordine.
+        return (
+            self.qty >= max(1, config.SHORT_TERM_MIN_SHARES)
+            and not self.price_blocks_trade
+            and not self.entry_already_triggered
+        )
 
 
 ALL_DIRECTIONS = ("long", "short")
@@ -328,6 +336,14 @@ def _build_candidate(
     qty = money_management.position_size(
         capital, config.SHORT_TERM_RISK_PER_TRADE_PCT, levels.risk_per_share, config.SHORT_TERM_FX_RATE
     )
+
+    if 0 < qty < config.SHORT_TERM_MIN_SHARES:
+        notes.append(
+            f"solo {qty} azioni col capitale attuale: sotto {config.SHORT_TERM_MIN_SHARES} "
+            "la scala di uscita (meta' a 1R, 30% a 3R) non e' eseguibile, operazione saltata"
+        )
+    elif qty == 0:
+        notes.append("capitale insufficiente per una sola azione a questo livello di rischio")
 
     last_close = float(daily["close"].iloc[-1])
     if (levels.entry <= last_close) if direction == "long" else (levels.entry >= last_close):
