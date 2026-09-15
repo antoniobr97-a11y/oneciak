@@ -222,7 +222,12 @@ SHORT_TERM_MAX_AGGREGATE_RISK_PCT = _float("SHORT_TERM_MAX_AGGREGATE_RISK_PCT", 
 # Conta su conti piccoli: con 1.500 EUR sul breve termine quasi tutti i
 # candidati sopra i 100 EUR ad azione finiscono qui.
 # 0 = nessun minimo (comportamento precedente).
-SHORT_TERM_MIN_SHARES = _int("SHORT_TERM_MIN_SHARES", 4)
+# SPENTO (0) finche' la misura non conferma che non fa danni: e' una
+# modifica scritta il 15/09 e non ancora verificata, e in questo progetto
+# niente di non misurato gira di default. Il candidato sotto il minimo
+# viene comunque SEGNALATO nel report, cosi' si vede l'effetto che avrebbe
+# senza subirlo. Metterlo a 4 lo accende.
+SHORT_TERM_MIN_SHARES = _int("SHORT_TERM_MIN_SHARES", 0)
 
 # Qualificazione trend (STRATEGY.md 2.1)
 TREND_LOOKBACK_DAYS = _int("TREND_LOOKBACK_DAYS", 60)  # ~2-3 mesi

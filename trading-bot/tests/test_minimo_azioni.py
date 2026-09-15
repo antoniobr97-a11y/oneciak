@@ -26,7 +26,9 @@ def test_l_aritmetica_che_giustifica_il_minimo():
     for q in (4, 5, 10):
         meta, seconda, runner = bot._tranches(q)
         assert meta > 0 and seconda > 0 and runner > 0, f"{q} azioni: scala incompleta"
-    assert config.SHORT_TERM_MIN_SHARES == 4
+    # Spento di default finche' la misura non conferma: qui si verifica
+    # solo che il valore 4 sia quello giusto QUANDO lo si accende.
+    assert config.SHORT_TERM_MIN_SHARES == 0
 
 
 def _candidato(qty: int) -> Candidate:
@@ -44,7 +46,8 @@ def _candidato(qty: int) -> Candidate:
 
 
 @pytest.mark.parametrize("qty", [0, 1, 2, 3])
-def test_sotto_il_minimo_non_e_operabile(qty):
+def test_sotto_il_minimo_non_e_operabile(qty, monkeypatch):
+    monkeypatch.setattr(config, "SHORT_TERM_MIN_SHARES", 4)
     assert _candidato(qty).is_actionable is False
 
 
@@ -60,9 +63,15 @@ def test_con_il_minimo_a_zero_torna_il_comportamento_di_prima(monkeypatch):
     assert _candidato(0).is_actionable is False, "zero azioni non e' mai operabile"
 
 
+def test_spento_di_default_una_azione_basta():
+    """Comportamento di oggi: nessun minimo attivo."""
+    assert _candidato(1).is_actionable is True
+
+
 def test_il_report_spiega_PERCHE_e_stato_saltato(monkeypatch, no_network):
     """Il candidato resta visibile con la sua nota: l'utente deve capire
     che e' una questione di capitale, non di grafico brutto."""
+    monkeypatch.setattr(config, "SHORT_TERM_MIN_SHARES", 4)
     monkeypatch.setattr(config, "SHORT_TERM_CAPITAL", 400.0)  # conto minuscolo
     candidati = _scan(_uptrend_with_pullback(), monkeypatch, capital=400.0)
     assert candidati, "il candidato e' sparito invece di essere spiegato"
