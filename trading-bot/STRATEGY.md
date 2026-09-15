@@ -1894,6 +1894,86 @@ misura di quanto sarebbe costata la disciplina mancata. Una regola
 dichiarata in anticipo sembrava pedanteria; ora ha un prezzo scritto
 accanto.
 
+## Minimo di azioni: misurato e RESPINTO (15 settembre 2026)
+
+**Da dove nasce.** Domanda dell'utente prima di passare a denaro vero: con
+3-4.000 € il bot brucia tutto? No — rischia l'1% a operazione. Ma la
+simulazione ha mostrato il problema opposto: quasi tutti i candidati
+sopra i 100 €/azione ricevevano **una** azione, e con una azione la scala
+di uscita del corso non esiste (non si vende metà di 1).
+
+Confermato dal vivo la sera stessa: JHX, size calcolata 39 azioni,
+**ridotta a 2 per limite di cassa**, comprata comunque — e quella
+posizione da 56 € occupava uno dei 12 posti del tetto di rischio.
+
+**L'aritmetica** (`bot._tranches`): sotto 4 azioni la scala è rotta.
+
+| azioni | vende a 1R | vende a 3R | |
+|---|---|---|---|
+| 1 | 0 | 0 | rotta |
+| 2 | 1 | 0 | rotta |
+| 3 | 1 | 0 | rotta |
+| **4** | **2** | **1** | **completa** |
+
+**Il criterio, scritto prima** (`IPOTESI_MINSHARES.md`), e diverso dagli
+altri: le idee precedenti promettevano *rendimento*, questa è una
+questione di *fedeltà* — il bot deve fare la strategia misurata o non
+farla. Quindi non "deve migliorare" ma **"non deve fare danni"**: CAGR non
+peggiore di 0,5 punti, drawdown non peggiore di 1, su entrambi gli
+universi.
+
+### I numeri
+
+| | CAGR | DD max | Sharpe | trade |
+|---|---|---|---|---|
+| **In campione** (42 titoli) | | | | |
+| senza minimo | 8,70% | −17,5% | 0,93 | 1065 |
+| minimo 4 azioni | **9,67%** | **−15,6%** | **0,98** | 1035 |
+| **Fuori campione** (68 titoli) | | | | |
+| senza minimo | 8,14% | −14,1% | 0,87 | 1025 |
+| minimo 4 azioni | **6,87%** | **−22,2%** | **0,75** | 937 |
+
+In campione migliora tutto. **Fuori campione il drawdown peggiora di 8,1
+punti** e il rendimento di 1,3. Criterio fallito. Anno per anno: vince in
+13 anni su 21 in campione, **7 su 16 fuori**.
+
+### Perché è il caso più istruttivo della serie
+
+Le altre idee respinte erano tentativi di *migliorare*. Questa era una
+correzione di *coerenza*: il bot faceva una cosa palesemente incoerente
+con la strategia — aprire posizioni che non possono eseguire la propria
+uscita — e il rimedio era ovvio.
+
+**Ed è stato il rimedio a fare più danni del difetto.** Otto punti di
+drawdown in più fuori campione, contro un difetto che costa qualche
+operazione mal gestita.
+
+Non c'è un meccanismo certo per spiegarlo. L'ipotesi più probabile è che
+rinunciare a 88 operazioni su 1025 lasci la cassa ferma in momenti in cui
+serviva essere investiti, e che le posizioni piccole — pur senza scala di
+uscita — restino comunque operazioni con valore atteso positivo, protette
+dal loro stop. **Ma è un'ipotesi, non una spiegazione verificata**, e va
+detto così.
+
+`SHORT_TERM_MIN_SHARES=0` (spento). Il candidato sotto le 4 azioni viene
+**segnalato nel report** con la nota che spiega il problema: si vede
+l'effetto senza subirlo. Metterlo a 4 lo riaccende.
+
+### Il conto aggiornato
+
+| Idea | In campione | Fuori campione | Esito |
+|---|---|---|---|
+| Tetto per settore | meglio | meglio | **adottata** |
+| Filtri di rischio come veti | peggio | — | respinta |
+| Secondo obiettivo a 2R | meglio | segno ribaltato | respinta |
+| Freno di volatilità | meglio | drawdown peggiore | respinta |
+| Trailing stop | meglio | vince 8 anni su 16 | respinta |
+| **Minimo di azioni** | **meglio** | **drawdown −8 punti** | **respinta** |
+
+**Una su sei.** E cinque delle sei sembravano buone in campione.
+
+---
+
 ## Trailing stop: misurato e ADOTTATO (13 settembre 2026)
 
 **Il problema.** Dopo 1R lo stop andava a pareggio e ci restava finché il
