@@ -293,6 +293,51 @@ bot lo tratta come un veto assoluto. Più severo del corso.
 
 ---
 
+# Appunti vecchi contro trascrizioni attuali
+
+L'utente ha caricato i suoi appunti scritti a mano del corso, poi ha
+chiarito: *"questi erano dei miei appunti del corso di tanto tempo fa,
+infatti il corso l'ho ripreso dopo anni, quindi non guardare il numero di
+lezione se coincide con le trascrizioni che ti ho mandato"*.
+
+**Regola adottata: dove appunti e trascrizioni divergono, vince la
+trascrizione.** Gli appunti descrivono una versione precedente del corso.
+Il bot deve seguire la versione che l'utente sta studiando oggi, cioè le
+27 trascrizioni.
+
+Le cinque divergenze, riverificate una per una contro le trascrizioni
+attuali:
+
+**1. Obbligazioni / TLT.** Gli appunti indicano scadenze diverse. Le
+trascrizioni dicono: *"scadenza minimo di 7-10 anni… a noi interessa
+7-10, 10+ per il lungo periodo"*. TLT (20+) rientra esplicitamente nel
+"10+". **Non è un errore, niente da cambiare.**
+
+**2. Super Trend.** Presente negli appunti. **Assente da tutte e 27 le
+trascrizioni.** Appartiene alla versione vecchia del corso. **Non va
+implementato.**
+
+**3. Ritracciamento al 50% del range.** Presente negli appunti. Assente
+dalle trascrizioni: il corso attuale parla del **25% superiore**, che è
+esattamente quello che fa il codice. **Niente da cambiare.**
+
+**4. Inside bar escluse dal conteggio del pullback.** Questa regola degli
+appunti è confermata anche dal corso attuale — video 29: *"Queste non si
+conteggiano all'interno del nostro pullback"*. Ma era **già
+implementata**: `patterns.py` ha `_is_inside_bar`, `_pullback_segment`
+restituisce `non_inside` e `detect_pullback_semplice` conta solo quelle.
+**Niente da cambiare.**
+
+**5. Sacro Graal, "toccare la media senza superarla".** Il "senza
+superarla" è negli appunti ma non nel corso attuale: il video 34 dice
+soltanto *"andare a toccare la media mobile esponenziale a 20 periodi"*.
+**Niente da cambiare.**
+
+**Esito: zero modifiche al bot.** Gli appunti vecchi avevano suggerito
+quattro interventi; riverificati contro il corso attuale, nessuno regge.
+
+---
+
 # Ancora da fare
 
 - Il PAC e le regole ETF non sono ancora stati confrontati riga per riga:
