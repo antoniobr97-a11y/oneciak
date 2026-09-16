@@ -176,230 +176,101 @@ investire una predeterminata cifra a intervalli regolari"*. Nel bot è un
 comando **manuale** (`pac` con `--deposit`), non automatico: coerente,
 perché è l'utente a decidere quando e quanto versare.
 
-## Valuta — una correzione a quello che si credeva
+## Valuta degli ETF — ERRORE MIO, l'utente aveva ragione
 
-L'utente aveva detto che *"gli ETF devono essere italiani o hedged"*. **Il
-corso non lo dice.** Dice (lezione sugli ETF):
+**Cosa era stato scritto qui il 14 settembre:** *"L'utente aveva detto che
+gli ETF devono essere italiani o hedged. **Il corso non lo dice.**"*
 
-> *"se andiamo a negoziare ETF in euro non c'è rischio cambio… se andiamo
-> a negoziare ETF in valuta estera dobbiamo fare i conti con il cosiddetto
-> rischio cambio, **che può essere anche un'opportunità**… se ti gioca a
-> favore hai un extra rendimento… **è comunque un elemento da tenere in
-> considerazione**"*
+**È falso. Il corso lo dice, ed è esplicito.** Trovato dopo che l'utente ha
+mandato le sue note scritte a mano, che costringevano a ricontrollare:
 
-Quindi: **non è un divieto, è un fattore da sapere**. Gli ETF del bot
-(VT, TLT, SHY, GLD) sono quotati in dollari, quindi il rischio cambio
-euro/dollaro c'è ed è reale — può aiutare o danneggiare. Non è una
-violazione del corso, ma è un'esposizione che non era mai stata scelta
-consapevolmente. Resta una decisione aperta per l'utente, non una
-correzione da fare al codice.
+> *"La valuta in genere noi, soprattutto **per portafogli statici**, cioè
+> che si costruiscono e si lasciano andare così nel tempo, **si predilige
+> ETF in valuta euro oppure hedgiati**"*
 
----
+E, parlando direttamente di Harry Browne:
 
-# Lettura integrale dei video chiave (non solo ricerca per argomenti)
+> *"su un Harry Brown che dura anni e resti sempre investito sullo stesso
+> strumento finanziario, **noi ad esempio abbiamo tutti strumenti in euro
+> comunque hedgiati**. Mentre per quanto riguarda la strategia
+> **advanced**, entrando ed uscendo sul mercato con maggiore rapidità,
+> abbiamo anche prodotti **ad esempio in dollari**"*
 
-La verifica precedente era fatta **cercando**: si interroga il testo su
-quello che si sospetta e si legge il passaggio. Cercare trova solo quello
-che si sospetta già. Leggere trova quello che non si sapeva di cercare.
-Questi video sono stati letti per intero.
+Il motivo, dal corso: *"il rischio cambio **aumenta all'aumentare del
+tempo** che detengo l'investimento"*.
 
-## Video 41 — il calcolo di entrata e stop (il più operativo di tutti)
+La regola vera è quindi più fine di come l'aveva posta l'utente e molto
+diversa da come l'avevo negata io:
 
-La formula esatta del corso:
-
-> entrata long = **chiusura della barra di setup + volatilità**
-> stop long = **minimo della barra di setup − volatilità**
-> *"può succedere che a causa dell'ampio range della barra di setup ti
-> cada dentro. Se cade dentro, dobbiamo necessariamente spostarlo comunque
-> sopra il massimo della barra"*
-
-Il codice (`levels.py:compute_levels`):
-
-```python
-entry = setup_bar["close"] + volatility
-if entry <= setup_bar["high"]:
-    entry = setup_bar["high"] + 0.01
-stop_loss = stop_bar["low"] - volatility
-```
-
-**Esatto, caso particolare compreso.** Lo short è speculare, come nel
-corso. La barra di setup è quella col minimo più basso del pullback
-(massimo più alto per gli short): confermato.
-
-Il motivo della formula, con le parole del corso: *"per evitare di essere
-eseguiti soltanto dal semplice rumore di fondo del titolo"*.
-
-## Video 39 — gli indicatori
-
-| Indicatore | Corso | Nel bot |
+| Portafoglio | Orizzonte | Valuta secondo il corso |
 |---|---|---|
-| MACD | **settimanale**, 12/26/9 | ✅ `macd(fast=12, slow=26, signal=9)` su barre settimanali |
-| ADX | **giornaliero, 14 periodi** | ✅ `adx_qualifier(df, period=14)` |
-| Medie mobili multiple | **esponenziali**, brevi **3/5/8/10/12/15**, lunghe **30/35/40/45/50/60**, giornaliero | ✅ identico in `ema_ribbon` |
+| **Harry Browne** | anni, mai toccato | **euro o hedged** |
+| **Advanced** | dentro/fuori ogni mese | **anche dollari** |
 
-Nota: la ricerca per parola chiave non le aveva trovate perché il corso
-non dice mai "ribbon" né "nastro": dice *"medie mobili multiple"* e
-*"fascio di medie"*. È esattamente il tipo di cosa che solo la lettura
-integrale trova.
+**Perché l'errore.** I sottotitoli automatici di YouTube scrivono
+"hedgiati" come **"e giati"** e **"egiati"**. La ricerca su "hedg" non
+trovava nulla, e la riga *"focalizzare la propria attenzione su ETF e
+giati"* era passata sotto gli occhi senza essere riconosciuta. È
+esattamente il limite della fonte dichiarato in cima a questo documento —
+solo che a caderci è stato chi l'aveva dichiarato.
 
-## La divergenza più profonda, che non è un parametro
+### Cosa comporta, e perché non si corregge nel codice
 
-Video 39, ripetuto tre volte con parole diverse:
+Il bot usa `VT, TLT, SHY, GLD` per Harry Browne: **tutti quotati negli
+USA, in dollari, nessuno con copertura valutaria.** Il portafoglio che
+secondo il corso deve stare in euro o hedged è interamente in dollari, ed
+è proprio quello destinato a restare fermo per anni — il caso in cui il
+corso dice che il rischio cambio pesa di più.
 
-> *"gli indicatori vanno a supporto dell'investitore, **non lo devono
-> sostituire**, cioè la **decisione finale spetterà sempre
-> all'investitore** se andare a negoziare o meno un determinato strumento
-> finanziario"*
+**Non è una riga da cambiare.** Alpaca negozia solo su NYSE, NASDAQ, ARCA,
+AMEX e BATS (`_ALLOWED_EXCHANGES`). Gli ETF UCITS in euro o hedged sono
+quotati su Borsa Italiana, Xetra, Euronext: **Alpaca non può comprarli**,
+qualunque ticker si metta in configurazione.
 
-> *"non prendere mai, e ripeto mai, una decisione operativa sulla base del
-> solo indicatore"*
+Quindi la parte ETF della strategia, su questo broker, **non può seguire
+il corso**. È una scelta di infrastruttura, non di codice, e va presa
+dall'utente:
 
-Il corso è costruito attorno a un investitore che **guarda e decide**. Gli
-indicatori sono conferme di un'analisi visiva già fatta a occhio, non
-sostituti di quell'analisi.
+1. **Tenere gli ETF su Alpaca in dollari**, sapendo che si assume il
+   rischio cambio su un investimento pluriennale — proprio quello che il
+   corso sconsiglia.
+2. **Spostare la parte ETF su un broker europeo** e comprare gli UCITS
+   hedged a mano. Il bot continua a dire *cosa* comprare e *quando*
+   ribilanciare (`bot.py long-term-status`), l'esecuzione la fa la persona.
+3. **Togliere gli ETF dal bot** e gestirli separatamente.
 
-Un bot automatico **rimuove quella persona**. Non è una regola violata --
-non esiste una riga del corso che vieti di automatizzare, il corso non si
-pone il problema -- ma è la differenza vera fra il metodo insegnato e
-quello che gira ogni sera, e conta più di qualunque soglia numerica.
+La parte azionaria (breve termine) non è toccata: il corso la vuole su
+azioni USA, e lì il dollaro è inevitabile.
 
-Va detto anche il rovescio, che è a favore dell'automazione: il corso
-avverte che *"la soggettività è nemica dell'investitore"* e dedica il
-video 47 alle cose da non fare mai, che sono tutte cedimenti umani
-(spostare lo stop, investire sul sentito dire, operare senza stop). Il bot
-quei cedimenti non li ha. Toglie il giudizio buono insieme a quello
-cattivo.
+## PD90 Sentiment — la regola c'è, la formula no
 
----
+Le note dell'utente riportano l'indicatore che qui era segnato come "non
+implementato":
 
-# ESTRAZIONE MECCANICA COMPLETA — tutti e 27 i video
+> *"PD90 SENTIMENT → ci sono i BIG (blu) e i SMALL investitori (rosso).
+> **Dobbiamo operare quando i BIG sono superiori degli SMALL**"*
+> *"DOMANDA − OFFERTA → devo avere più domanda, **verde sopra al rosso**"*
 
-Le verifiche precedenti cercavano per argomento, e cercare trova solo ciò
-che si sospetta. Per chiudere il buco sono state estratte
-**meccanicamente 703 affermazioni numeriche uniche** da tutti e 27 i
-video — ogni numero accompagnato da un'unità operativa (periodi, barre,
-mesi, %, scambi) o da una parola-parametro — e lette tutte.
+Il video 30 conferma il concetto: *"i grossi investitori sono in genere
+identificati come big investor oppure **mani forti**… è opportuno, quando
+investiamo, essere nella stessa direzione in cui si trovano le mani
+forti"*.
 
-Questo è l'elenco completo dei parametri del corso e del loro esito.
+**Ora si sa cosa dovrebbe fare, ma non come si calcola.** È un indicatore
+proprietario di ProRealTime: non è ricostruibile dai dati di prezzo e
+volume che il bot scarica. Resta non implementato, ma adesso è documentato
+come *regola nota e non calcolabile*, non come lacuna generica.
 
-## Qualificazione del trend — tutti e sei, con la loro definizione
+## Entrata e stop — riconfermati dalle note
 
-> *"performance, gap, range, massimi e minimi, la DX e la persistenza
-> sono **i sei principali qualificatori di trend**"* (video 27)
+Le note riportano la stessa formula già verificata nel video 41:
 
-| Qualificatore | Corso | Codice | |
-|---|---|---|---|
-| Performance | ≥ **+30%** (o ≤ −30%) negli ultimi **2-3 mesi** | 30%, 60 giorni | ✅ |
-| Gap | in direzione del trend | `gap_qualifier` | ✅ |
-| Range | barre ampie **con chiusura nel 25% superiore/inferiore** | `close_position >= 0.75` | ✅ |
-| Massimi/minimi | armonia, crescenti o decrescenti | `harmony_qualifier` | ✅ |
-| ADX | **14 periodi**, sopra **30**, crescente | `period=14`, soglia 30 | ✅ |
-| Persistenza | almeno **20 barre** | 20 | ✅ |
-| Quanti servono | *"difficilmente ci saranno tutti e sei… già se riesci a identificarne **due o tre**"* | `TREND_MIN_QUALIFIERS=2` | ✅ |
+> *"il livello di entrata si fa sommando **volatilità + chiusura** di quel
+> giorno → entry level"*
+> *"il livello di uscita si fa **min. barra di setup − volatilità** → stop
+> loss"*
 
-## I sette pattern e i loro numeri esatti
-
-| Pattern | Video | Numeri del corso | |
-|---|---|---|---|
-| Pullback Semplice | 29 | massimo di **2-3 mesi**; ritracciamento **min 2, max 7 barre** (*"oltre le sette il segnale si annulla"*) | ✅ |
-| Trend Knockout | 30 | sellof che rompe **2-3 minimi** precedenti | ✅ |
-| Pullback Persistente | 31 | persistenza **≥20 barre**, poi pullback 2-7 | ✅ |
-| Trend Pivot Pullback | 32 | ritracciamento **da 2 a 5 barre, non sette** | ✅ |
-| Second Entry Pullback | 33 | **da 2 a 5 barre** | ✅ |
-| Sacro Graal | 34 | pullback che tocca la **EMA 20**; entrata sopra il massimo della barra che l'ha toccata | ✅ |
-| Bowai | 36 | estremo di **almeno 6 mesi** (non 2-3); inversione **entro 5 giorni**; medie **SMA10 / EMA20 / EMA30** allineate | ✅ |
-
-Stop: *"qualsiasi pattern tu vada ad analizzare… lo stop loss va **sotto
-al minimo della barra di setup**"* (video 34) — ✅ in tutti e sette.
-
-## Indicatori — tutti e cinque
-
-| Indicatore | Corso | Codice | |
-|---|---|---|---|
-| MACD | **settimanale**, 12/26/9 — *"l'unico che si osserva sul settimanale"* | ✅ | ✅ |
-| ADX | giornaliero, **14 periodi** | ✅ | ✅ |
-| Medie mobili multiple | **esponenziali**: 3/5/8/10/12/15 e 30/35/40/45/50/60 | identiche | ✅ |
-| Estensione media giornaliera | *"intorno ai **10 periodi**"* — usata per entrata e stop | `VOLATILITY_PERIOD=10` | ✅ |
-| Historical Volatility | **20 periodi**; *"titoli che abbiano historical volatility **superiore al settore, e superiore il settore al mercato**"* | `hv_stock > hv_sector > hv_market`, periodo 20 | ✅ |
-
-## Entrata, stop e gestione
-
-| Regola | Corso | |
-|---|---|---|
-| Entrata long | chiusura barra di setup **+ volatilità** | ✅ |
-| Se cade dentro la barra | spostare **sopra il massimo** | ✅ |
-| Stop long | minimo **− volatilità** | ✅ |
-| A 1R | vendi metà, stop a pareggio | ✅ |
-| A 3R/4R | *"puoi optare per chiudere l'intera posizione o gran parte"* | ⚠️ il bot ne lascia correre il 20% |
-| Residuo | esce sotto la media **200 o 100** | ✅ |
-| Mai senza stop | *"non si apre mai un'operazione senza stop loss"* | ✅ auto-riparazione |
-| Mai abbassare lo stop | *"mai spostare lo stop loss **in difetto**"* | ✅ |
-
-## Universo, settore, rischio, ETF
-
-Volume ≥ **100.000** scambi medi ✅ · forza relativa titolo/settore/mercato
-✅ · conferma settoriale **obbligatoria per il Bowai** (`screener.py:299`)
-✅ · rischio **1%** per operazione (tetto del corso per chi inizia) ✅ ·
-Harry Browne quattro asset al 25% ✅ · ribilanciamento trimestrale (il
-corso ammette 3/4/6/12 mesi) ✅ · Advanced media **10 mesi** su chiusura
-mensile ✅ · PAC manuale ✅.
-
----
-
-# Trovato in esercizio: il bot comprava ETF (corretto il 14/09/2026)
-
-Il ciclo del 14 settembre ha piazzato un ordine su **IBIT**, un ETF che
-replica il bitcoin, come posizione più grande della serata:
-
-```
-IBIT LONG -- TKO   size=34 azioni
-  settore=n/d (conferma=no)
-  ! settore non determinato, analisi settoriale saltata
-```
-
-Non era un bug: l'universo includeva deliberatamente gli ETF, perché
-Alpaca classifica azioni ed ETF entrambi come `us_equity`. Ma:
-
-1. il corso insegna la strategia di breve sui **titoli azionari** (video 23
-   e seguenti); il bitcoin non compare da nessuna parte;
-2. un ETF non ha settore, quindi **salta l'analisi settoriale**, che il
-   corso chiama *"veramente fondamentale"*;
-3. era la posizione più grande della serata, senza quella conferma.
-
-**Corretto su scelta dell'utente**: `SHORT_TERM_STOCKS_ONLY=true`.
-
-Il modo importa. La regola **non** è "non ha settore, quindi è un ETF":
-un'azione vera può non avere il settore per un buco nei dati di Yahoo, e
-scartarla per quello sarebbe un errore peggiore di quello che si sta
-correggendo. Si guarda il **tipo di strumento dichiarato** (`quoteType`),
-che arriva nella stessa risposta di rete già usata per il settore —
-nessuna chiamata in più su 300 titoli a sera. Nel dubbio (tipo sconosciuto,
-Yahoo che non risponde) **non si scarta niente**.
-
-Nove test difendono la regola, compreso quello che verifica che
-un'azione senza settore NON venga scambiata per un ETF, e quello che
-conta le chiamate di rete.
-
----
-
-# LE DUE UNICHE COSE NON IMPLEMENTATE
-
-Su 703 affermazioni numeriche, dopo tutte le verifiche, restano due
-scostamenti — entrambi minori, entrambi ora dichiarati.
-
-**1. Le barre ad ampio range andrebbero pesate di più se recenti.**
-> *"La cosa fondamentale è trovare barre ad ampio range, **meglio ancora
-> nella seconda metà del periodo** che stiamo analizzando"* (video 27)
-
-Il codice le conta ovunque nella finestra, senza preferenza per la parte
-destra del grafico. Il corso dice che contano di più quelle vicine a oggi,
-*"perché noi operiamo dalla parte destra del grafico"*.
-
-**2. L'indicatore Domanda/Offerta non esiste nel bot.**
-Il corso lo cita fra gli indicatori (settaggio 14 periodi), ma è un
-indicatore proprietario di ProRealTime: non è ricostruibile dai dati
-pubblici di prezzo e volume che il bot scarica. Non è una svista, è un
-limite dei dati disponibili — ma va scritto.
+Identico al codice (`levels.py:compute_levels`).
 
 ---
 
