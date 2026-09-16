@@ -338,6 +338,74 @@ quattro interventi; riverificati contro il corso attuale, nessuno regge.
 
 ---
 
+# Gli ETF veri del corso (da ProRealTime dell'utente)
+
+L'utente ha mostrato le sue liste personali su ProRealTime, la piattaforma
+usata dal corso. Sono gli strumenti reali, non piu' una ricostruzione.
+
+**ETF STRATEGIA ADV** (il portafoglio Advanced, 5 caselle):
+
+| Casella | Strumento del corso | Sostituto USA nel bot |
+|---|---|---|
+| Azionario globale | UBS MSCI ACWI SF UCITS ETF hEUR acc (ACWIE, Euronext Milano) | VTI |
+| Obbligazionario lungo | Amundi Euro Govt Bond 7-10Y | EDV |
+| Obbligazionario breve | Amundi Euro Govt Bnd 1-3Y Acc | VGSH |
+| Oro | Xtrackers Physical Gold | IAU |
+| Immobiliare | iShares Dev Mkt Prop Yield | VNQ |
+
+Le altre liste confermano lo stesso impianto, tutto UCITS e in euro:
+
+- **ETF AZIONI**: UBS MSCI ACWI SF UCITS hEUR, UBS MSCI ACWI Socially
+  Responsible, iShares MSCI World EUR hedged, Xtrackers MSCI World hedged,
+  UBS Global Gender Equality hedged
+- **ETF OBB. BREVE**: Amundi Euro Govt Bnd 1-3Y, Amundi Floating Rate
+  Corporate, Xtrackers II Eurozone Gov Yield Plus, Xtrackers II Eurozone
+  Gov, iShares EU Govt Bond 1-3, Amundi Euro Lowest Rated IG, Amundi Euro
+  Hi Rate Mkt-Wt Govt Bond 1-3
+- **ETF OBB. LUNGA**: Amundi Euro Inflation Expectations 2-10Y, Amundi Euro
+  Govt Bond 7-10Y, Xtrackers II Eurozone Gov
+- **ETF METALLI PREZIOSI**: Xtrackers Physical Gold, Xtrackers Physical
+  Platinum, Xtrackers Physical Silver, WisdomTree Physical Gold
+- **ETF IMMOBILIARE**: iShares Dev Mkt Prop Yield, Amundi FTSE EPRA NAREIT
+  (due versioni)
+
+**Cosa ne esce.** La struttura del bot e' quella giusta: cinque caselle,
+una per una, nello stesso ordine. Cambiano solo gli strumenti, perche'
+Alpaca ammette solo borse americane e quegli ETF sono quotati a Milano.
+Non e' un errore di logica del bot, e' un limite del broker.
+
+Questo e' anche il motivo pratico per cui Interactive Brokers (il broker
+del corso) risolverebbe la questione: comprerebbe gli strumenti veri.
+Resta una decisione aperta dell'utente, non un intervento da fare adesso.
+
+---
+
+# Gli indicatori ProRealTime del corso — non leggibili
+
+L'utente ha quattro file `.itf` del corso: `Domanda-Offerta -
+(c)PD90Trading`, `Domanda-Offerta V3`, `PD90SENTIMENT @pd90trading`,
+`Volatilita'`.
+
+Sono **cifrati**. Analizzati: 4 byte di intestazione (2 di flag + 2 con la
+lunghezza del payload, verificata su tutti i file), poi payload a entropia
+7,6-7,7 bit/byte, lunghezza sempre multipla di 8. Nessuna decompressione
+standard (zlib, deflate grezzo, gzip, bz2, lzma) funziona a nessun offset.
+Il manuale ProRealTime conferma che chi esporta puo' proteggere il codice
+su tre livelli, fino a renderlo non leggibile dopo l'importazione.
+
+Il tentativo di importarli in ProRealTime per leggerne il codice non e'
+andato a buon fine.
+
+**Ma il piu' importante dei quattro non serviva.** La formula della
+volatilita' e' spiegata a voce nel video 41, con un esempio svolto, ed e'
+verificata contro il codice in `tests/test_volatilita_corso.py`.
+
+Gli altri due (PD90 Sentiment, Domanda-Offerta) restano non implementati.
+PD90 Sentiment comunque non sarebbe calcolabile: richiede dati sui
+flussi big/small investor che il bot non ha.
+
+---
+
 # Ancora da fare
 
 - Il PAC e le regole ETF non sono ancora stati confrontati riga per riga:
