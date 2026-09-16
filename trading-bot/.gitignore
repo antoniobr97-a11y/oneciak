@@ -9,3 +9,4 @@ logs/
 state/
 venv/
 corso/
+*.itf
