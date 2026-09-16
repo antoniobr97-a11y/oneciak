@@ -401,8 +401,33 @@ volatilita' e' spiegata a voce nel video 41, con un esempio svolto, ed e'
 verificata contro il codice in `tests/test_volatilita_corso.py`.
 
 Gli altri due (PD90 Sentiment, Domanda-Offerta) restano non implementati.
-PD90 Sentiment comunque non sarebbe calcolabile: richiede dati sui
-flussi big/small investor che il bot non ha.
+
+**E non lo saranno mai, perche' il corso non ne da' la formula: lo dice
+lui stesso.** Video 39:
+
+> *"abbiamo il domanda offerta, quindi questo e' un **indicatore
+> proprietario**, si utilizza sul time frame giornaliero, si guarda a
+> **otto periodi**"*
+> *"il domanda offerta ha avuto un'evoluzione [...] domanda offerta
+> versione 3, si imposta un pochino piu' largo a **14 periodi**"*
+> *"tramite un **calcolo algoritmico** andiamo a intercettare cosa sta
+> succedendo sul mercato"*
+> *"[indicatori] **trascodificati da noi**"*
+
+Il corso dichiara a cosa servono (capire se dominano compratori o
+venditori) e con che periodi si impostano (8 e 14), ma il "calcolo
+algoritmico" non lo spiega in nessuno dei 27 video: e' il prodotto che
+l'autore vende, protetto sia nel file che nella didattica. Non e' una
+lacuna della nostra ricerca, e' una scelta dell'autore.
+
+PD90 Sentiment, anche avendone la formula, non sarebbe comunque
+calcolabile: richiede dati sui flussi big/small investor che il bot non
+ha e non puo' comprare.
+
+Nel video 46 questi indicatori compaiono nello "step 4" del protocollo,
+accanto alla volatilita'. La volatilita' il bot ce l'ha ed e' verificata;
+i tre proprietari no. E' l'unico pezzo del protocollo del corso che il bot
+non replica, ed e' documentato qui perche' resti chiaro il perche'.
 
 ---
 
