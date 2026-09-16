@@ -2356,3 +2356,91 @@ fare è non nascondere il problema: e questo è il punto di questa sezione.
   ampiamente usata nell'analisi tecnica USA
 - Nessuna parte di questo codice o documento costituisce consulenza
   finanziaria
+
+## Domanda/Offerta ricostruito: misurato e RESPINTO (16 settembre 2026)
+
+Il corso usa tre indicatori proprietari nello "step 4" del protocollo
+(video 46). I file `.itf` sono cifrati, il codice resta protetto anche
+dopo l'importazione in ProRealTime, e il corso non ne pubblica la formula:
+video 39 lo chiama *"indicatore proprietario"* che funziona *"tramite un
+calcolo algoritmico"*. Non sono decifrabili.
+
+Quello che il corso **dichiara**: serve a *"capire chi domina la scena tra
+compratori e venditori"*, giornaliero, **8 periodi** (14 per la versione
+3), si legge come verde (domanda) sopra rosso (offerta).
+
+Tanto basta per una **ricostruzione indipendente** con i dati che il bot
+ha. Scomposizione classica del volume (termine CLV
+dell'Accumulation/Distribution di Chaikin), in `indicators.py`:
+
+    domanda = volume * (chiusura - minimo)  / (massimo - minimo)
+    offerta = volume * (massimo - chiusura) / (massimo - minimo)
+
+mediate su 8 barre. Usata come il corso la usa: **conferma**, non
+selezione — il trade passa trend, pattern e settore come sempre, e in piu'
+deve avere domanda > offerta il giorno del segnale.
+
+### Il criterio, scritto prima della misura
+
+Entra solo se, su **entrambi** gli universi: il CAGR migliora, il
+drawdown non peggiora, **e** anno per anno fuori campione vince in almeno
+il 60% degli anni. Il terzo punto e' la lezione del trailing stop, dove
+avevo guardato i totali e non la regolarita'.
+
+### I numeri
+
+| dentro campione (42 titoli, dal 2005) | CAGR | DD max | Sharpe | trade |
+|---|---|---|---|---|
+| senza conferma | **8,70%** | **−17,5%** | **0,93** | 1065 |
+| con conferma | 6,83% | −19,1% | 0,77 | 954 |
+
+| fuori campione (68 titoli mai usati, dal 2010) | CAGR | DD max | Sharpe | trade |
+|---|---|---|---|---|
+| senza conferma | **8,14%** | **−14,1%** | **0,87** | 1025 |
+| con conferma | 6,25% | −17,2% | 0,71 | 888 |
+
+Tutti e tre i criteri falliti. **Peggiora ovunque**, e -- prima idea su
+sette -- peggiora gia' dentro campione, dove di solito un'idea fa bella
+figura.
+
+### Perche', e la cosa interessante
+
+Anno per anno fuori campione la conferma vince in **9 anni su 16 (56%)**:
+piu' della meta'. Eppure i totali sono molto peggiori. Il motivo sta negli
+anni che perde:
+
+| anno | senza | con |
+|---|---|---|
+| 2012 | 20,2% | 4,7% |
+| 2014 | 12,1% | 0,9% |
+| 2019 | 10,8% | −0,8% |
+| 2021 | 18,3% | 0,3% |
+
+**Vince spesso e per poco, perde di rado e per tanto** -- e perde proprio
+negli anni di corsa. E' lo specchio dell'errore del trailing stop: li' i
+totali erano buoni e gli anni cattivi, qui gli anni sono quasi pari e i
+totali pessimi. Guardare una sola delle due cose inganna in entrambe le
+direzioni.
+
+La spiegazione probabile e' che i due segnali si pestino i piedi.
+"Domanda > offerta" misura **forza recente**: il titolo ha chiuso in alto
+negli ultimi 8 giorni. Ma il pattern del corso e' un **pullback**: si
+compra dopo una pausa, cioe' dopo qualche chiusura in basso. Il filtro
+scarta i pullback piu' profondi dentro i trend piu' forti, che sono quelli
+che pagano.
+
+### Cosa resta
+
+Il codice resta in `indicators.py` **e non e' chiamato da nessuno**, come
+il trailing stop. E' testato (8 test) e documentato, cosi' chi rilegge sa
+che e' stato provato e perche' e' fermo.
+
+**Questo boccia la ricostruzione, non l'indicatore del corso**, che fa
+qualcos'altro e non e' conoscibile. Conclusione onesta: con quello che si
+puo' ricostruire da prezzo e volume, non aiuta.
+
+### Punteggio complessivo
+
+**Sette idee misurate, una accettata** (il tetto per settore). Bocciate:
+filtri di rischio come veto, secondo target a 2R, freno di volatilita',
+trailing stop, minimo di azioni, conferma domanda/offerta.
