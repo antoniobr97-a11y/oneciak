@@ -89,3 +89,62 @@ def test_una_sola_chiamata_di_rete_per_settore_e_tipo():
 
 def test_l_interruttore_esiste_ed_e_acceso():
     assert config.SHORT_TERM_STOCKS_ONLY is True
+
+
+# --- Regressione del 2026-09-16: l'ETF EWT e' passato col filtro acceso ---
+
+def test_tipo_strumento_letto_anche_se_il_settore_e_gia_in_cache(tmp_path, monkeypatch):
+    """Il bug che ha fatto comprare l'ETF EWT il 2026-09-16.
+
+    Il titolo era gia' stato visto in un ciclo precedente, quindi il suo
+    settore era in cache. `get_sector_etf` usciva subito restituendo il
+    valore in cache e non scaricava niente -- percio' il tipo di strumento
+    non veniva mai scritto, `is_equity` rispondeva "non so" (None) e
+    l'ETF passava il filtro, che scarta solo su un False esplicito.
+    """
+    from datetime import date
+
+    oggi = date(2026, 9, 16)
+    # Cache vuota per davvero: reset() rilegge il file su disco, che nell'uso
+    # reale e' pieno e falserebbe il test.
+    monkeypatch.setattr(symbol_cache, "CACHE_PATH", str(tmp_path / "cache.json"))
+    symbol_cache.reset()
+    # Stato di partenza: il settore c'e' gia' (ciclo precedente), il tipo no.
+    symbol_cache.put("EWT", "sector_etf", None, oggi)
+
+    chiamate = []
+
+    class FintoTicker:
+        def __init__(self, simbolo):
+            chiamate.append(simbolo)
+
+        @property
+        def info(self):
+            return {"sector": None, "quoteType": "ETF"}
+
+    monkeypatch.setattr(sector.yf, "Ticker", FintoTicker)
+
+    assert sector.is_equity("EWT", today=oggi) is False
+    assert chiamate == ["EWT"], "doveva scaricare il tipo di strumento, non fidarsi della cache del settore"
+
+
+def test_un_fallimento_di_rete_non_diventa_un_verdetto(tmp_path, monkeypatch):
+    """Se la rete cade si risponde "non so" (None), non "e' un'azione".
+
+    Un fallimento non va messo in cache: sarebbe come decidere per 30
+    giorni che questo strumento e' o non e' un'azione."""
+    from datetime import date
+
+    oggi = date(2026, 9, 16)
+    class TickerCheEsplode:
+        def __init__(self, simbolo):
+            pass
+
+        @property
+        def info(self):
+            raise RuntimeError("rete giu'")
+
+    monkeypatch.setattr(sector.yf, "Ticker", TickerCheEsplode)
+
+    assert sector.is_equity("QUALCOSA", today=oggi) is None
+    assert symbol_cache.get("QUALCOSA", "quote_type", oggi, 30) is symbol_cache.MISSING

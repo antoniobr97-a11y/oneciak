@@ -56,7 +56,18 @@ def get_sector_etf(symbol: str, today: date | None = None) -> str | None:
     cached = symbol_cache.get(symbol, "sector_etf", today, symbol_cache.SECTOR_TTL_DAYS)
     if cached is not symbol_cache.MISSING:
         return cached
+    etf, _, _ = _scarica_e_memorizza(symbol, today)
+    return etf
 
+
+def _scarica_e_memorizza(symbol: str, today: date) -> tuple[str | None, str | None, bool]:
+    """Una sola chiamata di rete che riempie ENTRAMBE le voci di cache
+    (settore e tipo di strumento). Ritorna (etf, tipo, riuscito).
+
+    Sta in una funzione sua perche' get_sector_etf esce subito se il
+    settore e' gia' in cache: chiamarlo per popolare il tipo di strumento
+    non funzionava, ed e' il bug che ha fatto passare l'ETF EWT il
+    2026-09-16 nonostante SHORT_TERM_STOCKS_ONLY fosse acceso."""
     try:
         info = yf.Ticker(symbol).info
         sector = info.get("sector")
@@ -65,7 +76,7 @@ def get_sector_etf(symbol: str, today: date | None = None) -> str | None:
         # Non si mette in cache un fallimento di rete: sarebbe come
         # decidere per 30 giorni che questo titolo non ha settore.
         log.warning("Could not fetch sector info for %s: %s", symbol, exc)
-        return None
+        return None, None, False
 
     etf = SPDR_SECTOR_ETFS.get(sector)
     symbol_cache.put(symbol, "sector_etf", etf, today)
@@ -73,7 +84,7 @@ def get_sector_etf(symbol: str, today: date | None = None) -> str | None:
     # che tipo di strumento e', per poter tenere fuori gli ETF dal lato
     # azionario (vedi is_equity).
     symbol_cache.put(symbol, "quote_type", quote_type, today)
-    return etf
+    return etf, quote_type, True
 
 
 def is_equity(symbol: str, today: date | None = None) -> bool | None:
@@ -94,9 +105,15 @@ def is_equity(symbol: str, today: date | None = None) -> bool | None:
     today = today or market_today()
     cached = symbol_cache.get(symbol, "quote_type", today, symbol_cache.SECTOR_TTL_DAYS)
     if cached is symbol_cache.MISSING:
-        get_sector_etf(symbol, today)  # popola la cache (una sola chiamata per entrambi)
-        cached = symbol_cache.get(symbol, "quote_type", today, symbol_cache.SECTOR_TTL_DAYS)
-    if cached is symbol_cache.MISSING or cached is None:
+        # Si scarica DIRETTAMENTE, senza passare da get_sector_etf: quello
+        # esce subito quando il settore e' gia' in cache (com'e' per ogni
+        # titolo gia' visto in un ciclo precedente) e lascerebbe il tipo di
+        # strumento vuoto per sempre.
+        _, quote_type, riuscito = _scarica_e_memorizza(symbol, today)
+        if not riuscito:
+            return None
+        cached = quote_type
+    if cached is None:
         return None
     return str(cached).upper() == "EQUITY"
 
