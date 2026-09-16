@@ -145,3 +145,64 @@ def ribbon_alignment(ribbon_row: pd.Series, price: float | None = None) -> str:
         gap_pct = (closest_long - closest_short) / closest_long * 100 if price is None else (closest_long - closest_short) / price * 100
         return "bearish" if gap_pct >= min_separation_pct else "mixed"
     return "mixed"
+
+
+def domanda_offerta(
+    high: pd.Series,
+    low: pd.Series,
+    close: pd.Series,
+    volume: pd.Series,
+    period: int = 8,
+) -> tuple[pd.Series, pd.Series]:
+    """Ricostruzione dell'indicatore "domanda/offerta" del corso.
+
+    Il corso (video 39) lo dichiara PROPRIETARIO e non ne pubblica la
+    formula: dice solo a cosa serve ("capire chi domina la scena tra
+    compratori e venditori"), che si usa sul giornaliero e con quanti
+    periodi (8, e 14 per la versione 3). Il file .itf e' cifrato e il
+    codice resta protetto anche dopo l'importazione in ProRealTime.
+
+    Questa NON e' quindi una copia: e' una ricostruzione indipendente
+    della stessa grandezza, con i dati che il bot ha. Usa la scomposizione
+    classica del volume in acquisti e vendite -- il termine CLV
+    dell'Accumulation/Distribution di Chaikin -- che attribuisce lo
+    scambio di ogni giorno alle due parti in proporzione a dove la barra
+    chiude nel proprio range:
+
+        domanda del giorno = volume * (chiusura - minimo)  / (massimo - minimo)
+        offerta del giorno = volume * (massimo - chiusura) / (massimo - minimo)
+
+    Le due sommate fanno esattamente il volume del giorno. Il risultato e'
+    la media delle ultime `period` barre di ciascuna: "domanda > offerta"
+    corrisponde al verde sopra il rosso che il corso legge sul grafico.
+
+    Su una barra piatta (massimo == minimo) non c'e' modo di attribuire lo
+    scambio: il volume viene diviso a meta', cosi' la giornata resta
+    neutra invece di contare per una delle due parti.
+    """
+    ampiezza = high - low
+    posizione = np.where(ampiezza > 0, (close - low) / ampiezza.where(ampiezza > 0), 0.5)
+    quota_domanda = pd.Series(posizione, index=close.index)
+
+    domanda_giorno = volume * quota_domanda
+    offerta_giorno = volume * (1.0 - quota_domanda)
+
+    domanda = domanda_giorno.rolling(window=period, min_periods=period).mean()
+    offerta = offerta_giorno.rolling(window=period, min_periods=period).mean()
+    return domanda, offerta
+
+
+def domanda_supera_offerta(
+    high: pd.Series,
+    low: pd.Series,
+    close: pd.Series,
+    volume: pd.Series,
+    period: int = 8,
+) -> pd.Series:
+    """True dove la domanda supera l'offerta (il "verde sopra al rosso").
+
+    NaN finche' non ci sono abbastanza barre diventa False: senza dato non
+    si conferma, non si indovina.
+    """
+    domanda, offerta = domanda_offerta(high, low, close, volume, period)
+    return (domanda > offerta).where(domanda.notna(), False).astype(bool)
