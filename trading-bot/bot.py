@@ -109,7 +109,9 @@ def cmd_long_term_pac(args: argparse.Namespace) -> None:
 
 # --- Lungo termine: ciclo automatico -----------------------------------------
 
-def _advanced_monthly_cycle(broker: Broker, execute: bool, today: date) -> None:
+def _advanced_monthly_cycle(
+    broker: Broker, execute: bool, today: date, forza: bool = False
+) -> None:
     """Una decisione al mese per asset (STRATEGY.md 1.2): dentro se l'ultima
     chiusura mensile CHIUSA e' sopra la SMA10, fuori se sotto (vedi
     advanced_portfolio.is_above_sma per l'equivalenza con la regola a
@@ -117,7 +119,9 @@ def _advanced_monthly_cycle(broker: Broker, execute: bool, today: date) -> None:
     puo' girare ogni giorno senza ripetersi e senza saltare il mese se il
     server era spento il primo giorno utile."""
     month_key = today.strftime("%Y-%m")
-    if position_state.get_meta("advanced_last_month") == month_key:
+    if forza and position_state.get_meta("advanced_last_month") == month_key:
+        log.info("Advanced: mese %s gia' processato, ma il ciclo e' FORZATO.", month_key)
+    elif position_state.get_meta("advanced_last_month") == month_key:
         log.info("Advanced: mese %s gia' processato, niente da fare.", month_key)
         return
 
@@ -172,12 +176,16 @@ def _advanced_monthly_cycle(broker: Broker, execute: bool, today: date) -> None:
         log.warning("Advanced: mese %s NON segnato come completato (errori sopra), si riprova al prossimo ciclo.", month_key)
 
 
-def _harry_browne_rebalance_cycle(broker: Broker, execute: bool, today: date) -> None:
+def _harry_browne_rebalance_cycle(
+    broker: Broker, execute: bool, today: date, forza: bool = False
+) -> None:
     """Ribilanciamento al 25% per ETF a data fissa (STRATEGY.md 1.1), mai a
     soglia di scostamento. Idempotente per periodo (REBALANCE_FREQUENCY)
     tramite la data dell'ultimo ribilanciamento salvata nello stato."""
     last = position_state.get_meta("harry_browne_last_rebalance")
-    if last and not harry_browne.is_rebalance_due(date.fromisoformat(last), today):
+    if last and forza:
+        log.info("Harry Browne: ribilanciamento FORZATO (l'ultimo e' del %s).", last)
+    elif last and not harry_browne.is_rebalance_due(date.fromisoformat(last), today):
         log.info("Harry Browne: ultimo ribilanciamento %s, il prossimo non e' ancora dovuto.", last)
         return
 
@@ -258,13 +266,23 @@ def _harry_browne_rebalance_cycle(broker: Broker, execute: bool, today: date) ->
         log.warning("Harry Browne: ribilanciamento NON segnato come completato (errori sopra), si riprova al prossimo ciclo.")
 
 
-def run_long_term_cycle(broker: Broker, execute: bool, today: date | None = None) -> None:
+def run_long_term_cycle(
+    broker: Broker, execute: bool, today: date | None = None, forza: bool = False
+) -> None:
+    """`forza` salta il controllo "e' gia' ora?" e ribilancia adesso.
+
+    Serve quando il capitale di lungo termine cambia: il portafoglio resta
+    fermo sulle quote vecchie fino alla scadenza successiva (tre mesi per
+    Harry Browne, il mese dopo per Advanced), cioe' la differenza resta in
+    liquidita' per settimane. Non e' automatico apposta: il ribilanciamento
+    a data fissa e' una regola del corso, e saltarla dev'essere una scelta
+    esplicita di chi lo lancia, non del programma."""
     today = today or market_today()
     strategy = config.LONG_TERM_AUTO_STRATEGY
     if strategy == "advanced":
-        _advanced_monthly_cycle(broker, execute, today)
+        _advanced_monthly_cycle(broker, execute, today, forza=forza)
     elif strategy == "harry_browne":
-        _harry_browne_rebalance_cycle(broker, execute, today)
+        _harry_browne_rebalance_cycle(broker, execute, today, forza=forza)
     else:
         log.info("LONG_TERM_AUTO_STRATEGY=none: lungo termine solo a mano, niente da fare.")
 
@@ -275,7 +293,7 @@ def cmd_long_term_once(args: argparse.Namespace) -> None:
     if args.execute and not broker.is_trading_day(today):
         log.info("Oggi la borsa USA e' chiusa (weekend o festivo), salto il ciclo di lungo termine.")
         return
-    run_long_term_cycle(broker, execute=args.execute, today=today)
+    run_long_term_cycle(broker, execute=args.execute, today=today, forza=args.forza)
     if not args.execute:
         print("\n(report only -- passa --execute per inviare gli ordini in paper trading)")
 
@@ -1133,6 +1151,73 @@ _STAGE_LABEL = {
 }
 
 
+def cmd_chiudi(args: argparse.Namespace) -> None:
+    """Chiude a mercato una posizione APERTA di breve termine.
+
+    Le azioni sono trattenute dallo stop-loss: finche' quell'ordine esiste,
+    una vendita viene rifiutata per "insufficient qty". Quindi l'ordine e'
+    obbligato: prima si cancellano gli ordini di protezione, poi si vende.
+
+    E c'e' un istante, fra i due, in cui la posizione e' SCOPERTA. Con il
+    mercato aperto dura il tempo di un ordine a mercato. Con il mercato
+    chiuso durerebbe fino all'apertura dopo, perche' l'ordine resta in coda:
+    una notte intera senza stop, magari su un titolo che apre in gap. Per
+    questo a mercato chiuso il comando si rifiuta invece di "provarci".
+    """
+    symbol = args.symbol.upper()
+    broker = Broker()
+
+    posizione = broker.get_open_position(symbol)
+    if posizione is None:
+        print(f"\n  Su {symbol} non c'e' nessuna posizione aperta: niente da chiudere.")
+        print("  (per togliere un ordine d'ingresso in attesa usa invece: annulla"
+              f" {symbol} --execute)\n")
+        return
+
+    qty = float(posizione["qty"])
+    verso = "LONG" if qty > 0 else "SHORT"
+    prezzo = posizione.get("current_price") or posizione.get("avg_entry_price")
+    aperti = broker.list_open_orders(symbol)
+
+    print(f"\n  {symbol}: posizione {verso} di {abs(qty):g} azioni"
+          + (f", ora a {float(prezzo):.2f}" if prezzo else ""))
+    print(f"  Ordini di protezione da togliere prima di vendere: {len(aperti)}")
+    for o in aperti:
+        p_ord = getattr(o, "stop_price", None) or getattr(o, "limit_price", None)
+        print(f"    - {order_type_name(o)} {getattr(o, 'side', '')} {getattr(o, 'qty', '')}"
+              + (f" a {float(p_ord):.2f}" if p_ord else ""))
+
+    if not args.execute:
+        print("\n  (prova: non e' stato chiuso niente. Riesegui con --execute per chiudere.)\n")
+        return
+
+    if not broker.is_market_open():
+        print("\n  RIFIUTATO: il mercato e' chiuso.")
+        print("  Per vendere bisogna prima togliere lo stop-loss, e a mercato chiuso")
+        print("  l'ordine di vendita resterebbe in coda fino all'apertura: la posizione")
+        print("  passerebbe la notte senza protezione.")
+        print("  Rilancia questo comando a mercato aperto (15:30-22:00 ora italiana).\n")
+        return
+
+    cancellati = broker.cancel_open_orders(symbol)
+    intere = int(abs(qty))
+    if intere <= 0:
+        print(f"\n  {symbol}: {abs(qty):g} azioni, meno di un'azione intera: non e'")
+        print("  vendibile a mercato. Annullati comunque gli ordini di protezione.\n")
+        position_state.clear(symbol)
+        return
+
+    if qty > 0:
+        broker.sell_market(symbol, intere)
+    else:
+        broker.buy_market(symbol, intere)
+    position_state.clear(symbol)
+
+    print(f"\n  {symbol}: tolti {cancellati} ordini di protezione e mandata la chiusura")
+    print(f"  a mercato di {intere} azioni. Controlla con 'status' fra qualche minuto.\n")
+    notify.alert(f"{symbol}: posizione chiusa a mano ({intere} azioni)")
+
+
 def cmd_annulla(args: argparse.Namespace) -> None:
     """Annulla l'ordine d'INGRESSO ancora in attesa su un titolo.
 
@@ -1415,6 +1500,8 @@ def main() -> None:
 
     p = sub.add_parser("long-term-once", help="Ciclo automatico di lungo termine (LONG_TERM_AUTO_STRATEGY)")
     p.add_argument("--execute", action="store_true")
+    p.add_argument("--forza", action="store_true",
+                   help="ribilancia adesso anche se la scadenza non e' arrivata (es. dopo aver cambiato LONG_TERM_CAPITAL)")
     p.set_defaults(func=cmd_long_term_once)
 
     p = sub.add_parser("short-term-screen", help="Report candidati (nessun ordine)")
@@ -1432,6 +1519,11 @@ def main() -> None:
     p.add_argument("symbol", help="Il titolo, es. IBIT")
     p.add_argument("--execute", action="store_true", help="Annulla davvero (senza, mostra solo cosa farebbe)")
     p.set_defaults(func=cmd_annulla)
+
+    p = sub.add_parser("chiudi", help="Chiude a mercato una posizione aperta (toglie prima gli ordini di protezione)")
+    p.add_argument("symbol", help="Il titolo, es. BITO")
+    p.add_argument("--execute", action="store_true", help="Chiude davvero (senza, mostra solo cosa farebbe)")
+    p.set_defaults(func=cmd_chiudi)
 
     p = sub.add_parser("schedule", help="Ciclo breve + lungo termine schedulato ogni giorno feriale")
     p.set_defaults(func=cmd_schedule)

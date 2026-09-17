@@ -126,6 +126,31 @@ python bot.py schedule
 # giorno ma agisce una volta al mese (Advanced) o al trimestre (Harry Browne).
 ```
 
+### Interventi a mano
+
+Due comandi per quando serve mettere mano al portafoglio fuori dal ciclo
+automatico. Entrambi **mostrano soltanto cosa farebbero** se lanciati senza
+`--execute`.
+
+```bash
+python bot.py annulla BITO --execute
+# Toglie un ordine d'INGRESSO ancora in attesa. Si RIFIUTA se sul titolo
+# c'e' gia' una posizione aperta: li' "annullare gli ordini" toglierebbe
+# lo stop-loss, non un ingresso.
+
+python bot.py chiudi BITO --execute
+# Esce da una posizione APERTA. Le azioni sono trattenute dallo stop, quindi
+# prima cancella gli ordini di protezione e poi vende a mercato. Fra i due
+# passi la posizione e' scoperta: per questo si RIFIUTA a mercato chiuso,
+# dove l'ordine di vendita resterebbe in coda fino all'apertura dopo.
+
+python bot.py long-term-once --forza --execute
+# Ribilancia il portafoglio ETF ADESSO, senza aspettare la scadenza (tre
+# mesi per Harry Browne, il mese dopo per Advanced). Serve dopo aver
+# cambiato LONG_TERM_CAPITAL: altrimenti il portafoglio resta sulle quote
+# vecchie e la differenza dorme in liquidita' fino alla scadenza.
+```
+
 ### Universo full-market (scansionare tutto il mercato USA)
 
 **Di default (`SHORT_TERM_USE_FULL_MARKET=true`) il bot scansiona tutto il

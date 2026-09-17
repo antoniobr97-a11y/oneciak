@@ -150,3 +150,74 @@ def test_harry_browne_rebalance_is_marked_done_when_it_succeeds(monkeypatch):
         bot.run_long_term_cycle(broker, execute=True, today=date(2026, 9, 3))
 
     assert marked["harry_browne_last_rebalance"] == "2026-09-03"
+
+
+# --- --forza: ribilanciare prima della scadenza ----------------------------
+#
+# Serve quando LONG_TERM_CAPITAL cambia: senza, il portafoglio resta sulle
+# quote vecchie fino alla scadenza (tre mesi per Harry Browne) e la
+# differenza dorme in liquidita'. Non e' automatico apposta: il
+# ribilanciamento a data fissa e' una regola del corso, e saltarla deve
+# essere una scelta esplicita di chi lancia il comando.
+
+def _broker_lungo_termine():
+    from unittest.mock import MagicMock
+
+    broker = MagicMock()
+    broker.get_cash.return_value = 100_000.0
+    broker.get_open_position.return_value = None
+    return broker
+
+
+def test_senza_forza_non_ribilancia_prima_della_scadenza(monkeypatch):
+    import bot
+    from unittest.mock import patch
+    from datetime import date
+
+    monkeypatch.setattr(bot.config, "LONG_TERM_AUTO_STRATEGY", "harry_browne")
+    broker = _broker_lungo_termine()
+
+    with patch.object(bot, "_last_close", return_value=100.0), \
+         patch.object(bot.position_state, "get_meta", return_value="2026-09-03"), \
+         patch.object(bot.notify, "alert"):
+        bot.run_long_term_cycle(broker, execute=True, today=date(2026, 9, 17))
+
+    broker.buy_market.assert_not_called()
+
+
+def test_con_forza_ribilancia_subito(monkeypatch):
+    import bot
+    from unittest.mock import patch
+    from datetime import date
+
+    monkeypatch.setattr(bot.config, "LONG_TERM_AUTO_STRATEGY", "harry_browne")
+    broker = _broker_lungo_termine()
+
+    marked = {}
+    with patch.object(bot, "_last_close", return_value=100.0), \
+         patch.object(bot.position_state, "get_meta", return_value="2026-09-03"), \
+         patch.object(bot.position_state, "set_meta", side_effect=lambda k, v: marked.update({k: v})), \
+         patch.object(bot.notify, "alert"):
+        bot.run_long_term_cycle(broker, execute=True, today=date(2026, 9, 17), forza=True)
+
+    assert broker.buy_market.called, "con --forza il ribilanciamento deve partire"
+    assert marked["harry_browne_last_rebalance"] == "2026-09-17"
+
+
+def test_forza_non_e_il_comportamento_predefinito(monkeypatch):
+    """Il ciclo automatico giornaliero NON deve forzare: se lo facesse,
+    ribilancerebbe ogni sera invece che ogni tre mesi."""
+    import bot
+    from unittest.mock import patch
+    from datetime import date
+
+    monkeypatch.setattr(bot.config, "LONG_TERM_AUTO_STRATEGY", "harry_browne")
+    broker = _broker_lungo_termine()
+
+    with patch.object(bot, "_last_close", return_value=100.0), \
+         patch.object(bot.position_state, "get_meta", return_value="2026-09-03"), \
+         patch.object(bot.notify, "alert"):
+        bot.run_long_term_cycle(broker, execute=True, today=date(2026, 9, 17))
+
+    broker.buy_market.assert_not_called()
+    broker.sell_market.assert_not_called()
