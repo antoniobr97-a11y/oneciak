@@ -293,7 +293,12 @@ def cmd_long_term_once(args: argparse.Namespace) -> None:
     if args.execute and not broker.is_trading_day(today):
         log.info("Oggi la borsa USA e' chiusa (weekend o festivo), salto il ciclo di lungo termine.")
         return
-    run_long_term_cycle(broker, execute=args.execute, today=today, forza=args.forza)
+    # getattr e non args.forza: lo scheduler notturno costruisce il
+    # Namespace a mano (senza le opzioni della riga di comando), e
+    # pretendere l'attributo faceva fallire il ciclo automatico.
+    run_long_term_cycle(
+        broker, execute=args.execute, today=today, forza=getattr(args, "forza", False)
+    )
     if not args.execute:
         print("\n(report only -- passa --execute per inviare gli ordini in paper trading)")
 
@@ -1447,7 +1452,10 @@ def _run_cycle_safely() -> None:
         return
     try:
         _run_step_with_retry("breve termine", lambda: cmd_short_term_once(argparse.Namespace(execute=True)))
-        _run_step_with_retry("lungo termine", lambda: cmd_long_term_once(argparse.Namespace(execute=True)))
+        _run_step_with_retry(
+            "lungo termine",
+            lambda: cmd_long_term_once(argparse.Namespace(execute=True, forza=False)),
+        )
     finally:
         _cycle_lock.release()
 

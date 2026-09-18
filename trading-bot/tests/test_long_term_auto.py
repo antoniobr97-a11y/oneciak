@@ -221,3 +221,27 @@ def test_forza_non_e_il_comportamento_predefinito(monkeypatch):
 
     broker.buy_market.assert_not_called()
     broker.sell_market.assert_not_called()
+
+
+def test_il_ciclo_notturno_non_si_rompe_sulle_opzioni_da_riga_di_comando():
+    """Regressione del 18/09/2026.
+
+    Aggiungendo --forza, cmd_long_term_once leggeva args.forza. Ma lo
+    scheduler notturno costruisce il Namespace a mano, con il solo
+    execute: il ciclo automatico di lungo termine falliva ogni sera con
+    AttributeError. Il comando deve reggere un Namespace minimo.
+    """
+    import argparse
+    from unittest.mock import MagicMock, patch
+
+    import bot
+
+    broker = MagicMock()
+    broker.is_trading_day.return_value = True
+
+    with patch.object(bot, "Broker", return_value=broker), \
+         patch.object(bot, "run_long_term_cycle") as ciclo:
+        bot.cmd_long_term_once(argparse.Namespace(execute=True))
+
+    assert ciclo.called
+    assert ciclo.call_args.kwargs["forza"] is False, "senza l'opzione non si deve forzare"
