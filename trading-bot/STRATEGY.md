@@ -2444,3 +2444,65 @@ puo' ricostruire da prezzo e volume, non aiuta.
 **Sette idee misurate, una accettata** (il tetto per settore). Bocciate:
 filtri di rischio come veto, secondo target a 2R, freno di volatilita',
 trailing stop, minimo di azioni, conferma domanda/offerta.
+
+## Soglia di qualificazione del trend: misurata, resta 2 (18 settembre 2026)
+
+Il 18/09 il bot dal vivo ha comprato VZ e KR con punteggio di trend **2/6**,
+il minimo consentito, mentre le sere prima prendeva 4/6 e 5/6. VZ aveva
+anche il fascio di medie non allineato. Il 2 era un valore scelto
+all'inizio del progetto e mai verificato.
+
+La domanda non era "aggiungiamo un filtro" -- il filtro c'e' gia'. Era:
+**il 2 e' un altopiano o una scogliera?**
+
+### La curva intera
+
+Cambiata solo `TREND_MIN_QUALIFIERS`, tutto il resto identico.
+
+| dentro campione (42 titoli, dal 2005) | CAGR | DD max | Sharpe | trade |
+|---|---|---|---|---|
+| **2 (attuale)** | **8,70%** | −17,5% | 0,93 | 1065 |
+| 3 | 8,17% | −15,0% | 0,88 | 999 |
+| 4 | 8,38% | −15,9% | 0,98 | 746 |
+
+| fuori campione (68 titoli mai usati, dal 2010) | CAGR | DD max | Sharpe | trade |
+|---|---|---|---|---|
+| **2 (attuale)** | **8,14%** | **−14,1%** | **0,87** | 1025 |
+| 3 | 4,80% | −19,6% | 0,55 | 954 |
+| 4 | 5,51% | −20,8% | 0,63 | 757 |
+
+Entrambe le alternative bocciate su tutti e quattro i paletti. La soglia 3
+vince **2 anni su 16** fuori campione, la 4 ne vince 6.
+
+### Cosa dicono questi numeri
+
+**Dentro campione la curva e' piatta** (8,17-8,70%): a guardare solo
+quella si direbbe "cambia poco, scegli quello che preferisci". **Fuori
+campione no**: il 2 rende 8,14% e gli altri due crollano a 4,80% e 5,51%.
+E' un altro esempio di quanto poco dica il dentro campione da solo.
+
+**Essere piu' selettivi ha peggiorato anche il drawdown** (−14,1% ->
+−19,6%), e questo toglie di mezzo la consolazione tipica ("rendo meno ma
+rischio meno"): qui si rende meno E si rischia di piu'.
+
+La spiegazione probabile e' la natura del trend-following: il risultato
+dipende da pochi grandi vincitori dentro molte operazioni mediocri.
+Tagliare il numero di tentativi (1025 -> 757) taglia anche le probabilita'
+di essere dentro quando parte quello buono. Il filtro non distingue i
+vincitori dai perdenti: riduce tutto.
+
+Nota sul rumore: fra 3 e 4 la curva non e' monotona (il 4 fa meglio del
+3). In quella zona e' rumore. Quello che regge e' il confronto con il 2,
+netto e nella stessa direzione su entrambi gli universi.
+
+### Conclusione
+
+**`TREND_MIN_QUALIFIERS` resta 2.** VZ e KR a 2/6 non sono un difetto: sono
+esattamente cio' che la misura dice di lasciar passare.
+
+### Punteggio complessivo
+
+**Otto idee misurate, una accettata** (il tetto per settore). Bocciate:
+filtri di rischio come veto, secondo target a 2R, freno di volatilita',
+trailing stop, minimo di azioni, conferma domanda/offerta, soglia di trend
+piu' alta.
