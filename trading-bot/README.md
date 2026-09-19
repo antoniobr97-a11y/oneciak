@@ -144,6 +144,22 @@ come tre gonfierebbe la percentuale di successo.
 
 Su Windows c'e' `COME-STA-ANDANDO.bat` (doppio clic).
 
+Il rendiconto incrocia gli eseguiti del broker con il **diario di bordo**
+(`state/diario.jsonl`, scritto da `common/diario.py`): il broker sa solo
+che si e' comprato e venduto, mentre il pattern e gli avvisi esistono solo
+nel momento della decisione e dopo non si ricostruiscono. Da li' escono le
+due tabelle che servono davvero:
+
+- **per pattern**: quali dei sette rendono e quali no
+- **per numero di avvisi**: aprire nonostante settore che non conferma,
+  resistenza vicina e divergenza contraria costa davvero qualcosa?
+
+Il diario parte vuoto e si riempie da solo a ogni ordine: le operazioni
+chiuse prima restano nel totale ma fuori da quelle due tabelle, e il
+comando lo dice. Se il file non si puo' scrivere il bot continua a operare
+e perde solo la memoria di quella sera -- un diario non deve mai fermare
+un ciclo a meta'.
+
 **Attenzione a cosa se ne fa.** Sotto il centinaio di operazioni una
 striscia di sfortuna e una strategia rotta si somigliano: il comando lo
 scrive da solo finche' i numeri sono pochi. Le otto misure documentate in

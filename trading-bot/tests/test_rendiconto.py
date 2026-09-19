@@ -170,3 +170,68 @@ def test_il_comando_non_si_rompe_senza_operazioni(capsys):
         bot.cmd_rendiconto(argparse.Namespace(ultime=20))
 
     assert "Nessuna operazione ancora chiusa" in capsys.readouterr().out
+
+
+# --- incrocio con il diario: quali pattern rendono, e gli avvisi contano? --
+
+def _op(symbol, pnl, pattern=None, avvisi=()):
+    from short_term.rendiconto import Operazione
+    return Operazione(
+        symbol=symbol, apertura=GIORNO, chiusura=GIORNO + timedelta(days=5),
+        qty=10, prezzo_ingresso=100.0, prezzo_uscita=100.0 + pnl / 10,
+        pnl=pnl, pattern=pattern, avvisi=list(avvisi),
+    )
+
+
+def test_abbina_pattern_e_avvisi_alle_operazioni():
+    from short_term.rendiconto import abbina
+
+    fills = [_fill("HOOD", "buy", 10, 100.0, giorno=6), _fill("HOOD", "sell", 10, 110.0, giorno=9)]
+    voci = [{
+        "symbol": "HOOD", "pattern": "Second Entry Pullback",
+        "avvisi": ["analisi settoriale non conferma"],
+        "quando": GIORNO.isoformat(),     # deciso 6 giorni prima dell'esecuzione
+    }]
+
+    (op,) = abbina(ricostruisci(fills), voci)
+
+    assert op.pattern == "Second Entry Pullback"
+    assert op.avvisi == ["analisi settoriale non conferma"]
+
+
+def test_le_operazioni_si_raggruppano_per_pattern():
+    from short_term.rendiconto import per_pattern
+
+    gruppi = per_pattern([
+        _op("A", +100, "TKO"), _op("B", +50, "TKO"), _op("C", -200, "Pullback Semplice"),
+    ])
+
+    assert gruppi["TKO"]["totale"] == 2
+    assert gruppi["TKO"]["pnl"] == pytest.approx(150.0)
+    assert gruppi["Pullback Semplice"]["successo"] == 0.0
+
+
+def test_un_operazione_senza_diario_resta_fuori_dai_raggruppamenti():
+    """Le operazioni chiuse prima che il diario esistesse non hanno
+    un'etichetta: attribuirgliene una falserebbe il confronto."""
+    from short_term.rendiconto import per_numero_avvisi, per_pattern
+
+    operazioni = [_op("A", +100, "TKO"), _op("VECCHIA", -500, None)]
+
+    assert sum(g["totale"] for g in per_pattern(operazioni).values()) == 1
+    assert sum(g["totale"] for g in per_numero_avvisi(operazioni).values()) == 1
+
+
+def test_si_raggruppa_anche_per_numero_di_avvisi():
+    """La domanda vera: aprire nonostante tre avvisi rende meno?"""
+    from short_term.rendiconto import per_numero_avvisi
+
+    gruppi = per_numero_avvisi([
+        _op("A", +300, "TKO"),
+        _op("B", -100, "TKO", ["settore", "resistenza", "divergenza"]),
+        _op("C", -100, "Pivot", ["settore", "resistenza", "divergenza", "quarto"]),
+    ])
+
+    assert gruppi[0]["totale"] == 1 and gruppi[0]["pnl"] == pytest.approx(300.0)
+    assert gruppi[3]["totale"] == 2, "tre avvisi o piu' stanno insieme"
+    assert gruppi[3]["pnl"] == pytest.approx(-200.0)

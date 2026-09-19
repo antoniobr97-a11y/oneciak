@@ -26,7 +26,7 @@ from alpaca.common.exceptions import APIError
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from common import config, notify, position_state
+from common import config, diario, notify, position_state
 from common.market_time import MARKET_TIMEZONE, market_now, market_today
 from common.broker import Broker, order_type_name
 from common.data import get_daily_bars, get_monthly_bars
@@ -1110,6 +1110,24 @@ def cmd_short_term_once(args: argparse.Namespace) -> None:
                     pending_since=existing.get("pending_since") or today.isoformat(),
                 )
                 notify.alert(f"Ordine d'ingresso {c.direction.upper()} {c.symbol} x{qty} a {c.levels.entry:.2f} (stop {c.levels.stop_loss:.2f}, {c.pattern})")
+                # Il broker registra le compravendite, non il perche': il
+                # pattern e gli avvisi esistono solo adesso e non si
+                # ricostruiscono dopo. Senza questa riga, "le operazioni
+                # aperte nonostante gli avvisi rendono meno?" resta senza
+                # risposta per sempre.
+                diario.annota(
+                    symbol=c.symbol,
+                    direction=c.direction,
+                    pattern=c.pattern,
+                    trend_score=c.trend.score,
+                    entry=round(c.levels.entry, 4),
+                    stop=round(c.levels.stop_loss, 4),
+                    risk_per_share=round(c.levels.risk_per_share, 4),
+                    qty=qty,
+                    settore=c.sector_etf,
+                    settore_conferma=c.sector_passes,
+                    avvisi=list(c.notes),
+                )
             except APIError as exc:
                 # Rifiuto del broker: e' una risposta, non un guasto del bot.
                 # Va loggato per esteso ma in una riga, senza traceback: un
@@ -1168,6 +1186,7 @@ def cmd_rendiconto(args: argparse.Namespace) -> None:
     broker = Broker()
     fills = broker.list_filled_orders()
     operazioni = rendiconto.ricostruisci(fills, escludi=LONG_TERM_TICKERS)
+    rendiconto.abbina(operazioni, diario.leggi())
     s = rendiconto.statistiche(operazioni)
 
     print("\n" + "=" * 62)
@@ -1200,15 +1219,49 @@ def cmd_rendiconto(args: argparse.Namespace) -> None:
         print("  Servono alcune centinaia di operazioni prima di cambiare qualcosa")
         print("  sulla base di questo rendiconto.")
 
+    pattern = rendiconto.per_pattern(operazioni)
+    if pattern:
+        print("\n" + "-" * 62)
+        print(" PER PATTERN")
+        print("-" * 62)
+        print(f"  {'pattern':<26s} {'n':>4s} {'successo':>9s} {'risultato':>12s} {'PF':>6s}")
+        for nome, r in sorted(pattern.items(), key=lambda kv: -kv[1]["pnl"]):
+            pf = "inf" if r["profit_factor"] == float("inf") else f"{r['profit_factor']:.2f}"
+            print(f"  {nome:<26s} {r['totale']:>4d} {r['successo']:>8.0f}% {r['pnl']:>+11,.2f} {pf:>6s}")
+
+    avvisi = rendiconto.per_numero_avvisi(operazioni)
+    if avvisi:
+        print("\n" + "-" * 62)
+        print(" PER NUMERO DI AVVISI (settore, resistenza, divergenza)")
+        print("-" * 62)
+        print(f"  {'avvisi':<26s} {'n':>4s} {'successo':>9s} {'risultato':>12s} {'PF':>6s}")
+        for n, r in sorted(avvisi.items()):
+            etichetta = ("nessun avviso" if n == 0 else
+                         "1 avviso" if n == 1 else
+                         f"{n} avvisi" if n < 3 else "3 o piu' avvisi")
+            pf = "inf" if r["profit_factor"] == float("inf") else f"{r['profit_factor']:.2f}"
+            print(f"  {etichetta:<26s} {r['totale']:>4d} {r['successo']:>8.0f}% {r['pnl']:>+11,.2f} {pf:>6s}")
+
+    senza_diario = sum(1 for o in operazioni if o.pattern is None)
+    if senza_diario:
+        quante = (f"{senza_diario} operazione e' precedente" if senza_diario == 1
+                  else f"{senza_diario} operazioni sono precedenti")
+        print(f"\n  ({quante} al diario di bordo: di quelle")
+        print("   non si sa il pattern, e restano fuori dalle due tabelle qui sopra.)")
+
     recenti = operazioni[-args.ultime:] if args.ultime else operazioni
     print("\n" + "-" * 62)
     print(f" ULTIME {len(recenti)} OPERAZIONI")
     print("-" * 62)
-    print(f"  {'titolo':<7s} {'chiusa':<11s} {'gg':>3s} {'risultato':>12s} {'%':>8s} {'R':>7s}")
+    print(f"  {'titolo':<7s} {'chiusa':<11s} {'gg':>3s} {'risultato':>11s} {'R':>7s}  pattern")
     for o in recenti:
         erre = f"{o.erre:+.2f}" if o.erre is not None else "  n/d"
+        etichetta = o.pattern or "-"
+        if o.avvisi:
+            quanti = len(o.avvisi)
+            etichetta += f"  ({quanti} avviso)" if quanti == 1 else f"  ({quanti} avvisi)"
         print(f"  {o.symbol:<7s} {o.chiusura.date().isoformat():<11s} {o.giorni:>3d}"
-              f" {o.pnl:>+11,.2f} {o.pnl_pct:>+7.1f}% {erre:>7s}")
+              f" {o.pnl:>+10,.2f} {erre:>7s}  {etichetta}")
     print()
 
 

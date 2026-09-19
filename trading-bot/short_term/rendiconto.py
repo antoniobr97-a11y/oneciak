@@ -32,6 +32,9 @@ class Operazione:
     pnl: float
     uscite: int = 1                  # quanti eseguiti di uscita (la scala del corso ne fa 3)
     stop_iniziale: float | None = None
+    # Riempiti da abbina() dal diario di bordo: il broker non li conosce.
+    pattern: str | None = None
+    avvisi: list[str] = field(default_factory=list)
 
     @property
     def vinta(self) -> bool:
@@ -162,3 +165,67 @@ def statistiche(operazioni: list[Operazione]) -> dict:
         "erre_medio": (sum(erre) / len(erre)) if erre else None,
         "con_erre": len(erre),
     }
+
+
+# --- incrocio con il diario di bordo ---------------------------------------
+
+def abbina(operazioni: list[Operazione], voci: list[dict]) -> list[Operazione]:
+    """Attacca a ogni operazione il pattern e gli avvisi di quella sera.
+
+    Il broker sa solo che si e' comprato e venduto. Il perche' -- quale
+    pattern, e con quali riserve -- sta nel diario, scritto al momento
+    della decisione. Senza questo incrocio non si puo' rispondere ne' a
+    "quali pattern rendono" ne' a "gli avvisi contano davvero".
+    """
+    from common import diario
+
+    for op in operazioni:
+        v = diario.voce_per(op.symbol, op.apertura, voci)
+        if v:
+            op.pattern = v.get("pattern")
+            op.avvisi = list(v.get("avvisi") or [])
+    return operazioni
+
+
+def _riassunto(gruppo: list[Operazione]) -> dict:
+    vinte = [o for o in gruppo if o.vinta]
+    guadagni = sum(o.pnl for o in vinte)
+    perdite = abs(sum(o.pnl for o in gruppo if not o.vinta))
+    return {
+        "totale": len(gruppo),
+        "successo": len(vinte) / len(gruppo) * 100 if gruppo else 0.0,
+        "pnl": sum(o.pnl for o in gruppo),
+        "profit_factor": (guadagni / perdite) if perdite else (float("inf") if guadagni else 0.0),
+    }
+
+
+def per_pattern(operazioni: list[Operazione]) -> dict[str, dict]:
+    """Quanto rende ciascuno dei sette pattern del corso.
+
+    Solo sulle operazioni di cui si conosce il pattern: quelle chiuse
+    prima che il diario esistesse non hanno colpe, ma non hanno nemmeno
+    un'etichetta, e attribuirgliene una a caso falserebbe il confronto.
+    """
+    gruppi: dict[str, list[Operazione]] = {}
+    for o in operazioni:
+        if o.pattern:
+            gruppi.setdefault(o.pattern, []).append(o)
+    return {nome: _riassunto(g) for nome, g in sorted(gruppi.items())}
+
+
+def per_numero_avvisi(operazioni: list[Operazione]) -> dict[int, dict]:
+    """Le operazioni aperte nonostante gli avvisi rendono meno?
+
+    Il bot tratta gli avvisi (settore che non conferma, resistenza troppo
+    vicina, divergenza contraria) come segnalazioni e non come veti:
+    trasformarli in veti e' stato misurato e peggiorava i risultati. Ma
+    quella misura e' su dati simulati. Questo raggruppamento dice cosa
+    succede DAVVERO, ed e' la prima domanda da rifare quando le operazioni
+    saranno abbastanza.
+    """
+    gruppi: dict[int, list[Operazione]] = {}
+    for o in operazioni:
+        if o.pattern is None:
+            continue  # nessun diario: non si sa quanti avvisi avesse
+        gruppi.setdefault(min(len(o.avvisi), 3), []).append(o)
+    return {n: _riassunto(g) for n, g in sorted(gruppi.items())}
