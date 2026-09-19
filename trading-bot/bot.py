@@ -33,7 +33,7 @@ from common.data import get_daily_bars, get_monthly_bars
 from common.logger_setup import setup_logging
 from long_term import advanced_portfolio, harry_browne, pac, risk_profile
 from long_term.advanced_portfolio import closed_monthly_closes
-from short_term import money_management, sector
+from short_term import money_management, rendiconto, sector
 from short_term.indicators import atr, sma
 from short_term.screener import Candidate, screen_universe
 
@@ -1156,6 +1156,62 @@ _STAGE_LABEL = {
 }
 
 
+def cmd_rendiconto(args: argparse.Namespace) -> None:
+    """Come sta andando DAVVERO: le operazioni gia' chiuse.
+
+    Tutto quello che sappiamo di questa strategia viene da simulazioni sul
+    2005-2026. Di quello che il bot ha fatto sul serio non sapevamo niente,
+    perche' lo stato locale cancella la posizione appena si chiude. Qui lo
+    storico si ricostruisce dagli eseguiti conservati dal broker, quindi
+    copre anche le operazioni chiuse prima che questo comando esistesse.
+    """
+    broker = Broker()
+    fills = broker.list_filled_orders()
+    operazioni = rendiconto.ricostruisci(fills, escludi=LONG_TERM_TICKERS)
+    s = rendiconto.statistiche(operazioni)
+
+    print("\n" + "=" * 62)
+    print(" RENDICONTO OPERAZIONI CHIUSE (solo azioni, breve termine)")
+    print("=" * 62)
+
+    if not s["totale"]:
+        print("\n  Nessuna operazione ancora chiusa.")
+        print("  Il rendiconto conta solo i giri completi (comprato E rivenduto):")
+        print("  le posizioni ancora aperte non hanno un risultato, e metterle")
+        print("  qui dentro falserebbe le medie. Guardale con 'status'.\n")
+        return
+
+    perc = s["percentuale_successo"]
+    pf = s["profit_factor"]
+    print(f"\n  Operazioni chiuse   : {s['totale']}")
+    print(f"  Vinte / perse       : {s['vinte']} / {s['perse']}   ({perc:.0f}% di successo)")
+    print(f"  Risultato totale    : {s['pnl_totale']:+,.2f} USD")
+    print(f"  Guadagno medio      : {s['guadagno_medio']:+,.2f} USD")
+    print(f"  Perdita media       : {s['perdita_media']:+,.2f} USD")
+    print(f"  Profit factor       : {pf:.2f}"
+          + ("   (sotto 1 = si perde)" if pf < 1 else "   (sopra 1,5 = margine reale)" if pf >= 1.5 else ""))
+    if s["erre_medio"] is not None:
+        print(f"  Risultato medio in R: {s['erre_medio']:+.2f}R   (su {s['con_erre']} operazioni su {s['totale']})")
+    print(f"  Durata media        : {s['giorni_medi']:.0f} giorni")
+
+    if s["totale"] < 100:
+        print(f"\n  ATTENZIONE: {s['totale']} operazioni sono POCHE. Con questi numeri")
+        print("  una striscia di sfortuna e una strategia rotta si somigliano.")
+        print("  Servono alcune centinaia di operazioni prima di cambiare qualcosa")
+        print("  sulla base di questo rendiconto.")
+
+    recenti = operazioni[-args.ultime:] if args.ultime else operazioni
+    print("\n" + "-" * 62)
+    print(f" ULTIME {len(recenti)} OPERAZIONI")
+    print("-" * 62)
+    print(f"  {'titolo':<7s} {'chiusa':<11s} {'gg':>3s} {'risultato':>12s} {'%':>8s} {'R':>7s}")
+    for o in recenti:
+        erre = f"{o.erre:+.2f}" if o.erre is not None else "  n/d"
+        print(f"  {o.symbol:<7s} {o.chiusura.date().isoformat():<11s} {o.giorni:>3d}"
+              f" {o.pnl:>+11,.2f} {o.pnl_pct:>+7.1f}% {erre:>7s}")
+    print()
+
+
 def cmd_chiudi(args: argparse.Namespace) -> None:
     """Chiude a mercato una posizione APERTA di breve termine.
 
@@ -1527,6 +1583,10 @@ def main() -> None:
     p.add_argument("symbol", help="Il titolo, es. IBIT")
     p.add_argument("--execute", action="store_true", help="Annulla davvero (senza, mostra solo cosa farebbe)")
     p.set_defaults(func=cmd_annulla)
+
+    p = sub.add_parser("rendiconto", help="Come sta andando davvero: le operazioni gia' chiuse")
+    p.add_argument("--ultime", type=int, default=20, help="quante operazioni elencare (0 = tutte)")
+    p.set_defaults(func=cmd_rendiconto)
 
     p = sub.add_parser("chiudi", help="Chiude a mercato una posizione aperta (toglie prima gli ordini di protezione)")
     p.add_argument("symbol", help="Il titolo, es. BITO")

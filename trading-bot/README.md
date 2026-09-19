@@ -126,6 +126,30 @@ python bot.py schedule
 # giorno ma agisce una volta al mese (Advanced) o al trimestre (Harry Browne).
 ```
 
+### Come sta andando davvero
+
+```bash
+python bot.py rendiconto            # ultime 20 operazioni chiuse
+python bot.py rendiconto --ultime 0 # tutte
+```
+
+Lo stato locale tiene solo le posizioni APERTE e viene cancellato appena
+una si chiude: del passato, in casa, non resta niente. Il rendiconto
+ricostruisce le operazioni complete dagli eseguiti conservati dal broker,
+quindi copre anche quelle chiuse prima che il comando esistesse.
+
+Le uscite a scaglioni del corso (meta' a 1R, 30% a 3R, il resto che corre)
+sono tre eseguiti su un solo ingresso: contano come UNA operazione. Contarle
+come tre gonfierebbe la percentuale di successo.
+
+Su Windows c'e' `COME-STA-ANDANDO.bat` (doppio clic).
+
+**Attenzione a cosa se ne fa.** Sotto il centinaio di operazioni una
+striscia di sfortuna e una strategia rotta si somigliano: il comando lo
+scrive da solo finche' i numeri sono pochi. Le otto misure documentate in
+STRATEGY.md sono su 1000+ operazioni simulate, e sette su otto hanno
+ribaltato il verdetto passando dai dati vecchi a quelli nuovi.
+
 ### Interventi a mano
 
 Due comandi per quando serve mettere mano al portafoglio fuori dal ciclo

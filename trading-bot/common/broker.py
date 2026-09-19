@@ -417,6 +417,55 @@ class Broker:
         request = GetOrdersRequest(status=QueryOrderStatus.OPEN)
         return {o.symbol for o in self.client.get_orders(request) if str(getattr(o.side, "value", o.side)).lower() == "buy"}
 
+    def list_filled_orders(self, since: datetime | None = None, page_size: int = 500) -> list[dict]:
+        """Tutti gli ordini ESEGUITI, dal piu' vecchio al piu' recente.
+
+        E' la memoria del bot. Lo stato locale tiene solo le posizioni
+        aperte e viene cancellato quando una si chiude: di quello che e'
+        gia' successo, in casa, non resta niente. Alpaca invece conserva
+        ogni eseguito, quindi lo storico si ricostruisce da li' -- anche
+        all'indietro, per le operazioni chiuse prima che questo comando
+        esistesse.
+
+        Impagina all'indietro con `until`: una richiesta sola torna al
+        massimo 500 ordini, e chi fa qualche operazione al giorno li
+        supera in pochi mesi. Senza impaginazione il rendiconto avrebbe
+        taciuto la parte piu' vecchia senza dirlo.
+        """
+        raccolti: dict[str, dict] = {}
+        until = None
+        while True:
+            richiesta = GetOrdersRequest(
+                status=QueryOrderStatus.CLOSED, limit=page_size,
+                direction="desc", until=until, after=since,
+            )
+            pagina = list(self.client.get_orders(richiesta))
+            nuovi = 0
+            for o in pagina:
+                if o.filled_at is None or not o.filled_qty:
+                    continue  # annullato o scaduto: non e' un eseguito
+                if str(o.id) in raccolti:
+                    continue
+                raccolti[str(o.id)] = {
+                    "symbol": o.symbol,
+                    "side": str(getattr(o.side, "value", o.side)).lower(),
+                    "qty": float(o.filled_qty),
+                    "price": float(o.filled_avg_price or 0.0),
+                    "filled_at": o.filled_at,
+                    "type": order_type_name(o),
+                    "stop_price": float(o.stop_price) if getattr(o, "stop_price", None) else None,
+                }
+                nuovi += 1
+            if len(pagina) < page_size or nuovi == 0:
+                break
+            # si risale oltre il piu' vecchio di questa pagina
+            piu_vecchio = min(o.submitted_at or o.created_at for o in pagina)
+            if until is not None and piu_vecchio >= until:
+                break  # non si sta avanzando: meglio fermarsi che ciclare
+            until = piu_vecchio
+
+        return sorted(raccolti.values(), key=lambda f: f["filled_at"])
+
     def cancel_open_orders(self, symbol: str) -> int:
         """Cancella TUTTI gli ordini aperti sul titolo (entrata pendente,
         stop di protezione, limit di take-profit). Ritorna quanti.
