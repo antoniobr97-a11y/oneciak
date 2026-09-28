@@ -735,9 +735,11 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div class="pdf-card reveal">
       <div class="pdf-label">Save report as PDF</div>
       <div class="pdf-row">
-        <button onclick="savePDF()">Save PDF</button>
+        <button onclick="savePDF()">Save Full PDF</button>
+        <button onclick="saveOneSheet()">Save One-Sheet</button>
       </div>
       <div class="success-msg" id="pdfSuccess">PDF saved — check your downloads.</div>
+      <div class="success-msg" id="oneSheetSuccess">One-sheet saved — check your downloads.</div>
     </div>
     <button class="btn-secondary" onclick="goLanding()">← New Analysis</button>
     <div class="disclaimer-box" style="margin-top:14px">
@@ -1215,7 +1217,7 @@ function renderFull(r, title) {
       score: r.creative_score,
       body: buildAccordionBody(r.creative_score, r.creative_verdict, r.creative_detail,
         r.creative_flags, r.creative_strengths, r.creative_tips, null,
-        buildPitchAssessment(r.pitch_assessment) + buildLabeledText('Attachment Strategy', r.attachment_strategy))
+        buildPitchAssessment(r.pitch_assessment) + buildLabeledText('Attachment Strategy', r.attachment_strategy) + buildKeyCrew(r.key_crew_recommendations))
     },
     {
       num:'02', label:'Financial Plan', sublabel:'Budget · Funding · Financing',
@@ -1229,7 +1231,7 @@ function renderFull(r, title) {
       score: r.market_score,
       body: buildAccordionBody(r.market_score, r.market_verdict, r.market_detail,
         r.market_flags, r.market_strengths, r.market_tips, null,
-        buildComparables(r.market_comps) + buildMarketingStrategy(r.marketing_strategy) + buildLabeledText('Target Audience Profile', r.target_audience_profile))
+        buildComparables(r.market_comps) + buildMarketingStrategy(r.marketing_strategy) + buildLabeledText('Target Audience Profile', r.target_audience_profile) + buildCautionaryComps(r.cautionary_comps))
     },
     {
       num:'04', label:'Festival Strategy', sublabel:'Circuit · Festivals · Timing',
@@ -1413,6 +1415,12 @@ function buildActionPlanBody(r) {
       '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300">'+r.awards_qualification_strategy+'</div></div>';
   }
 
+  // Legal & Rights Considerations
+  if (r.legal_and_rights_considerations) {
+    out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Legal &amp; Rights Considerations</div>'+
+      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300">'+r.legal_and_rights_considerations+'</div></div>';
+  }
+
   // Revenue Projection
   if (r.revenue_projection) {
     var rp = r.revenue_projection;
@@ -1540,6 +1548,32 @@ function buildComparables(comps) {
   return h;
 }
 
+function buildKeyCrew(crew) {
+  if (!crew || !crew.length) return '';
+  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Key Crew Recommendations</div>';
+  crew.forEach(function(c){
+    if (!c) return;
+    h += '<div style="padding:9px 0;border-bottom:1px solid var(--border-light)">'+
+      '<div style="font-size:13px;font-weight:700;margin-bottom:2px">'+(c.role||'')+'</div>'+
+      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:3px">'+(c.profile||'')+'</div>'+
+      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300">'+(c.why||'')+'</div>'+
+      '</div>';
+  });
+  h += '</div>';
+  return h;
+}
+
+function buildCautionaryComps(comps) {
+  if (!comps || !comps.length) return '';
+  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Cautionary Comparables</div>';
+  comps.forEach(function(c){
+    if (!c) return;
+    h += '<div class="comp-item"><div class="comp-name">'+(c.title||'')+' ('+(c.year||'')+')</div><div class="comp-detail">Budget: '+(c.budget||'')+' — '+(c.what_went_wrong||'')+'</div><div class="comp-lesson">'+(c.lesson||'')+'</div></div>';
+  });
+  h += '</div>';
+  return h;
+}
+
 function buildPlatforms(platforms) {
   if (!platforms || !platforms.length) return '';
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Platform Priority</div>';
@@ -1611,6 +1645,12 @@ function showSampleReport() {
       pitch_deck_checklist: ['Comp-title page (The Quiet Girl, Aftersun)', 'Visual mood board emphasizing the coastal/automation contrast', 'Casting wishlist with 2-3 tiers per role', 'One-page financing structure with fund targets']
     },
     attachment_strategy: 'Attaching a cinematographer with a strong coastal/landscape portfolio would do more for this project\'s credibility than a recognizable lead actor — regional funds weight visual pedigree heavily for location-driven dramas, and it directly de-risks the film\'s central visual promise.',
+    key_crew_recommendations: [
+      { role: 'Director of Photography', profile: 'A DP with a strong natural-light and landscape portfolio — this film lives or dies on its coastal visual identity.', why: 'The automation/lighthouse hook is the project\'s main differentiator, and that only lands if the cinematography sells it.' },
+      { role: 'Editor', profile: 'An editor experienced with restrained, slow-burn character dramas who can resist over-cutting quiet moments.', why: 'The film\'s emotional core depends on unhurried pacing between the mother and son.' },
+      { role: 'Composer', profile: 'A composer working in minimal, textural scoring rather than a traditional orchestral approach.', why: 'A heavy-handed score would undercut the restrained arthouse register this project is aiming for.' },
+      { role: 'Production Designer', profile: 'Someone with location-based (not studio-build) experience, comfortable working within a single-location budget.', why: 'Nearly the entire budget discipline depends on making one real location feel lived-in and specific.' }
+    ],
     financial_score: 7, financial_verdict: 'Realistic and financeable at the stated budget, with a clear public-funding path.',
     financial_detail: 'A two-hander with one primary location keeps the budget disciplined relative to comparable festival dramas, which often run 20-40% higher due to larger casts or multiple locations. The financing gap is bridgeable primarily through public regional funds plus a modest pre-sale to a domestic distributor. Expect a 9-12 month financing timeline if regional fund deadlines are hit on the first attempt rather than a resubmission cycle.',
     financial_flags: ['Single-location dependency means a weather-disrupted shoot has outsized schedule risk', 'No pre-attached cast yet, which regional funds often weight heavily'],
@@ -1637,6 +1677,10 @@ function showSampleReport() {
     market_comps: [
       { title: 'The Quiet Girl', year: '2022', budget: '~€1.3M', result: 'Oscar-nominated, strong European festival run, solid VOD afterlife', lesson: 'Restrained, specific character dramas can outperform starrier competition on festival prestige alone' },
       { title: 'Aftersun', year: '2022', budget: '~$2M', result: 'A24 acquisition off festival buzz, major critical breakout', lesson: 'A distinctive visual identity and a clear emotional hook drove acquisition interest more than plot novelty' }
+    ],
+    cautionary_comps: [
+      { title: 'Hampstead', year: '2017', budget: '~€10M', what_went_wrong: 'A similarly quiet, character-driven premise was undercut by a generic, overly conventional visual approach that made it feel indistinguishable from countless other mid-budget dramas', lesson: 'A distinctive visual identity is not optional at this scale — without it, quiet character dramas simply blend into the background' },
+      { title: 'Land', year: '2021', budget: '~$5M', what_went_wrong: 'Strong premise and star power still resulted in a muted festival reception and modest VOD returns because the pacing felt slow without a clear enough emotional throughline', lesson: 'Every scene needs to visibly advance the mother-son relationship — restraint should never come at the cost of momentum' }
     ],
     marketing_strategy: {
       overview: 'Lead with the automation/obsolescence hook rather than the reconciliation plot alone — it is the more distinctive angle and differentiates the film from genre peers.',
@@ -1691,6 +1735,7 @@ function showSampleReport() {
       mitigation: ['Invest disproportionately in cinematography/visual identity relative to budget to stand out from genre peers', 'Build a weather contingency budget line and flexible shoot-day buffer into scheduling']
     },
     awards_qualification_strategy: 'A qualifying festival run (rather than a qualifying theatrical release) is the realistic path here — a top-tier festival premiere at this budget can open doors to regional and national film-award consideration, but a self-funded theatrical qualifying run is not a cost-effective use of this budget and isn\'t recommended.',
+    legal_and_rights_considerations: 'The logline and notes describe an original story with no indication it is based on a true story or an existing work, so no life-rights or underlying-work clearance appears necessary — a standard chain-of-title and script registration should still be completed as a precaution. For a project at this budget, expect Errors & Omissions (E&O) insurance in the range of €1,500-€3,500 for a one-year policy, which most sales agents and festivals will require before acquisition or certain premiere slots — secure it during pre-production, well before the shoot begins.',
     roadmap: [
       { phase: 'Phase 1 — Script & Pitch', action: 'Lock a final draft and build a comp-title pitch deck within 6-8 weeks' },
       { phase: 'Phase 2 — Financing', action: 'Submit to 2-3 regional/national funds across their next application cycles' },
@@ -1869,6 +1914,18 @@ function savePDF() {
       hr();
     }
 
+    if (isFullReport && lastResult.key_crew_recommendations && lastResult.key_crew_recommendations.length) {
+      ln('KEY CREW RECOMMENDATIONS',10,true);
+      lastResult.key_crew_recommendations.forEach(function(c){
+        if (!c) return;
+        ln(c.role||'',10,true);
+        ln(c.profile||'',9,false,122,118,112);
+        ln(c.why||'',9,false,150,148,145);
+        y+=1;
+      });
+      hr();
+    }
+
     if (isFullReport && lastResult.marketing_strategy) {
       var ms = lastResult.marketing_strategy;
       ln('MARKETING STRATEGY',10,true);
@@ -1909,6 +1966,17 @@ function savePDF() {
       lastResult.market_comps.forEach(function(c){
         if (!c) return;
         ln((c.title||'')+' ('+(c.year||'')+') — Budget: '+(c.budget||'')+' — '+(c.result||''),10,true);
+        ln(c.lesson||'',9,false,122,118,112);
+        y+=1;
+      });
+      hr();
+    }
+
+    if (isFullReport && lastResult.cautionary_comps && lastResult.cautionary_comps.length) {
+      ln('CAUTIONARY COMPARABLES',10,true);
+      lastResult.cautionary_comps.forEach(function(c){
+        if (!c) return;
+        ln((c.title||'')+' ('+(c.year||'')+') — Budget: '+(c.budget||'')+' — '+(c.what_went_wrong||''),10,true,185,28,28);
         ln(c.lesson||'',9,false,122,118,112);
         y+=1;
       });
@@ -1970,6 +2038,12 @@ function savePDF() {
       hr();
     }
 
+    if (isFullReport && lastResult.legal_and_rights_considerations) {
+      ln('LEGAL & RIGHTS CONSIDERATIONS',10,true);
+      ln(lastResult.legal_and_rights_considerations,10,false,122,118,112);
+      hr();
+    }
+
     if (isFullReport && lastResult.revenue_projection && lastResult.revenue_projection.total_realistic) {
       var rp = lastResult.revenue_projection;
       ln('REVENUE PROJECTION',10,true);
@@ -1987,6 +2061,61 @@ function savePDF() {
     document.getElementById('pdfSuccess').style.display = 'block';
     setTimeout(function(){ document.getElementById('pdfSuccess').style.display='none'; }, 4000);
   } catch(e) { alert('PDF generation failed. Please try again.'); }
+}
+
+/* ── ONE-SHEET PDF — a condensed single-page summary suitable for printing
+   or sharing with a financier, built from whatever data the current
+   report has (works for both the free preview and the full report). ── */
+function saveOneSheet() {
+  if (!lastResult||!lastProject) { alert('No report to save yet.'); return; }
+  try {
+    var doc = new jspdf.jsPDF();
+    var y=24, margin=24, maxW=doc.internal.pageSize.getWidth()-margin*2;
+    function ln(txt,sz,bold,r,g,b) {
+      doc.setFontSize(sz||11); doc.setFont('helvetica',bold?'bold':'normal');
+      doc.setTextColor(r!==undefined?r:26, g!==undefined?g:25, b!==undefined?b:22);
+      doc.splitTextToSize(String(txt||''),maxW).forEach(function(l){ if(y>272){doc.addPage();y=24;} doc.text(l,margin,y); y+=(sz||11)*0.5; }); y+=2;
+    }
+    function hr() { y+=2; doc.setDrawColor(226,224,219); doc.line(margin,y,doc.internal.pageSize.getWidth()-margin,y); y+=6; }
+
+    ln('ONECIAK — ONE-SHEET SUMMARY',9,true,122,118,112);
+    ln('"'+lastProject.title+'"',19,true);
+    ln('OneCiak Score: '+Number(lastResult.overall_score||0).toFixed(1)+'/10 — '+(lastResult.overall_label||''),12,true);
+    hr();
+
+    ln((isFullReport && lastResult.executive_summary) ? lastResult.executive_summary : (lastResult.overall_summary||''),10,false,70,68,64);
+    if (lastResult.biggest_risk) ln('Main Risk: '+lastResult.biggest_risk,9,true,185,28,28);
+    if (lastResult.biggest_opportunity) ln('Main Opportunity: '+lastResult.biggest_opportunity,9,true,22,101,52);
+    hr();
+
+    ln('SCORECARD',9,true,122,118,112);
+    [
+      {k:'creative',l:'Creative Package'}, {k:'financial',l:'Financial Plan'}, {k:'market',l:'Market & Audience'},
+      {k:'festival',l:'Festival Strategy'}, {k:'distribution',l:'Distribution & Revenue'}
+    ].forEach(function(d){
+      var score = lastResult[d.k+'_score'];
+      if (score === undefined || score === null) return;
+      ln(Number(score).toFixed(1)+'/10 — '+d.l+': '+(lastResult[d.k+'_verdict']||''),10,false,50,50,50);
+    });
+    hr();
+
+    if (isFullReport) {
+      if (lastResult.revenue_projection && lastResult.revenue_projection.total_realistic) {
+        ln('Realistic Revenue Potential: '+lastResult.revenue_projection.total_realistic,10,true,22,101,52);
+      }
+      if (lastResult.roadmap && lastResult.roadmap[0] && lastResult.roadmap[0].action) {
+        ln('Next Step: '+lastResult.roadmap[0].action,9,false,70,68,64);
+      }
+      hr();
+    }
+
+    ln('This is a condensed summary. The complete report — red flags, strengths, funding sources, festival calendar, full roadmap — is available at oneciak.com.',8,false,150,148,145);
+    ln('Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. Results are estimates and do not guarantee any outcome.',8,false,150,148,145);
+
+    doc.save('OneCiak-OneSheet-'+lastProject.title.replace(/\s+/g,'-')+'.pdf');
+    document.getElementById('oneSheetSuccess').style.display = 'block';
+    setTimeout(function(){ document.getElementById('oneSheetSuccess').style.display='none'; }, 4000);
+  } catch(e) { alert('One-sheet generation failed. Please try again.'); }
 }
 
 function showError(msg) { var b=document.getElementById('errorBox'); b.textContent=msg; b.style.display='block'; }
