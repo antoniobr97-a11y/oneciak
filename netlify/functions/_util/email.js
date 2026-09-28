@@ -116,6 +116,22 @@ function labOpportunitiesHtml(labs) {
   return h;
 }
 
+function keyCrewHtml(crew) {
+  if (!crew || !crew.length) return '';
+  let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#6f6f6f">Key Crew Recommendations</span>';
+  crew.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.role) + '</b><br><span style="font-size:13px;color:#161616">' + esc(c.profile) + '</span><br><span style="font-size:12px;color:#6f6f6f">' + esc(c.why) + '</span></p>'; });
+  h += '</div>';
+  return h;
+}
+
+function cautionaryCompsHtml(comps) {
+  if (!comps || !comps.length) return '';
+  let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#6f6f6f">Cautionary Comparables</span>';
+  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b> (' + esc(c.year) + ') — Budget: ' + esc(c.budget) + '<br><span style="font-size:12px;color:#c5382a">' + esc(c.what_went_wrong) + '</span><br><span style="font-size:12px;color:#6f6f6f">' + esc(c.lesson) + '</span></p>'; });
+  h += '</div>';
+  return h;
+}
+
 function talentAndTaxHtml(talentLeverage, taxIncentive) {
   if (!talentLeverage && !(taxIncentive && taxIncentive.estimate)) return '';
   let h = '<div style="margin-top:10px">';
@@ -139,9 +155,9 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
 
   const financialExtra = fundingSourcesHtml(r.financial_sources) + talentAndTaxHtml(r.talent_leverage, r.tax_incentive) + labeledTextHtml('Budget Breakdown Guidance', r.budget_breakdown_guidance);
   let body = '';
-  body += section('Creative Package', r.creative_score, r.creative_verdict, r.creative_detail, r.creative_flags, r.creative_strengths, r.creative_tips, null, pitchAssessmentHtml(r.pitch_assessment) + labeledTextHtml('Attachment Strategy', r.attachment_strategy));
+  body += section('Creative Package', r.creative_score, r.creative_verdict, r.creative_detail, r.creative_flags, r.creative_strengths, r.creative_tips, null, pitchAssessmentHtml(r.pitch_assessment) + labeledTextHtml('Attachment Strategy', r.attachment_strategy) + keyCrewHtml(r.key_crew_recommendations));
   body += section('Financial Plan', r.financial_score, r.financial_verdict, r.financial_detail, r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan, financialExtra);
-  body += section('Market & Audience', r.market_score, r.market_verdict, r.market_detail, r.market_flags, r.market_strengths, r.market_tips, null, comparablesHtml(r.market_comps) + marketingStrategyHtml(r.marketing_strategy) + labeledTextHtml('Target Audience Profile', r.target_audience_profile));
+  body += section('Market & Audience', r.market_score, r.market_verdict, r.market_detail, r.market_flags, r.market_strengths, r.market_tips, null, comparablesHtml(r.market_comps) + marketingStrategyHtml(r.marketing_strategy) + labeledTextHtml('Target Audience Profile', r.target_audience_profile) + cautionaryCompsHtml(r.cautionary_comps));
   body += section('Festival Strategy', r.festival_score, r.festival_verdict, r.festival_detail, r.festival_flags, r.festival_strengths, r.festival_tips, r.festival_action_plan, labOpportunitiesHtml(r.lab_and_market_opportunities));
   body += section('Distribution & Revenue', r.distribution_score, r.distribution_verdict, r.distribution_detail, r.distribution_flags, r.distribution_strengths, r.distribution_tips, r.distribution_action_plan, platformsHtml(r.distribution_platforms) + labeledTextHtml('Self-Distribution Playbook', r.self_distribution_playbook));
 
@@ -184,6 +200,11 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
   if (r.awards_qualification_strategy) {
     body += '<tr><td style="padding:28px 0;border-top:1px solid #e5e5e5"><span style="font-size:16px;font-weight:700;color:#000">Awards Qualification Strategy</span>' +
       '<p style="margin:10px 0 0;font-size:13px;color:#161616;line-height:1.7">' + esc(r.awards_qualification_strategy) + '</p></td></tr>';
+  }
+
+  if (r.legal_and_rights_considerations) {
+    body += '<tr><td style="padding:28px 0;border-top:1px solid #e5e5e5"><span style="font-size:16px;font-weight:700;color:#000">Legal &amp; Rights Considerations</span>' +
+      '<p style="margin:10px 0 0;font-size:13px;color:#161616;line-height:1.7">' + esc(r.legal_and_rights_considerations) + '</p></td></tr>';
   }
 
   if (r.revenue_projection) {
