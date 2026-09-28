@@ -998,7 +998,7 @@ async function handleFreeReportReturn() {
    can go much deeper. This just polls for that result and shows it,
    which also guarantees the page and the email always match exactly. */
 var POLL_INTERVAL_MS = 4000;
-var POLL_MAX_ATTEMPTS = 40; // ~2.5 minutes
+var POLL_MAX_ATTEMPTS = 75; // ~5 minutes — widened alongside the deeper report prompts so a normal-but-slower generation doesn't hit "Almost there" prematurely
 
 function wait(ms) { return new Promise(function(resolve){ setTimeout(resolve, ms); }); }
 
@@ -1011,7 +1011,7 @@ function startFullReportTimer() {
   function render() {
     var secs = Math.floor((Date.now() - startedAt) / 1000);
     var m = Math.floor(secs / 60), s = secs % 60;
-    var label = secs < 20 ? 'Just started' : 'This can take a couple of minutes for a deeply detailed report';
+    var label = secs < 20 ? 'Just started' : secs < 90 ? 'This can take a few minutes for a deeply detailed report' : 'Still working — perfectly normal, feel free to close this page and check your email instead';
     el.innerHTML = '<span class="loading-timer-dot"></span>' + m + ':' + (s < 10 ? '0' : '') + s + ' elapsed — ' + label;
   }
   render();
@@ -1062,7 +1062,7 @@ async function generateFullReport() {
   stopFullReportTimer();
   document.getElementById('loadingSpinner').style.display = 'none';
   document.getElementById('loadingTitle').textContent = 'Almost there';
-  document.getElementById('loadingDesc').textContent = 'Your report is taking a bit longer than usual to prepare. Your payment is confirmed and safe — we\'ll email it to you as soon as it\'s ready. Tap below to keep checking.';
+  document.getElementById('loadingDesc').textContent = 'Your report is taking a bit longer than usual to prepare. It\'s still being generated — we\'ll email it to you as soon as it\'s ready. Tap below to keep checking, or just close this page and check your inbox in a few minutes.';
   document.getElementById('loadingRetryBtn').style.display = 'inline-flex';
 }
 
@@ -1199,34 +1199,36 @@ function renderFull(r, title) {
       num:'01', label:'Creative Package', sublabel:'Narrative · Logline · Pitch',
       score: r.creative_score,
       body: buildAccordionBody(r.creative_score, r.creative_verdict, r.creative_detail,
-        r.creative_flags, r.creative_strengths, r.creative_tips, null, buildPitchAssessment(r.pitch_assessment))
+        r.creative_flags, r.creative_strengths, r.creative_tips, null,
+        buildPitchAssessment(r.pitch_assessment) + buildLabeledText('Attachment Strategy', r.attachment_strategy))
     },
     {
       num:'02', label:'Financial Plan', sublabel:'Budget · Funding · Financing',
       score: r.financial_score,
       body: buildAccordionBody(r.financial_score, r.financial_verdict, r.financial_detail,
         r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan,
-        buildFundingSources(r.financial_sources) + buildTalentAndTax(r.talent_leverage, r.tax_incentive))
+        buildFundingSources(r.financial_sources) + buildTalentAndTax(r.talent_leverage, r.tax_incentive) + buildLabeledText('Budget Breakdown Guidance', r.budget_breakdown_guidance))
     },
     {
       num:'03', label:'Market & Audience', sublabel:'Demand · Trends · Comparables',
       score: r.market_score,
       body: buildAccordionBody(r.market_score, r.market_verdict, r.market_detail,
         r.market_flags, r.market_strengths, r.market_tips, null,
-        buildComparables(r.market_comps) + buildMarketingStrategy(r.marketing_strategy))
+        buildComparables(r.market_comps) + buildMarketingStrategy(r.marketing_strategy) + buildLabeledText('Target Audience Profile', r.target_audience_profile))
     },
     {
       num:'04', label:'Festival Strategy', sublabel:'Circuit · Festivals · Timing',
       score: r.festival_score,
       body: buildAccordionBody(r.festival_score, r.festival_verdict, r.festival_detail,
-        r.festival_flags, r.festival_strengths, r.festival_tips, r.festival_action_plan, '')
+        r.festival_flags, r.festival_strengths, r.festival_tips, r.festival_action_plan,
+        buildLabOpportunities(r.lab_and_market_opportunities))
     },
     {
       num:'05', label:'Distribution & Revenue', sublabel:'Platforms · Pricing · Sales',
       score: r.distribution_score,
       body: buildAccordionBody(r.distribution_score, r.distribution_verdict, r.distribution_detail,
         r.distribution_flags, r.distribution_strengths, r.distribution_tips, r.distribution_action_plan,
-        buildPlatforms(r.distribution_platforms))
+        buildPlatforms(r.distribution_platforms) + buildLabeledText('Self-Distribution Playbook', r.self_distribution_playbook))
     },
     {
       num:'06', label:'Action Plan', sublabel:'Roadmap · Markets · Revenue',
@@ -1390,6 +1392,12 @@ function buildActionPlanBody(r) {
     out += '</div>';
   }
 
+  // Awards Qualification Strategy
+  if (r.awards_qualification_strategy) {
+    out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Awards Qualification Strategy</div>'+
+      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300">'+r.awards_qualification_strategy+'</div></div>';
+  }
+
   // Revenue Projection
   if (r.revenue_projection) {
     var rp = r.revenue_projection;
@@ -1466,6 +1474,26 @@ function buildMarketingStrategy(ms) {
   if (ms.social_strategy) h += '<div style="font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;margin-top:8px"><b style="color:var(--text)">Social:</b> '+ms.social_strategy+'</div>';
   if (ms.community) h += '<div style="font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;margin-top:6px"><b style="color:var(--text)">Community:</b> '+ms.community+'</div>';
   if (ms.press) h += '<div style="font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;margin-top:6px"><b style="color:var(--text)">Press:</b> '+ms.press+'</div>';
+  h += '</div>';
+  return h;
+}
+
+function buildLabeledText(label, text) {
+  if (!text) return '';
+  return '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">'+label+'</div><div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300">'+text+'</div></div>';
+}
+
+function buildLabOpportunities(labs) {
+  if (!labs || !labs.length) return '';
+  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Labs &amp; Market Opportunities</div>';
+  labs.forEach(function(l){
+    if (!l) return;
+    h += '<div style="padding:10px 0;border-bottom:1px solid var(--border-light)">'+
+      '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+(l.name||'')+'</div>'+
+      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:5px">'+(l.fit||'')+'</div>'+
+      '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+(l.url||'#')+'" target="_blank" rel="noopener">Visit →</a>'+
+      '</div>';
+  });
   h += '</div>';
   return h;
 }
@@ -1567,6 +1595,7 @@ function showSampleReport() {
       logline_improved: 'When automation renders her lighthouse keeper post obsolete, a grieving mother has one final summer to reconnect with the son she\'s spent years pushing away.',
       pitch_deck_checklist: ['Comp-title page (The Quiet Girl, Aftersun)', 'Visual mood board emphasizing the coastal/automation contrast', 'Casting wishlist with 2-3 tiers per role', 'One-page financing structure with fund targets']
     },
+    attachment_strategy: 'Attaching a cinematographer with a strong coastal/landscape portfolio would do more for this project\'s credibility than a recognizable lead actor — regional funds weight visual pedigree heavily for location-driven dramas, and it directly de-risks the film\'s central visual promise.',
     financial_score: 7, financial_verdict: 'Realistic and financeable at the stated budget, with a clear public-funding path.',
     financial_detail: 'A two-hander with one primary location keeps the budget disciplined relative to comparable festival dramas, which often run 20-40% higher due to larger casts or multiple locations. The financing gap is bridgeable primarily through public regional funds plus a modest pre-sale to a domestic distributor. Expect a 9-12 month financing timeline if regional fund deadlines are hit on the first attempt rather than a resubmission cycle.',
     financial_flags: ['Single-location dependency means a weather-disrupted shoot has outsized schedule risk', 'No pre-attached cast yet, which regional funds often weight heavily'],
@@ -1582,6 +1611,7 @@ function showSampleReport() {
     ],
     talent_leverage: 'A first-time director with 1-2 prior shorts is within the normal range for regional fund eligibility, but pairing with a producer who has one prior feature credit materially improves financing odds — most public funds weight producer track record as heavily as director experience.',
     tax_incentive: { region: 'Italy', estimate: '25-30% tax credit for qualifying Italian production spend', note: 'Administered by the Ministry of Culture (MiC) — application must be filed before principal photography begins; this is an AI estimate, verify current rates locally.' },
+    budget_breakdown_guidance: 'At this budget, expect roughly 15-20% above-the-line, 55-60% production/below-the-line, 15-20% post, and a 10% contingency line — coastal location dramas routinely underestimate weather-contingency days and location-permit costs, so pad the schedule buffer beyond the industry-standard 10%.',
     market_score: 7, market_verdict: 'Solid niche demand with clear festival-to-streaming pipeline precedent.',
     market_detail: 'Character-driven coastal dramas have a reliable, if modest, arthouse and streaming afterlife — buyers in this category prioritize festival laurels over stars. Audience demand skews older and more international than typical indie output, which favors European co-financing and sales. Timing is reasonably favorable: platforms have shown renewed appetite for quiet, character-first dramas over the last two festival cycles.',
     market_flags: ['Genre is well-served, so festival placement quality matters more than usual for distributor interest'],
@@ -1598,8 +1628,10 @@ function showSampleReport() {
       pre_release: ['Behind-the-scenes coastal location content to build visual identity pre-premiere', 'A short mood-board teaser timed to the first festival submission cycle', 'Targeted outreach to regional press ahead of the local festival circuit'],
       social_strategy: 'Prioritize visual platforms (Instagram, Letterboxd) with location and process-driven content over broad-reach paid campaigns — the audience is niche and discovery-driven, not mass-market.',
       community: 'Engage regional film communities and coastal-heritage groups who have organic affinity for the setting and can drive grassroots local screening interest.',
-      press: 'Target genre-specific and arthouse critics early with festival-cut screeners rather than a broad trade-press blast — reviews from the right niche outlets carry more weight with programmers and distributors than volume.'
+      press: 'Target genre-specific and arthouse critics early with festival-cut screeners rather than a broad trade-press blast — reviews from the right niche outlets carry more weight with programmers and distributors than volume.',
+      budget_estimate: '€8,000–€15,000 covering a mood-board teaser, a modest regional PR push and festival-premiere press materials — most of it should go toward the visual assets, since the automation hook is the differentiator to sell.'
     },
+    target_audience_profile: 'Core audience skews 35-65, arthouse-leaning, drawn to festival laurels over star power — reachable through Letterboxd, regional cinema membership programs, and public-broadcaster streaming apps rather than broad social advertising.',
     festival_score: 8, festival_verdict: 'A strong, realistic festival trajectory if positioned correctly from the first submission.',
     festival_detail: 'This is a classic A-tier-adjacent festival profile: not a guaranteed top-5 selection, but a strong candidate for major festivals\' second-tier sidebars and a near-certain fit for the broader A-minus/B-tier circuit. Sequencing matters — premiering too early at a smaller festival can close doors at bigger ones with premiere-status requirements, so the top-tier submissions should go out first even with lower odds.',
     festival_flags: ['Premiere-status rules mean submitting to smaller festivals first could disqualify from bigger ones later'],
@@ -1614,6 +1646,10 @@ function showSampleReport() {
       { festival: 'San Sebastián International Film Festival', tier: 'A', deadline: 'Spring submission window', fit: 'European co-production angle and coastal setting align well with this festival\'s programming identity', url: 'https://www.sansebastianfestival.com' },
       { festival: 'Karlovy Vary IFF', tier: 'B', deadline: 'Spring submission window', fit: 'Strong track record supporting first/second European features', url: 'https://www.kviff.com' }
     ],
+    lab_and_market_opportunities: [
+      { name: 'Torino FilmLab', fit: 'Development-stage support well-suited to a first/second feature with a distinctive visual concept, plus access to European co-production contacts', url: 'https://www.torinofilmlab.it' },
+      { name: 'Berlinale Talents', fit: 'Strong networking value for attaching a cinematographer with the coastal/landscape pedigree this project needs', url: 'https://www.berlinale-talents.de' }
+    ],
     distribution_score: 6, distribution_verdict: 'A realistic path via festival-driven acquisition rather than a pre-sale.',
     distribution_detail: 'Without attached names, a pre-sale is unlikely — the realistic path is a festival premiere followed by an acquisition offer, which is the standard route for this profile of film. Territory-by-territory, expect stronger initial interest from European broadcasters/streamers than from US theatrical distributors, given the film\'s tone and scale. A hybrid VOD + limited theatrical release is the most probable outcome rather than a wide release.',
     distribution_flags: ['No attached cast makes a pre-sale unlikely — financing should not depend on one'],
@@ -1626,6 +1662,7 @@ function showSampleReport() {
       { name: 'MUBI', priority: 'First', reason: 'Strong track record acquiring festival-driven character dramas at this budget, typical acquisition range €30,000–€80,000', url: 'https://mubi.com' },
       { name: 'Regional public broadcaster VOD arm', priority: 'Second', reason: 'Reliable domestic revenue floor via broadcast pre-sale or post-festival acquisition', url: 'https://www.ebu.ch' }
     ],
+    self_distribution_playbook: 'If no acquisition materializes post-festival, a hybrid plan works best here: a limited regional theatrical run timed to festival buzz in the coastal-setting region itself (where local press interest is strongest), paired with a direct VOD release via a platform like Vimeo On Demand and a domestic AVOD placement — modest revenue, but keeps the film earning without waiting on a sales agent.',
     sales_agents: [
       { name: 'Films Boutique', focus: 'European festival dramas and arthouse titles', why: 'Strong track record placing similarly-scaled character dramas at A-tier festivals and securing European broadcaster deals', url: 'https://www.filmsboutique.com' }
     ],
@@ -1638,6 +1675,7 @@ function showSampleReport() {
       top_risks: ['Genre oversaturation reduces festival differentiation if visual execution doesn\'t deliver on the premise', 'Single-location weather dependency could extend the shoot schedule and budget'],
       mitigation: ['Invest disproportionately in cinematography/visual identity relative to budget to stand out from genre peers', 'Build a weather contingency budget line and flexible shoot-day buffer into scheduling']
     },
+    awards_qualification_strategy: 'A qualifying festival run (rather than a qualifying theatrical release) is the realistic path here — a top-tier festival premiere at this budget can open doors to regional and national film-award consideration, but a self-funded theatrical qualifying run is not a cost-effective use of this budget and isn\'t recommended.',
     roadmap: [
       { phase: 'Phase 1 — Script & Pitch', action: 'Lock a final draft and build a comp-title pitch deck within 6-8 weeks' },
       { phase: 'Phase 2 — Financing', action: 'Submit to 2-3 regional/national funds across their next application cycles' },
@@ -1683,7 +1721,7 @@ async function startFreeFullReport(email) {
   try {
     showOnly('sec-loading');
     document.getElementById('loadingTitle').textContent = 'Starting your full report…';
-    document.getElementById('loadingDesc').textContent = 'Setting things up — this will take a moment.';
+    document.getElementById('loadingDesc').textContent = 'This can take a few minutes to generate. Feel free to close this page any time — we\'ll email it to "'+email+'" the moment it\'s ready.';
     var res = await fetch('/.netlify/functions/start-full-report', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1778,6 +1816,22 @@ function savePDF() {
       hr();
     }
 
+    if (isFullReport && (lastResult.talent_leverage || (lastResult.tax_incentive && lastResult.tax_incentive.estimate))) {
+      ln('TALENT LEVERAGE & TAX INCENTIVE',10,true);
+      if (lastResult.talent_leverage) ln(lastResult.talent_leverage,10,false,122,118,112);
+      if (lastResult.tax_incentive && lastResult.tax_incentive.estimate) {
+        ln('Tax Incentive'+(lastResult.tax_incentive.region?' — '+lastResult.tax_incentive.region:'')+': '+lastResult.tax_incentive.estimate,10,true,22,101,52);
+        if (lastResult.tax_incentive.note) ln(lastResult.tax_incentive.note,9,false,122,118,112);
+      }
+      hr();
+    }
+
+    if (isFullReport && lastResult.budget_breakdown_guidance) {
+      ln('BUDGET BREAKDOWN GUIDANCE',10,true);
+      ln(lastResult.budget_breakdown_guidance,10,false,122,118,112);
+      hr();
+    }
+
     if (isFullReport && lastResult.pitch_assessment) {
       var pa = lastResult.pitch_assessment;
       ln('PITCH ASSESSMENT',10,true);
@@ -1794,6 +1848,12 @@ function savePDF() {
       hr();
     }
 
+    if (isFullReport && lastResult.attachment_strategy) {
+      ln('ATTACHMENT STRATEGY',10,true);
+      ln(lastResult.attachment_strategy,10,false,122,118,112);
+      hr();
+    }
+
     if (isFullReport && lastResult.marketing_strategy) {
       var ms = lastResult.marketing_strategy;
       ln('MARKETING STRATEGY',10,true);
@@ -1802,6 +1862,13 @@ function savePDF() {
       if (ms.social_strategy) ln('Social: '+ms.social_strategy,9,false,122,118,112);
       if (ms.community) ln('Community: '+ms.community,9,false,122,118,112);
       if (ms.press) ln('Press: '+ms.press,9,false,122,118,112);
+      if (ms.budget_estimate) ln('Marketing Budget: '+ms.budget_estimate,9,false,122,118,112);
+      hr();
+    }
+
+    if (isFullReport && lastResult.target_audience_profile) {
+      ln('TARGET AUDIENCE PROFILE',10,true);
+      ln(lastResult.target_audience_profile,10,false,122,118,112);
       hr();
     }
 
@@ -1813,6 +1880,12 @@ function savePDF() {
         ln(pl.reason||'',9,false,122,118,112);
         y+=1;
       });
+      hr();
+    }
+
+    if (isFullReport && lastResult.self_distribution_playbook) {
+      ln('SELF-DISTRIBUTION PLAYBOOK',10,true);
+      ln(lastResult.self_distribution_playbook,10,false,122,118,112);
       hr();
     }
 
@@ -1833,6 +1906,17 @@ function savePDF() {
         if (!f) return;
         ln((f.festival||'')+' (Tier '+(f.tier||'')+') — '+(f.deadline||''),10,true);
         ln(f.fit||'',9,false,122,118,112);
+        y+=1;
+      });
+      hr();
+    }
+
+    if (isFullReport && lastResult.lab_and_market_opportunities && lastResult.lab_and_market_opportunities.length) {
+      ln('LABS & MARKET OPPORTUNITIES',10,true);
+      lastResult.lab_and_market_opportunities.forEach(function(l){
+        if (!l) return;
+        ln(l.name||'',10,true);
+        ln(l.fit||'',9,false,122,118,112);
         y+=1;
       });
       hr();
@@ -1862,6 +1946,12 @@ function savePDF() {
       ln('RISK ASSESSMENT',10,true);
       (lastResult.risk_assessment.top_risks||[]).forEach(function(risk){ if(risk) ln('• '+risk,9,false,185,28,28); });
       (lastResult.risk_assessment.mitigation||[]).forEach(function(m){ if(m) ln('• '+m,9,false,22,101,52); });
+      hr();
+    }
+
+    if (isFullReport && lastResult.awards_qualification_strategy) {
+      ln('AWARDS QUALIFICATION STRATEGY',10,true);
+      ln(lastResult.awards_qualification_strategy,10,false,122,118,112);
       hr();
     }
 

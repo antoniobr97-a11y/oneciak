@@ -98,6 +98,20 @@ function marketingStrategyHtml(ms) {
   if (ms.social_strategy) h += '<p style="margin:6px 0 0;font-size:12px;color:#6f6f6f"><b style="color:#161616">Social:</b> ' + esc(ms.social_strategy) + '</p>';
   if (ms.community) h += '<p style="margin:4px 0 0;font-size:12px;color:#6f6f6f"><b style="color:#161616">Community:</b> ' + esc(ms.community) + '</p>';
   if (ms.press) h += '<p style="margin:4px 0 0;font-size:12px;color:#6f6f6f"><b style="color:#161616">Press:</b> ' + esc(ms.press) + '</p>';
+  if (ms.budget_estimate) h += '<p style="margin:4px 0 0;font-size:12px;color:#6f6f6f"><b style="color:#161616">Marketing Budget:</b> ' + esc(ms.budget_estimate) + '</p>';
+  h += '</div>';
+  return h;
+}
+
+function labeledTextHtml(label, text) {
+  if (!text) return '';
+  return '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#6f6f6f">' + esc(label) + '</span><p style="margin:6px 0 0;font-size:13px;color:#161616;line-height:1.6">' + esc(text) + '</p></div>';
+}
+
+function labOpportunitiesHtml(labs) {
+  if (!labs || !labs.length) return '';
+  let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#6f6f6f">Labs &amp; Market Opportunities</span>';
+  labs.forEach(l => { if (!l) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(l.name) + '</b><br><span style="font-size:12px;color:#6f6f6f">' + esc(l.fit) + '</span></p>'; });
   h += '</div>';
   return h;
 }
@@ -123,13 +137,13 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
   const score = Number(r.overall_score || 5).toFixed(1);
   const viewUrl = viewUrlOverride || (sessionId ? 'https://oneciak.com/?session_id=' + encodeURIComponent(sessionId) : 'https://oneciak.com');
 
-  const financialExtra = fundingSourcesHtml(r.financial_sources) + talentAndTaxHtml(r.talent_leverage, r.tax_incentive);
+  const financialExtra = fundingSourcesHtml(r.financial_sources) + talentAndTaxHtml(r.talent_leverage, r.tax_incentive) + labeledTextHtml('Budget Breakdown Guidance', r.budget_breakdown_guidance);
   let body = '';
-  body += section('Creative Package', r.creative_score, r.creative_verdict, r.creative_detail, r.creative_flags, r.creative_strengths, r.creative_tips, null, pitchAssessmentHtml(r.pitch_assessment));
+  body += section('Creative Package', r.creative_score, r.creative_verdict, r.creative_detail, r.creative_flags, r.creative_strengths, r.creative_tips, null, pitchAssessmentHtml(r.pitch_assessment) + labeledTextHtml('Attachment Strategy', r.attachment_strategy));
   body += section('Financial Plan', r.financial_score, r.financial_verdict, r.financial_detail, r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan, financialExtra);
-  body += section('Market & Audience', r.market_score, r.market_verdict, r.market_detail, r.market_flags, r.market_strengths, r.market_tips, null, comparablesHtml(r.market_comps) + marketingStrategyHtml(r.marketing_strategy));
-  body += section('Festival Strategy', r.festival_score, r.festival_verdict, r.festival_detail, r.festival_flags, r.festival_strengths, r.festival_tips, r.festival_action_plan);
-  body += section('Distribution & Revenue', r.distribution_score, r.distribution_verdict, r.distribution_detail, r.distribution_flags, r.distribution_strengths, r.distribution_tips, r.distribution_action_plan, platformsHtml(r.distribution_platforms));
+  body += section('Market & Audience', r.market_score, r.market_verdict, r.market_detail, r.market_flags, r.market_strengths, r.market_tips, null, comparablesHtml(r.market_comps) + marketingStrategyHtml(r.marketing_strategy) + labeledTextHtml('Target Audience Profile', r.target_audience_profile));
+  body += section('Festival Strategy', r.festival_score, r.festival_verdict, r.festival_detail, r.festival_flags, r.festival_strengths, r.festival_tips, r.festival_action_plan, labOpportunitiesHtml(r.lab_and_market_opportunities));
+  body += section('Distribution & Revenue', r.distribution_score, r.distribution_verdict, r.distribution_detail, r.distribution_flags, r.distribution_strengths, r.distribution_tips, r.distribution_action_plan, platformsHtml(r.distribution_platforms) + labeledTextHtml('Self-Distribution Playbook', r.self_distribution_playbook));
 
   if (r.roadmap && r.roadmap.length) {
     let rm = '<tr><td style="padding:28px 0;border-top:1px solid #e5e5e5"><span style="font-size:16px;font-weight:700;color:#000">Roadmap</span>';
@@ -165,6 +179,11 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
     (r.risk_assessment.mitigation || []).forEach(m => { if (m) ra += '<p style="margin:8px 0 0;font-size:13px;color:#0f7a3d">✓ ' + esc(m) + '</p>'; });
     ra += '</td></tr>';
     body += ra;
+  }
+
+  if (r.awards_qualification_strategy) {
+    body += '<tr><td style="padding:28px 0;border-top:1px solid #e5e5e5"><span style="font-size:16px;font-weight:700;color:#000">Awards Qualification Strategy</span>' +
+      '<p style="margin:10px 0 0;font-size:13px;color:#161616;line-height:1.7">' + esc(r.awards_qualification_strategy) + '</p></td></tr>';
   }
 
   if (r.revenue_projection) {

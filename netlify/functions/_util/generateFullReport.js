@@ -4,7 +4,7 @@ const { buildReportEmailHtml, sendReportEmail } = require('./email');
 const { incrementUsageCount } = require('./stats');
 
 const FULL_MODEL = 'claude-haiku-4-5-20251001';
-const FULL_MAX_TOKENS = 8000; // background function isn't bound by a sync response-time ceiling, so the deeper prompts get real room
+const FULL_MAX_TOKENS = 9500; // background function isn't bound by a sync response-time ceiling, so the deeper prompts get real room; raised alongside reportPrompts.js's expanded fields to keep headroom against truncated/malformed JSON
 const PROCESSING_STALE_MS = 8 * 60 * 1000; // generation can legitimately take a few minutes; give it plenty of room before a retry is treated as abandoned
 const PROMPT_ATTEMPTS = 3; // each of the 6 parallel prompts gets its own retries — an occasional malformed-JSON response from the model shouldn't fail the whole report
 const OVERALL_ATTEMPTS = 2; // a second full pass in case something broader (Resend, a transient network error) fails
