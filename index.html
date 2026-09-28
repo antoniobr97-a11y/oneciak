@@ -530,7 +530,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         <div class="menu-faq-item"><div class="menu-faq-q">Is this a real consultant?</div><div class="menu-faq-a">Advanced AI trained on film market data. Structured analysis most filmmakers never access.</div></div>
         <div class="menu-faq-item"><div class="menu-faq-q">What does the free report cover?</div><div class="menu-faq-a">All five dimensions with a general assessment and one key recommendation each.</div></div>
         <div class="menu-faq-item"><div class="menu-faq-q">What does the full report add?</div><div class="menu-faq-a">Deep analysis, red flags, strengths, 3 recommendations with real links, action plans, funding sources, comparable films, international markets and a 5-step roadmap — free, delivered by email.</div></div>
-        <div class="menu-faq-item"><div class="menu-faq-q">Why do you ask for my email?</div><div class="menu-faq-a">Generating the full report can take a couple of minutes, so we email it to you the moment it's ready — you don't have to keep the page open, and it also means you can't lose it if you close your browser.</div></div>
+        <div class="menu-faq-item"><div class="menu-faq-q">Why do you ask for my email?</div><div class="menu-faq-a">Generating the full report can take a few minutes, so we email it to you the moment it's ready — you don't have to keep the page open, and it also means you can't lose it if you close your browser.</div></div>
         <div class="menu-faq-item"><div class="menu-faq-q">Is my project data private?</div><div class="menu-faq-a">Your project details are sent only to the providers needed to generate and deliver your report (see our Privacy Policy) — never sold, never used to train AI models.</div></div>
       </div>
       <button class="menu-cta" onclick="closeMenuGoLanding()">Start Free Analysis →</button>
@@ -1036,7 +1036,7 @@ async function generateFullReport() {
   document.getElementById('loadingRetryBtn').style.display = 'none';
   document.getElementById('loadingSpinner').style.display = 'block';
   document.getElementById('loadingTitle').textContent = 'Building your full report…';
-  document.getElementById('loadingDesc').textContent = 'Preparing a deeply detailed analysis — this can take up to a couple of minutes. Feel free to close this page: we\'ll email your full report the moment it\'s ready, and you can always come back here to view it.';
+  document.getElementById('loadingDesc').textContent = 'Preparing a deeply detailed analysis — this can take a few minutes. Feel free to close this page: we\'ll email your full report the moment it\'s ready, and you can always come back here to view it.';
   showOnly('sec-loading');
   startFullReportTimer();
 
@@ -1159,7 +1159,7 @@ function renderFree(r, title) {
     '<div class="upgrade-divider"><span>Full Report</span></div>'+
     '<div class="locked-card">'+
     '<div class="locked-title">Get the Full Report — Free</div>'+
-    '<div class="locked-desc">Same structure, much deeper. Red flags, strengths, 3 recommendations with real links, action plans, funding sources, festival calendar, sales agents, revenue projection and 5-phase roadmap. Takes a couple of minutes to generate — we email it to you as soon as it\'s ready.</div>'+
+    '<div class="locked-desc">Same structure, much deeper. Red flags, strengths, 3 recommendations with real links, action plans, funding sources, festival calendar, sales agents, revenue projection and 5-phase roadmap. Takes a few minutes to generate — we email it to you as soon as it\'s ready.</div>'+
     '<div class="field" style="text-align:left;margin-bottom:14px"><label for="fullReportEmail">Your email</label><input type="email" id="fullReportEmail" placeholder="you@example.com"></div>'+
     '<div class="checkbox-row"><input type="checkbox" id="fullTerms"><label class="checkbox-label" for="fullTerms">I understand this is AI-generated analysis for informational purposes only. Not professional, legal or financial advice. OneCiak is not a licensed consulting firm.</label></div>'+
     '<div class="inline-error" id="unlockError">Please accept the terms to continue.</div>'+
