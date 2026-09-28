@@ -83,9 +83,8 @@ footer a { text-decoration: underline; text-underline-offset: 2px; }
     <h2>1. What we collect</h2>
     <ul>
       <li><strong>Project details you submit</strong> — title, logline, genre, format, budget, target audience, distribution goal, production country, director experience, and any optional notes you enter to generate a report.</li>
-      <li><strong>Email address</strong> — collected by Stripe during checkout when you purchase the full report (€29), used solely to deliver your report and payment receipt.</li>
-      <li><strong>Payment information</strong> — handled entirely by Stripe. We never receive or store your full card number; we only receive confirmation that a payment succeeded.</li>
-      <li><strong>Basic technical data</strong> — your IP address is processed transiently by our hosting provider (Netlify) and rate-limiting system to prevent abuse of the free tier, and by Google Fonts when loading our typeface.</li>
+      <li><strong>Email address</strong> — collected directly in the form when you request the full report, used solely to deliver it to your inbox.</li>
+      <li><strong>Basic technical data</strong> — your IP address is processed transiently by our hosting provider (Netlify) and rate-limiting system to prevent abuse of the service, and by Google Fonts when loading our typeface.</li>
     </ul>
   </div>
 
@@ -93,7 +92,7 @@ footer a { text-decoration: underline; text-underline-offset: 2px; }
     <h2>2. How we use it</h2>
     <ul>
       <li>Your project details are sent to Anthropic's Claude API to generate your AI market analysis.</li>
-      <li>If you purchase the full report, your email is used by Resend (our email provider) to deliver the report to your inbox, and the generated report is temporarily stored (via Netlify Blobs) keyed to your Stripe checkout session, so it can be re-displayed if you return to the page or the report needs to be resent.</li>
+      <li>If you request the full report, your email is used by Resend (our email provider) to deliver the report to your inbox, and the generated report is temporarily stored (via Netlify Blobs) keyed to a random report ID, so it can be re-displayed if you return to the page or the report needs to be resent.</li>
       <li>We do not use your data to train AI models, and we do not sell your data to third parties.</li>
     </ul>
   </div>
@@ -102,7 +101,6 @@ footer a { text-decoration: underline; text-underline-offset: 2px; }
     <h2>3. Third-party processors</h2>
     <p>We rely on the following services to operate OneCiak. Each processes a limited slice of your data solely to perform its function:</p>
     <ul>
-      <li><strong>Stripe</strong> — payment processing and checkout (collects email, billing/payment details)</li>
       <li><strong>Anthropic</strong> — generates the AI analysis from your submitted project details</li>
       <li><strong>Resend</strong> — sends the full report email</li>
       <li><strong>Netlify</strong> — hosting, serverless functions, and temporary data storage</li>
@@ -119,7 +117,7 @@ footer a { text-decoration: underline; text-underline-offset: 2px; }
 
   <div class="reveal">
     <h2>5. Data retention</h2>
-    <p>Free-tier analyses are not stored after being returned to your browser. Full reports linked to a completed Stripe purchase are retained so they remain accessible if you return to the page or need it re-sent. You can request deletion at any time — see Section 6.</p>
+    <p>Quick-preview analyses are not stored after being returned to your browser. Full reports are retained so they remain accessible if you return to the page or need it re-sent. You can request deletion at any time — see Section 6.</p>
   </div>
 
   <div class="reveal">

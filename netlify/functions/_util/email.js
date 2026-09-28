@@ -118,10 +118,10 @@ function talentAndTaxHtml(talentLeverage, taxIncentive) {
   return h;
 }
 
-function buildReportEmailHtml(project, r, sessionId) {
+function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
   const title = project.title || 'Your project';
   const score = Number(r.overall_score || 5).toFixed(1);
-  const viewUrl = sessionId ? 'https://oneciak.com/?session_id=' + encodeURIComponent(sessionId) : 'https://oneciak.com';
+  const viewUrl = viewUrlOverride || (sessionId ? 'https://oneciak.com/?session_id=' + encodeURIComponent(sessionId) : 'https://oneciak.com');
 
   const financialExtra = fundingSourcesHtml(r.financial_sources) + talentAndTaxHtml(r.talent_leverage, r.tax_incentive);
   let body = '';

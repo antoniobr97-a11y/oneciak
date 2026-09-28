@@ -1,36 +1,16 @@
 const Stripe = require('stripe');
 const { connectLambda, getStore } = require('@netlify/blobs');
-const { callAnthropic, extractJSON } = require('./_util/anthropic');
-const { allFullPrompts } = require('./_util/reportPrompts');
-const { buildReportEmailHtml, sendReportEmail } = require('./_util/email');
-const { incrementUsageCount } = require('./_util/stats');
+const { generateAndDeliverFullReport, PROCESSING_STALE_MS } = require('./_util/generateFullReport');
 
-const FULL_MODEL = 'claude-haiku-4-5-20251001';
-const FULL_MAX_TOKENS = 8000; // background function isn't bound by a sync response-time ceiling, so the deeper prompts get real room
-const PROCESSING_STALE_MS = 8 * 60 * 1000; // generation can now legitimately take a few minutes; give it plenty of room before a retry is treated as abandoned
-const PROMPT_ATTEMPTS = 3; // each of the 6 parallel prompts gets its own retries — an occasional malformed-JSON response from the model shouldn't fail the whole report
-const OVERALL_ATTEMPTS = 2; // a second full pass in case something broader (Resend, a transient network error) fails
-
+// DORMANT: the paid flow is currently disabled site-wide (see start-full-report.js
+// for the free path all reports now go through). Left intact and wired to the same
+// shared generation core, rather than deleted, so it can be re-enabled without
+// rebuilding it if that ever makes sense again.
+//
 // Background functions always ack Stripe with 202 immediately, regardless
 // of what happens afterward — so unlike a normal function, a failure here
-// does NOT get Stripe's automatic webhook retry. All retry logic has to
-// live inside this one invocation.
-async function callAndParseWithRetry(apiKey, prompt, model, maxTokens) {
-  let lastErr;
-  for (let i = 0; i < PROMPT_ATTEMPTS; i++) {
-    const result = await callAnthropic(apiKey, prompt, model, maxTokens);
-    if (result.status !== 200) {
-      lastErr = new Error('Anthropic API error: ' + (result.body.error && result.body.error.message));
-      continue;
-    }
-    try {
-      return extractJSON(result.body.content && result.body.content[0] ? result.body.content[0].text : '');
-    } catch (e) {
-      lastErr = e;
-    }
-  }
-  throw lastErr;
-}
+// does NOT get Stripe's automatic webhook retry. All retry logic lives in
+// generateAndDeliverFullReport instead.
 
 // Netlify Background Function (note the -background suffix): Netlify acks
 // this immediately with a 202 and lets it keep running for up to 15
@@ -103,32 +83,12 @@ exports.handler = async (event) => {
     await store.setJSON(key, { status: 'processing', startedAt: Date.now() });
   } catch (e) { /* fail open — proceed even if we can't record state */ }
 
-  const prompts = allFullPrompts(project);
-  let lastErr;
-  for (let attempt = 1; attempt <= OVERALL_ATTEMPTS; attempt++) {
-    try {
-      const parsedResults = await Promise.all(prompts.map(p => callAndParseWithRetry(anthropicKey, p, FULL_MODEL, FULL_MAX_TOKENS)));
-      const merged = {};
-      parsedResults.forEach(r => Object.assign(merged, r));
+  const result = await generateAndDeliverFullReport({
+    store, key, project, email, anthropicKey, resendKey,
+    fromEmail: process.env.REPORT_FROM_EMAIL || 'OneCiak <onboarding@resend.dev>',
+    subjectPrefix: 'Your OneCiak Full Report —'
+  });
 
-      const html = buildReportEmailHtml(project, merged, session.id);
-      await sendReportEmail({
-        apiKey: resendKey,
-        from: process.env.REPORT_FROM_EMAIL || 'OneCiak <onboarding@resend.dev>',
-        to: email,
-        subject: 'Your OneCiak Full Report — "' + project.title + '"',
-        html
-      });
-
-      await store.setJSON(key, { status: 'sent', sentAt: Date.now(), report: merged, project });
-      await incrementUsageCount();
-      return { statusCode: 200, body: 'OK' };
-    } catch (err) {
-      lastErr = err;
-      console.error('stripe-webhook-background: attempt ' + attempt + ' failed for session', session.id, err.message);
-    }
-  }
-
-  try { await store.setJSON(key, { status: 'failed', error: lastErr.message, at: Date.now() }); } catch (e) {}
-  return { statusCode: 500, body: 'Failed after retries' };
+  if (!result.ok) return { statusCode: 500, body: 'Failed after retries' };
+  return { statusCode: 200, body: 'OK' };
 };

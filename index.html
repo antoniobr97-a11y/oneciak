@@ -529,8 +529,8 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         <div class="menu-sec-title">FAQ</div>
         <div class="menu-faq-item"><div class="menu-faq-q">Is this a real consultant?</div><div class="menu-faq-a">Advanced AI trained on film market data. Structured analysis most filmmakers never access.</div></div>
         <div class="menu-faq-item"><div class="menu-faq-q">What does the free report cover?</div><div class="menu-faq-a">All five dimensions with a general assessment and one key recommendation each.</div></div>
-        <div class="menu-faq-item"><div class="menu-faq-q">What does the full report add?</div><div class="menu-faq-a">Deep analysis, red flags, strengths, 3 recommendations with real links, action plans, funding sources, comparable films, international markets and a 5-step roadmap.</div></div>
-        <div class="menu-faq-item"><div class="menu-faq-q">Can I get a refund?</div><div class="menu-faq-a">No refunds once the report is generated, since it's delivered immediately. If generation fails on our end, we regenerate it at no extra charge.</div></div>
+        <div class="menu-faq-item"><div class="menu-faq-q">What does the full report add?</div><div class="menu-faq-a">Deep analysis, red flags, strengths, 3 recommendations with real links, action plans, funding sources, comparable films, international markets and a 5-step roadmap — free, delivered by email.</div></div>
+        <div class="menu-faq-item"><div class="menu-faq-q">Why do you ask for my email?</div><div class="menu-faq-a">Generating the full report can take a couple of minutes, so we email it to you the moment it's ready — you don't have to keep the page open, and it also means you can't lose it if you close your browser.</div></div>
         <div class="menu-faq-item"><div class="menu-faq-q">Is my project data private?</div><div class="menu-faq-a">Your project details are sent only to the providers needed to generate and deliver your report (see our Privacy Policy) — never sold, never used to train AI models.</div></div>
       </div>
       <button class="menu-cta" onclick="closeMenuGoLanding()">Start Free Analysis →</button>
@@ -552,7 +552,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
       <p class="l-desc">A professional market assessment across five industry dimensions — before you invest time and money into your project.</p>
       <div class="l-terms">
         <input type="checkbox" id="termsCheck">
-        <label for="termsCheck">I understand that OneCiak provides AI-generated analysis for informational purposes only. It does not constitute professional advice. No refunds once the report is generated.</label>
+        <label for="termsCheck">I understand that OneCiak provides AI-generated analysis for informational purposes only. It does not constitute professional advice.</label>
       </div>
       <div class="l-terms-error" id="termsError" role="alert">Please accept the disclaimer to continue.</div>
       <button class="l-btn" onclick="onStartClick()">Start Free Analysis →</button>
@@ -564,7 +564,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div style="border-top:1px solid var(--border);background:var(--white)">
       <div class="l-stats-bar">
         <div class="l-stat reveal"><div class="l-stat-num">5</div><div class="l-stat-label">Analysis Dimensions</div></div>
-        <div class="l-stat reveal" style="transition-delay:0.08s"><div class="l-stat-num">€29</div><div class="l-stat-label">Full Report</div></div>
+        <div class="l-stat reveal" style="transition-delay:0.08s"><div class="l-stat-num">Free</div><div class="l-stat-label">Full Report</div></div>
         <div class="l-stat reveal" style="transition-delay:0.16s"><div class="l-stat-num">PDF</div><div class="l-stat-label">Export Included</div></div>
         <div class="l-stat reveal" style="transition-delay:0.24s" id="usageStat"><div class="l-stat-num" id="usageStatNum">—</div><div class="l-stat-label">Reports Generated</div></div>
       </div>
@@ -602,7 +602,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   </div>
   <div class="f-main">
     <div class="f-title">Tell us about your project</div>
-    <div class="f-subtitle">Free report covers all 5 dimensions. Full report unlocks for €29.</div>
+    <div class="f-subtitle">Free report covers all 5 dimensions. The full, in-depth report is free too — delivered to your email.</div>
     <div class="card reveal" style="transition-delay:0s">
       <div class="card-title">Your Project</div>
       <div class="field">
@@ -885,7 +885,7 @@ async function callAPI(prompt, tier, auth) {
   catch(e) { throw new Error("Could not parse AI response. Please try again."); }
 }
 
-/* ── MULTI-PROMPT API (several smaller prompts run in parallel server-side, merged into one report — used for the free tier; the full report is generated entirely server-side by the payment webhook) ── */
+/* ── MULTI-PROMPT API (several smaller prompts run in parallel server-side, merged into one report — used for the free quick preview; the full report is generated entirely server-side, see start-full-report.js) ── */
 async function callFullAPI(prompts, tier, auth) {
   var res = await fetch("/.netlify/functions/analyze", {
     method: "POST",
@@ -975,6 +975,20 @@ async function handleStripeReturn() {
     showOnly('sec-landing');
     alert('Error: ' + err.message);
   }
+}
+
+/* ── HANDLE RETURN FROM THE "VIEW ON ONECIAK.COM" EMAIL LINK (free full report) ──
+   The link already carries a token signed when the report was started, so
+   unlike the Stripe path there's nothing to verify server-side first —
+   get-report.js (called from inside generateFullReport) checks the token. */
+async function handleFreeReportReturn() {
+  var params = new URLSearchParams(window.location.search);
+  var reportId = params.get('report_id');
+  var reportToken = params.get('report_token');
+  if (!reportId || !reportToken) return;
+  window.history.replaceState({}, document.title, window.location.pathname);
+  pendingFullReportAuth = { project: null, token: reportToken, session_id: reportId };
+  await generateFullReport();
 }
 
 /* ── GENERATE FULL REPORT ──
@@ -1120,7 +1134,7 @@ function renderFree(r, title) {
       if (sec.flag) ph += '<div class="flag-item red" style="margin-bottom:6px">'+sec.flag+'</div>';
       if (sec.strength) ph += '<div class="flag-item green">'+sec.strength+'</div>';
       body += '<div class="preview-blur-wrap"><div class="preview-blur-content">'+ph+'</div>'+
-        '<div class="preview-blur-overlay"><span class="preview-blur-label">Unlock Full Report</span></div></div>';
+        '<div class="preview-blur-overlay"><span class="preview-blur-label">Get Full Report — Free</span></div></div>';
     }
 
     html +=
@@ -1144,11 +1158,12 @@ function renderFree(r, title) {
   document.getElementById('upgradeSection').innerHTML =
     '<div class="upgrade-divider"><span>Full Report</span></div>'+
     '<div class="locked-card">'+
-    '<div class="locked-title">Unlock the Full Report</div>'+
-    '<div class="locked-desc">Same structure, much deeper. Red flags, strengths, 3 recommendations with real links, action plans, funding sources, festival calendar, sales agents, revenue projection and 5-phase roadmap.</div>'+
-    '<div class="checkbox-row"><input type="checkbox" id="fullTerms"><label class="checkbox-label" for="fullTerms">I understand this is AI-generated analysis for informational purposes only. No refunds once generated. OneCiak is not a licensed consulting firm.</label></div>'+
+    '<div class="locked-title">Get the Full Report — Free</div>'+
+    '<div class="locked-desc">Same structure, much deeper. Red flags, strengths, 3 recommendations with real links, action plans, funding sources, festival calendar, sales agents, revenue projection and 5-phase roadmap. Takes a couple of minutes to generate — we email it to you as soon as it\'s ready.</div>'+
+    '<div class="field" style="text-align:left;margin-bottom:14px"><label for="fullReportEmail">Your email</label><input type="email" id="fullReportEmail" placeholder="you@example.com"></div>'+
+    '<div class="checkbox-row"><input type="checkbox" id="fullTerms"><label class="checkbox-label" for="fullTerms">I understand this is AI-generated analysis for informational purposes only. Not professional, legal or financial advice. OneCiak is not a licensed consulting firm.</label></div>'+
     '<div class="inline-error" id="unlockError">Please accept the terms to continue.</div>'+
-    '<button class="btn-unlock" onclick="onUnlockClick()">Unlock Full Report — €29</button>'+
+    '<button class="btn-unlock" onclick="onUnlockClick()">Get Full Report — Free →</button>'+
     '</div>';
 }
 
@@ -1498,7 +1513,7 @@ function buildPlatforms(platforms) {
   return h;
 }
 
-/* ── RUN ANALYSIS (free tier — the full report always goes through the Stripe payment flow) ── */
+/* ── RUN ANALYSIS (free quick preview — the full report always goes through start-full-report.js) ── */
 async function runAnalysis() {
   var p = getProject();
   if (!p.title||!p.logline||!p.genre||!p.format||!p.budget||!p.audience||!p.distrib) {
@@ -1643,13 +1658,51 @@ function showSampleReport() {
   initScrollReveal();
 }
 
-/* ── UNLOCK → STRIPE ── */
+/* ── UNLOCK FULL REPORT (free) ── */
+var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function onUnlockClick() {
   var cb = document.getElementById('fullTerms');
   var err = document.getElementById('unlockError');
-  if (!cb||!cb.checked) { if(err) err.style.display='block'; return; }
-  if (err) err.style.display='none';
-  startStripeCheckout();
+  var emailInput = document.getElementById('fullReportEmail');
+  var email = emailInput ? emailInput.value.trim() : '';
+  if (!email || !EMAIL_RE.test(email)) {
+    if (err) { err.textContent = 'Please enter a valid email address.'; err.style.display = 'block'; }
+    return;
+  }
+  if (!cb||!cb.checked) {
+    if (err) { err.textContent = 'Please accept the terms to continue.'; err.style.display = 'block'; }
+    return;
+  }
+  if (err) err.style.display = 'none';
+  startFreeFullReport(email);
+}
+
+async function startFreeFullReport(email) {
+  var p = lastProject;
+  if (!p) { alert("Project data missing. Please run the free analysis first."); return; }
+  try {
+    showOnly('sec-loading');
+    document.getElementById('loadingTitle').textContent = 'Starting your full report…';
+    document.getElementById('loadingDesc').textContent = 'Setting things up — this will take a moment.';
+    var res = await fetch('/.netlify/functions/start-full-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ project: p, email: email })
+    });
+    var text = await res.text();
+    var data;
+    try { data = JSON.parse(text); } catch(e) { throw new Error('Could not start the report. Please try again.'); }
+    if (!res.ok || !data.id || !data.token) {
+      showOnly('sec-results');
+      alert('Error: ' + (data.error || 'Could not start the report. Please try again.'));
+      return;
+    }
+    pendingFullReportAuth = { project: p, token: data.token, session_id: data.id };
+    await generateFullReport();
+  } catch(err) {
+    showOnly('sec-results');
+    alert('Error: ' + err.message);
+  }
 }
 
 /* ── PDF ── */
@@ -1834,9 +1887,10 @@ function savePDF() {
 function showError(msg) { var b=document.getElementById('errorBox'); b.textContent=msg; b.style.display='block'; }
 function hideError() { document.getElementById('errorBox').style.display='none'; }
 
-// Check for Stripe return on page load
+// Check for a return link (Stripe — dormant, or the free full-report email) on page load
 window.addEventListener('DOMContentLoaded', function() {
   handleStripeReturn();
+  handleFreeReportReturn();
   initScrollReveal();
   loadUsageStat();
 });
