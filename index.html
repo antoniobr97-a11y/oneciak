@@ -1007,12 +1007,27 @@ var fullReportTimerHandle = null;
 function startFullReportTimer() {
   stopFullReportTimer();
   var el = document.getElementById('loadingTimer');
+  // The clock and the label live in separate spans, updated independently.
+  // If a browser's auto-translate feature is active, replacing the whole
+  // line's innerHTML every second (clock included) makes it re-translate
+  // that text every second too, which looks like it's flickering between
+  // languages. Only the clock (plain digits, nothing to translate) changes
+  // every second; the label text node is only touched when it actually
+  // changes (twice total over a full wait), so translation only reruns then.
+  el.innerHTML = '<span class="loading-timer-dot"></span><span id="loadingTimerClock">0:00</span> elapsed — <span id="loadingTimerLabel">Just started</span>';
+  var clockEl = document.getElementById('loadingTimerClock');
+  var labelEl = document.getElementById('loadingTimerLabel');
   var startedAt = Date.now();
+  var lastLabel = 'Just started';
   function render() {
     var secs = Math.floor((Date.now() - startedAt) / 1000);
     var m = Math.floor(secs / 60), s = secs % 60;
+    if (clockEl) clockEl.textContent = m + ':' + (s < 10 ? '0' : '') + s;
     var label = secs < 20 ? 'Just started' : secs < 90 ? 'This can take a few minutes for a deeply detailed report' : 'Still working — perfectly normal, feel free to close this page and check your email instead';
-    el.innerHTML = '<span class="loading-timer-dot"></span>' + m + ':' + (s < 10 ? '0' : '') + s + ' elapsed — ' + label;
+    if (label !== lastLabel) {
+      if (labelEl) labelEl.textContent = label;
+      lastLabel = label;
+    }
   }
   render();
   el.style.display = 'inline-flex';
