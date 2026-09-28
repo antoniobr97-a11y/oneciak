@@ -23,7 +23,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 /* ── RESET ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1803,10 +1802,27 @@ async function startFreeFullReport(email) {
   }
 }
 
-/* ── PDF ── */
-function savePDF() {
+/* ── PDF ── jsPDF (~350KB) is only needed by the two export buttons below,
+   so it's fetched on first use instead of blocking the initial page load
+   for every visitor who never exports a PDF. ── */
+var jsPDFLoadPromise = null;
+function loadJsPDF() {
+  if (window.jspdf) return Promise.resolve();
+  if (jsPDFLoadPromise) return jsPDFLoadPromise;
+  jsPDFLoadPromise = new Promise(function(resolve, reject) {
+    var s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload = resolve;
+    s.onerror = function() { jsPDFLoadPromise = null; reject(new Error('Failed to load PDF library')); };
+    document.head.appendChild(s);
+  });
+  return jsPDFLoadPromise;
+}
+
+async function savePDF() {
   if (!lastResult||!lastProject) { alert('No report to save yet.'); return; }
   try {
+    await loadJsPDF();
     var doc = new jspdf.jsPDF();
     var y=22, margin=22, maxW=doc.internal.pageSize.getWidth()-margin*2;
     function ln(txt,sz,bold,r,g,b) {
@@ -2066,9 +2082,10 @@ function savePDF() {
 /* ── ONE-SHEET PDF — a condensed single-page summary suitable for printing
    or sharing with a financier, built from whatever data the current
    report has (works for both the free preview and the full report). ── */
-function saveOneSheet() {
+async function saveOneSheet() {
   if (!lastResult||!lastProject) { alert('No report to save yet.'); return; }
   try {
+    await loadJsPDF();
     var doc = new jspdf.jsPDF();
     var y=24, margin=24, maxW=doc.internal.pageSize.getWidth()-margin*2;
     function ln(txt,sz,bold,r,g,b) {
