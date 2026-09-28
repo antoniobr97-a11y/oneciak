@@ -24,7 +24,7 @@ exports.handler = async (event) => {
   if (body.id) {
     try {
       const record = await store.get(body.id, { type: 'json' });
-      out.record = record ? { status: record.status, startedAt: record.startedAt, sentAt: record.sentAt, error: record.error, hasReport: !!record.report } : null;
+      out.record = record ? { status: record.status, startedAt: record.startedAt, sentAt: record.sentAt, error: record.error, hasReport: !!record.report, resendId: record.resendId, emailTo: record.emailTo } : null;
     } catch (e) {
       out.recordError = e.message;
     }

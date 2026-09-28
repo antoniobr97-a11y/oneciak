@@ -47,7 +47,7 @@ async function generateAndDeliverFullReport({ store, key, project, email, anthro
       parsedResults.forEach(r => Object.assign(merged, r));
 
       const html = buildReportEmailHtml(project, merged, key, viewUrl);
-      await sendReportEmail({
+      const emailResult = await sendReportEmail({
         apiKey: resendKey,
         from: fromEmail,
         to: email,
@@ -55,7 +55,10 @@ async function generateAndDeliverFullReport({ store, key, project, email, anthro
         html
       });
 
-      await store.setJSON(key, { status: 'sent', sentAt: Date.now(), report: merged, project });
+      // Resend's message id, so a delivery complaint can be cross-referenced
+      // against the Resend dashboard's logs (accepted-by-API is not the same
+      // as delivered-to-inbox — that's tracked on Resend's side, not ours).
+      await store.setJSON(key, { status: 'sent', sentAt: Date.now(), report: merged, project, resendId: emailResult && emailResult.id, emailTo: email });
       await incrementUsageCount();
       return { ok: true };
     } catch (err) {
