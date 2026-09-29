@@ -16,7 +16,9 @@ exports.handler = async (event) => {
     const rl = await checkRateLimit(event, { name: 'get-report', limit: 30, windowMinutes: 60 });
     if (!rl.allowed) return { statusCode: 429, headers, body: JSON.stringify({ error: 'Too many requests. Please try again in a while.' }) };
 
-    const { session_id, token } = JSON.parse(event.body || '{}');
+    let parsedBody;
+    try { parsedBody = JSON.parse(event.body || '{}'); } catch (e) { return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid request body.' }) }; }
+    const { session_id, token } = parsedBody;
     if (!session_id || !verifyReportToken(token, session_id)) {
       return { statusCode: 403, headers, body: JSON.stringify({ ready: false }) };
     }

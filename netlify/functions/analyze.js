@@ -18,7 +18,8 @@ exports.handler = async (event) => {
     const rl = await checkRateLimit(event, { name: 'analyze', limit: 10, windowMinutes: 60 });
     if (!rl.allowed) return { statusCode: 429, headers, body: JSON.stringify({ error: 'Too many requests. Please try again in a while.' }) };
 
-    const body = JSON.parse(event.body || '{}');
+    let body;
+    try { body = JSON.parse(event.body || '{}'); } catch (e) { return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid request body.' }) }; }
 
     const apiKey = (process.env.ANTHROPIC_API_KEY || '').trim();
     if (!apiKey) return { statusCode: 500, headers, body: JSON.stringify({ error: 'No API key' }) };

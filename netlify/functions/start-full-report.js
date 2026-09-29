@@ -43,7 +43,9 @@ exports.handler = async (event) => {
     const rl = await checkRateLimit(event, { name: 'start-full-report', limit: 3, windowMinutes: 180 });
     if (!rl.allowed) return { statusCode: 429, headers, body: JSON.stringify({ error: 'Too many full reports requested from this connection recently. Please try again later.' }) };
 
-    const { project, email } = JSON.parse(event.body || '{}');
+    let parsedBody;
+    try { parsedBody = JSON.parse(event.body || '{}'); } catch (e) { return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid request body.' }) }; }
+    const { project, email } = parsedBody;
     if (!project || !project.title || typeof project.title !== 'string') {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing project data.' }) };
     }
