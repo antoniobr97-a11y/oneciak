@@ -28,7 +28,12 @@ function section(title, score, verdict, detail, flags, strengths, tips, plan, ex
       const txt = typeof t === 'string' ? t : (t.advice || '');
       html += '<p style="margin:6px 0 0;font-size:13px;color:#161616">• ' + esc(txt) + '</p>';
       if (typeof t === 'object' && t.links && t.links.length) {
-        t.links.forEach(l => { if (l) html += '<p style="margin:2px 0 0 14px;font-size:12px"><a href="' + esc(l.url) + '" style="color:#000">' + esc(l.label) + ' →</a></p>'; });
+        t.links.forEach(l => {
+          if (!l) return;
+          html += l.url
+            ? '<p style="margin:2px 0 0 14px;font-size:12px"><a href="' + esc(l.url) + '" style="color:#000">' + esc(l.label) + ' →</a></p>'
+            : '<p style="margin:2px 0 0 14px;font-size:12px;color:#6f6f6f">' + esc(l.label) + '</p>';
+        });
       }
     });
     html += '</div>';
