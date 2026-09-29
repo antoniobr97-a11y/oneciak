@@ -756,6 +756,21 @@ var lastProject = null;
 var isFullReport = false;
 var isSampleReport = false; // true only while showing the fictional sample — cleared on any real navigation so its data can't leak into a real form/analysis
 
+/* ── ANONYMOUS FUNNEL TRACKING ──
+   Fire-and-forget beacon to /.netlify/functions/track, called at a handful
+   of fixed points below. No per-visitor identifier is ever sent — only an
+   event name — so this needs no cookie/consent banner. Failures are always
+   swallowed: tracking must never affect the actual user experience. */
+function track(eventName) {
+  try {
+    fetch('/.netlify/functions/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: eventName })
+    }).catch(function(){});
+  } catch (e) {}
+}
+
 /* ── NAV ── */
 function showOnly(id) {
   ['sec-landing','sec-form','sec-loading','sec-results'].forEach(function(s) {
@@ -816,6 +831,7 @@ function onStartClick() {
   var err = document.getElementById('termsError');
   if (!cb || !cb.checked) { err.style.display = 'block'; return; }
   err.style.display = 'none';
+  track('form_start');
   goForm();
 }
 
@@ -864,34 +880,12 @@ function freePromptC(p) {
   return 'You are a film market consultant. Write in clear English, no markdown. Be honest and specific — a filmmaker needs real information, not generic advice. Respond ONLY with valid JSON, no text outside the JSON.\n\nProject: Title=\"'+p.title+'\", Logline=\"'+p.logline+'\", Genre=\"'+p.genre+'\", Format=\"'+p.format+'\", Budget=\"'+p.budget+'\", Audience=\"'+p.audience+'\", Distribution=\"'+p.distrib+'\", Country=\"'+p.country+'\", Experience=\"'+p.experience+'\", Notes=\"'+(p.extra||'None')+'\"\n\nCover ONLY: festival strategy (circuit, timing) and distribution & revenue (platforms, projections). NOTHING about creative, budget, market.\n\nRespond with exactly this JSON:\n{\n"festival_score":8,\n"festival_verdict":"one sentence",\n"festival_detail":"2-3 sentences",\n"festival_tip":"one concrete suggestion",\n"festival_flag":"one specific red flag",\n"festival_strength":"one specific strength",\n"distribution_score":5,\n"distribution_verdict":"one sentence",\n"distribution_detail":"2-3 sentences",\n"distribution_tip":"one concrete suggestion",\n"distribution_flag":"one specific red flag",\n"distribution_strength":"one specific strength"\n}';
 }
 
-/* ── API ── */
-async function callAPI(prompt, tier, auth) {
-  var res = await fetch("/.netlify/functions/analyze", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt: prompt, tier: tier || 'free', token: auth && auth.token, session_id: auth && auth.session_id })
-  });
-  var text = await res.text();
-  if (!res.ok) {
-    var msg = 'Service error. Please try again.';
-    try { var e = JSON.parse(text); if (e && e.error) msg = e.error; } catch(e2) {}
-    throw new Error(msg);
-  }
-  var data;
-  try { data = JSON.parse(text); } catch(e) { throw new Error('Service error. Please try again.'); }
-  var raw = (data.content && data.content[0] ? data.content[0].text : '').replace(/```json/gi,'').replace(/```/g,'').trim();
-  var a = raw.indexOf('{'), b = raw.lastIndexOf('}');
-  if (a !== -1 && b !== -1) raw = raw.substring(a, b+1);
-  try { return JSON.parse(raw); }
-  catch(e) { throw new Error("Could not parse AI response. Please try again."); }
-}
-
 /* ── MULTI-PROMPT API (several smaller prompts run in parallel server-side, merged into one report — used for the free quick preview; the full report is generated entirely server-side, see start-full-report.js) ── */
-async function callFullAPI(prompts, tier, auth) {
+async function callFullAPI(prompts) {
   var res = await fetch("/.netlify/functions/analyze", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompts: prompts, tier: tier || 'free', token: auth && auth.token, session_id: auth && auth.session_id })
+    body: JSON.stringify({ prompts: prompts })
   });
   var text = await res.text();
   if (!res.ok) {
@@ -920,63 +914,8 @@ async function checkReportReady(sessionId, token) {
   }
 }
 
-/* ── STRIPE PAYMENT LINK ── */
-async function startStripeCheckout() {
-  var p = lastProject;
-  if (!p) { alert("Project data missing. Please run the free analysis first."); return; }
-  try {
-    showOnly('sec-loading');
-    document.getElementById('loadingTitle').textContent = 'Preparing checkout…';
-    document.getElementById('loadingDesc').textContent = 'You will be redirected to Stripe to complete the payment securely.';
-    var res = await fetch('/.netlify/functions/create-checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ project: p })
-    });
-    var text = await res.text();
-    var data;
-    try { data = JSON.parse(text); } catch(e) { throw new Error('Checkout error. Please try again.'); }
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      showOnly('sec-results');
-      alert('Checkout error: ' + (data.error || 'Unknown error'));
-    }
-  } catch(err) {
-    showOnly('sec-results');
-    alert('Error: ' + err.message);
-  }
-}
-
-/* ── HANDLE STRIPE RETURN ── */
-var pendingFullReportAuth = null; // { project, token, session_id } — kept so a failed generation can be retried without paying again
+var pendingFullReportAuth = null; // { project, token, session_id } — kept so a failed generation can be retried
 var fullReportGenerationId = 0; // bumped whenever the user navigates away or starts a new report, so a stale poll loop from a previous attempt can't overwrite what's on screen now
-
-async function handleStripeReturn() {
-  var params = new URLSearchParams(window.location.search);
-  var sessionId = params.get('session_id');
-  if (!sessionId) return;
-  window.history.replaceState({}, document.title, window.location.pathname);
-  showOnly('sec-loading');
-  document.getElementById('loadingTitle').textContent = 'Verifying payment…';
-  document.getElementById('loadingDesc').textContent = 'Confirming your purchase and generating the full report.';
-  try {
-    var res = await fetch('/.netlify/functions/verify-payment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session_id: sessionId })
-    });
-    var text = await res.text();
-    var data;
-    try { data = JSON.parse(text); } catch(e) { showOnly('sec-landing'); alert('Payment verification failed. Please contact info@oneciak.com'); return; }
-    if (!data.paid) { showOnly('sec-landing'); alert('Payment not confirmed. Please contact info@oneciak.com'); return; }
-    pendingFullReportAuth = { project: data.project, token: data.reportToken, session_id: data.session_id || sessionId };
-    await generateFullReport();
-  } catch(err) {
-    showOnly('sec-landing');
-    alert('Error: ' + err.message);
-  }
-}
 
 /* ── HANDLE RETURN FROM THE "VIEW ON ONECIAK.COM" EMAIL LINK (free full report) ──
    The link already carries a token signed when the report was started, so
@@ -993,10 +932,10 @@ async function handleFreeReportReturn() {
 }
 
 /* ── GENERATE FULL REPORT ──
-   The stripe-webhook background function is the SOLE source of truth for
-   the full report — it's what gets emailed, and generating it there (not
-   in the browser) means it isn't bound by a page-load time limit, so it
-   can go much deeper. This just polls for that result and shows it,
+   generate-report-background.js is the SOLE source of truth for the full
+   report — it's what gets emailed, and generating it there (not in the
+   browser) means it isn't bound by a page-load time limit, so it can go
+   much deeper. This just polls for that result and shows it,
    which also guarantees the page and the email always match exactly. */
 var POLL_INTERVAL_MS = 4000;
 var POLL_MAX_ATTEMPTS = 75; // ~5 minutes — widened alongside the deeper report prompts so a normal-but-slower generation doesn't hit "Almost there" prematurely
@@ -1066,6 +1005,7 @@ async function generateFullReport() {
       pendingFullReportAuth = null;
       showOnly('sec-results');
       renderFull(lastResult, p.title);
+      track('full_report_delivered');
       checkTranslation();
       initScrollReveal();
       return;
@@ -1606,10 +1546,11 @@ async function runAnalysis() {
   document.getElementById('loadingTitle').textContent = 'Analyzing your project…';
   document.getElementById('loadingDesc').textContent = 'Evaluating your project across five market dimensions with real industry data.';
   try {
-    var result = await callFullAPI([freePromptA(p), freePromptB(p), freePromptC(p)], 'free', {});
+    var result = await callFullAPI([freePromptA(p), freePromptB(p), freePromptC(p)]);
     lastResult = result;
     showOnly('sec-results');
     renderFree(result, p.title);
+    track('analysis_completed');
     checkTranslation();
     initScrollReveal();
   } catch(err) {
@@ -1777,6 +1718,7 @@ function onUnlockClick() {
 async function startFreeFullReport(email) {
   var p = lastProject;
   if (!p) { alert("Project data missing. Please run the free analysis first."); return; }
+  track('full_report_requested');
   try {
     showOnly('sec-loading');
     document.getElementById('loadingTitle').textContent = 'Starting your full report…';
@@ -2138,9 +2080,9 @@ async function saveOneSheet() {
 function showError(msg) { var b=document.getElementById('errorBox'); b.textContent=msg; b.style.display='block'; }
 function hideError() { document.getElementById('errorBox').style.display='none'; }
 
-// Check for a return link (Stripe — dormant, or the free full-report email) on page load
+// Check for a return link (the free full-report email) on page load
 window.addEventListener('DOMContentLoaded', function() {
-  handleStripeReturn();
+  track('landing');
   handleFreeReportReturn();
   initScrollReveal();
   loadUsageStat();

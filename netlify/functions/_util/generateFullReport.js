@@ -26,12 +26,11 @@ async function callAndParseWithRetry(apiKey, prompt, model, maxTokens) {
   throw lastErr;
 }
 
-// Shared core used by every path that generates and delivers a full report
-// (the dormant Stripe webhook and the free-tier trigger) so both get the
-// exact same retry/reliability behavior instead of two copies that can drift.
-// Always runs inside a Background Function — callers are not bound by a
-// sync response-time ceiling, so all retry logic has to live in here rather
-// than relying on the caller (e.g. Stripe) to redeliver on failure.
+// Core used to generate and deliver a full report, kept separate from
+// generate-report-background.js so the retry/reliability behavior has a
+// single home. Always runs inside a Background Function — callers are not
+// bound by a sync response-time ceiling, so all retry logic has to live in
+// here rather than relying on the caller to redeliver on failure.
 //
 // `key` is the blob store key the report is persisted under and the id
 // embedded in the emailed "View on oneciak.com" link. `viewUrl`, if given,

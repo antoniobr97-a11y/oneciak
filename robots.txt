@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /admin-stats.html
 
 Sitemap: https://oneciak.com/sitemap.xml
