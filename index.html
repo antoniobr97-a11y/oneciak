@@ -820,6 +820,18 @@ function esc(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+// Guards against a rare but real failure mode: the AI call returns 200 with
+// technically-valid but empty/near-empty JSON (e.g. "{}"), which would
+// otherwise render a blank-looking report with a fake default score instead
+// of a clear error. Requires the overall score plus at least one of the 5
+// dimension scores to be present before treating a response as usable.
+function isUsableReport(r) {
+  if (!r || typeof r !== 'object') return false;
+  if (typeof r.overall_score !== 'number') return false;
+  var dims = ['creative_score','financial_score','market_score','festival_score','distribution_score'];
+  return dims.some(function(k){ return typeof r[k] === 'number'; });
+}
+
 /* ── ANONYMOUS FUNNEL TRACKING ──
    Fire-and-forget beacon to /.netlify/functions/track, called at a handful
    of fixed points below. No per-visitor identifier is ever sent — only an
@@ -1074,6 +1086,16 @@ async function generateFullReport() {
     if (myGenId !== fullReportGenerationId) return; // user navigated away or started something else — abandon silently
     if (existing && existing.ready) {
       stopFullReportTimer();
+      if (!isUsableReport(existing.report)) {
+        // The server has already marked this generation "sent" — polling
+        // again would just return the same incomplete data, so retrying
+        // client-side can't help. A fresh report is the only real fix.
+        document.getElementById('loadingSpinner').style.display = 'none';
+        document.getElementById('loadingTitle').textContent = 'Something went wrong';
+        document.getElementById('loadingDesc').textContent = 'Your report came back incomplete. Please start a new analysis — if this keeps happening, contact info@oneciak.com.';
+        document.getElementById('loadingRetryBtn').style.display = 'none';
+        return;
+      }
       lastResult = existing.report;
       if (existing.project) { lastProject = existing.project; p = existing.project; }
       pendingFullReportAuth = null;
@@ -1653,6 +1675,7 @@ async function runAnalysis() {
   document.getElementById('loadingDesc').textContent = 'Evaluating your project across five market dimensions with real industry data.';
   try {
     var result = await callFullAPI([freePromptA(p), freePromptB(p), freePromptC(p)]);
+    if (!isUsableReport(result)) throw new Error('The analysis came back incomplete. Please try again.');
     lastResult = result;
     showOnly('sec-results');
     renderFree(result, p.title);
