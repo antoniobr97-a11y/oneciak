@@ -13,12 +13,17 @@
 <meta property="og:title" content="OneCiak — Film Market Intelligence">
 <meta property="og:description" content="Does your film have a real market? A professional AI market assessment across five industry dimensions.">
 <meta property="og:url" content="https://oneciak.com/">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://oneciak.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="OneCiak — Film Market Intelligence">
 <meta name="twitter:description" content="Does your film have a real market? A professional AI market assessment across five industry dimensions.">
+<meta name="twitter:image" content="https://oneciak.com/og-image.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-6 -6 135 136'%3E%3Cpath d='M6 0L117 0A6 6 0 0 1 123 6L123 19Q123 25 117.11 26.15L5.89 47.85Q0 49 0 43L0 6A6 6 0 0 1 6 0Z' fill='%23000000'/%3E%3Crect x='0' y='62' width='123' height='62' rx='6' fill='%23000000'/%3E%3C/svg%3E" media="(prefers-color-scheme: light)">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-6 -6 135 136'%3E%3Cpath d='M6 0L117 0A6 6 0 0 1 123 6L123 19Q123 25 117.11 26.15L5.89 47.85Q0 49 0 43L0 6A6 6 0 0 1 6 0Z' fill='%23ffffff'/%3E%3Crect x='0' y='62' width='123' height='62' rx='6' fill='%23ffffff'/%3E%3C/svg%3E" media="(prefers-color-scheme: dark)">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-6 -6 135 136'%3E%3Cpath d='M6 0L117 0A6 6 0 0 1 123 6L123 19Q123 25 117.11 26.15L5.89 47.85Q0 49 0 43L0 6A6 6 0 0 1 6 0Z' fill='%23000000'/%3E%3Crect x='0' y='62' width='123' height='62' rx='6' fill='%23000000'/%3E%3C/svg%3E">
+<link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -671,7 +676,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
       <div class="card-title">Context</div>
       <div class="field">
         <label for="country">Production Country</label>
-        <input type="text" id="country" placeholder="e.g. Italy, France, USA">
+        <input type="text" id="country" placeholder="e.g. Italy, France, USA" autocomplete="country-name">
       </div>
       <div class="field">
         <label for="experience">Director Experience <span class="hint">(optional)</span></label>
@@ -697,9 +702,9 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
 
 <!-- ══ LOADING ══ -->
-<div id="sec-loading">
+<div id="sec-loading" role="status" aria-live="polite">
   <div class="loading-wrap">
-    <div class="spinner" id="loadingSpinner"></div>
+    <div class="spinner" id="loadingSpinner" aria-hidden="true"></div>
     <div class="loading-title" id="loadingTitle">Analyzing your project…</div>
     <div class="loading-desc" id="loadingDesc">Evaluating your project across five market dimensions with real industry data.</div>
     <div class="loading-timer" id="loadingTimer" style="display:none"></div>
@@ -868,16 +873,22 @@ function getProject() {
 }
 
 /* ── FREE PROMPT (split into 3 small parallel calls for reliability) ── */
+var FREE_PREAMBLE = 'You are a film market consultant. Write in clear English, no markdown. Be honest and specific — a filmmaker needs real information, not generic advice. Every sentence must add new, specific information: never restate a verdict field inside its paired detail field, and never pad with generic filler ("this is important", "it is worth noting"). Respond ONLY with valid JSON, no text outside the JSON.';
+
+function freeProjectContext(p) {
+  return 'Project: Title="'+p.title+'", Logline="'+p.logline+'", Genre="'+p.genre+'", Format="'+p.format+'", Budget="'+p.budget+'", Audience="'+p.audience+'", Distribution="'+p.distrib+'", Country="'+p.country+'", Experience="'+p.experience+'", Notes="'+(p.extra||'None')+'"';
+}
+
 function freePromptA(p) {
-  return 'You are a film market consultant. Write in clear English, no markdown. Be honest and specific — a filmmaker needs real information, not generic advice. Respond ONLY with valid JSON, no text outside the JSON.\n\nProject: Title=\"'+p.title+'\", Logline=\"'+p.logline+'\", Genre=\"'+p.genre+'\", Format=\"'+p.format+'\", Budget=\"'+p.budget+'\", Audience=\"'+p.audience+'\", Distribution=\"'+p.distrib+'\", Country=\"'+p.country+'\", Experience=\"'+p.experience+'\", Notes=\"'+(p.extra||'None')+'\"\n\nCover ONLY: overall assessment, one comparable film, one festival fit, and the creative package (narrative, logline, pitch). NOTHING about budget, market, distribution.\n\nRespond with exactly this JSON:\n{\n"overall_score":7.5,\n"overall_label":"3-5 words",\n"overall_summary":"2 honest sentences about this project market position",\n"biggest_risk":"one specific sentence",\n"biggest_opportunity":"one specific sentence",\n"next_step":"the single most important concrete action this week",\n"logline_verdict":"one sentence: does the logline work as a pitch tool",\n"one_comp":{"title":"one real comparable film","year":"year","result":"what it achieved at this budget level","lesson":"one concrete lesson"},\n"one_festival":{"name":"one realistic festival to target","tier":"A/B/C","why":"why it fits","url":"https://real.submission.url"},\n"creative_score":7,\n"creative_verdict":"one sentence",\n"creative_detail":"2-3 sentences",\n"creative_tip":"one concrete suggestion",\n"creative_flag":"one specific red flag",\n"creative_strength":"one specific strength"\n}';
+  return FREE_PREAMBLE+'\n\n'+freeProjectContext(p)+'\n\nCover ONLY: overall assessment, one comparable film, one festival fit, and the creative package (narrative, logline, pitch). NOTHING about budget, market, distribution.\n\nRespond with exactly this JSON:\n{\n"overall_score":7.5,\n"overall_label":"3-5 words",\n"overall_summary":"2 honest sentences about this project market position",\n"biggest_risk":"one specific sentence",\n"biggest_opportunity":"one specific sentence",\n"next_step":"the single most important concrete action this week",\n"logline_verdict":"one sentence: does the logline work as a pitch tool",\n"one_comp":{"title":"one real comparable film","year":"year","result":"what it achieved at this budget level","lesson":"one concrete lesson"},\n"one_festival":{"name":"one realistic festival to target","tier":"A/B/C","why":"why it fits","url":"https://real.submission.url"},\n"creative_score":7,\n"creative_verdict":"one sentence — a sharp headline judgment, not a preview of creative_detail","creative_detail":"2-3 sentences","creative_tip":"one concrete suggestion","creative_flag":"one specific red flag","creative_strength":"one specific strength"\n}';
 }
 
 function freePromptB(p) {
-  return 'You are a film market consultant. Write in clear English, no markdown. Be honest and specific — a filmmaker needs real information, not generic advice. Respond ONLY with valid JSON, no text outside the JSON.\n\nProject: Title=\"'+p.title+'\", Logline=\"'+p.logline+'\", Genre=\"'+p.genre+'\", Format=\"'+p.format+'\", Budget=\"'+p.budget+'\", Audience=\"'+p.audience+'\", Distribution=\"'+p.distrib+'\", Country=\"'+p.country+'\", Experience=\"'+p.experience+'\", Notes=\"'+(p.extra||'None')+'\"\n\nCover ONLY: the financial plan (budget realism, funding) and market & audience (demand, trends). NOTHING about creative, festivals, distribution.\n\nRespond with exactly this JSON:\n{\n"financial_score":6,\n"financial_verdict":"one sentence",\n"financial_detail":"2-3 sentences",\n"financial_tip":"one concrete suggestion",\n"financial_flag":"one specific red flag",\n"financial_strength":"one specific strength",\n"market_score":7,\n"market_verdict":"one sentence",\n"market_detail":"2-3 sentences",\n"market_tip":"one concrete suggestion",\n"market_flag":"one specific red flag",\n"market_strength":"one specific strength"\n}';
+  return FREE_PREAMBLE+'\n\n'+freeProjectContext(p)+'\n\nCover ONLY: the financial plan (budget realism, funding) and market & audience (demand, trends). NOTHING about creative, festivals, distribution.\n\nRespond with exactly this JSON:\n{\n"financial_score":6,\n"financial_verdict":"one sentence — a sharp headline judgment, not a preview of financial_detail","financial_detail":"2-3 sentences","financial_tip":"one concrete suggestion","financial_flag":"one specific red flag","financial_strength":"one specific strength",\n"market_score":7,\n"market_verdict":"one sentence — a sharp headline judgment, not a preview of market_detail","market_detail":"2-3 sentences","market_tip":"one concrete suggestion","market_flag":"one specific red flag","market_strength":"one specific strength"\n}';
 }
 
 function freePromptC(p) {
-  return 'You are a film market consultant. Write in clear English, no markdown. Be honest and specific — a filmmaker needs real information, not generic advice. Respond ONLY with valid JSON, no text outside the JSON.\n\nProject: Title=\"'+p.title+'\", Logline=\"'+p.logline+'\", Genre=\"'+p.genre+'\", Format=\"'+p.format+'\", Budget=\"'+p.budget+'\", Audience=\"'+p.audience+'\", Distribution=\"'+p.distrib+'\", Country=\"'+p.country+'\", Experience=\"'+p.experience+'\", Notes=\"'+(p.extra||'None')+'\"\n\nCover ONLY: festival strategy (circuit, timing) and distribution & revenue (platforms, projections). NOTHING about creative, budget, market.\n\nRespond with exactly this JSON:\n{\n"festival_score":8,\n"festival_verdict":"one sentence",\n"festival_detail":"2-3 sentences",\n"festival_tip":"one concrete suggestion",\n"festival_flag":"one specific red flag",\n"festival_strength":"one specific strength",\n"distribution_score":5,\n"distribution_verdict":"one sentence",\n"distribution_detail":"2-3 sentences",\n"distribution_tip":"one concrete suggestion",\n"distribution_flag":"one specific red flag",\n"distribution_strength":"one specific strength"\n}';
+  return FREE_PREAMBLE+'\n\n'+freeProjectContext(p)+'\n\nCover ONLY: festival strategy (circuit, timing) and distribution & revenue (platforms, projections). NOTHING about creative, budget, market.\n\nRespond with exactly this JSON:\n{\n"festival_score":8,\n"festival_verdict":"one sentence — a sharp headline judgment, not a preview of festival_detail","festival_detail":"2-3 sentences","festival_tip":"one concrete suggestion","festival_flag":"one specific red flag","festival_strength":"one specific strength",\n"distribution_score":5,\n"distribution_verdict":"one sentence — a sharp headline judgment, not a preview of distribution_detail","distribution_detail":"2-3 sentences","distribution_tip":"one concrete suggestion","distribution_flag":"one specific red flag","distribution_strength":"one specific strength"\n}';
 }
 
 /* ── MULTI-PROMPT API (several smaller prompts run in parallel server-side, merged into one report — used for the free quick preview; the full report is generated entirely server-side, see start-full-report.js) ── */
@@ -1116,7 +1127,7 @@ function renderFree(r, title) {
     '<div class="locked-card">'+
     '<div class="locked-title">Get the Full Report — Free</div>'+
     '<div class="locked-desc">Same structure, much deeper. Red flags, strengths, 3 recommendations with real links, action plans, funding sources, festival calendar, sales agents, revenue projection and 5-phase roadmap. Takes a few minutes to generate — we email it to you as soon as it\'s ready.</div>'+
-    '<div class="field" style="text-align:left;margin-bottom:14px"><label for="fullReportEmail">Your email</label><input type="email" id="fullReportEmail" placeholder="you@example.com"></div>'+
+    '<div class="field" style="text-align:left;margin-bottom:14px"><label for="fullReportEmail">Your email</label><input type="email" id="fullReportEmail" placeholder="you@example.com" autocomplete="email" inputmode="email"></div>'+
     '<div class="checkbox-row"><input type="checkbox" id="fullTerms"><label class="checkbox-label" for="fullTerms">I understand this is AI-generated analysis for informational purposes only. Not professional, legal or financial advice. OneCiak is not a licensed consulting firm.</label></div>'+
     '<div class="inline-error" id="unlockError">Please accept the terms to continue.</div>'+
     '<button class="btn-unlock" onclick="onUnlockClick()">Get Full Report — Free →</button>'+
