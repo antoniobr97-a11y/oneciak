@@ -1254,6 +1254,11 @@ function renderFull(r, title) {
       num:'06', label:'Action Plan', sublabel:'Roadmap · Markets · Revenue',
       score: null,
       body: buildActionPlanBody(r)
+    },
+    {
+      num:'07', label:'Business Plan Summary', sublabel:'Ready to share with a financier',
+      score: null,
+      body: buildBusinessPlanBody(r.business_plan_summary)
     }
   ];
 
@@ -1436,6 +1441,33 @@ function buildActionPlanBody(r) {
   }
 
   return out || '<div style="font-size:13px;color:var(--muted);font-weight:300">No action plan data available.</div>';
+}
+
+/* ── BUSINESS PLAN SUMMARY — a condensed, presentation-ready synthesis
+   closing out the full report, so there's a single section a filmmaker can
+   screenshot or read aloud when pitching a financier, instead of having to
+   piece it together from the 6 sections above it. ── */
+function buildBusinessPlanBody(bp) {
+  if (!bp) return '<div style="font-size:13px;color:var(--muted);font-weight:300">No business plan summary available.</div>';
+  var out = '';
+  if (bp.executive_summary) out += '<div style="font-size:13px;color:var(--text);line-height:1.7;font-weight:300;margin-bottom:16px">'+bp.executive_summary+'</div>';
+  if (bp.the_ask) out += '<div style="padding:12px 14px;background:var(--accent-wash);border-radius:var(--radius);font-size:13px;color:var(--text);line-height:1.55;margin-bottom:16px"><b>The Ask:</b> '+bp.the_ask+'</div>';
+  [
+    { label:'Market Opportunity', v:bp.market_opportunity },
+    { label:'Competitive Advantage', v:bp.competitive_advantage },
+    { label:'Use of Funds', v:bp.use_of_funds },
+    { label:'Team &amp; Experience', v:bp.team_and_experience }
+  ].forEach(function(row){
+    if (!row.v) return;
+    out += '<div style="padding-top:14px;border-top:1px solid var(--border-light);margin-bottom:14px"><div class="tips-label" style="display:block;margin-bottom:8px">'+row.label+'</div><div style="font-size:13px;color:var(--text);line-height:1.65;font-weight:300">'+row.v+'</div></div>';
+  });
+  if (bp.key_milestones && bp.key_milestones.length) {
+    out += '<div style="padding-top:14px;border-top:1px solid var(--border-light);margin-bottom:14px"><div class="tips-label" style="display:block;margin-bottom:10px">Key Milestones</div>';
+    bp.key_milestones.forEach(function(m){ if (m) out += '<div class="roadmap-step"><div class="roadmap-num">✓</div><div class="roadmap-action">'+m+'</div></div>'; });
+    out += '</div>';
+  }
+  if (bp.risk_summary) out += '<div style="padding-top:14px;border-top:1px solid var(--border-light)"><div class="tips-label" style="display:block;margin-bottom:8px">Biggest Risk</div><div class="flag-item red">'+bp.risk_summary+'</div></div>';
+  return out || '<div style="font-size:13px;color:var(--muted);font-weight:300">No business plan summary available.</div>';
 }
 
 /* ── TOGGLE ACCORDION ── */
@@ -1746,7 +1778,17 @@ function showSampleReport() {
       { phase: 'Phase 3 — Pre-Production & Packaging', action: 'Attach a cinematographer and lock location agreements with weather contingency' },
       { phase: 'Phase 4 — Production & Post', action: 'Shoot on a disciplined 4-week schedule; prioritize festival-cut delivery timeline' },
       { phase: 'Phase 5 — Festival & Sales', action: 'Premiere at the highest-tier festival that accepts, then run the B-tier fallback list in parallel with sales agent outreach' }
-    ]
+    ],
+    business_plan_summary: {
+      executive_summary: 'Northbound is a €250,000 character drama pairing a proven festival-friendly premise (a widowed lighthouse keeper and her estranged son) with a first-time director whose short-film track record already carries festival recognition. The path to a modest but real return runs through the festival circuit and a European broadcaster pre-sale, not theatrical.',
+      the_ask: '€180,000 in remaining financing to close the €250,000 budget, structured as regional fund grants plus a broadcaster pre-sale advance.',
+      market_opportunity: 'Restrained, festival-driven character dramas in this budget range have a consistent buyer base among European arthouse distributors and public broadcasters, particularly when paired with a distinctive visual setting like this project\'s coastal lighthouse backdrop.',
+      competitive_advantage: 'The single-location, small-cast structure keeps the budget disciplined without compromising festival appeal, and the director\'s existing festival relationships from prior short films shorten the path to a credible premiere slot.',
+      use_of_funds: 'Roughly 30% above-the-line (writer/director/lead cast), 45% production, 15% post-production, and 10% contingency — in line with typical allocation at this budget and format.',
+      team_and_experience: 'A first feature for the director carries real financing-odds risk; attaching one recognizable name in a supporting role or a known cinematographer would materially de-risk this for financiers.',
+      key_milestones: ['Month 1-2: Lock financing and attach key crew', 'Month 3: Complete pre-production and location lockdown', 'Month 4: Principal photography (4 weeks)', 'Month 6-8: Post-production and festival-cut delivery', 'Month 9-12: Festival premiere and sales agent outreach'],
+      risk_summary: 'The biggest risk is financing timeline slippage if fund applications miss their cycles — mitigated by applying to multiple funds in parallel rather than sequentially.'
+    }
   };
   fullReportGenerationId++;
   stopFullReportTimer();
@@ -2074,6 +2116,23 @@ async function savePDF() {
       hr();
     }
 
+    if (isFullReport && lastResult.business_plan_summary) {
+      var bp = lastResult.business_plan_summary;
+      ln('BUSINESS PLAN SUMMARY',10,true);
+      if (bp.executive_summary) ln(bp.executive_summary,9,false,122,118,112);
+      if (bp.the_ask) ln('The Ask: '+bp.the_ask,9,true);
+      if (bp.market_opportunity) { ln('Market Opportunity',9,true); ln(bp.market_opportunity,9,false,122,118,112); }
+      if (bp.competitive_advantage) { ln('Competitive Advantage',9,true); ln(bp.competitive_advantage,9,false,122,118,112); }
+      if (bp.use_of_funds) { ln('Use of Funds',9,true); ln(bp.use_of_funds,9,false,122,118,112); }
+      if (bp.team_and_experience) { ln('Team & Experience',9,true); ln(bp.team_and_experience,9,false,122,118,112); }
+      if (bp.key_milestones && bp.key_milestones.length) {
+        ln('Key Milestones',9,true);
+        bp.key_milestones.forEach(function(m){ if (m) ln('• '+m,9,false,122,118,112); });
+      }
+      if (bp.risk_summary) { ln('Biggest Risk',9,true); ln(bp.risk_summary,9,false,197,56,42); }
+      hr();
+    }
+
     ln('Report by OneCiak — oneciak.com',9,false,122,118,112);
     y+=4; hr();
     ln('LEGAL DISCLAIMER',9,true,122,118,112);
@@ -2123,6 +2182,9 @@ async function saveOneSheet() {
     hr();
 
     if (isFullReport) {
+      if (lastResult.business_plan_summary && lastResult.business_plan_summary.the_ask) {
+        ln('The Ask: '+lastResult.business_plan_summary.the_ask,10,true,26,25,22);
+      }
       if (lastResult.revenue_projection && lastResult.revenue_projection.total_realistic) {
         ln('Realistic Revenue Potential: '+lastResult.revenue_projection.total_realistic,10,true,22,101,52);
       }

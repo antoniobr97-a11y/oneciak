@@ -223,6 +223,22 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
     body += rv;
   }
 
+  if (r.business_plan_summary) {
+    const bp = r.business_plan_summary;
+    let bps = '<tr><td style="padding:28px 0;border-top:1px solid #e5e5e5"><span style="font-size:16px;font-weight:700;color:#000">Business Plan Summary</span>';
+    if (bp.executive_summary) bps += '<p style="margin:10px 0 0;font-size:13px;color:#161616;line-height:1.7">' + esc(bp.executive_summary) + '</p>';
+    if (bp.the_ask) bps += '<p style="margin:12px 0 0;padding:10px 14px;background:#f0f0f0;border-radius:10px;font-size:13px;color:#161616"><b>The Ask:</b> ' + esc(bp.the_ask) + '</p>';
+    [['Market Opportunity', bp.market_opportunity], ['Competitive Advantage', bp.competitive_advantage], ['Use of Funds', bp.use_of_funds], ['Team & Experience', bp.team_and_experience]]
+      .forEach(([label, v]) => { if (v) bps += '<p style="margin:12px 0 0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6f6f6f">' + esc(label) + '</p><p style="margin:4px 0 0;font-size:13px;color:#161616;line-height:1.6">' + esc(v) + '</p>'; });
+    if (bp.key_milestones && bp.key_milestones.length) {
+      bps += '<p style="margin:14px 0 0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6f6f6f">Key Milestones</p>';
+      bp.key_milestones.forEach(m => { if (m) bps += '<p style="margin:6px 0 0;font-size:13px;color:#161616">• ' + esc(m) + '</p>'; });
+    }
+    if (bp.risk_summary) bps += '<p style="margin:14px 0 0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6f6f6f">Biggest Risk</p><p style="margin:4px 0 0;font-size:13px;color:#c5382a">' + esc(bp.risk_summary) + '</p>';
+    bps += '</td></tr>';
+    body += bps;
+  }
+
   return '<!doctype html><html><body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif">' +
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:32px 0">' +
     '<tr><td align="center">' +
