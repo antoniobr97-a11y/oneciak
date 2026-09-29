@@ -810,6 +810,16 @@ var lastProject = null;
 var isFullReport = false;
 var isSampleReport = false; // true only while showing the fictional sample — cleared on any real navigation so its data can't leak into a real form/analysis
 
+// Every report field below is rendered via innerHTML for layout flexibility,
+// but the content itself — AI-generated text and, indirectly, whatever a
+// user typed into Logline/Notes — is untrusted: it must never be able to
+// inject markup. Every dynamic value interpolated into a template string in
+// this file is wrapped in esc() before use; only the literal HTML Claude
+// wrote here itself is trusted.
+function esc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 /* ── ANONYMOUS FUNNEL TRACKING ──
    Fire-and-forget beacon to /.netlify/functions/track, called at a handful
    of fixed points below. No per-visitor identifier is ever sent — only an
@@ -1102,7 +1112,7 @@ function renderFree(r, title) {
   var col = scoreColor(Number(r.overall_score||5));
   document.getElementById('overallScore').innerHTML =
     '<div class="overall-card">'+
-    '<div><div class="overall-label">OneCiak Score</div><div class="overall-sublabel">'+(r.overall_label||'')+'</div></div>'+
+    '<div><div class="overall-label">OneCiak Score</div><div class="overall-sublabel">'+esc(r.overall_label)+'</div></div>'+
     '<div class="overall-num score-'+col+'">'+Number(r.overall_score||5).toFixed(1)+'<span class="denom">/10</span></div>'+
     '</div>';
 
@@ -1110,12 +1120,12 @@ function renderFree(r, title) {
   document.getElementById('execSummary').innerHTML =
     '<div class="exec-card">'+
     '<div class="exec-label">Summary</div>'+
-    '<div class="exec-text">'+(r.overall_summary||'')+'</div>'+
+    '<div class="exec-text">'+esc(r.overall_summary)+'</div>'+
     ((r.biggest_risk||r.biggest_opportunity) ? '<div class="exec-row">'+
-      '<div class="exec-box risk"><div class="exec-box-label">Main Risk</div><div class="exec-box-text">'+(r.biggest_risk||'')+'</div></div>'+
-      '<div class="exec-box opp"><div class="exec-box-label">Main Opportunity</div><div class="exec-box-text">'+(r.biggest_opportunity||'')+'</div></div>'+
+      '<div class="exec-box risk"><div class="exec-box-label">Main Risk</div><div class="exec-box-text">'+esc(r.biggest_risk)+'</div></div>'+
+      '<div class="exec-box opp"><div class="exec-box-label">Main Opportunity</div><div class="exec-box-text">'+esc(r.biggest_opportunity)+'</div></div>'+
       '</div>' : '')+
-    (r.next_step ? '<div style="margin-top:16px;padding:14px 16px;background:var(--accent-wash);border-radius:var(--radius);font-size:13px;color:var(--text);line-height:1.55"><b>Your Next Step:</b> '+r.next_step+'</div>' : '')+
+    (r.next_step ? '<div style="margin-top:16px;padding:14px 16px;background:var(--accent-wash);border-radius:var(--radius);font-size:13px;color:var(--text);line-height:1.55"><b>Your Next Step:</b> '+esc(r.next_step)+'</div>' : '')+
     '</div>';
 
   // Free accordion — same structure, limited content + blurred preview
@@ -1123,12 +1133,12 @@ function renderFree(r, title) {
   var oneFestival = r.one_festival || {};
   var freeSections = [
     { num:'01', label:'Creative Package',     sublabel:'Narrative · Logline · Pitch',    score:r.creative_score,     verdict:r.creative_verdict,     detail:r.creative_detail,     tip:r.creative_tip,     flag:r.creative_flag,     strength:r.creative_strength,
-      extra: r.logline_verdict ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light);font-size:13px;color:var(--text);line-height:1.6"><b>Logline verdict:</b> '+r.logline_verdict+'</div>' : '' },
+      extra: r.logline_verdict ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light);font-size:13px;color:var(--text);line-height:1.6"><b>Logline verdict:</b> '+esc(r.logline_verdict)+'</div>' : '' },
     { num:'02', label:'Financial Plan',       sublabel:'Budget · Funding · Financing',   score:r.financial_score,    verdict:r.financial_verdict,    detail:r.financial_detail,    tip:r.financial_tip,    flag:r.financial_flag,    strength:r.financial_strength, extra:'' },
     { num:'03', label:'Market & Audience',    sublabel:'Demand · Trends · Comparables',  score:r.market_score,       verdict:r.market_verdict,       detail:r.market_detail,       tip:r.market_tip,       flag:r.market_flag,       strength:r.market_strength,
-      extra: oneComp.title ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)"><div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px">Comparable Film</div><div style="font-size:13px;color:var(--text)"><b>'+(oneComp.title||'')+'</b> ('+(oneComp.year||'')+') — '+(oneComp.result||'')+'</div>'+(oneComp.lesson?'<div style="font-size:12px;color:var(--muted);margin-top:4px">'+oneComp.lesson+'</div>':'')+'</div>' : '' },
+      extra: oneComp.title ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)"><div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px">Comparable Film</div><div style="font-size:13px;color:var(--text)"><b>'+esc(oneComp.title)+'</b> ('+esc(oneComp.year)+') — '+esc(oneComp.result)+'</div>'+(oneComp.lesson?'<div style="font-size:12px;color:var(--muted);margin-top:4px">'+esc(oneComp.lesson)+'</div>':'')+'</div>' : '' },
     { num:'04', label:'Festival Strategy',    sublabel:'Circuit · Festivals · Timing',   score:r.festival_score,     verdict:r.festival_verdict,     detail:r.festival_detail,     tip:r.festival_tip,     flag:r.festival_flag,     strength:r.festival_strength,
-      extra: oneFestival.name ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)"><div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px">Suggested Festival</div><div style="font-size:13px;color:var(--text)"><b>'+(oneFestival.name||'')+'</b>'+(oneFestival.tier?' (Tier '+oneFestival.tier+')':'')+' — '+(oneFestival.why||'')+'</div></div>' : '' },
+      extra: oneFestival.name ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)"><div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px">Suggested Festival</div><div style="font-size:13px;color:var(--text)"><b>'+esc(oneFestival.name)+'</b>'+(oneFestival.tier?' (Tier '+esc(oneFestival.tier)+')':'')+' — '+esc(oneFestival.why)+'</div></div>' : '' },
     { num:'05', label:'Distribution & Revenue', sublabel:'Platforms · Pricing · Sales',  score:r.distribution_score, verdict:r.distribution_verdict, detail:r.distribution_detail, tip:r.distribution_tip, flag:r.distribution_flag, strength:r.distribution_strength, extra:'' }
   ];
 
@@ -1143,16 +1153,16 @@ function renderFree(r, title) {
     var body = '<div class="accordion-divider"></div>';
     body += '<div class="score-bar-bg" style="margin-bottom:14px"><div class="score-bar-fill bar-'+c+'" id="'+bid+'" style="width:0%"></div></div>';
     setTimeout(function(b,p){ return function(){ var el=document.getElementById(b); if(el) el.style.width=p+'%'; }; }(bid,pct), 80);
-    body += '<div class="score-verdict">'+(sec.verdict||'')+'</div>';
-    body += '<div class="score-detail" style="margin-bottom:8px">'+(sec.detail||'')+'</div>';
-    if (sec.tip) body += '<div class="tips-block"><span class="tips-label">Key Recommendation</span><div class="tip-item"><div class="tip-text">'+sec.tip+'</div></div></div>';
+    body += '<div class="score-verdict">'+esc(sec.verdict)+'</div>';
+    body += '<div class="score-detail" style="margin-bottom:8px">'+esc(sec.detail)+'</div>';
+    if (sec.tip) body += '<div class="tips-block"><span class="tips-label">Key Recommendation</span><div class="tip-item"><div class="tip-text">'+esc(sec.tip)+'</div></div></div>';
     if (sec.extra) body += sec.extra;
 
     // Blurred preview of flag + strength
     if (sec.flag || sec.strength) {
       var ph = '';
-      if (sec.flag) ph += '<div class="flag-item red" style="margin-bottom:6px">'+sec.flag+'</div>';
-      if (sec.strength) ph += '<div class="flag-item green">'+sec.strength+'</div>';
+      if (sec.flag) ph += '<div class="flag-item red" style="margin-bottom:6px">'+esc(sec.flag)+'</div>';
+      if (sec.strength) ph += '<div class="flag-item green">'+esc(sec.strength)+'</div>';
       body += '<div class="preview-blur-wrap"><div class="preview-blur-content">'+ph+'</div>'+
         '<div class="preview-blur-overlay"><span class="preview-blur-label">Get Full Report — Free</span></div></div>';
     }
@@ -1197,20 +1207,20 @@ function renderFull(r, title) {
   var col = scoreColor(Number(r.overall_score||5));
   document.getElementById('overallScore').innerHTML =
     '<div class="overall-card">'+
-    '<div><div class="overall-label">OneCiak Score</div><div class="overall-sublabel">'+(r.overall_label||'')+'</div></div>'+
+    '<div><div class="overall-label">OneCiak Score</div><div class="overall-sublabel">'+esc(r.overall_label)+'</div></div>'+
     '<div style="text-align:right">'+
     '<div class="overall-num score-'+col+'">'+Number(r.overall_score||5).toFixed(1)+'<span class="denom">/10</span></div>'+
     '</div></div>'+
-    (r.score_benchmark ? '<div style="font-size:12.5px;color:var(--muted);line-height:1.5;font-weight:300;margin-top:10px;padding:0 4px">'+r.score_benchmark+'</div>' : '');
+    (r.score_benchmark ? '<div style="font-size:12.5px;color:var(--muted);line-height:1.5;font-weight:300;margin-top:10px;padding:0 4px">'+esc(r.score_benchmark)+'</div>' : '');
 
   // Exec summary — synthesis always visible
   document.getElementById('execSummary').innerHTML =
     '<div class="exec-card">'+
     '<div class="exec-label">Summary</div>'+
-    '<div class="exec-text">'+(r.executive_summary||r.overall_summary||'')+'</div>'+
+    '<div class="exec-text">'+esc(r.executive_summary||r.overall_summary)+'</div>'+
     '<div class="exec-row">'+
-    '<div class="exec-box risk"><div class="exec-box-label">Main Risk</div><div class="exec-box-text">'+(r.biggest_risk||'')+'</div></div>'+
-    '<div class="exec-box opp"><div class="exec-box-label">Main Opportunity</div><div class="exec-box-text">'+(r.biggest_opportunity||'')+'</div></div>'+
+    '<div class="exec-box risk"><div class="exec-box-label">Main Risk</div><div class="exec-box-text">'+esc(r.biggest_risk)+'</div></div>'+
+    '<div class="exec-box opp"><div class="exec-box-label">Main Opportunity</div><div class="exec-box-text">'+esc(r.biggest_opportunity)+'</div></div>'+
     '</div></div>';
 
   // Build accordion
@@ -1304,17 +1314,17 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
   setTimeout(function(b,p){ return function(){ var el=document.getElementById(b); if(el) el.style.width=p+'%'; }; }(bid,pct), 80);
 
   // Verdict + detail
-  out += '<div class="score-verdict">'+( verdict||'')+'</div>';
-  out += '<div class="score-detail" style="margin-bottom:4px">'+(detail||'')+'</div>';
+  out += '<div class="score-verdict">'+esc(verdict)+'</div>';
+  out += '<div class="score-detail" style="margin-bottom:4px">'+esc(detail)+'</div>';
 
   // Flags
   var fl = '';
-  (flags||[]).forEach(function(f){ if (f) fl += '<div class="flag-item red">'+f+'</div>'; });
+  (flags||[]).forEach(function(f){ if (f) fl += '<div class="flag-item red">'+esc(f)+'</div>'; });
   if (fl) out += '<div class="flags-block"><div class="flags-label red">Red Flags</div>'+fl+'</div>';
 
   // Strengths
   var st = '';
-  (strengths||[]).forEach(function(s){ if (s) st += '<div class="flag-item green">'+s+'</div>'; });
+  (strengths||[]).forEach(function(s){ if (s) st += '<div class="flag-item green">'+esc(s)+'</div>'; });
   if (st) out += '<div class="flags-block"><div class="flags-label green">Strengths</div>'+st+'</div>';
 
   // Tips
@@ -1323,10 +1333,10 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
     tips.forEach(function(t){
       if (!t) return;
       var txt = typeof t==='string' ? t : (t.advice||'');
-      out += '<div class="tip-item"><div class="tip-text">'+txt+'</div>';
+      out += '<div class="tip-item"><div class="tip-text">'+esc(txt)+'</div>';
       if (typeof t==='object' && t.links && t.links.length) {
         out += '<div class="tip-links">';
-        t.links.forEach(function(l){ if (l && l.url) out += '<a class="tip-link" href="'+l.url+'" target="_blank" rel="noopener">'+(l.label||'')+'</a>'; else if (l && l.label) out += '<span class="tip-link" style="cursor:default">'+l.label+'</span>'; });
+        t.links.forEach(function(l){ if (l && l.url) out += '<a class="tip-link" href="'+esc(l.url)+'" target="_blank" rel="noopener">'+esc(l.label)+'</a>'; else if (l && l.label) out += '<span class="tip-link" style="cursor:default">'+esc(l.label)+'</span>'; });
         out += '</div>';
       }
       out += '</div>';
@@ -1340,7 +1350,7 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
     var tags = ['30 days','60 days','90 days'];
     plan.forEach(function(a,i){
       var clean = String(a||'').replace(/^(30|60|90)\s*days?:?\s*/i,'');
-      out += '<div class="action-item"><span class="action-tag">'+(tags[i]||'')+'</span><span class="action-text">'+clean+'</span></div>';
+      out += '<div class="action-item"><span class="action-tag">'+(tags[i]||'')+'</span><span class="action-text">'+esc(clean)+'</span></div>';
     });
     out += '</div>';
   }
@@ -1360,7 +1370,7 @@ function buildActionPlanBody(r) {
     out += '<div style="margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Roadmap</div>';
     r.roadmap.forEach(function(s,i){
       if (!s) return;
-      out += '<div class="roadmap-step"><div class="roadmap-num">'+(i+1)+'</div><div><div class="roadmap-phase">'+(s.phase||'')+'</div><div class="roadmap-action">'+(s.action||'')+'</div></div></div>';
+      out += '<div class="roadmap-step"><div class="roadmap-num">'+(i+1)+'</div><div><div class="roadmap-phase">'+esc(s.phase)+'</div><div class="roadmap-action">'+esc(s.action)+'</div></div></div>';
     });
     out += '</div>';
   }
@@ -1370,7 +1380,7 @@ function buildActionPlanBody(r) {
     out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">International Markets</div>';
     r.international_markets.forEach(function(m){
       if (!m) return;
-      out += '<div class="market-item"><div class="market-name">'+(m.country||'')+'</div><div class="market-reason">'+(m.reason||'')+'</div></div>';
+      out += '<div class="market-item"><div class="market-name">'+esc(m.country)+'</div><div class="market-reason">'+esc(m.reason)+'</div></div>';
     });
     out += '</div>';
   }
@@ -1383,12 +1393,12 @@ function buildActionPlanBody(r) {
       var tc = f.tier==='A' ? 'var(--text)' : f.tier==='B' ? 'var(--accent)' : 'var(--muted)';
       out += '<div style="padding:10px 0;border-bottom:1px solid var(--border-light)">'+
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'+
-        '<div style="font-size:13px;font-weight:600">'+(f.festival||'')+'</div>'+
-        '<span style="font-size:10px;font-weight:700;color:'+tc+';padding:1px 7px;border-radius:999px;border:1px solid var(--border);background:var(--cream)">'+(f.tier||'')+'</span>'+
+        '<div style="font-size:13px;font-weight:600">'+esc(f.festival)+'</div>'+
+        '<span style="font-size:10px;font-weight:700;color:'+tc+';padding:1px 7px;border-radius:999px;border:1px solid var(--border);background:var(--cream)">'+esc(f.tier)+'</span>'+
         '</div>'+
-        '<div style="font-size:12px;color:var(--muted);font-weight:300;margin-bottom:3px">'+(f.deadline||'')+'</div>'+
-        '<div style="font-size:12px;color:var(--text);font-weight:300;margin-bottom:5px">'+(f.fit||'')+'</div>'+
-        (f.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+f.url+'" target="_blank" rel="noopener">Submit →</a>' : '')+
+        '<div style="font-size:12px;color:var(--muted);font-weight:300;margin-bottom:3px">'+esc(f.deadline)+'</div>'+
+        '<div style="font-size:12px;color:var(--text);font-weight:300;margin-bottom:5px">'+esc(f.fit)+'</div>'+
+        (f.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+esc(f.url)+'" target="_blank" rel="noopener">Submit →</a>' : '')+
         '</div>';
     });
     out += '</div>';
@@ -1400,10 +1410,10 @@ function buildActionPlanBody(r) {
     r.sales_agents.forEach(function(a){
       if (!a) return;
       out += '<div style="padding:10px 0;border-bottom:1px solid var(--border-light)">'+
-        '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+(a.name||'')+'</div>'+
-        '<div style="font-size:11px;color:var(--muted-light);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">'+(a.focus||'')+'</div>'+
-        '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:5px">'+(a.why||'')+'</div>'+
-        (a.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+a.url+'" target="_blank" rel="noopener">Visit →</a>' : '')+
+        '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+esc(a.name)+'</div>'+
+        '<div style="font-size:11px;color:var(--muted-light);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">'+esc(a.focus)+'</div>'+
+        '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:5px">'+esc(a.why)+'</div>'+
+        (a.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+esc(a.url)+'" target="_blank" rel="noopener">Visit →</a>' : '')+
         '</div>';
     });
     out += '</div>';
@@ -1412,21 +1422,21 @@ function buildActionPlanBody(r) {
   // Risk Assessment
   if (r.risk_assessment && ((r.risk_assessment.top_risks && r.risk_assessment.top_risks.length) || (r.risk_assessment.mitigation && r.risk_assessment.mitigation.length))) {
     out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Risk Assessment</div>';
-    (r.risk_assessment.top_risks||[]).forEach(function(risk){ if (risk) out += '<div class="flag-item red" style="margin-bottom:6px">'+risk+'</div>'; });
-    (r.risk_assessment.mitigation||[]).forEach(function(m){ if (m) out += '<div class="flag-item green" style="margin-bottom:6px">'+m+'</div>'; });
+    (r.risk_assessment.top_risks||[]).forEach(function(risk){ if (risk) out += '<div class="flag-item red" style="margin-bottom:6px">'+esc(risk)+'</div>'; });
+    (r.risk_assessment.mitigation||[]).forEach(function(m){ if (m) out += '<div class="flag-item green" style="margin-bottom:6px">'+esc(m)+'</div>'; });
     out += '</div>';
   }
 
   // Awards Qualification Strategy
   if (r.awards_qualification_strategy) {
     out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Awards Qualification Strategy</div>'+
-      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300">'+r.awards_qualification_strategy+'</div></div>';
+      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300">'+esc(r.awards_qualification_strategy)+'</div></div>';
   }
 
   // Legal & Rights Considerations
   if (r.legal_and_rights_considerations) {
     out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Legal &amp; Rights Considerations</div>'+
-      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300">'+r.legal_and_rights_considerations+'</div></div>';
+      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300">'+esc(r.legal_and_rights_considerations)+'</div></div>';
   }
 
   // Revenue Projection
@@ -1434,9 +1444,9 @@ function buildActionPlanBody(r) {
     var rp = r.revenue_projection;
     out += '<div style="padding-top:16px;border-top:1px solid var(--border-light)"><div class="tips-label" style="display:block;margin-bottom:12px">Revenue Projection</div>';
     [{l:'Theatrical',v:rp.theatrical},{l:'Streaming (SVOD)',v:rp.streaming_svod},{l:'VOD / AVOD',v:rp.vod_avod},{l:'TV Rights',v:rp.tv_rights},{l:'International',v:rp.international}]
-      .forEach(function(w){ if(w.v) out += '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-light)"><span style="font-size:13px;font-weight:400">'+w.l+'</span><span style="font-size:13px;color:var(--muted);font-weight:300">'+w.v+'</span></div>'; });
-    if (rp.total_realistic) out += '<div style="display:flex;justify-content:space-between;padding:12px 0 4px"><span style="font-size:13px;font-weight:700">Total Realistic</span><span style="font-size:14px;font-weight:700;color:var(--accent)">'+rp.total_realistic+'</span></div>';
-    if (rp.breakeven_note) out += '<div style="font-size:12px;color:var(--muted);line-height:1.65;margin-top:8px">'+rp.breakeven_note+'</div>';
+      .forEach(function(w){ if(w.v) out += '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-light)"><span style="font-size:13px;font-weight:400">'+w.l+'</span><span style="font-size:13px;color:var(--muted);font-weight:300">'+esc(w.v)+'</span></div>'; });
+    if (rp.total_realistic) out += '<div style="display:flex;justify-content:space-between;padding:12px 0 4px"><span style="font-size:13px;font-weight:700">Total Realistic</span><span style="font-size:14px;font-weight:700;color:var(--accent)">'+esc(rp.total_realistic)+'</span></div>';
+    if (rp.breakeven_note) out += '<div style="font-size:12px;color:var(--muted);line-height:1.65;margin-top:8px">'+esc(rp.breakeven_note)+'</div>';
     out += '</div>';
   }
 
@@ -1450,8 +1460,8 @@ function buildActionPlanBody(r) {
 function buildBusinessPlanBody(bp) {
   if (!bp) return '<div style="font-size:13px;color:var(--muted);font-weight:300">No business plan summary available.</div>';
   var out = '';
-  if (bp.executive_summary) out += '<div style="font-size:13px;color:var(--text);line-height:1.7;font-weight:300;margin-bottom:16px">'+bp.executive_summary+'</div>';
-  if (bp.the_ask) out += '<div style="padding:12px 14px;background:var(--accent-wash);border-radius:var(--radius);font-size:13px;color:var(--text);line-height:1.55;margin-bottom:16px"><b>The Ask:</b> '+bp.the_ask+'</div>';
+  if (bp.executive_summary) out += '<div style="font-size:13px;color:var(--text);line-height:1.7;font-weight:300;margin-bottom:16px">'+esc(bp.executive_summary)+'</div>';
+  if (bp.the_ask) out += '<div style="padding:12px 14px;background:var(--accent-wash);border-radius:var(--radius);font-size:13px;color:var(--text);line-height:1.55;margin-bottom:16px"><b>The Ask:</b> '+esc(bp.the_ask)+'</div>';
   [
     { label:'Market Opportunity', v:bp.market_opportunity },
     { label:'Competitive Advantage', v:bp.competitive_advantage },
@@ -1459,14 +1469,14 @@ function buildBusinessPlanBody(bp) {
     { label:'Team &amp; Experience', v:bp.team_and_experience }
   ].forEach(function(row){
     if (!row.v) return;
-    out += '<div style="padding-top:14px;border-top:1px solid var(--border-light);margin-bottom:14px"><div class="tips-label" style="display:block;margin-bottom:8px">'+row.label+'</div><div style="font-size:13px;color:var(--text);line-height:1.65;font-weight:300">'+row.v+'</div></div>';
+    out += '<div style="padding-top:14px;border-top:1px solid var(--border-light);margin-bottom:14px"><div class="tips-label" style="display:block;margin-bottom:8px">'+row.label+'</div><div style="font-size:13px;color:var(--text);line-height:1.65;font-weight:300">'+esc(row.v)+'</div></div>';
   });
   if (bp.key_milestones && bp.key_milestones.length) {
     out += '<div style="padding-top:14px;border-top:1px solid var(--border-light);margin-bottom:14px"><div class="tips-label" style="display:block;margin-bottom:10px">Key Milestones</div>';
-    bp.key_milestones.forEach(function(m){ if (m) out += '<div class="roadmap-step"><div class="roadmap-num">✓</div><div class="roadmap-action">'+m+'</div></div>'; });
+    bp.key_milestones.forEach(function(m){ if (m) out += '<div class="roadmap-step"><div class="roadmap-num">✓</div><div class="roadmap-action">'+esc(m)+'</div></div>'; });
     out += '</div>';
   }
-  if (bp.risk_summary) out += '<div style="padding-top:14px;border-top:1px solid var(--border-light)"><div class="tips-label" style="display:block;margin-bottom:8px">Biggest Risk</div><div class="flag-item red">'+bp.risk_summary+'</div></div>';
+  if (bp.risk_summary) out += '<div style="padding-top:14px;border-top:1px solid var(--border-light)"><div class="tips-label" style="display:block;margin-bottom:8px">Biggest Risk</div><div class="flag-item red">'+esc(bp.risk_summary)+'</div></div>';
   return out || '<div style="font-size:13px;color:var(--muted);font-weight:300">No business plan summary available.</div>';
 }
 
@@ -1489,12 +1499,12 @@ function buildFundingSources(sources) {
     if (!f) return;
     h += '<div style="padding:11px 0;border-bottom:1px solid var(--border)">'+
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:3px">'+
-      '<div style="font-size:13px;font-weight:700">'+(f.name||'')+'</div>'+
-      '<div style="font-size:10px;font-weight:700;color:var(--muted);background:var(--cream);padding:2px 7px;border-radius:3px;white-space:nowrap;flex-shrink:0">'+(f.type||'')+'</div>'+
+      '<div style="font-size:13px;font-weight:700">'+esc(f.name)+'</div>'+
+      '<div style="font-size:10px;font-weight:700;color:var(--muted);background:var(--cream);padding:2px 7px;border-radius:3px;white-space:nowrap;flex-shrink:0">'+esc(f.type)+'</div>'+
       '</div>'+
-      '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:3px">'+(f.amount||'')+'</div>'+
-      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:5px">Deadline: '+(f.deadline||'')+' · '+(f.eligibility||'')+'</div>'+
-      (f.url ? '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px" href="'+f.url+'" target="_blank" rel="noopener">Apply →</a>' : '')+
+      '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:3px">'+esc(f.amount)+'</div>'+
+      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:5px">Deadline: '+esc(f.deadline)+' · '+esc(f.eligibility)+'</div>'+
+      (f.url ? '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px" href="'+esc(f.url)+'" target="_blank" rel="noopener">Apply →</a>' : '')+
       '</div>';
   });
   h += '</div>';
@@ -1506,16 +1516,16 @@ function buildPitchAssessment(pa) {
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">';
   if (pa.thirty_second_pitch) {
     h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">30-Second Pitch</div>'+
-      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;font-style:italic;margin-bottom:14px">"'+pa.thirty_second_pitch+'"</div>';
+      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;font-style:italic;margin-bottom:14px">"'+esc(pa.thirty_second_pitch)+'"</div>';
   }
   if (pa.logline_improved) {
-    h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Logline Assessment'+(pa.logline_score?' — '+pa.logline_score+'/10':'')+'</div>';
-    if (pa.logline_issues) h += '<div style="font-size:13px;color:var(--muted);line-height:1.6;font-weight:300;margin-bottom:6px">'+pa.logline_issues+'</div>';
-    h += '<div style="font-size:13px;color:var(--success);line-height:1.6;font-weight:600;margin-bottom:14px">Improved: '+pa.logline_improved+'</div>';
+    h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Logline Assessment'+(pa.logline_score?' — '+esc(pa.logline_score)+'/10':'')+'</div>';
+    if (pa.logline_issues) h += '<div style="font-size:13px;color:var(--muted);line-height:1.6;font-weight:300;margin-bottom:6px">'+esc(pa.logline_issues)+'</div>';
+    h += '<div style="font-size:13px;color:var(--success);line-height:1.6;font-weight:600;margin-bottom:14px">Improved: '+esc(pa.logline_improved)+'</div>';
   }
   if (pa.pitch_deck_checklist && pa.pitch_deck_checklist.length) {
     h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Pitch Deck Checklist</div>';
-    pa.pitch_deck_checklist.forEach(function(item){ if (item) h += '<div style="font-size:13px;color:var(--text);font-weight:300;margin-bottom:4px">☐ '+item+'</div>'; });
+    pa.pitch_deck_checklist.forEach(function(item){ if (item) h += '<div style="font-size:13px;color:var(--text);font-weight:300;margin-bottom:4px">☐ '+esc(item)+'</div>'; });
   }
   h += '</div>';
   return h;
@@ -1524,21 +1534,21 @@ function buildPitchAssessment(pa) {
 function buildMarketingStrategy(ms) {
   if (!ms) return '';
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Marketing Strategy</div>';
-  if (ms.overview) h += '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:10px">'+ms.overview+'</div>';
+  if (ms.overview) h += '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:10px">'+esc(ms.overview)+'</div>';
   if (ms.pre_release && ms.pre_release.length) {
     h += '<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px">Pre-Release Actions</div>';
-    ms.pre_release.forEach(function(a){ if (a) h += '<div style="font-size:13px;color:var(--muted);font-weight:300;margin-bottom:4px">• '+a+'</div>'; });
+    ms.pre_release.forEach(function(a){ if (a) h += '<div style="font-size:13px;color:var(--muted);font-weight:300;margin-bottom:4px">• '+esc(a)+'</div>'; });
   }
-  if (ms.social_strategy) h += '<div style="font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;margin-top:8px"><b style="color:var(--text)">Social:</b> '+ms.social_strategy+'</div>';
-  if (ms.community) h += '<div style="font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;margin-top:6px"><b style="color:var(--text)">Community:</b> '+ms.community+'</div>';
-  if (ms.press) h += '<div style="font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;margin-top:6px"><b style="color:var(--text)">Press:</b> '+ms.press+'</div>';
+  if (ms.social_strategy) h += '<div style="font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;margin-top:8px"><b style="color:var(--text)">Social:</b> '+esc(ms.social_strategy)+'</div>';
+  if (ms.community) h += '<div style="font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;margin-top:6px"><b style="color:var(--text)">Community:</b> '+esc(ms.community)+'</div>';
+  if (ms.press) h += '<div style="font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;margin-top:6px"><b style="color:var(--text)">Press:</b> '+esc(ms.press)+'</div>';
   h += '</div>';
   return h;
 }
 
 function buildLabeledText(label, text) {
   if (!text) return '';
-  return '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">'+label+'</div><div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300">'+text+'</div></div>';
+  return '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">'+label+'</div><div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300">'+esc(text)+'</div></div>';
 }
 
 function buildLabOpportunities(labs) {
@@ -1547,9 +1557,9 @@ function buildLabOpportunities(labs) {
   labs.forEach(function(l){
     if (!l) return;
     h += '<div style="padding:10px 0;border-bottom:1px solid var(--border-light)">'+
-      '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+(l.name||'')+'</div>'+
-      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:5px">'+(l.fit||'')+'</div>'+
-      (l.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+l.url+'" target="_blank" rel="noopener">Visit →</a>' : '')+
+      '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+esc(l.name)+'</div>'+
+      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:5px">'+esc(l.fit)+'</div>'+
+      (l.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+esc(l.url)+'" target="_blank" rel="noopener">Visit →</a>' : '')+
       '</div>';
   });
   h += '</div>';
@@ -1561,12 +1571,12 @@ function buildTalentAndTax(talentLeverage, taxIncentive) {
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">';
   if (talentLeverage) {
     h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Talent Leverage</div>'+
-      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:14px">'+talentLeverage+'</div>';
+      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:14px">'+esc(talentLeverage)+'</div>';
   }
   if (taxIncentive && taxIncentive.estimate) {
-    h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Tax Incentive'+(taxIncentive.region?' — '+taxIncentive.region:'')+'</div>'+
-      '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:4px">'+taxIncentive.estimate+'</div>'+
-      (taxIncentive.note ? '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300">'+taxIncentive.note+'</div>' : '');
+    h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Tax Incentive'+(taxIncentive.region?' — '+esc(taxIncentive.region):'')+'</div>'+
+      '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:4px">'+esc(taxIncentive.estimate)+'</div>'+
+      (taxIncentive.note ? '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300">'+esc(taxIncentive.note)+'</div>' : '');
   }
   h += '</div>';
   return h;
@@ -1577,7 +1587,7 @@ function buildComparables(comps) {
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Comparable Films</div>';
   comps.forEach(function(c){
     if (!c) return;
-    h += '<div class="comp-item"><div class="comp-name">'+(c.title||'')+' ('+(c.year||'')+')</div><div class="comp-detail">Budget: '+(c.budget||'')+' — '+(c.result||'')+'</div><div class="comp-lesson">'+(c.lesson||'')+'</div></div>';
+    h += '<div class="comp-item"><div class="comp-name">'+esc(c.title)+' ('+esc(c.year)+')</div><div class="comp-detail">Budget: '+esc(c.budget)+' — '+esc(c.result)+'</div><div class="comp-lesson">'+esc(c.lesson)+'</div></div>';
   });
   h += '</div>';
   return h;
@@ -1589,9 +1599,9 @@ function buildKeyCrew(crew) {
   crew.forEach(function(c){
     if (!c) return;
     h += '<div style="padding:9px 0;border-bottom:1px solid var(--border-light)">'+
-      '<div style="font-size:13px;font-weight:700;margin-bottom:2px">'+(c.role||'')+'</div>'+
-      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:3px">'+(c.profile||'')+'</div>'+
-      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300">'+(c.why||'')+'</div>'+
+      '<div style="font-size:13px;font-weight:700;margin-bottom:2px">'+esc(c.role)+'</div>'+
+      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:3px">'+esc(c.profile)+'</div>'+
+      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300">'+esc(c.why)+'</div>'+
       '</div>';
   });
   h += '</div>';
@@ -1603,7 +1613,7 @@ function buildCautionaryComps(comps) {
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Cautionary Comparables</div>';
   comps.forEach(function(c){
     if (!c) return;
-    h += '<div class="comp-item"><div class="comp-name">'+(c.title||'')+' ('+(c.year||'')+')</div><div class="comp-detail">Budget: '+(c.budget||'')+' — '+(c.what_went_wrong||'')+'</div><div class="comp-lesson">'+(c.lesson||'')+'</div></div>';
+    h += '<div class="comp-item"><div class="comp-name">'+esc(c.title)+' ('+esc(c.year)+')</div><div class="comp-detail">Budget: '+esc(c.budget)+' — '+esc(c.what_went_wrong)+'</div><div class="comp-lesson">'+esc(c.lesson)+'</div></div>';
   });
   h += '</div>';
   return h;
@@ -1615,10 +1625,10 @@ function buildPlatforms(platforms) {
   platforms.forEach(function(pl){
     if (!pl) return;
     h += '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px;background:var(--cream);border-radius:7px;margin-bottom:7px">'+
-      '<div style="font-size:9px;font-weight:700;color:#fff;background:var(--text);padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px;letter-spacing:0.04em">'+(pl.priority||'')+'</div>'+
-      '<div><div style="font-size:13px;font-weight:700;margin-bottom:2px">'+(pl.name||'')+'</div>'+
-      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:4px">'+(pl.reason||'')+'</div>'+
-      (pl.url ? '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px;display:inline-block" href="'+pl.url+'" target="_blank" rel="noopener">Visit →</a>' : '')+
+      '<div style="font-size:9px;font-weight:700;color:#fff;background:var(--text);padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px;letter-spacing:0.04em">'+esc(pl.priority)+'</div>'+
+      '<div><div style="font-size:13px;font-weight:700;margin-bottom:2px">'+esc(pl.name)+'</div>'+
+      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:4px">'+esc(pl.reason)+'</div>'+
+      (pl.url ? '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px;display:inline-block" href="'+esc(pl.url)+'" target="_blank" rel="noopener">Visit →</a>' : '')+
       '</div></div>';
   });
   h += '</div>';
