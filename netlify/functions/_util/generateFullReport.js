@@ -2,6 +2,7 @@ const { callAnthropic, extractJSON } = require('./anthropic');
 const { allFullPrompts } = require('./reportPrompts');
 const { buildReportEmailHtml, sendReportEmail } = require('./email');
 const { incrementUsageCount } = require('./stats');
+const { verifyReportLinks } = require('./linkCheck');
 
 const FULL_MODEL = 'claude-haiku-4-5-20251001';
 const FULL_MAX_TOKENS = 9500; // background function isn't bound by a sync response-time ceiling, so the deeper prompts get real room; raised alongside reportPrompts.js's expanded fields to keep headroom against truncated/malformed JSON
@@ -44,6 +45,11 @@ async function generateAndDeliverFullReport({ store, key, project, email, anthro
       const parsedResults = await Promise.all(prompts.map(p => callAndParseWithRetry(anthropicKey, p, FULL_MODEL, FULL_MAX_TOKENS)));
       const merged = {};
       parsedResults.forEach(r => Object.assign(merged, r));
+
+      // AI-generated URLs (funds, festivals, sales agents, platforms) can be
+      // plausible hallucinations — strip any that don't actually resolve
+      // before the report ever reaches screen, PDF, or email.
+      await verifyReportLinks(merged);
 
       const html = buildReportEmailHtml(project, merged, key, viewUrl);
       const emailResult = await sendReportEmail({

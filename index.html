@@ -1321,7 +1321,7 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
       out += '<div class="tip-item"><div class="tip-text">'+txt+'</div>';
       if (typeof t==='object' && t.links && t.links.length) {
         out += '<div class="tip-links">';
-        t.links.forEach(function(l){ if (l) out += '<a class="tip-link" href="'+(l.url||'#')+'" target="_blank" rel="noopener">'+(l.label||'')+'</a>'; });
+        t.links.forEach(function(l){ if (l && l.url) out += '<a class="tip-link" href="'+l.url+'" target="_blank" rel="noopener">'+(l.label||'')+'</a>'; else if (l && l.label) out += '<span class="tip-link" style="cursor:default">'+l.label+'</span>'; });
         out += '</div>';
       }
       out += '</div>';
@@ -1383,7 +1383,7 @@ function buildActionPlanBody(r) {
         '</div>'+
         '<div style="font-size:12px;color:var(--muted);font-weight:300;margin-bottom:3px">'+(f.deadline||'')+'</div>'+
         '<div style="font-size:12px;color:var(--text);font-weight:300;margin-bottom:5px">'+(f.fit||'')+'</div>'+
-        '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+(f.url||'#')+'" target="_blank" rel="noopener">Submit →</a>'+
+        (f.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+f.url+'" target="_blank" rel="noopener">Submit →</a>' : '')+
         '</div>';
     });
     out += '</div>';
@@ -1398,7 +1398,7 @@ function buildActionPlanBody(r) {
         '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+(a.name||'')+'</div>'+
         '<div style="font-size:11px;color:var(--muted-light);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">'+(a.focus||'')+'</div>'+
         '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:5px">'+(a.why||'')+'</div>'+
-        '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+(a.url||'#')+'" target="_blank" rel="noopener">Visit →</a>'+
+        (a.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+a.url+'" target="_blank" rel="noopener">Visit →</a>' : '')+
         '</div>';
     });
     out += '</div>';
@@ -1462,7 +1462,7 @@ function buildFundingSources(sources) {
       '</div>'+
       '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:3px">'+(f.amount||'')+'</div>'+
       '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:5px">Deadline: '+(f.deadline||'')+' · '+(f.eligibility||'')+'</div>'+
-      '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px" href="'+(f.url||'#')+'" target="_blank" rel="noopener">Apply →</a>'+
+      (f.url ? '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px" href="'+f.url+'" target="_blank" rel="noopener">Apply →</a>' : '')+
       '</div>';
   });
   h += '</div>';
@@ -1517,7 +1517,7 @@ function buildLabOpportunities(labs) {
     h += '<div style="padding:10px 0;border-bottom:1px solid var(--border-light)">'+
       '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+(l.name||'')+'</div>'+
       '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:5px">'+(l.fit||'')+'</div>'+
-      '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+(l.url||'#')+'" target="_blank" rel="noopener">Visit →</a>'+
+      (l.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+l.url+'" target="_blank" rel="noopener">Visit →</a>' : '')+
       '</div>';
   });
   h += '</div>';
@@ -1586,7 +1586,7 @@ function buildPlatforms(platforms) {
       '<div style="font-size:9px;font-weight:700;color:#fff;background:var(--text);padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px;letter-spacing:0.04em">'+(pl.priority||'')+'</div>'+
       '<div><div style="font-size:13px;font-weight:700;margin-bottom:2px">'+(pl.name||'')+'</div>'+
       '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:4px">'+(pl.reason||'')+'</div>'+
-      '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px;display:inline-block" href="'+(pl.url||'#')+'" target="_blank" rel="noopener">Visit →</a>'+
+      (pl.url ? '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px;display:inline-block" href="'+pl.url+'" target="_blank" rel="noopener">Visit →</a>' : '')+
       '</div></div>';
   });
   h += '</div>';
