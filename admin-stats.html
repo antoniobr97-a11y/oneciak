@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>OneCiak — Funnel Stats</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Helvetica, Arial, sans-serif; background: #fafafa; color: #161616; padding: 32px 20px; }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .sub { color: #6f6f6f; font-size: 13px; margin-bottom: 24px; }
+  .key-row { display: flex; gap: 8px; margin-bottom: 28px; }
+  input[type="password"], input[type="text"] { flex: 1; padding: 10px 12px; border: 1px solid #dcdcdc; border-radius: 6px; font-size: 14px; }
+  button { padding: 10px 16px; border: none; background: #161616; color: #fff; border-radius: 6px; font-size: 14px; cursor: pointer; }
+  button:hover { background: #333; }
+  .error { color: #b3261e; font-size: 13px; margin-bottom: 16px; display: none; }
+  .funnel { display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
+  .funnel-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #fff; border: 1px solid #ebebeb; border-radius: 8px; }
+  .funnel-label { flex: 1; font-size: 13px; color: #6f6f6f; }
+  .funnel-count { font-size: 20px; font-weight: 700; min-width: 48px; text-align: right; }
+  .funnel-pct { font-size: 12px; color: #a3a3a3; min-width: 56px; text-align: right; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; background: #fff; border: 1px solid #ebebeb; border-radius: 8px; overflow: hidden; }
+  th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid #ebebeb; }
+  th:first-child, td:first-child { text-align: left; }
+  th { background: #f5f5f5; font-weight: 600; color: #6f6f6f; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>OneCiak — Funnel Stats</h1>
+  <div class="sub">Anonymous, aggregate counts only — no per-visitor data is stored.</div>
+
+  <div class="key-row">
+    <input type="password" id="keyInput" placeholder="Admin key">
+    <button onclick="loadStats()">Load</button>
+  </div>
+  <div class="error" id="statsError"></div>
+
+  <div id="statsContent" class="hidden">
+    <div class="funnel" id="funnelRows"></div>
+    <table id="dailyTable">
+      <thead><tr id="dailyHead"></tr></thead>
+      <tbody id="dailyBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+var LABELS = {
+  landing: 'Landing page views',
+  form_start: 'Started the form',
+  analysis_completed: 'Saw the free preview',
+  full_report_requested: 'Requested the full report',
+  full_report_delivered: 'Received the full report'
+};
+
+window.addEventListener('DOMContentLoaded', function() {
+  try {
+    var saved = localStorage.getItem('oneciak_admin_key');
+    if (saved) { document.getElementById('keyInput').value = saved; loadStats(); }
+  } catch (e) {}
+});
+
+async function loadStats() {
+  var key = document.getElementById('keyInput').value.trim();
+  var errEl = document.getElementById('statsError');
+  errEl.style.display = 'none';
+  if (!key) return;
+  try {
+    var res = await fetch('/.netlify/functions/analytics-summary?days=30&key=' + encodeURIComponent(key));
+    if (res.status === 403) { errEl.textContent = 'Wrong key.'; errEl.style.display = 'block'; return; }
+    if (!res.ok) { errEl.textContent = 'Could not load stats. Please try again.'; errEl.style.display = 'block'; return; }
+    var data = await res.json();
+    try { localStorage.setItem('oneciak_admin_key', key); } catch (e) {}
+    renderStats(data);
+  } catch (e) {
+    errEl.textContent = 'Could not load stats. Please try again.';
+    errEl.style.display = 'block';
+  }
+}
+
+function renderStats(data) {
+  var events = data.events;
+  var totals = data.totals;
+  var landingTotal = totals[events[0]] || 0;
+
+  var funnelHtml = '';
+  events.forEach(function(e) {
+    var count = totals[e] || 0;
+    var pct = landingTotal ? Math.round((count / landingTotal) * 100) + '%' : '—';
+    funnelHtml += '<div class="funnel-row"><div class="funnel-label">' + (LABELS[e] || e) + '</div><div class="funnel-count">' + count + '</div><div class="funnel-pct">' + pct + '</div></div>';
+  });
+  document.getElementById('funnelRows').innerHTML = funnelHtml;
+
+  var headHtml = '<th>Date</th>';
+  events.forEach(function(e) { headHtml += '<th>' + (LABELS[e] || e).split(' ').slice(0,2).join(' ') + '</th>'; });
+  document.getElementById('dailyHead').innerHTML = headHtml;
+
+  var bodyHtml = '';
+  data.daily.slice().reverse().forEach(function(row) {
+    bodyHtml += '<tr><td>' + row.date + '</td>';
+    events.forEach(function(e) { bodyHtml += '<td>' + (row[e] || 0) + '</td>'; });
+    bodyHtml += '</tr>';
+  });
+  document.getElementById('dailyBody').innerHTML = bodyHtml;
+
+  document.getElementById('statsContent').classList.remove('hidden');
+}
+</script>
+</body>
+</html>

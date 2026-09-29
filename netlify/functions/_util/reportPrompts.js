@@ -1,9 +1,8 @@
-// Server-side full-report prompt builders, used by generate-report-background.js
-// (and, dormant, stripe-webhook-background.js). Deeper than the old client-side
-// versions since the background function isn't bound by a browser-facing
-// response-time ceiling — this is the sole source of truth for the full
-// report, so screen and email always show identical, maximally detailed
-// content.
+// Server-side full-report prompt builders, used by generate-report-background.js.
+// Deeper than the old client-side versions since the background function isn't
+// bound by a browser-facing response-time ceiling — this is the sole source of
+// truth for the full report, so screen and email always show identical,
+// maximally detailed content.
 
 // Shared by all six prompts instead of repeated verbatim in each: the
 // anti-repetition/anti-filler line exists because a verdict field and its
