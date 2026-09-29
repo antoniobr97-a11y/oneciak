@@ -274,6 +274,19 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .disclaimer-box { background: var(--cream); border: none; border-radius: var(--radius); padding: 15px 17px; margin-bottom: 16px; }
 .disclaimer-text { font-size: 12.5px; color: var(--muted); line-height: 1.7; }
 .disclaimer-text strong { color: var(--text); font-weight: 600; }
+
+/* ── GUIDE / GLOSSARY (collapsed by default — help for first-time filmmakers without adding visual weight for everyone else) ── */
+.guide-box { border: 1px solid var(--border-light); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
+.guide-box summary { list-style: none; cursor: pointer; padding: 14px 17px; font-size: 13.5px; font-weight: 600; color: var(--text); display: flex; align-items: center; justify-content: space-between; background: var(--cream); }
+.guide-box summary::-webkit-details-marker { display: none; }
+.guide-box summary::after { content: '+'; font-size: 18px; font-weight: 400; color: var(--muted); transition: transform 0.2s var(--ease); }
+.guide-box[open] summary::after { transform: rotate(45deg); }
+.guide-box-body { padding: 16px 17px; font-size: 13.5px; color: var(--text); line-height: 1.7; }
+.guide-box-body p { margin-bottom: 10px; }
+.guide-box-body p:last-child { margin-bottom: 0; }
+.guide-box-body dt { font-weight: 600; color: var(--text); margin-top: 10px; }
+.guide-box-body dt:first-child { margin-top: 0; }
+.guide-box-body dd { color: var(--muted); margin: 2px 0 0; }
 .checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
 .checkbox-row input[type="checkbox"] { width: 17px; height: 17px; margin-top: 2px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
 .checkbox-label { font-size: 13px; color: var(--muted); line-height: 1.6; cursor: pointer; }
@@ -536,6 +549,9 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         <div class="menu-faq-item"><div class="menu-faq-q">What does the full report add?</div><div class="menu-faq-a">Deep analysis, red flags, strengths, 3 recommendations with real links, action plans, funding sources, comparable films, international markets and a 5-step roadmap — free, delivered by email.</div></div>
         <div class="menu-faq-item"><div class="menu-faq-q">Why do you ask for my email?</div><div class="menu-faq-a">Generating the full report can take a few minutes, so we email it to you the moment it's ready — you don't have to keep the page open, and it also means you can't lose it if you close your browser.</div></div>
         <div class="menu-faq-item"><div class="menu-faq-q">Is my project data private?</div><div class="menu-faq-a">Your project details are sent only to the providers needed to generate and deliver your report (see our Privacy Policy) — never sold, never used to train AI models.</div></div>
+        <div class="menu-faq-item"><div class="menu-faq-q">I've never made a film before — is this still useful?</div><div class="menu-faq-a">Yes — that's exactly who this is built for. You don't need any industry experience or connections to get a report; just describe your project as best you can. The "Experience" field even has a "First film" option, and the analysis adjusts its advice accordingly.</div></div>
+        <div class="menu-faq-item"><div class="menu-faq-q">I don't understand a term in my report — what do I do?</div><div class="menu-faq-a">Every report page has a "Glossary" you can expand near the top, explaining common industry terms (sales agent, tax incentive, E&O insurance, etc.) in plain language.</div></div>
+        <div class="menu-faq-item"><div class="menu-faq-q">Where do I actually start after getting my report?</div><div class="menu-faq-a">In the full report, open the Roadmap near the end — it's a 5-phase sequence (script & pitch, financing, pre-production, production, festivals & sales) built specifically for your project, not generic advice.</div></div>
       </div>
       <button class="menu-cta" onclick="closeMenuGoLanding()">Start Free Analysis →</button>
       <p style="text-align:center;font-size:12px;color:var(--muted-light);margin-top:16px"><a href="/privacy.html" style="text-decoration:underline;text-underline-offset:2px">Privacy Policy</a> · <a href="/terms.html" style="text-decoration:underline;text-underline-offset:2px">Terms of Service</a></p>
@@ -734,6 +750,38 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     </div>
     <div id="overallScore" class="reveal"></div>
     <div id="execSummary" class="reveal" style="transition-delay:0.06s"></div>
+
+    <details class="guide-box reveal">
+      <summary>New to this? How to read your report</summary>
+      <div class="guide-box-body">
+        <p>The <strong>OneCiak Score</strong> is a rough overall signal, not a verdict — a high score doesn't guarantee success, and a low one doesn't mean give up. It's a starting point for asking better questions.</p>
+        <p>Each of the 5 dimensions below has its own score, a one-line <strong>verdict</strong>, <strong>red flags</strong> (real risks worth addressing), and <strong>strengths</strong> (what's already working). Read the flags first — they're the most actionable part.</p>
+        <p><strong>Tips</strong> are concrete next actions, often with real links to funds, festivals, or companies to actually contact.</p>
+        <p>First film ever? In the full report, start with the <strong>Roadmap</strong> near the end — it's a step-by-step sequence, not just a list of separate ideas.</p>
+        <p>Don't recognize a term like "sales agent" or "tax incentive"? Check the glossary below.</p>
+      </div>
+    </details>
+
+    <details class="guide-box reveal">
+      <summary>Glossary — key terms explained</summary>
+      <div class="guide-box-body">
+        <dl>
+          <dt>Sales agent</dt><dd>A company that sells your finished film to distributors and streaming platforms in different countries, usually for a percentage of the deal.</dd>
+          <dt>Tax incentive / rebate</dt><dd>Money a government or region gives back to productions that film there, usually a percentage of what you spent locally.</dd>
+          <dt>E&amp;O insurance</dt><dd>Insurance that protects you from lawsuits over your film's content (rights, defamation, etc.) — most distributors require it before buying a film.</dd>
+          <dt>Attachment</dt><dd>A known director, actor, or crew member who has committed to your project — attachments make financing and festival acceptance easier.</dd>
+          <dt>Comp / comparable film</dt><dd>A similar existing film used to judge whether yours has a realistic market, based on its budget and how it performed.</dd>
+          <dt>Festival tier (A/B/C)</dt><dd>A rough ranking of prestige — Tier A (Cannes, Sundance, Berlinale) opens the most doors; Tier B and C still help, reaching smaller audiences.</dd>
+          <dt>Lab / market</dt><dd>A program where you pitch your project to industry professionals and potential financiers before it's fully made.</dd>
+          <dt>SVOD / AVOD / VOD</dt><dd>SVOD = subscription streaming (e.g. Netflix). AVOD = free, ad-supported streaming. VOD = pay-per-view rental or purchase.</dd>
+          <dt>Self-distribution</dt><dd>Releasing and marketing your film yourself instead of selling it to a distributor — more work, but you keep all the revenue.</dd>
+          <dt>Qualifying run</dt><dd>A festival screening or theatrical release that satisfies the eligibility rules for major awards like the Oscars.</dd>
+          <dt>Breakeven</dt><dd>The point where your film's revenue equals what it cost to make — after that, it's actually making money.</dd>
+          <dt>Pitch deck</dt><dd>A short visual document, like a slideshow, used to present your film to investors or financiers.</dd>
+        </dl>
+      </div>
+    </details>
+
     <div id="accordionMenu" class="reveal" style="display:none"></div>
     <div id="upgradeSection"></div>
     <div class="pdf-card reveal">
