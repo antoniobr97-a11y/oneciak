@@ -862,6 +862,10 @@ function goLanding() {
   stopFullReportTimer();
   document.getElementById('sampleBanner').style.display = 'none';
   if (isSampleReport) { lastProject = null; lastResult = null; isSampleReport = false; }
+  // Starting over: clear any report_id/report_token left in the URL from a
+  // previous report, so a later reload doesn't resurrect stale data instead
+  // of whatever the user does next.
+  try { window.history.replaceState({}, document.title, window.location.pathname); } catch (e) {}
   showOnly('sec-landing');
 }
 function goForm() {
@@ -946,8 +950,13 @@ function getProject() {
 /* ── FREE PROMPT (split into 3 small parallel calls for reliability) ── */
 var FREE_PREAMBLE = 'You are a film market consultant. Write in clear English, no markdown. Be honest and specific — a filmmaker needs real information, not generic advice. Every sentence must add new, specific information: never restate a verdict field inside its paired detail field, and never pad with generic filler ("this is important", "it is worth noting"). Respond ONLY with valid JSON, no text outside the JSON.';
 
+function freeCurrentDateLine() {
+  var today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+  return 'Today\'s date is '+today+'. Only recommend festival editions, fund deadlines and other time-bound opportunities that have not yet closed as of this date — if the current year\'s edition has already happened or its deadline has passed, recommend the next upcoming edition instead and say so.';
+}
+
 function freeProjectContext(p) {
-  var ctx = 'Project: Title="'+p.title+'", Logline="'+p.logline+'", Genre="'+p.genre+'", Format="'+p.format+'", Budget="'+p.budget+'", Audience="'+p.audience+'", Distribution="'+p.distrib+'", Country="'+p.country+'", Experience="'+p.experience+'", Notes="'+(p.extra||'None')+'"';
+  var ctx = freeCurrentDateLine()+'\n\nProject: Title="'+p.title+'", Logline="'+p.logline+'", Genre="'+p.genre+'", Format="'+p.format+'", Budget="'+p.budget+'", Audience="'+p.audience+'", Distribution="'+p.distrib+'", Country="'+p.country+'", Experience="'+p.experience+'", Notes="'+(p.extra||'None')+'"';
   if (p.budget === 'Not sure yet') {
     ctx += '\n\nThe filmmaker has not set a budget yet. Before giving any financial assessment, recommend a realistic budget range for a project with this genre, format and scope, and use that range as the basis for every other budget-dependent field in your response.';
   }
@@ -1012,7 +1021,11 @@ async function handleFreeReportReturn() {
   var reportId = params.get('report_id');
   var reportToken = params.get('report_token');
   if (!reportId || !reportToken) return;
-  window.history.replaceState({}, document.title, window.location.pathname);
+  // Deliberately NOT clearing these from the URL here — keeping them is what
+  // lets a reload (tab purged by iOS Safari, accidental back-navigation,
+  // manual refresh) recover this exact report instead of landing on a blank
+  // page. They're only cleared when the user explicitly starts over, in
+  // goLanding().
   pendingFullReportAuth = { project: null, token: reportToken, session_id: reportId };
   await generateFullReport();
 }
@@ -1876,6 +1889,11 @@ async function startFreeFullReport(email) {
       return;
     }
     pendingFullReportAuth = { project: p, token: data.token, session_id: data.id };
+    // Mirrors the email "View on oneciak.com" link into the URL bar for this
+    // same-session path too, so a reload at any point — iOS Safari purging a
+    // backgrounded tab, an accidental back-navigation, a manual refresh —
+    // recovers the exact same report instead of losing all progress.
+    try { window.history.replaceState({}, document.title, '?report_id=' + encodeURIComponent(data.id) + '&report_token=' + encodeURIComponent(data.token)); } catch (e) {}
     await generateFullReport();
   } catch(err) {
     showOnly('sec-results');
