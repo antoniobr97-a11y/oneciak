@@ -72,18 +72,18 @@ footer a { text-decoration: underline; text-underline-offset: 2px; }
   <div class="reveal">
     <div class="eyebrow">Legal</div>
     <h1>Privacy Policy</h1>
-    <div class="updated">Last updated: September 2026</div>
+    <div class="updated">Last updated: October 2026</div>
   </div>
 
   <div class="reveal">
-    <p>This policy explains what data OneCiak ("we," "our") collects when you use oneciak.com, why we collect it, and who we share it with. OneCiak does not require an account or login — most of what we collect is tied to a single analysis session, not a persistent profile.</p>
+    <p>This policy explains what data OneCiak ("we," "our") collects when you use oneciak.com, why we collect it, and who we share it with. OneCiak does not require an account or password — most of what we collect is tied to a single analysis session, not a persistent profile. You can optionally sign in with just your email, via a time-limited link we send you, to see a list of your own past full reports; see Sections 1, 2 and 4 for what that involves.</p>
   </div>
 
   <div class="reveal">
     <h2>1. What we collect</h2>
     <ul>
       <li><strong>Project details you submit</strong> — title, logline, genre, format, budget, target audience, distribution goal, production country, director experience, and any optional notes you enter to generate a report.</li>
-      <li><strong>Email address</strong> — collected directly in the form when you request the full report, used solely to deliver it to your inbox.</li>
+      <li><strong>Email address</strong> — collected directly in the form when you request the full report, used to deliver it to your inbox and, if you choose to use the optional "My Reports" sign-in, to send you a time-limited access link and to keep a short list (titles and report links only, not the report content) of the reports tied to that address.</li>
       <li><strong>Basic technical data</strong> — your IP address is processed transiently by our hosting provider (Netlify) and rate-limiting system to prevent abuse of the service, and by Google Fonts when loading our typeface.</li>
     </ul>
   </div>
@@ -93,6 +93,7 @@ footer a { text-decoration: underline; text-underline-offset: 2px; }
     <ul>
       <li>Your project details are sent to Anthropic's Claude API to generate your AI market analysis.</li>
       <li>If you request the full report, your email is used by Resend (our email provider) to deliver the report to your inbox, and the generated report is temporarily stored (via Netlify Blobs) keyed to a random report ID, so it can be re-displayed if you return to the page or the report needs to be resent.</li>
+      <li>If you use the optional "My Reports" sign-in, your email is used to send you a time-limited access link (valid for 20 minutes) and, once you follow it, a sign-in token is kept in your browser's local storage for up to 90 days so you don't have to repeat that step on every visit. We do not set cookies or use your email for any marketing purpose.</li>
       <li>We do not use your data to train AI models, and we do not sell your data to third parties.</li>
     </ul>
   </div>
@@ -112,12 +113,13 @@ footer a { text-decoration: underline; text-underline-offset: 2px; }
     <h2>4. Cookies &amp; tracking</h2>
     <div class="card">
       <p>OneCiak does not use cookies, advertising trackers, or any third-party analytics service. We keep a self-hosted, anonymous count of how many visitors reach each step of the site (e.g. landing page, form started, report requested) to understand and improve the product — these counts carry no IP address, device identifier, or anything else that could be tied back to you.</p>
+      <p>If you use the optional "My Reports" sign-in, your browser's local storage (not a cookie — it is never sent to our servers automatically, and no other site can read it) keeps your email and a sign-in token so you stay signed in on return visits. This is used solely to provide that feature at your request; it is not used for tracking or advertising, and clicking "Log out" removes it immediately.</p>
     </div>
   </div>
 
   <div class="reveal">
     <h2>5. Data retention</h2>
-    <p>Quick-preview analyses are not stored after being returned to your browser. Full reports are retained so they remain accessible if you return to the page or need it re-sent. You can request deletion at any time — see Section 6.</p>
+    <p>Quick-preview analyses are not stored after being returned to your browser. Full reports are retained so they remain accessible if you return to the page or need it re-sent. If you've used "My Reports," a short index (titles and report links, not report content) is kept against your email so that list can be shown to you again. You can request deletion of any of this at any time — see Section 6.</p>
   </div>
 
   <div class="reveal">
