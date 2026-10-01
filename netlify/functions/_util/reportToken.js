@@ -1,6 +1,13 @@
 const crypto = require('crypto');
 
-const TOKEN_TTL_MS = 30 * 60 * 1000; // 30 minutes — enough to load the full report after payment
+// This token is embedded once in the "View on oneciak.com" email link and in
+// the page URL for the lifetime of that report — the product promise is
+// "we'll email it, and you can always come back here to view it", so it has
+// to outlive a single sitting. 90 days comfortably covers that while still
+// not being literally unbounded. (A much shorter TTL — 30 minutes — was
+// inherited from an earlier Stripe-checkout-session design where the token
+// only needed to survive a single payment flow; that no longer applies.)
+const TOKEN_TTL_MS = 90 * 24 * 60 * 60 * 1000;
 
 function sign(sessionId) {
   const secret = process.env.REPORT_TOKEN_SECRET || '';
