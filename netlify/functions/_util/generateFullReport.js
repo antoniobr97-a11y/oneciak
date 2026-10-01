@@ -4,6 +4,7 @@ const { buildReportEmailHtml, sendReportEmail } = require('./email');
 const { incrementUsageCount } = require('./stats');
 const { verifyReportLinks } = require('./linkCheck');
 const { recordAndBenchmark } = require('./benchmarkStats');
+const { recordReportForEmail } = require('./userReports');
 
 const FULL_MODEL = 'claude-haiku-4-5-20251001';
 const FULL_MAX_TOKENS = 9500; // background function isn't bound by a sync response-time ceiling, so the deeper prompts get real room; raised alongside reportPrompts.js's expanded fields to keep headroom against truncated/malformed JSON
@@ -76,6 +77,12 @@ async function generateAndDeliverFullReport({ store, key, project, email, anthro
       // as delivered-to-inbox — that's tracked on Resend's side, not ours).
       await store.setJSON(key, { status: 'sent', sentAt: Date.now(), report: merged, project, resendId: emailResult && emailResult.id, emailTo: email });
       await incrementUsageCount();
+
+      // Lets this report show up under "My Reports" for this email later,
+      // without needing to keep the original link — the whole point of
+      // logging in being an alternative to "I lost the email".
+      try { await recordReportForEmail(email, { title: project.title, viewUrl: viewUrl, createdAt: Date.now() }); } catch (e) { /* never block report delivery over this */ }
+
       return { ok: true };
     } catch (err) {
       lastErr = err;
