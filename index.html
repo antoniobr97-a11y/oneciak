@@ -785,6 +785,24 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
     <div id="accordionMenu" class="reveal" style="display:none"></div>
     <div id="upgradeSection"></div>
+
+    <div class="guide-box reveal" id="reportIssueBox" style="display:none">
+      <details>
+        <summary>Found an outdated link or a mistake in this report? Let us know</summary>
+        <div class="guide-box-body">
+          <p style="margin-top:0">We automatically check that every link in this report works before sending it — but if something still slipped through (a dead link, a festival date that's already passed, anything else), telling us helps us fix it fast.</p>
+          <select id="reportIssueCategory" style="width:100%;margin-bottom:8px;padding:8px">
+            <option value="A link doesn't work">A link doesn't work</option>
+            <option value="A date or deadline is wrong">A date or deadline is wrong</option>
+            <option value="Something else">Something else</option>
+          </select>
+          <textarea id="reportIssueMessage" rows="3" maxlength="2000" placeholder="What's wrong? (e.g. which section, what you found)" style="width:100%;box-sizing:border-box;margin-bottom:8px;padding:8px;font-family:inherit"></textarea>
+          <button type="button" class="btn-secondary" onclick="submitReportIssue()" id="reportIssueSubmitBtn">Send</button>
+          <div id="reportIssueStatus" style="margin-top:8px;font-size:13px"></div>
+        </div>
+      </details>
+    </div>
+
     <div class="pdf-card reveal">
       <div class="pdf-label">Save report as PDF</div>
       <div class="pdf-row">
@@ -992,6 +1010,47 @@ async function callFullAPI(prompts) {
   try { data = JSON.parse(text); } catch(e) { throw new Error('Service error. Please try again.'); }
   if (!data.merged) throw new Error("Could not parse AI response. Please try again.");
   return data.merged;
+}
+
+/* ── REPORT AN ISSUE (dead link, stale date, etc.) ── */
+async function submitReportIssue() {
+  var statusEl = document.getElementById('reportIssueStatus');
+  var btn = document.getElementById('reportIssueSubmitBtn');
+  var message = document.getElementById('reportIssueMessage').value.trim();
+  var category = document.getElementById('reportIssueCategory').value;
+  if (!message) { statusEl.textContent = 'Please describe the issue first.'; statusEl.style.color = '#c5382a'; return; }
+
+  // The report's session_id/token live in the URL for as long as the report
+  // itself does (see handleFreeReportReturn / startFreeFullReport) — reading
+  // them here instead of from JS state means this still works after a
+  // reload, since nothing else needs to stay in memory for it.
+  var params = new URLSearchParams(window.location.search);
+  var sessionId = params.get('report_id');
+  var token = params.get('report_token');
+  if (!sessionId || !token) { statusEl.textContent = 'Could not identify this report. Please reload the page and try again.'; statusEl.style.color = '#c5382a'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  statusEl.textContent = '';
+  try {
+    var res = await fetch('/.netlify/functions/report-issue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: sessionId, token: token, category: category, message: message })
+    });
+    var data = await res.json().catch(function () { return {}; });
+    if (!res.ok) throw new Error((data && data.error) || 'Could not send your report right now.');
+    statusEl.textContent = 'Thanks — we\'ll look into it.';
+    statusEl.style.color = '#0f7a3d';
+    document.getElementById('reportIssueMessage').value = '';
+    btn.disabled = false;
+    btn.textContent = 'Send';
+  } catch (e) {
+    statusEl.textContent = e.message || 'Could not send your report right now. Please try again later.';
+    statusEl.style.color = '#c5382a';
+    btn.disabled = false;
+    btn.textContent = 'Send';
+  }
 }
 
 /* ── CHECK IF THE WEBHOOK ALREADY GENERATED THE REPORT SERVER-SIDE ── */
@@ -1248,6 +1307,14 @@ function renderFull(r, title) {
   isFullReport = true;
   document.getElementById('resultTitle').textContent = '"'+title+'"';
   document.getElementById('resultSubtitle').textContent = r.overall_summary||'';
+
+  // Only a real, persisted full report has a session_id/token to flag an
+  // issue against — hide it for the fictional sample report entirely.
+  document.getElementById('reportIssueBox').style.display = isSampleReport ? 'none' : 'block';
+  document.getElementById('reportIssueMessage').value = '';
+  document.getElementById('reportIssueStatus').textContent = '';
+  document.getElementById('reportIssueSubmitBtn').disabled = false;
+  document.getElementById('reportIssueSubmitBtn').textContent = 'Send';
 
   // Overall score
   var col = scoreColor(Number(r.overall_score||5));
