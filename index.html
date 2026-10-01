@@ -1097,6 +1097,17 @@ async function generateFullReport() {
   for (var i = 0; i < POLL_MAX_ATTEMPTS; i++) {
     var existing = await checkReportReady(sessionId, token);
     if (myGenId !== fullReportGenerationId) return; // user navigated away or started something else — abandon silently
+    if (existing && existing.failed) {
+      // Generation died server-side (e.g. the report email couldn't be
+      // delivered) — the stored record will never flip to "sent", so
+      // continuing to poll would just say "almost there" forever.
+      stopFullReportTimer();
+      document.getElementById('loadingSpinner').style.display = 'none';
+      document.getElementById('loadingTitle').textContent = 'Something went wrong';
+      document.getElementById('loadingDesc').textContent = 'We couldn\'t finish generating your report. Please start a new analysis and double-check your email address — if this keeps happening, contact info@oneciak.com.';
+      document.getElementById('loadingRetryBtn').style.display = 'none';
+      return;
+    }
     if (existing && existing.ready) {
       stopFullReportTimer();
       if (!isUsableReport(existing.report)) {
