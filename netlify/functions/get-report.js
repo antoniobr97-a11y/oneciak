@@ -30,6 +30,13 @@ exports.handler = async (event) => {
     if (record && record.status === 'sent' && record.report) {
       return { statusCode: 200, headers, body: JSON.stringify({ ready: true, report: record.report, project: record.project }) };
     }
+    // Surfaced distinctly from a still-generating/not-started session so the
+    // client can stop polling and tell the user, instead of silently
+    // repeating "almost there" forever for a generation that already died
+    // server-side (e.g. the recipient email was undeliverable).
+    if (record && record.status === 'failed') {
+      return { statusCode: 200, headers, body: JSON.stringify({ ready: false, failed: true }) };
+    }
     return { statusCode: 200, headers, body: JSON.stringify({ ready: false }) };
   } catch (err) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
