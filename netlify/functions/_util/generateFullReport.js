@@ -3,6 +3,7 @@ const { allFullPrompts } = require('./reportPrompts');
 const { buildReportEmailHtml, sendReportEmail } = require('./email');
 const { incrementUsageCount } = require('./stats');
 const { verifyReportLinks } = require('./linkCheck');
+const { recordAndBenchmark } = require('./benchmarkStats');
 
 const FULL_MODEL = 'claude-haiku-4-5-20251001';
 const FULL_MAX_TOKENS = 9500; // background function isn't bound by a sync response-time ceiling, so the deeper prompts get real room; raised alongside reportPrompts.js's expanded fields to keep headroom against truncated/malformed JSON
@@ -50,6 +51,16 @@ async function generateAndDeliverFullReport({ store, key, project, email, anthro
       // plausible hallucinations — strip any that don't actually resolve
       // before the report ever reaches screen, PDF, or email.
       await verifyReportLinks(merged);
+
+      // Replace the AI's generic score_benchmark guess with a factual one
+      // computed from our own accumulated, anonymized report data, once
+      // there's enough of it to say something real — this is the one field
+      // a generic chatbot can never produce, since it has no access to data
+      // from every other project run through OneCiak.
+      try {
+        const realBenchmark = await recordAndBenchmark(project, merged.overall_score);
+        if (realBenchmark) merged.score_benchmark = realBenchmark;
+      } catch (e) { /* benchmarking must never block report delivery */ }
 
       const html = buildReportEmailHtml(project, merged, key, viewUrl);
       const emailResult = await sendReportEmail({
