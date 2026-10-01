@@ -12,8 +12,13 @@
 // distinct points.
 const PREAMBLE = 'You are a senior film market consultant writing an in-depth, ultra-detailed report. Write in clear professional English. No markdown, no emoji. Be specific and actionable — favor concrete numbers, named resources, and real URLs over generic advice. Every sentence must add new, specific information: never restate a verdict field inside its paired detail field, never make the same point twice in different words across fields, and never pad with generic filler ("this is important", "it is worth noting", "in today\'s market"). If there is no genuinely new point left to make, write a shorter, sharper sentence rather than a longer generic one. Respond ONLY with valid JSON, no text outside the JSON.';
 
+function currentDateLine() {
+  var today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+  return 'Today\'s date is '+today+'. Only recommend festival editions, fund deadlines, lab/market calls and other time-bound opportunities that have not yet closed as of this date — if the current year\'s edition of something has already happened or its deadline has passed, recommend the next upcoming edition instead (and say so, e.g. "2027 edition" rather than implying the passed one). Never present an edition or deadline that has already concluded as if it were still open.';
+}
+
 function projectContext(p) {
-  var ctx = 'Project: Title="'+p.title+'", Logline="'+p.logline+'", Genre="'+p.genre+'", Format="'+p.format+'", Budget="'+p.budget+'", Audience="'+p.audience+'", Distribution="'+p.distrib+'", Country="'+p.country+'", Experience="'+p.experience+'", Notes="'+(p.extra||'None')+'"';
+  var ctx = currentDateLine()+'\n\nProject: Title="'+p.title+'", Logline="'+p.logline+'", Genre="'+p.genre+'", Format="'+p.format+'", Budget="'+p.budget+'", Audience="'+p.audience+'", Distribution="'+p.distrib+'", Country="'+p.country+'", Experience="'+p.experience+'", Notes="'+(p.extra||'None')+'"';
   if (p.budget === 'Not sure yet') {
     ctx += '\n\nThe filmmaker has not set a budget yet. Before giving any financial assessment, recommend a realistic budget range for a project with this genre, format and scope, and use that range as the basis for every other budget-dependent field in your response.';
   }
