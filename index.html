@@ -60,7 +60,7 @@
   --ease: cubic-bezier(0.28, 0.11, 0.32, 1);
 }
 html { color-scheme: only light; scroll-behavior: smooth; }
-body { font-family: var(--sf); background: var(--white); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; letter-spacing: -0.011em; }
+body { font-family: var(--sf); background: var(--white); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; letter-spacing: -0.011em; overflow-anchor: none; }
 ::selection { background: var(--accent); color: #fff; }
 a { color: inherit; }
 button, input, select, textarea { font-family: inherit; }
@@ -267,6 +267,18 @@ input[type="text"], input[type="email"], select, textarea {
 input:focus, select:focus, textarea:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); background: var(--white); }
 textarea { resize: vertical; min-height: 92px; line-height: 1.55; }
 select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236e6e73' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; cursor: pointer; }
+
+/* ── BUDGET SLIDER ── */
+.budget-row { display: flex; gap: 10px; margin-bottom: 10px; }
+.budget-row select { width: 120px; flex-shrink: 0; padding-right: 32px; background-position: right 10px center; }
+.budget-amount { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: var(--text); background: var(--cream); border-radius: var(--radius); box-shadow: inset 0 0 0 1px var(--border); }
+input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 34px; background: transparent; cursor: pointer; }
+input[type="range"]::-webkit-slider-runnable-track { height: 4px; background: var(--border); border-radius: 2px; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; margin-top: -9px; border-radius: 50%; background: var(--accent); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
+input[type="range"]::-moz-range-track { height: 4px; background: var(--border); border-radius: 2px; }
+input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
+input[type="range"]:disabled { opacity: 0.4; cursor: not-allowed; }
+.budget-row.disabled select, .budget-amount.disabled { opacity: 0.4; }
 .btn-primary { width: 100%; padding: 16px; background: var(--accent); color: #fff; border: none; border-radius: 980px; font-family: var(--sf); font-size: 16px; font-weight: 500; cursor: pointer; letter-spacing: -0.01em; }
 .btn-secondary { width: 100%; padding: 14px; background: transparent; color: var(--accent); border: none; border-radius: 980px; font-family: var(--sf); font-size: 14.5px; font-weight: 500; cursor: pointer; transition: opacity 0.2s; margin-top: 10px; letter-spacing: -0.01em; }
 .btn-secondary:hover { opacity: 0.7; }
@@ -675,14 +687,35 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div class="card reveal" style="transition-delay:0.06s">
       <div class="card-title">Budget &amp; Distribution</div>
       <div class="field">
-        <label for="budgetSelect">Estimated Budget</label>
-        <select id="budgetSelect">
-          <option value="">Select budget…</option>
-          <option>Under €5K</option><option>€5K – €15K</option><option>€15K – €30K</option>
-          <option>€50K</option><option>€100K</option><option>€200K</option>
-          <option>€500K</option><option>€1M</option><option>€2M</option><option>€5M</option><option>€10M+</option>
-          <option>Not sure yet</option>
-        </select>
+        <label for="budgetSlider">Estimated Budget</label>
+        <div class="budget-row">
+          <select id="budgetCurrency" aria-label="Currency" onchange="updateBudgetDisplay()">
+            <option value="EUR">€ EUR</option>
+            <option value="USD">$ USD</option>
+            <option value="GBP">£ GBP</option>
+            <option value="CAD">C$ CAD</option>
+            <option value="AUD">A$ AUD</option>
+            <option value="NZD">NZ$ NZD</option>
+            <option value="CHF">CHF</option>
+            <option value="SEK">SEK</option>
+            <option value="NOK">NOK</option>
+            <option value="DKK">DKK</option>
+            <option value="JPY">¥ JPY</option>
+            <option value="KRW">₩ KRW</option>
+            <option value="INR">₹ INR</option>
+            <option value="BRL">R$ BRL</option>
+            <option value="MXN">MX$ MXN</option>
+            <option value="ZAR">R ZAR</option>
+            <option value="PLN">zł PLN</option>
+            <option value="CZK">Kč CZK</option>
+          </select>
+          <div class="budget-amount" id="budgetAmountDisplay">€500K</div>
+        </div>
+        <input type="range" id="budgetSlider" min="0" max="23" step="1" value="13" oninput="updateBudgetDisplay()">
+        <div class="checkbox-row" style="margin-top:10px;margin-bottom:0">
+          <input type="checkbox" id="budgetNotSure" onchange="toggleBudgetNotSure()">
+          <label class="checkbox-label" for="budgetNotSure">I'm not sure yet</label>
+        </div>
       </div>
       <div class="field">
         <label for="audience">Target Audience</label>
@@ -948,7 +981,11 @@ function goForm() {
   document.getElementById('genreOther').value = '';
   document.getElementById('genreOther').style.display = 'none';
   document.getElementById('format').value = '';
-  document.getElementById('budgetSelect').value = '';
+  document.getElementById('budgetSlider').value = 13; // 500K — a sensible, neutral default position
+  document.getElementById('budgetCurrency').value = 'EUR';
+  document.getElementById('budgetNotSure').checked = false;
+  toggleBudgetNotSure();
+  updateBudgetDisplay();
   document.getElementById('audience').value = '';
   document.getElementById('distrib').value = '';
   document.getElementById('country').value = '';
@@ -957,7 +994,17 @@ function goForm() {
 }
 
 /* ── MENU ── */
+var menuScrollLockY = 0;
 function openMenu() {
+  // Locks the page behind the full-screen overlay — without this, iOS
+  // Safari in particular still lets the landing page scroll/rubber-band
+  // underneath, and closing the menu then snaps it back to a different,
+  // visibly "jumped" position instead of where the user actually was.
+  menuScrollLockY = window.scrollY || window.pageYOffset || 0;
+  document.body.style.position = 'fixed';
+  document.body.style.top = '-' + menuScrollLockY + 'px';
+  document.body.style.left = '0';
+  document.body.style.right = '0';
   document.getElementById('menuOverlay').classList.add('open');
   document.getElementById('hamburgerBtn').classList.add('open');
   document.getElementById('hamburgerBtn').setAttribute('aria-expanded', 'true');
@@ -966,6 +1013,11 @@ function closeMenu() {
   document.getElementById('menuOverlay').classList.remove('open');
   document.getElementById('hamburgerBtn').classList.remove('open');
   document.getElementById('hamburgerBtn').setAttribute('aria-expanded', 'false');
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.left = '';
+  document.body.style.right = '';
+  window.scrollTo(0, menuScrollLockY);
 }
 function closeMenuGoLanding() { closeMenu(); goLanding(); }
 
@@ -977,6 +1029,42 @@ function onStartClick() {
   err.style.display = 'none';
   track('form_start');
   goForm();
+}
+
+/* ── BUDGET SLIDER ──
+   Fixed, log-spaced "clean number" stops instead of a free-form number —
+   keeps the display always readable (never "€347,283"), and keeps the
+   comparative-benchmark cohorts meaningful (every user picks from the same
+   small set of values, so "similar budget" matches are still possible). */
+var BUDGET_STOPS = ['1K','2K','5K','10K','15K','20K','30K','50K','75K','100K','150K','200K','300K','500K','750K','1M','1.5M','2M','3M','5M','7.5M','10M','15M','20M+'];
+var CURRENCY_FORMAT = {
+  EUR: { symbol: '€', suffix: false }, USD: { symbol: '$', suffix: false }, GBP: { symbol: '£', suffix: false },
+  CAD: { symbol: 'C$', suffix: false }, AUD: { symbol: 'A$', suffix: false }, NZD: { symbol: 'NZ$', suffix: false },
+  CHF: { symbol: 'CHF', suffix: true }, SEK: { symbol: 'SEK', suffix: true }, NOK: { symbol: 'NOK', suffix: true }, DKK: { symbol: 'DKK', suffix: true },
+  JPY: { symbol: '¥', suffix: false }, KRW: { symbol: '₩', suffix: false }, INR: { symbol: '₹', suffix: false },
+  BRL: { symbol: 'R$', suffix: false }, MXN: { symbol: 'MX$', suffix: false }, ZAR: { symbol: 'R', suffix: false },
+  PLN: { symbol: 'zł', suffix: true }, CZK: { symbol: 'Kč', suffix: true }
+};
+function formatBudgetValue(stopIndex, currencyCode) {
+  var amount = BUDGET_STOPS[stopIndex];
+  var fmt = CURRENCY_FORMAT[currencyCode] || CURRENCY_FORMAT.EUR;
+  return fmt.suffix ? (amount + ' ' + fmt.symbol) : (fmt.symbol + amount);
+}
+function updateBudgetDisplay() {
+  var idx = Number(document.getElementById('budgetSlider').value);
+  var currency = document.getElementById('budgetCurrency').value;
+  document.getElementById('budgetAmountDisplay').textContent = formatBudgetValue(idx, currency);
+}
+function toggleBudgetNotSure() {
+  var notSure = document.getElementById('budgetNotSure').checked;
+  document.getElementById('budgetSlider').disabled = notSure;
+  document.getElementById('budgetCurrency').disabled = notSure;
+  document.querySelector('.budget-row').classList.toggle('disabled', notSure);
+  document.getElementById('budgetAmountDisplay').classList.toggle('disabled', notSure);
+}
+function getBudgetValue() {
+  if (document.getElementById('budgetNotSure').checked) return 'Not sure yet';
+  return formatBudgetValue(Number(document.getElementById('budgetSlider').value), document.getElementById('budgetCurrency').value);
 }
 
 /* ── GENRE ── */
@@ -1002,7 +1090,7 @@ function getProject() {
     logline:    document.getElementById('logline').value.trim(),
     genre:      getGenre(),
     format:     document.getElementById('format').value,
-    budget:     document.getElementById('budgetSelect').value,
+    budget:     getBudgetValue(),
     audience:   document.getElementById('audience').value,
     distrib:    document.getElementById('distrib').value,
     country:    document.getElementById('country').value.trim() || 'Not specified',
