@@ -71,12 +71,12 @@ body { font-family: var(--sf); background: var(--white); color: var(--text); min
 body::before {
   content: ''; position: fixed; inset: 0; z-index: -2; pointer-events: none;
   background:
-    radial-gradient(ellipse 1000px 750px at 14% 6%, rgba(198,164,100,0.22) 0%, rgba(198,164,100,0.1) 40%, transparent 75%),
-    radial-gradient(ellipse 950px 900px at 88% 20%, rgba(0,0,0,0.13) 0%, rgba(0,0,0,0.055) 40%, transparent 75%),
-    radial-gradient(ellipse 1100px 900px at 50% 95%, rgba(198,164,100,0.14) 0%, rgba(198,164,100,0.06) 40%, transparent 75%);
+    radial-gradient(ellipse 1000px 750px at 14% 6%, rgba(214,120,76,0.17) 0%, rgba(214,120,76,0.08) 40%, transparent 75%),
+    radial-gradient(ellipse 950px 900px at 88% 20%, rgba(94,67,86,0.11) 0%, rgba(94,67,86,0.045) 40%, transparent 75%),
+    radial-gradient(ellipse 1100px 900px at 50% 95%, rgba(214,120,76,0.11) 0%, rgba(214,120,76,0.05) 40%, transparent 75%);
 }
 body::after {
-  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.025;
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.045;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 ::selection { background: var(--accent); color: #fff; }
@@ -133,20 +133,36 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-hero {
   min-height: 100vh;
   display: flex; flex-direction: column;
+  position: relative;
   /* This section's own opaque white base sits in normal document flow, so
      it paints above the page-level ambient wash (body::before, a fixed,
      negative-z-index layer) and fully hides it for this section — the
      wash has to be repeated here directly for the hero (the one section
      that's full-bleed over the entire first screen) to actually show it. */
   background:
-    radial-gradient(ellipse 1100px 700px at 12% 2%, rgba(198,164,100,0.16) 0%, rgba(198,164,100,0.07) 40%, transparent 75%),
-    radial-gradient(ellipse 1000px 800px at 92% 10%, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.04) 40%, transparent 75%),
+    radial-gradient(ellipse 1100px 700px at 12% 2%, rgba(214,120,76,0.2) 0%, rgba(214,120,76,0.08) 40%, transparent 75%),
+    radial-gradient(ellipse 1000px 800px at 92% 10%, rgba(94,67,86,0.12) 0%, rgba(94,67,86,0.05) 40%, transparent 75%),
     var(--white);
 }
 .l-hero-inner {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
   max-width: 820px; margin: 0 auto; padding: 160px 24px 72px; width: 100%;
 }
+/* Small editorial/print-registration touches — a nod to the technical,
+   considered feel of a well-designed print spec sheet, without needing any
+   actual photography or illustration. */
+.crop-mark { position: absolute; width: 22px; height: 22px; pointer-events: none; opacity: 0.35; top: 76px; }
+.crop-mark::before, .crop-mark::after { content: ''; position: absolute; background: var(--muted-light); }
+.crop-mark::before { width: 100%; height: 1px; top: 50%; left: 0; }
+.crop-mark::after { width: 1px; height: 100%; left: 50%; top: 0; }
+.crop-tl { left: 24px; }
+.crop-tr { right: 24px; }
+.l-meta-row {
+  display: flex; justify-content: center; gap: 22px; flex-wrap: wrap;
+  font-family: 'SF Mono', 'Courier New', monospace; font-size: 10.5px; letter-spacing: 0.02em;
+  color: var(--muted-light); margin-bottom: 22px; animation: riseIn 0.6s var(--ease) both;
+}
+@media (max-width: 640px) { .crop-mark { display: none; } .l-meta-row { gap: 14px; font-size: 9.5px; } }
 .l-eyebrow {
   font-size: 15px; font-weight: 600; letter-spacing: -0.01em; text-transform: none;
   color: var(--accent); margin-bottom: 18px; display: flex; align-items: center; gap: 10px; justify-content: center;
@@ -629,7 +645,10 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 
   <!-- Hero -->
   <div class="l-hero">
+    <span class="crop-mark crop-tl" aria-hidden="true"></span>
+    <span class="crop-mark crop-tr" aria-hidden="true"></span>
     <div class="l-hero-inner">
+      <div class="l-meta-row" aria-hidden="true"><span>Format — AI Report</span><span>Dimensions — 05</span><span>Access — Free</span></div>
       <div class="l-eyebrow">AI-Powered Analysis</div>
       <h1 class="l-headline">Does your film<br>have a <em>real market?</em></h1>
       <p class="l-desc">A professional market assessment across five industry dimensions — before you invest time and money into your project.</p>
