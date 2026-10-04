@@ -60,7 +60,25 @@
   --ease: cubic-bezier(0.28, 0.11, 0.32, 1);
 }
 html { color-scheme: only light; scroll-behavior: smooth; }
-body { font-family: var(--sf); background: var(--white); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; letter-spacing: -0.011em; overflow-anchor: none; }
+body { font-family: var(--sf); background: var(--white); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; letter-spacing: -0.011em; overflow-anchor: none; position: relative; }
+/* Ambient background: a barely-there gradient wash for depth + a fine grain
+   texture, both purely decorative (pointer-events:none, negative z-index)
+   so they never intercept clicks or sit above real content. Kept
+   intentionally subtle and monochrome/warm-neutral — a splash of color
+   here would clash with the site's black/white editorial look. Easy to
+   remove entirely: delete this rule and the two ::before/::after rules
+   below, nothing else references them. */
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(ellipse 900px 650px at 8% -8%, rgba(0,0,0,0.035), transparent 60%),
+    radial-gradient(ellipse 800px 750px at 108% 18%, rgba(198,164,100,0.05), transparent 60%),
+    radial-gradient(ellipse 1000px 800px at 50% 115%, rgba(0,0,0,0.03), transparent 60%);
+}
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
 ::selection { background: var(--accent); color: #fff; }
 a { color: inherit; }
 button, input, select, textarea { font-family: inherit; }
