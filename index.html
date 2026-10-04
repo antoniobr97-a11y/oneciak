@@ -60,7 +60,27 @@
   --ease: cubic-bezier(0.28, 0.11, 0.32, 1);
 }
 html { color-scheme: only light; scroll-behavior: smooth; }
-body { font-family: var(--sf); background: var(--white); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; letter-spacing: -0.011em; overflow-anchor: none; }
+body { font-family: var(--sf); background: var(--white); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; letter-spacing: -0.011em; overflow-anchor: none; position: relative; }
+/* Ambient background: a barely-there gradient wash for depth + a fine grain
+   texture, both purely decorative (pointer-events:none, negative z-index)
+   so they never intercept clicks or sit above real content. Kept
+   intentionally subtle and monochrome/warm-neutral — a splash of color
+   here would clash with the site's black/white editorial look. Easy to
+   remove entirely: delete this rule and the two ::before/::after rules
+   below, nothing else references them. */
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(ellipse 1000px 750px at 14% 6%, rgba(214,120,76,0.17) 0%, rgba(214,120,76,0.08) 40%, transparent 75%),
+    radial-gradient(ellipse 950px 900px at 88% 20%, rgba(94,67,86,0.11) 0%, rgba(94,67,86,0.045) 40%, transparent 75%),
+    radial-gradient(ellipse 1100px 900px at 50% 95%, rgba(214,120,76,0.11) 0%, rgba(214,120,76,0.05) 40%, transparent 75%);
+}
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.16;
+  /* Two turbulence octave ranges mixed via contrast boost — reads as
+     uneven, fibrous paper grain rather than uniform digital static. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch' seed='11' result='fine'/%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.12' numOctaves='2' stitchTiles='stitch' seed='3' result='coarse'/%3E%3CfeComposite in='fine' in2='coarse' operator='arithmetic' k1='0.5' k2='0.5' k3='0' k4='0'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='2.2' intercept='-0.6'/%3E%3CfeFuncG type='linear' slope='2.2' intercept='-0.6'/%3E%3CfeFuncB type='linear' slope='2.2' intercept='-0.6'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
 ::selection { background: var(--accent); color: #fff; }
 a { color: inherit; }
 button, input, select, textarea { font-family: inherit; }
@@ -115,14 +135,39 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-hero {
   min-height: 100vh;
   display: flex; flex-direction: column;
+  position: relative;
+  /* This section's own opaque white base sits in normal document flow, so
+     it paints above the page-level ambient wash (body::before, a fixed,
+     negative-z-index layer) and fully hides it for this section — the
+     wash has to be repeated here directly for the hero (the one section
+     that's full-bleed over the entire first screen) to actually show it. */
   background:
-    radial-gradient(ellipse 1000px 560px at 50% -8%, rgba(0,0,0,0.045), transparent 60%),
+    radial-gradient(ellipse 1100px 700px at 12% 2%, rgba(214,120,76,0.2) 0%, rgba(214,120,76,0.08) 40%, transparent 75%),
+    radial-gradient(ellipse 1000px 800px at 92% 10%, rgba(94,67,86,0.12) 0%, rgba(94,67,86,0.05) 40%, transparent 75%),
     var(--white);
 }
+/* The grain needs its own opacity, separate from .l-hero's actual content,
+   so it can't just be another layer in .l-hero's background shorthand —
+   that would need per-layer opacity, which CSS doesn't support. A
+   dedicated absolutely-positioned pseudo-element does it instead, with
+   .l-hero-inner raised above it via z-index. */
+.l-hero::after {
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.16;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch' seed='11' result='fine'/%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.12' numOctaves='2' stitchTiles='stitch' seed='3' result='coarse'/%3E%3CfeComposite in='fine' in2='coarse' operator='arithmetic' k1='0.5' k2='0.5' k3='0' k4='0'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='2.2' intercept='-0.6'/%3E%3CfeFuncG type='linear' slope='2.2' intercept='-0.6'/%3E%3CfeFuncB type='linear' slope='2.2' intercept='-0.6'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
 .l-hero-inner {
+  position: relative; z-index: 1;
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
   max-width: 820px; margin: 0 auto; padding: 160px 24px 72px; width: 100%;
 }
+/* Small editorial touch — a nod to a well-designed print spec sheet,
+   without needing any actual photography or illustration. */
+.l-meta-row {
+  display: flex; justify-content: center; gap: 22px; flex-wrap: wrap;
+  font-family: 'SF Mono', 'Courier New', monospace; font-size: 10.5px; letter-spacing: 0.02em;
+  color: var(--muted-light); margin-bottom: 22px; animation: riseIn 0.6s var(--ease) both;
+}
+@media (max-width: 640px) { .l-meta-row { gap: 14px; font-size: 9.5px; } }
 .l-eyebrow {
   font-size: 15px; font-weight: 600; letter-spacing: -0.01em; text-transform: none;
   color: var(--accent); margin-bottom: 18px; display: flex; align-items: center; gap: 10px; justify-content: center;
@@ -606,6 +651,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   <!-- Hero -->
   <div class="l-hero">
     <div class="l-hero-inner">
+      <div class="l-meta-row" aria-hidden="true"><span>Format — AI Report</span><span>Dimensions — 05</span><span>Access — Free</span></div>
       <div class="l-eyebrow">AI-Powered Analysis</div>
       <h1 class="l-headline">Does your film<br>have a <em>real market?</em></h1>
       <p class="l-desc">A professional market assessment across five industry dimensions — before you invest time and money into your project.</p>
@@ -625,7 +671,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
         <div class="l-stat reveal"><div class="l-stat-num">5</div><div class="l-stat-label">Analysis Dimensions</div></div>
         <div class="l-stat reveal" style="transition-delay:0.08s"><div class="l-stat-num">Free</div><div class="l-stat-label">Full Report</div></div>
         <div class="l-stat reveal" style="transition-delay:0.16s"><div class="l-stat-num">PDF</div><div class="l-stat-label">Export Included</div></div>
-        <div class="l-stat reveal" style="transition-delay:0.24s" id="usageStat"><div class="l-stat-num" id="usageStatNum">—</div><div class="l-stat-label">Reports Generated</div></div>
+        <div class="l-stat reveal" style="transition-delay:0.24s"><div class="l-stat-num">90 Days</div><div class="l-stat-label">Report Access</div></div>
       </div>
     </div>
 
@@ -2632,10 +2678,14 @@ window.addEventListener('DOMContentLoaded', function() {
   handleFreeReportReturn();
   handleLoginReturn();
   initScrollReveal();
-  loadUsageStat();
 });
 
-/* ── LIVE USAGE COUNTER (real count, not a placeholder) ── */
+/* ── LIVE USAGE COUNTER (real count, not a placeholder) ──
+   Not called for now: the real count is still small enough that showing it
+   undermines trust rather than building it. The 4th landing stat shows
+   "90 Days — Report Access" instead. Bring this back (call loadUsageStat()
+   from DOMContentLoaded above, restore the #usageStat/#usageStatNum
+   markup) once the number is large enough to be a selling point. */
 async function loadUsageStat() {
   try {
     var res = await fetch('/.netlify/functions/stats');
