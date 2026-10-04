@@ -71,9 +71,9 @@ body { font-family: var(--sf); background: var(--white); color: var(--text); min
 body::before {
   content: ''; position: fixed; inset: 0; z-index: -2; pointer-events: none;
   background:
-    radial-gradient(ellipse 950px 700px at 8% -8%, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.03) 35%, transparent 72%),
-    radial-gradient(ellipse 850px 800px at 108% 16%, rgba(198,164,100,0.09) 0%, rgba(198,164,100,0.045) 35%, transparent 72%),
-    radial-gradient(ellipse 1050px 850px at 50% 112%, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.025) 35%, transparent 72%);
+    radial-gradient(ellipse 1000px 750px at 14% 6%, rgba(198,164,100,0.22) 0%, rgba(198,164,100,0.1) 40%, transparent 75%),
+    radial-gradient(ellipse 950px 900px at 88% 20%, rgba(0,0,0,0.13) 0%, rgba(0,0,0,0.055) 40%, transparent 75%),
+    radial-gradient(ellipse 1100px 900px at 50% 95%, rgba(198,164,100,0.14) 0%, rgba(198,164,100,0.06) 40%, transparent 75%);
 }
 body::after {
   content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.025;
@@ -133,8 +133,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-hero {
   min-height: 100vh;
   display: flex; flex-direction: column;
+  /* This section's own opaque white base sits in normal document flow, so
+     it paints above the page-level ambient wash (body::before, a fixed,
+     negative-z-index layer) and fully hides it for this section — the
+     wash has to be repeated here directly for the hero (the one section
+     that's full-bleed over the entire first screen) to actually show it. */
   background:
-    radial-gradient(ellipse 1000px 560px at 50% -8%, rgba(0,0,0,0.045), transparent 60%),
+    radial-gradient(ellipse 1100px 700px at 12% 2%, rgba(198,164,100,0.16) 0%, rgba(198,164,100,0.07) 40%, transparent 75%),
+    radial-gradient(ellipse 1000px 800px at 92% 10%, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.04) 40%, transparent 75%),
     var(--white);
 }
 .l-hero-inner {
