@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="only light">
+<meta name="google" content="notranslate">
 <title>OneCiak — Film Market Intelligence</title>
 <meta name="description" content="Get a professional AI-powered market assessment for your film across five industry dimensions — creative package, financing, audience, festivals and distribution — before you invest time and money.">
 <meta name="theme-color" content="#ffffff">
@@ -514,6 +515,16 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 </style>
 </head>
 <body>
+<!-- Invisible but accessibility-visible marker: translation engines (Chrome's
+     Google Translate, Safari's native translate, others) rewrite the text
+     content of rendered elements, even visually-hidden ones like this. We
+     read its original text once at script load and compare it later —
+     if it no longer matches, some translator is active, regardless of
+     which engine or browser, unlike checking for Chrome-specific DOM
+     markers alone (which Safari never sets). display:none is avoided
+     since some translators skip content that isn't part of the render
+     tree at all. -->
+<span id="translateCheckMarker" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">This sentence helps detect automatic page translation.</span>
 
 <!-- ══ LANDING ══ -->
 <div id="sec-landing">
@@ -852,6 +863,14 @@ var lastResult = null;
 var lastProject = null;
 var isFullReport = false;
 var isSampleReport = false; // true only while showing the fictional sample — cleared on any real navigation so its data can't leak into a real form/analysis
+
+// Captured synchronously at script load, before any translator has had a
+// chance to run, so this is always the true original English text.
+var TRANSLATE_CHECK_ORIGINAL = (function () {
+  var el = document.getElementById('translateCheckMarker');
+  return el ? el.textContent : '';
+})();
+var translateBannerShown = false;
 
 // Every report field below is rendered via innerHTML for layout flexibility,
 // but the content itself — AI-generated text and, indirectly, whatever a
@@ -2539,16 +2558,40 @@ function initScrollReveal() {
   });
 }
 
-function checkTranslation() {
-  setTimeout(function() {
-    var el = document.getElementById('translateBanner');
-    if (!el) return;
-    var translated = document.documentElement.classList.contains('translated-ltr') ||
-      document.documentElement.classList.contains('translated-rtl') ||
-      document.documentElement.getAttribute('translate') === 'yes';
-    if (translated) el.style.display = 'flex';
-  }, 800);
+// Engine-agnostic: compares a known marker string against its live DOM
+// value rather than checking for Chrome-specific translation markers
+// (document.documentElement.classList.contains('translated-ltr'), etc.),
+// which Safari's native translate never sets — that gap meant iPhone/Safari
+// users (most of this site's traffic) never saw the warning even when their
+// whole page had actually been machine-translated.
+function pageIsTranslated() {
+  if (!TRANSLATE_CHECK_ORIGINAL) return false; // marker missing — fail closed, never false-positive
+  var el = document.getElementById('translateCheckMarker');
+  if (!el) return false;
+  if (el.textContent !== TRANSLATE_CHECK_ORIGINAL) return true;
+  // Chrome/Google Translate's own markers, kept as a fast-path alongside
+  // the marker check (cheap, no reason to drop it).
+  return document.documentElement.classList.contains('translated-ltr') ||
+    document.documentElement.classList.contains('translated-rtl') ||
+    document.documentElement.getAttribute('translate') === 'yes';
 }
+
+function showTranslateBannerIfNeeded() {
+  if (translateBannerShown) return;
+  var el = document.getElementById('translateBanner');
+  if (!el) return;
+  if (pageIsTranslated()) { el.style.display = 'flex'; translateBannerShown = true; }
+}
+
+function checkTranslation() {
+  setTimeout(showTranslateBannerIfNeeded, 800);
+}
+
+// Translation can also kick in later than any single post-render check —
+// e.g. right as new report content streams in — so keep polling at a low
+// frequency for the rest of the session instead of only checking once
+// right after each render.
+setInterval(showTranslateBannerIfNeeded, 3000);
 
 </script>
 </body>
