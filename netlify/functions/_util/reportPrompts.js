@@ -18,7 +18,7 @@ function currentDateLine() {
 }
 
 function projectContext(p) {
-  var ctx = currentDateLine()+'\n\nProject: Title="'+p.title+'", Logline="'+p.logline+'", Genre="'+p.genre+'", Format="'+p.format+'", Budget="'+p.budget+'", Audience="'+p.audience+'", Distribution="'+p.distrib+'", Country="'+p.country+'", Experience="'+p.experience+'", Notes="'+(p.extra||'None')+'"';
+  var ctx = currentDateLine()+'\n\nProject: Title="'+p.title+'", Logline="'+p.logline+'", Genre="'+p.genre+'", Format="'+p.format+'", Budget="'+p.budget+'", Audience="'+p.audience+'", Distribution="'+p.distrib+'", Country="'+p.country+'", Language="'+(p.language||'Not specified')+'", Experience="'+p.experience+'", Notes="'+(p.extra||'None')+'"';
   if (p.budget === 'Not sure yet') {
     ctx += '\n\nThe filmmaker has not set a budget yet. Before giving any financial assessment, recommend a realistic budget range for a project with this genre, format and scope, and use that range as the basis for every other budget-dependent field in your response.';
   }

@@ -803,14 +803,18 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
           <input type="text" id="country" placeholder="e.g. Italy, France, USA" autocomplete="country-name">
         </div>
         <div class="field">
-          <label for="experience">Director Experience <span class="hint">(optional)</span></label>
-          <select id="experience">
-            <option value="">Select level…</option>
-            <option>First film</option><option>1–2 short films</option>
-            <option>1–2 feature films</option><option>3+ feature films</option>
-            <option>Experience in TV / advertising</option>
-          </select>
+          <label for="language">Original Language <span class="hint">(optional)</span></label>
+          <input type="text" id="language" placeholder="e.g. English, Italian, French">
         </div>
+      </div>
+      <div class="field">
+        <label for="experience">Director Experience <span class="hint">(optional)</span></label>
+        <select id="experience">
+          <option value="">Select level…</option>
+          <option>First film</option><option>1–2 short films</option>
+          <option>1–2 feature films</option><option>3+ feature films</option>
+          <option>Experience in TV / advertising</option>
+        </select>
       </div>
       <div class="field">
         <label for="extra">Anything else? <span class="hint">(optional)</span></label>
@@ -1050,6 +1054,7 @@ function goForm() {
   document.getElementById('audience').value = '';
   document.getElementById('distrib').value = '';
   document.getElementById('country').value = '';
+  document.getElementById('language').value = '';
   document.getElementById('experience').value = '';
   document.getElementById('extra').value = '';
 }
@@ -1155,6 +1160,7 @@ function getProject() {
     audience:   document.getElementById('audience').value,
     distrib:    document.getElementById('distrib').value,
     country:    document.getElementById('country').value.trim() || 'Not specified',
+    language:   document.getElementById('language').value.trim() || 'Not specified',
     experience: document.getElementById('experience').value || 'Not specified',
     extra:      document.getElementById('extra').value.trim()
   };
@@ -1169,7 +1175,7 @@ function freeCurrentDateLine() {
 }
 
 function freeProjectContext(p) {
-  var ctx = freeCurrentDateLine()+'\n\nProject: Title="'+p.title+'", Logline="'+p.logline+'", Genre="'+p.genre+'", Format="'+p.format+'", Budget="'+p.budget+'", Audience="'+p.audience+'", Distribution="'+p.distrib+'", Country="'+p.country+'", Experience="'+p.experience+'", Notes="'+(p.extra||'None')+'"';
+  var ctx = freeCurrentDateLine()+'\n\nProject: Title="'+p.title+'", Logline="'+p.logline+'", Genre="'+p.genre+'", Format="'+p.format+'", Budget="'+p.budget+'", Audience="'+p.audience+'", Distribution="'+p.distrib+'", Country="'+p.country+'", Language="'+p.language+'", Experience="'+p.experience+'", Notes="'+(p.extra||'None')+'"';
   if (p.budget === 'Not sure yet') {
     ctx += '\n\nThe filmmaker has not set a budget yet. Before giving any financial assessment, recommend a realistic budget range for a project with this genre, format and scope, and use that range as the basis for every other budget-dependent field in your response.';
   }
