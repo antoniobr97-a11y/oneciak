@@ -2,6 +2,7 @@ const { connectLambda } = require('@netlify/blobs');
 const { checkRateLimit } = require('./_util/rateLimit');
 const signedToken = require('./_util/signedToken');
 const { normalizeEmail, listReportsForEmail } = require('./_util/userReports');
+const { sign: signReportToken } = require('./_util/reportToken');
 
 const ALLOWED_ORIGIN = process.env.SITE_URL || 'https://oneciak.com';
 
@@ -24,7 +25,18 @@ exports.handler = async (event) => {
       return { statusCode: 403, headers, body: JSON.stringify({ error: 'Your session has expired. Please sign in again.' }) };
     }
 
-    const reports = await listReportsForEmail(email);
+    const stored = await listReportsForEmail(email);
+    const siteBase = (process.env.URL || process.env.SITE_URL || 'https://oneciak.com').replace(/\/$/, '');
+    // Mint a fresh token for every report on every visit instead of reusing
+    // whatever was stored — this is what makes a logged-in visit to "My
+    // Reports" never go stale, regardless of how old the report itself is.
+    const reports = stored.map(function (r) {
+      var viewUrl = r.sessionId
+        ? siteBase + '/?report_id=' + encodeURIComponent(r.sessionId) + '&report_token=' + encodeURIComponent(signReportToken(r.sessionId))
+        : r.viewUrl; // best-effort fallback for any legacy entry recorded before this field existed
+      return { title: r.title, viewUrl: viewUrl, createdAt: r.createdAt };
+    }).filter(function (r) { return !!r.viewUrl; });
+
     return { statusCode: 200, headers, body: JSON.stringify({ ok: true, reports: reports }) };
   } catch (err) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };

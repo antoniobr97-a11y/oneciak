@@ -11,9 +11,15 @@ function normalizeEmail(email) {
 // Same read-modify-write pattern as benchmarkStats.js: one small JSON blob
 // per email, keyed by the normalized address, holding just enough to link
 // back to each report — never the report content itself.
+//
+// Stores sessionId (not a pre-built viewUrl) so list-reports.js can re-sign
+// a fresh report token on every "My Reports" visit — the emailed link still
+// expires after 90 days (reasonable for a link sitting in an old inbox),
+// but a filmmaker who's actually logged in sees every report they've ever
+// requested stay reachable, however old.
 async function recordReportForEmail(email, entry) {
   const normalized = normalizeEmail(email);
-  if (!normalized || !entry || !entry.viewUrl) return;
+  if (!normalized || !entry || !entry.sessionId) return;
   const store = getStore('user-reports');
   let existing = [];
   try {
@@ -22,7 +28,7 @@ async function recordReportForEmail(email, entry) {
   } catch (e) { /* no record yet */ }
   const updated = existing.concat([{
     title: entry.title || 'Untitled project',
-    viewUrl: entry.viewUrl,
+    sessionId: entry.sessionId,
     createdAt: entry.createdAt || Date.now()
   }]).slice(-MAX_REPORTS_PER_EMAIL);
   try { await store.setJSON(normalized, { reports: updated }); } catch (e) { /* never block report delivery over this */ }

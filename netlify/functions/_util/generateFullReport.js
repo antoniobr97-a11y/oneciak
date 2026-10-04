@@ -80,8 +80,11 @@ async function generateAndDeliverFullReport({ store, key, project, email, anthro
 
       // Lets this report show up under "My Reports" for this email later,
       // without needing to keep the original link — the whole point of
-      // logging in being an alternative to "I lost the email".
-      try { await recordReportForEmail(email, { title: project.title, viewUrl: viewUrl, createdAt: Date.now() }); } catch (e) { /* never block report delivery over this */ }
+      // logging in being an alternative to "I lost the email". Storing the
+      // session id (not a pre-built link) lets list-reports.js mint a fresh,
+      // never-expired link on every visit instead of inheriting the emailed
+      // link's 90-day lifetime.
+      try { await recordReportForEmail(email, { title: project.title, sessionId: key, createdAt: Date.now() }); } catch (e) { /* never block report delivery over this */ }
 
       return { ok: true };
     } catch (err) {
