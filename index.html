@@ -71,9 +71,9 @@ body { font-family: var(--sf); background: var(--white); color: var(--text); min
 body::before {
   content: ''; position: fixed; inset: 0; z-index: -2; pointer-events: none;
   background:
-    radial-gradient(ellipse 900px 650px at 8% -8%, rgba(0,0,0,0.035), transparent 60%),
-    radial-gradient(ellipse 800px 750px at 108% 18%, rgba(198,164,100,0.05), transparent 60%),
-    radial-gradient(ellipse 1000px 800px at 50% 115%, rgba(0,0,0,0.03), transparent 60%);
+    radial-gradient(ellipse 950px 700px at 8% -8%, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.03) 35%, transparent 72%),
+    radial-gradient(ellipse 850px 800px at 108% 16%, rgba(198,164,100,0.09) 0%, rgba(198,164,100,0.045) 35%, transparent 72%),
+    radial-gradient(ellipse 1050px 850px at 50% 112%, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.025) 35%, transparent 72%);
 }
 body::after {
   content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.025;
@@ -643,7 +643,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
         <div class="l-stat reveal"><div class="l-stat-num">5</div><div class="l-stat-label">Analysis Dimensions</div></div>
         <div class="l-stat reveal" style="transition-delay:0.08s"><div class="l-stat-num">Free</div><div class="l-stat-label">Full Report</div></div>
         <div class="l-stat reveal" style="transition-delay:0.16s"><div class="l-stat-num">PDF</div><div class="l-stat-label">Export Included</div></div>
-        <div class="l-stat reveal" style="transition-delay:0.24s" id="usageStat"><div class="l-stat-num" id="usageStatNum">—</div><div class="l-stat-label">Reports Generated</div></div>
+        <div class="l-stat reveal" style="transition-delay:0.24s"><div class="l-stat-num">90 Days</div><div class="l-stat-label">Report Access</div></div>
       </div>
     </div>
 
@@ -2650,10 +2650,14 @@ window.addEventListener('DOMContentLoaded', function() {
   handleFreeReportReturn();
   handleLoginReturn();
   initScrollReveal();
-  loadUsageStat();
 });
 
-/* ── LIVE USAGE COUNTER (real count, not a placeholder) ── */
+/* ── LIVE USAGE COUNTER (real count, not a placeholder) ──
+   Not called for now: the real count is still small enough that showing it
+   undermines trust rather than building it. The 4th landing stat shows
+   "90 Days — Report Access" instead. Bring this back (call loadUsageStat()
+   from DOMContentLoaded above, restore the #usageStat/#usageStatNum
+   markup) once the number is large enough to be a selling point. */
 async function loadUsageStat() {
   try {
     var res = await fetch('/.netlify/functions/stats');
