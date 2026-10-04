@@ -292,6 +292,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .card-title::after { content: none; }
 .field { margin-bottom: 18px; }
 .field:last-child { margin-bottom: 0; }
+/* A field-row's last .field matches :last-child relative to the row, not
+   the card, so it loses its margin even when more fields follow the row
+   (e.g. Country/Experience followed by the "Anything else?" field) —
+   restore the gap on the row itself whenever something comes after it. */
+.field-row:not(:last-child) { margin-bottom: 18px; }
 label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--text); letter-spacing: -0.01em; }
 label .hint { font-weight: 400; color: var(--muted); font-size: 13px; }
 input[type="text"], input[type="email"], select, textarea {
