@@ -94,7 +94,10 @@ conversazione aspettando.
 **Redesign del 2026-10-08 (approvato da Antonio, pubblicato):** direzione
 "sala buia" ispirata a A24/NEON/Stripe, scelta tramite mockup A/B.
 - **Hero landing scuro** (`--night:#0f0e0d`, caldo ma non troppo). Storia del colore, 2026-10-08: il primo `#0e0c0b` con bagliore arancio al 20% era "troppo marrone" (saturazione media hero 17.9%); il neutro `#0f0f0f` al 7% era troppo freddo ("quel marrone mi piaceva ma un po' meno"). Valore approvato: via di mezzo, bagliore 10%, saturazione ~11.4%. Misurare con lo stesso metodo se si ritocca. Il nero **sfuma** nel crema
-  (`--paper:#f4f1ec`) in ~300px, senza linea netta. Antonio odia gli
+  (`--paper:#f4f1ec`) in ~280px, senza linea netta. La sfumatura è
+  interpolata `in oklab` (variante "B" scelta da Antonio il 2026-10-08): la
+  versione a gradini nei grigi faceva una fascia "color fango" che non gli
+  piaceva. Resta come fallback per browser vecchi. Antonio odia gli
   "stacchi" tra sfondo e contenuto: niente bordi netti, niente card bianche
   incollate sullo sfondo. La sfumatura è nel `padding-bottom` dell'hero, sotto
   tutto il testo (così il testo non finisce mai sui toni intermedi).
