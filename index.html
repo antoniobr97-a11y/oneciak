@@ -745,6 +745,20 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .mr-logout { width: auto; padding: 14px 0; margin-top: 12px; }
 @media (max-width: 640px) { .mr-row { grid-template-columns: 1fr 20px; gap: 4px 12px; } .mr-date { grid-column: 1 / -1; } }
 
+/* Open accordion content sits on the paper itself: no white panel. Risk vs
+   strength is carried by a thin coloured rule and the label, not by pink
+   and green boxes. */
+.accordion-body { background: transparent; padding: 4px 4px 32px 46px; }
+.flag-item, .flag-item.red, .flag-item.green { background: none; border-radius: 0; padding: 4px 0 4px 16px; margin-bottom: 12px; color: var(--text); }
+.flag-item.red { border-left: 2px solid rgba(177,50,37,0.55); }
+.flag-item.green { border-left: 2px solid rgba(15,122,61,0.55); }
+.exec-box, .exec-box.risk, .exec-box.opp { background: none; border-radius: 0; padding: 2px 0 2px 16px; }
+.exec-box.risk { border-left: 2px solid rgba(177,50,37,0.55); }
+.exec-box.opp { border-left: 2px solid rgba(15,122,61,0.55); }
+.exec-row { gap: 24px; }
+.flags-block, .tips-block, .action-block { border-top-color: var(--border); }
+@media (max-width: 640px) { .accordion-body { padding-left: 4px; } }
+
 /* LOADING: light display title, mono step numbers, no filled circles */
 .loading-wrap { max-width: 520px; }
 .loading-title { font-family: var(--display); font-size: clamp(30px, 5vw, 40px); font-weight: 300; letter-spacing: -0.03em; }
@@ -1876,7 +1890,7 @@ function renderFree(r, title) {
       '<div class="exec-box risk"><div class="exec-box-label">Main Risk</div><div class="exec-box-text">'+esc(r.biggest_risk)+'</div></div>'+
       '<div class="exec-box opp"><div class="exec-box-label">Main Opportunity</div><div class="exec-box-text">'+esc(r.biggest_opportunity)+'</div></div>'+
       '</div>' : '')+
-    (r.next_step ? '<div style="margin-top:16px;padding:14px 16px;background:var(--accent-wash);border-radius:var(--radius);font-size:13px;color:var(--text);line-height:1.55"><b>Your Next Step:</b> '+esc(r.next_step)+'</div>' : '')+
+    (r.next_step ? '<div style="margin-top:16px;padding:14px 16px;background:var(--field);border-radius:var(--radius);font-size:13px;color:var(--text);line-height:1.55"><b>Your Next Step:</b> '+esc(r.next_step)+'</div>' : '')+
     '</div>';
 
   // Free accordion — same structure, limited content + blurred preview
@@ -2152,7 +2166,7 @@ function buildActionPlanBody(r) {
       out += '<div style="padding:10px 0;border-bottom:1px solid var(--border-light)">'+
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'+
         '<div style="font-size:13px;font-weight:600">'+esc(f.festival)+'</div>'+
-        '<span style="font-size:10px;font-weight:700;color:'+tc+';padding:1px 7px;border-radius:999px;border:1px solid var(--border);background:var(--cream)">'+esc(f.tier)+'</span>'+
+        '<span style="font-size:10px;font-weight:700;color:'+tc+';padding:1px 7px;border-radius:999px;border:1px solid var(--border);background:var(--field)">'+esc(f.tier)+'</span>'+
         '</div>'+
         '<div style="font-size:12px;color:var(--muted);font-weight:300;margin-bottom:3px">'+esc(f.deadline)+'</div>'+
         '<div style="font-size:12px;color:var(--text);font-weight:300;margin-bottom:5px">'+esc(f.fit)+'</div>'+
@@ -2219,7 +2233,7 @@ function buildBusinessPlanBody(bp) {
   if (!bp) return '<div style="font-size:13px;color:var(--muted);font-weight:300">No business plan summary available.</div>';
   var out = '';
   if (bp.executive_summary) out += '<div style="font-size:13px;color:var(--text);line-height:1.7;font-weight:300;margin-bottom:16px">'+esc(bp.executive_summary)+'</div>';
-  if (bp.the_ask) out += '<div style="padding:12px 14px;background:var(--accent-wash);border-radius:var(--radius);font-size:13px;color:var(--text);line-height:1.55;margin-bottom:16px"><b>The Ask:</b> '+esc(bp.the_ask)+'</div>';
+  if (bp.the_ask) out += '<div style="padding:12px 14px;background:var(--field);border-radius:var(--radius);font-size:13px;color:var(--text);line-height:1.55;margin-bottom:16px"><b>The Ask:</b> '+esc(bp.the_ask)+'</div>';
   [
     { label:'Market Opportunity', v:bp.market_opportunity },
     { label:'Competitive Advantage', v:bp.competitive_advantage },
@@ -2258,7 +2272,7 @@ function buildFundingSources(sources) {
     h += '<div style="padding:11px 0;border-bottom:1px solid var(--border)">'+
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:3px">'+
       '<div style="font-size:13px;font-weight:700">'+esc(f.name)+'</div>'+
-      '<div style="font-size:10px;font-weight:700;color:var(--muted);background:var(--cream);padding:2px 7px;border-radius:3px;white-space:nowrap;flex-shrink:0">'+esc(f.type)+'</div>'+
+      '<div style="font-size:10px;font-weight:700;color:var(--muted);background:var(--field);padding:2px 7px;border-radius:3px;white-space:nowrap;flex-shrink:0">'+esc(f.type)+'</div>'+
       '</div>'+
       '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:3px">'+esc(f.amount)+'</div>'+
       '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:5px">Deadline: '+esc(f.deadline)+' · '+esc(f.eligibility)+'</div>'+
@@ -2382,7 +2396,7 @@ function buildPlatforms(platforms) {
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Platform Priority</div>';
   platforms.forEach(function(pl){
     if (!pl) return;
-    h += '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px;background:var(--cream);border-radius:7px;margin-bottom:7px">'+
+    h += '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px;background:var(--field);border-radius:7px;margin-bottom:7px">'+
       '<div style="font-size:9px;font-weight:700;color:#fff;background:var(--text);padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px;letter-spacing:0.04em">'+esc(pl.priority)+'</div>'+
       '<div><div style="font-size:13px;font-weight:700;margin-bottom:2px">'+esc(pl.name)+'</div>'+
       '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:4px">'+esc(pl.reason)+'</div>'+
