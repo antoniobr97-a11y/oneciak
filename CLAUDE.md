@@ -93,7 +93,7 @@ conversazione aspettando.
 
 **Redesign del 2026-10-08 (approvato da Antonio, pubblicato):** direzione
 "sala buia" ispirata a A24/NEON/Stripe, scelta tramite mockup A/B.
-- **Hero landing scuro** (`--night:#0e0c0b`) che **sfuma** nel crema
+- **Hero landing scuro** (`--night:#0f0f0f`, neutro: Antonio trovava il vecchio #0e0c0b + bagliore arancio al 20% "troppo marrone", ridotto il 2026-10-08 a bagliore 7% e sfumatura in grigi neutri) che **sfuma** nel crema
   (`--paper:#f4f1ec`) in ~300px, senza linea netta. Antonio odia gli
   "stacchi" tra sfondo e contenuto: niente bordi netti, niente card bianche
   incollate sullo sfondo. La sfumatura è nel `padding-bottom` dell'hero, sotto
