@@ -158,7 +158,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-hero {
   position: relative; overflow: hidden; color: var(--on-night);
   background: linear-gradient(180deg, var(--night) 0, var(--night) calc(100% - 300px), #201e1c calc(100% - 230px), #4a4643 calc(100% - 165px), #908c86 calc(100% - 100px), #d5d0ca calc(100% - 45px), var(--paper) 100%);
-  padding-bottom: 220px;
+  /* Chosen 2026-10-08 (variant B): the same long dissolve, interpolated in
+     oklab so the midpoint stays warm instead of passing through muddy grey.
+     Browsers without 'in oklab' keep the stepped gradient above. */
+  background: linear-gradient(in oklab 180deg, var(--night) 0, var(--night) calc(100% - 280px), var(--paper) 100%);
+  padding-bottom: 270px;
 }
 /* Ember glow, deliberately lopsided: one dominant warm source top-right,
    a small plum one low on the left. Never mirrored. */
@@ -668,6 +672,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #sec-results .r-hero, #sec-myreports .r-hero {
   color: var(--on-night); position: relative;
   background: linear-gradient(180deg, var(--night) 0, var(--night) calc(100% - 260px), #201e1c calc(100% - 200px), #4a4643 calc(100% - 145px), #908c86 calc(100% - 88px), #d5d0ca calc(100% - 40px), var(--paper) 100%);
+  background: linear-gradient(in oklab 180deg, var(--night) 0, var(--night) calc(100% - 250px), var(--paper) 100%);
   padding: 64px 24px 220px;
 }
 #sec-results .r-hero::before, #sec-myreports .r-hero::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(50% 50% at 88% 10%, rgba(214,120,76,0.11), transparent 62%); }
