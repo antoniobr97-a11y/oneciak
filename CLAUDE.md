@@ -197,7 +197,7 @@ Server locale per testare prima di pubblicare:
   5 report al giorno per indirizzo email (`checkKeyLimit`, email hashata).
 - Errori 500 generici verso il client, dettagli solo in `console.error`.
 - `admin-stats.html` manda la chiave nell'header `X-Admin-Key`, non nell'URL.
-- Consigliato ad Antonio: limite di spesa mensile nella console Anthropic.
+- Limite di spesa mensile nella console Anthropic: impostato a 50 (confermato da Antonio il 2026-10-08). Se si raggiunge, le analisi falliscono fino al mese dopo.
 
 ## Principio di onestà (esplicito, non derogabile)
 
