@@ -735,45 +735,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #sec-results .disclaimer-box, #sec-myreports .disclaimer-box { background: none; padding: 0; }
 .tip-link { background: var(--field); }
 .roadmap-num, .action-tag { background: var(--text); }
-/* RESULTS fully on the night (Antonio, 2026-10-08: "perché l'analisi è
-   ancora chiara?"). The palette tokens are redefined inside #sec-results
-   only, so every component that reads them (text, rules, fields, tags)
-   flips without per-component rewrites; --paper becomes the night, which
-   also turns the header's dissolve into a continuous dark page. */
-#sec-results {
-  --paper: var(--night); --text: #f2ede6; --ink: #f2ede6; --accent: #f2ede6; --accent-hover: #ffffff; --accent-press: #f2ede6;
-  --muted: #b3aca4; --muted-light: #b3aca4;
-  --border: rgba(255,255,255,0.13); --border-light: rgba(255,255,255,0.08);
-  --cream: rgba(255,255,255,0.05); --white: rgba(255,255,255,0.05); --field: rgba(255,255,255,0.06); --field-hover: rgba(255,255,255,0.09);
-  --success: #74d6a0; --danger: #ff9a87;
-  background: var(--night); color: var(--text); min-height: 100vh;
-}
-#sec-results .r-hero { background: var(--night); }
-#sec-results .sample-banner { background: #000; color: #fff; }
-#sec-results .r-header.is-light { background: rgba(20,13,16,0.72); color: var(--on-night); border-bottom-color: rgba(255,255,255,0.08); }
-#sec-results .r-header.is-light .back-btn { background: rgba(20,13,16,0.62); border-color: rgba(255,255,255,0.22); }
-#sec-results .score-mid { color: #f2b25c; }
-#sec-results .accordion-trigger.open .accordion-icon { color: #f0a07c !important; }
-#sec-results .bar-mid { background: #f2b25c; }
-#sec-results .flag-item { color: var(--text); }
-#sec-results .flag-item.red { border-left-color: rgba(255,154,135,0.7); }
-#sec-results .flag-item.green { border-left-color: rgba(116,214,160,0.7); }
-#sec-results .exec-box.risk { border-left-color: rgba(255,154,135,0.7); }
-#sec-results .exec-box.opp { border-left-color: rgba(116,214,160,0.7); }
-#sec-results .pdf-row button, #sec-results .btn-unlock, #sec-results .btn-primary { background: var(--on-night); color: var(--night); }
-@media (hover: hover) and (pointer: fine) { #sec-results .pdf-row button:hover, #sec-results .btn-unlock:hover { background: #fff; } }
-#sec-results .action-tag, #sec-results .roadmap-num { background: var(--on-night); color: var(--night); }
-#sec-results .tip-link { color: var(--text); }
-@media (hover: hover) and (pointer: fine) { #sec-results .tip-link:hover { background: var(--on-night); color: var(--night); } }
-#sec-results input[type="email"], #sec-results input[type="text"], #sec-results select, #sec-results textarea { color: var(--text); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.14); }
-#sec-results input::placeholder, #sec-results textarea::placeholder { color: #8f8880; }
-#sec-results input:focus, #sec-results select:focus, #sec-results textarea:focus { background: rgba(255,255,255,0.08); box-shadow: inset 0 0 0 1px rgba(240,160,124,0.7), 0 0 0 4px rgba(240,160,124,0.15); }
-#sec-results select option { color: #141210; }
-#sec-results .success-msg { background: rgba(116,214,160,0.1); }
-#sec-results .error-box { background: rgba(255,154,135,0.1); }
-#sec-results .footer-note a, #sec-results a { color: inherit; }
-#sec-results ::selection { background: var(--on-night); color: var(--night); }
-
 /* MY REPORTS: same header as results; sign-in is a plain field on the
    paper, the list is hairline rows (date, title, arrow), not boxes. */
 #sec-myreports .r-hero-inner { max-width: 640px; }
@@ -2467,7 +2428,7 @@ function buildPlatforms(platforms) {
   platforms.forEach(function(pl){
     if (!pl) return;
     h += '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px;background:var(--field);border-radius:7px;margin-bottom:7px">'+
-      '<div style="font-size:9px;font-weight:700;color:var(--night);background:var(--text);padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px;letter-spacing:0.04em">'+esc(pl.priority)+'</div>'+
+      '<div style="font-size:9px;font-weight:700;color:#fff;background:var(--text);padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px;letter-spacing:0.04em">'+esc(pl.priority)+'</div>'+
       '<div><div style="font-size:13px;font-weight:700;margin-bottom:2px">'+esc(pl.name)+'</div>'+
       '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:4px">'+esc(pl.reason)+'</div>'+
       (pl.url ? '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px;display:inline-block" href="'+esc(pl.url)+'" target="_blank" rel="noopener">Visit →</a>' : '')+
