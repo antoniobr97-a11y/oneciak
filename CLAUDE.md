@@ -113,8 +113,11 @@ conversazione aspettando.
   statistiche anonime self-hosted; il localStorage serve solo al login
   "My Reports" scelto dall'utente. Non aggiungerlo senza un motivo nuovo.
 - Il disclaimer con casella sulla landing resta obbligatorio (`termsCheck`).
-- **Ancora da fare**: schermate di caricamento e risultati nello stesso stile
-  (per ora hanno solo preso i nuovi colori).
+- **Risultati e caricamento** (stesso giorno): header scuro che sfuma come la
+  home, punteggio nella stessa scheda di vetro (`#overallScore` è dentro
+  `.r-hero`), niente card, numeri mono. Home compattata su richiesta di
+  Antonio ("troppo piena, niente ripetizioni"): non riaggiungere etichetta
+  sopra il titolo, link doppi al report di esempio, CTA finale ripetuta.
 
 Regole che restano valide:
 - Contrasto: misurarlo sui **pixel veri** (nascondere il testo, campionare lo
