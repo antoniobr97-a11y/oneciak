@@ -255,10 +255,19 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 @media (hover: hover) and (pointer: fine) { .menu-aud:hover { transform: translateY(-3px); } }
 .menu-aud-title { font-size: 14.5px; font-weight: 600; color: var(--text); margin-bottom: 5px; letter-spacing: -0.01em; }
 .menu-aud-desc { font-size: 13.5px; color: var(--muted); line-height: 1.5; font-weight: 400; }
-.menu-faq-item { padding: 20px 0; border-bottom: 1px solid var(--border-light); }
+/* FAQ as native <details> — collapsed by default so 8 answers don't all
+   render open at once (the menu already gets this right for the results
+   page's "How to read" / "Glossary" sections; this brings the FAQ list
+   in line with that pattern instead of being the one place that dumps
+   everything open). */
+.menu-faq-item { border-bottom: 1px solid var(--border-light); }
 .menu-faq-item:last-child { border-bottom: none; }
-.menu-faq-q { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 8px; letter-spacing: -0.01em; }
-.menu-faq-a { font-size: 14.5px; color: var(--muted); line-height: 1.6; font-weight: 400; }
+.menu-faq-item summary { list-style: none; cursor: pointer; padding: 20px 0; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.menu-faq-item summary::-webkit-details-marker { display: none; }
+.menu-faq-item summary::after { content: '+'; font-size: 20px; font-weight: 400; color: var(--muted); flex-shrink: 0; transition: transform 0.2s var(--ease); }
+.menu-faq-item[open] summary::after { transform: rotate(45deg); }
+.menu-faq-q { font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+.menu-faq-a { font-size: 14.5px; color: var(--muted); line-height: 1.6; font-weight: 400; padding-bottom: 20px; }
 .menu-cta { width: 100%; padding: 16px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--sf); font-size: 16px; font-weight: 500; cursor: pointer; letter-spacing: -0.01em; }
 
 /* HAMBURGER */
@@ -355,15 +364,37 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 /* ══════════════════════
    LOADING
 ══════════════════════ */
-#sec-loading { background: var(--white); min-height: 100vh; align-items: center; justify-content: center; }
-.loading-wrap { text-align: center; padding: 40px 24px; }
-.spinner { width: 36px; height: 36px; border: 3px solid var(--border-light); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 32px; }
-@keyframes spin { to { transform: rotate(360deg); } }
+#sec-loading { min-height: 100vh; align-items: center; justify-content: center; position: relative; }
+.loading-wrap { text-align: center; padding: 40px 24px; max-width: 420px; width: 100%; position: relative; z-index: 1; }
 .loading-title { font-family: var(--sf); font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 12px; letter-spacing: -0.02em; }
-.loading-desc { font-size: 14.5px; color: var(--muted); font-weight: 400; line-height: 1.6; max-width: 320px; margin: 0 auto; }
-.loading-timer { margin-top: 18px; font-size: 13px; color: var(--muted-light); font-weight: 500; font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border-light); border-radius: 999px; padding: 6px 14px; }
+.loading-desc { font-size: 14.5px; color: var(--muted); font-weight: 400; line-height: 1.6; max-width: 320px; margin: 0 auto 36px; }
+/* Dimension progress — walks through the same 01-05 numbering used on the
+   landing page and results accordion, so the wait itself previews the
+   product's own structure instead of a generic spinner that could belong
+   to any app. Pacing is a plausible staged animation (not literal
+   per-dimension telemetry — the API calls don't expose that granularity),
+   timed to roughly match how long each flow actually takes. */
+.loading-dims { display: flex; flex-direction: column; gap: 4px; text-align: left; }
+.loading-dim {
+  display: flex; align-items: center; gap: 14px; padding: 10px 14px; border-radius: var(--radius);
+  opacity: 0.4; transition: opacity 0.4s var(--ease), background 0.4s var(--ease);
+}
+.loading-dim.is-active { opacity: 1; background: var(--cream); }
+.loading-dim.is-done { opacity: 0.75; }
+.loading-dim-num {
+  font-family: var(--sf); font-size: 12px; font-weight: 700; color: var(--muted); min-width: 26px; height: 26px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  box-shadow: inset 0 0 0 1.5px var(--border); transition: all 0.4s var(--ease);
+}
+.loading-dim.is-active .loading-dim-num { color: #fff; background: var(--accent); box-shadow: none; animation: loadingDimPulse 1.6s ease-in-out infinite; }
+.loading-dim.is-done .loading-dim-num { color: #fff; background: var(--success); box-shadow: none; font-size: 0; }
+.loading-dim.is-done .loading-dim-num::after { content: '✓'; font-size: 12px; }
+@keyframes loadingDimPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0,0,0,0.18); } 50% { box-shadow: 0 0 0 5px rgba(0,0,0,0); } }
+.loading-dim-name { font-size: 14.5px; font-weight: 600; color: var(--text); }
+.loading-timer { margin-top: 28px; font-size: 13px; color: var(--muted-light); font-weight: 500; font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border-light); border-radius: 999px; padding: 6px 14px; }
 .loading-timer-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: loadingPulse 1.4s ease-in-out infinite; }
 @keyframes loadingPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .loading-dim.is-active .loading-dim-num { animation: none; } }
 
 /* ══════════════════════
    RESULTS
@@ -392,6 +423,17 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 }
 .r-summary { font-size: 15.5px; color: var(--muted); line-height: 1.6; font-weight: 400; }
 .r-main { max-width: 640px; margin: 0 auto; padding: 24px 20px 90px; }
+
+/* MY REPORTS — the sign-in moment gets a real card instead of a bare form
+   pinned to the top of an otherwise-empty viewport; the logged-in report
+   list stays full-width below since it's a list, not a single action. */
+.myreports-signin { padding-top: 10vh; }
+.myreports-card { background: var(--cream); border-radius: var(--radius-lg); padding: 38px 30px; text-align: center; }
+.myreports-icon { width: 48px; height: 48px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; margin: 0 auto 22px; }
+.myreports-icon svg path, .myreports-icon svg rect { fill: #fff; }
+.myreports-card h2 { text-align: center; }
+.myreports-card .field { text-align: left; }
+@media (max-width: 640px) { .myreports-signin { padding-top: 6vh; } }
 
 /* OVERALL SCORE */
 .overall-card {
@@ -513,8 +555,10 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .accordion-trigger.open .accordion-icon { background: var(--accent); color: #fff; }
 .accordion-label { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
 .accordion-sublabel { font-size: 12.5px; color: var(--muted); font-weight: 400; margin-top: 2px; }
-.accordion-score { font-family: var(--sf); font-size: 19px; font-weight: 700; flex-shrink: 0; }
+.accordion-score-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
+.accordion-score { font-family: var(--sf); font-size: 19px; font-weight: 700; }
 .accordion-score .denom { font-size: 12px; color: var(--muted); font-weight: 500; }
+.accordion-score-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
 .accordion-chevron { font-size: 13px; color: var(--muted-light); flex-shrink: 0; transition: transform 0.25s var(--ease); }
 .accordion-trigger.open .accordion-chevron { transform: rotate(180deg); }
 .accordion-body { display: none; padding: 0 20px 22px; background: var(--white); }
@@ -629,14 +673,14 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
       </div>
       <div class="menu-sec">
         <div class="menu-sec-title">FAQ</div>
-        <div class="menu-faq-item"><div class="menu-faq-q">Is this a real consultant?</div><div class="menu-faq-a">Advanced AI trained on film market data. Structured analysis most filmmakers never access.</div></div>
-        <div class="menu-faq-item"><div class="menu-faq-q">What does the free report cover?</div><div class="menu-faq-a">All five dimensions with a general assessment and one key recommendation each.</div></div>
-        <div class="menu-faq-item"><div class="menu-faq-q">What does the full report add?</div><div class="menu-faq-a">Deep analysis, red flags, strengths, 3 recommendations with real links, action plans, funding sources, comparable films, international markets and a 5-step roadmap — free, delivered by email.</div></div>
-        <div class="menu-faq-item"><div class="menu-faq-q">Why do you ask for my email?</div><div class="menu-faq-a">Generating the full report can take a few minutes, so we email it to you the moment it's ready — you don't have to keep the page open, and it also means you can't lose it if you close your browser.</div></div>
-        <div class="menu-faq-item"><div class="menu-faq-q">Is my project data private?</div><div class="menu-faq-a">Your project details are sent only to the providers needed to generate and deliver your report (see our Privacy Policy) — never sold, never used to train AI models.</div></div>
-        <div class="menu-faq-item"><div class="menu-faq-q">I've never made a film before — is this still useful?</div><div class="menu-faq-a">Yes — that's exactly who this is built for. You don't need any industry experience or connections to get a report; just describe your project as best you can. The "Experience" field even has a "First film" option, and the analysis adjusts its advice accordingly.</div></div>
-        <div class="menu-faq-item"><div class="menu-faq-q">I don't understand a term in my report — what do I do?</div><div class="menu-faq-a">Every report page has a "Glossary" you can expand near the top, explaining common industry terms (sales agent, tax incentive, E&O insurance, etc.) in plain language.</div></div>
-        <div class="menu-faq-item"><div class="menu-faq-q">Where do I actually start after getting my report?</div><div class="menu-faq-a">In the full report, open the Roadmap near the end — it's a 5-phase sequence (script & pitch, financing, pre-production, production, festivals & sales) built specifically for your project, not generic advice.</div></div>
+        <details class="menu-faq-item"><summary class="menu-faq-q">Is this a real consultant?</summary><div class="menu-faq-a">Advanced AI trained on film market data. Structured analysis most filmmakers never access.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">What does the free report cover?</summary><div class="menu-faq-a">All five dimensions with a general assessment and one key recommendation each.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">What does the full report add?</summary><div class="menu-faq-a">Deep analysis, red flags, strengths, 3 recommendations with real links, action plans, funding sources, comparable films, international markets and a 5-step roadmap — free, delivered by email.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">Why do you ask for my email?</summary><div class="menu-faq-a">Generating the full report can take a few minutes, so we email it to you the moment it's ready — you don't have to keep the page open, and it also means you can't lose it if you close your browser.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">Is my project data private?</summary><div class="menu-faq-a">Your project details are sent only to the providers needed to generate and deliver your report (see our Privacy Policy) — never sold, never used to train AI models.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">I've never made a film before — is this still useful?</summary><div class="menu-faq-a">Yes — that's exactly who this is built for. You don't need any industry experience or connections to get a report; just describe your project as best you can. The "Experience" field even has a "First film" option, and the analysis adjusts its advice accordingly.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">I don't understand a term in my report — what do I do?</summary><div class="menu-faq-a">Every report page has a "Glossary" you can expand near the top, explaining common industry terms (sales agent, tax incentive, E&O insurance, etc.) in plain language.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">Where do I actually start after getting my report?</summary><div class="menu-faq-a">In the full report, open the Roadmap near the end — it's a 5-phase sequence (script & pitch, financing, pre-production, production, festivals & sales) built specifically for your project, not generic advice.</div></details>
       </div>
       <button class="menu-cta" onclick="closeMenuGoLanding()">Start Free Analysis →</button>
       <p style="text-align:center;font-size:12px;color:var(--muted-light);margin-top:16px"><a href="/privacy.html" style="text-decoration:underline;text-underline-offset:2px">Privacy Policy</a> · <a href="/terms.html" style="text-decoration:underline;text-underline-offset:2px">Terms of Service</a></p>
@@ -840,9 +884,15 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 <!-- ══ LOADING ══ -->
 <div id="sec-loading" role="status" aria-live="polite">
   <div class="loading-wrap">
-    <div class="spinner" id="loadingSpinner" aria-hidden="true"></div>
     <div class="loading-title" id="loadingTitle">Analyzing your project…</div>
     <div class="loading-desc" id="loadingDesc">Evaluating your project across five market dimensions with real industry data.</div>
+    <div class="loading-dims" id="loadingDims" aria-hidden="true">
+      <div class="loading-dim" data-dim="0"><span class="loading-dim-num">01</span><span class="loading-dim-name">Creative Package</span></div>
+      <div class="loading-dim" data-dim="1"><span class="loading-dim-num">02</span><span class="loading-dim-name">Financial Plan</span></div>
+      <div class="loading-dim" data-dim="2"><span class="loading-dim-num">03</span><span class="loading-dim-name">Market &amp; Audience</span></div>
+      <div class="loading-dim" data-dim="3"><span class="loading-dim-num">04</span><span class="loading-dim-name">Festival Strategy</span></div>
+      <div class="loading-dim" data-dim="4"><span class="loading-dim-num">05</span><span class="loading-dim-name">Distribution &amp; Revenue</span></div>
+    </div>
     <div class="loading-timer" id="loadingTimer" style="display:none"></div>
     <button class="btn-primary" id="loadingRetryBtn" style="display:none;margin-top:20px;max-width:280px" onclick="retryLastAction()">Try again →</button>
   </div>
@@ -945,17 +995,20 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
     <button class="back-btn" onclick="goLanding()">← Back</button>
   </div>
   <div class="r-main myreports-main">
-    <h2 style="margin:24px 0 8px">My Reports</h2>
-
-    <div id="myReportsLoggedOut">
-      <p style="color:var(--muted);font-size:14px;line-height:1.6">Enter the email you used to request a full report — we'll send you a link to see every report tied to it, no password needed.</p>
-      <div class="field" style="text-align:left;margin-bottom:14px"><label for="loginEmail">Your email</label><input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" inputmode="email"></div>
-      <div class="inline-error" id="loginError" style="display:none"></div>
-      <button class="btn-unlock" onclick="requestLogin()" id="loginSubmitBtn">Send me a sign-in link →</button>
-      <div id="loginStatus" style="margin-top:10px;font-size:13px"></div>
+    <div id="myReportsLoggedOut" class="myreports-signin">
+      <div class="myreports-card">
+        <div class="myreports-icon"><svg width="20" height="20" viewBox="0 0 124 124" xmlns="http://www.w3.org/2000/svg"><path d="M6 0L117 0A6 6 0 0 1 123 6L123 19Q123 25 117.11 26.15L5.89 47.85Q0 49 0 43L0 6A6 6 0 0 1 6 0Z"/><rect x="0" y="62" width="123" height="62" rx="6"/></svg></div>
+        <h2 style="margin-bottom:8px">My Reports</h2>
+        <p style="color:var(--muted);font-size:14px;line-height:1.6">Enter the email you used to request a full report — we'll send you a link to see every report tied to it, no password needed.</p>
+        <div class="field" style="margin-top:18px;margin-bottom:14px"><label for="loginEmail">Your email</label><input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" inputmode="email"></div>
+        <div class="inline-error" id="loginError" style="display:none"></div>
+        <button class="btn-unlock" onclick="requestLogin()" id="loginSubmitBtn">Send me a sign-in link →</button>
+        <div id="loginStatus" style="margin-top:10px;font-size:13px"></div>
+      </div>
     </div>
 
     <div id="myReportsLoggedIn" style="display:none">
+      <h2 style="margin:24px 0 8px">My Reports</h2>
       <p id="myReportsEmailLabel" style="color:var(--muted);font-size:13px;margin-bottom:16px"></p>
       <div id="myReportsList"></div>
       <button class="btn-secondary" onclick="logoutMyReports()" style="margin-top:20px">Log out</button>
@@ -1483,6 +1536,44 @@ function stopFullReportTimer() {
   if (el) el.style.display = 'none';
 }
 
+/* ── DIMENSION PROGRESS ── walks the loading screen through the same 5
+   numbered dimensions used everywhere else in the product, instead of a
+   generic spinner. Pacing is a plausible staged animation keyed to elapsed
+   time, not literal per-dimension telemetry (the underlying API calls run
+   in parallel and don't expose that granularity) — it still lands on the
+   right dimension by the time each flow realistically finishes. */
+var loadingDimHandle = null;
+function resetLoadingDims() {
+  if (loadingDimHandle) { clearInterval(loadingDimHandle); loadingDimHandle = null; }
+  document.querySelectorAll('#loadingDims .loading-dim').forEach(function (el) {
+    el.classList.remove('is-active', 'is-done');
+  });
+}
+function startLoadingDims(stageSeconds) {
+  resetLoadingDims();
+  var dims = document.querySelectorAll('#loadingDims .loading-dim');
+  var startedAt = Date.now();
+  function render() {
+    var secs = (Date.now() - startedAt) / 1000;
+    var stage = 0;
+    for (var i = 0; i < stageSeconds.length; i++) { if (secs >= stageSeconds[i]) stage = i + 1; }
+    stage = Math.min(stage, dims.length - 1);
+    dims.forEach(function (el, i) {
+      el.classList.toggle('is-done', i < stage);
+      el.classList.toggle('is-active', i === stage);
+    });
+  }
+  render();
+  loadingDimHandle = setInterval(render, 500);
+}
+function finishLoadingDims() {
+  if (loadingDimHandle) { clearInterval(loadingDimHandle); loadingDimHandle = null; }
+  document.querySelectorAll('#loadingDims .loading-dim').forEach(function (el) {
+    el.classList.remove('is-active');
+    el.classList.add('is-done');
+  });
+}
+
 async function generateFullReport() {
   if (!pendingFullReportAuth) return;
   var myGenId = ++fullReportGenerationId;
@@ -1493,11 +1584,11 @@ async function generateFullReport() {
   isSampleReport = false;
   document.getElementById('sampleBanner').style.display = 'none';
   document.getElementById('loadingRetryBtn').style.display = 'none';
-  document.getElementById('loadingSpinner').style.display = 'block';
   document.getElementById('loadingTitle').textContent = 'Building your full report…';
   document.getElementById('loadingDesc').textContent = 'Preparing a deeply detailed analysis — this can take a few minutes. Feel free to close this page: we\'ll email your full report the moment it\'s ready, and you can always come back here to view it.';
   showOnly('sec-loading');
   startFullReportTimer();
+  startLoadingDims([15, 45, 100, 180]);
 
   for (var i = 0; i < POLL_MAX_ATTEMPTS; i++) {
     var existing = await checkReportReady(sessionId, token);
@@ -1507,7 +1598,7 @@ async function generateFullReport() {
       // delivered) — the stored record will never flip to "sent", so
       // continuing to poll would just say "almost there" forever.
       stopFullReportTimer();
-      document.getElementById('loadingSpinner').style.display = 'none';
+      resetLoadingDims();
       document.getElementById('loadingTitle').textContent = 'Something went wrong';
       document.getElementById('loadingDesc').textContent = 'We couldn\'t finish generating your report. Please start a new analysis and double-check your email address — if this keeps happening, contact info@oneciak.com.';
       document.getElementById('loadingRetryBtn').style.display = 'none';
@@ -1515,11 +1606,11 @@ async function generateFullReport() {
     }
     if (existing && existing.ready) {
       stopFullReportTimer();
+      finishLoadingDims();
       if (!isUsableReport(existing.report)) {
         // The server has already marked this generation "sent" — polling
         // again would just return the same incomplete data, so retrying
         // client-side can't help. A fresh report is the only real fix.
-        document.getElementById('loadingSpinner').style.display = 'none';
         document.getElementById('loadingTitle').textContent = 'Something went wrong';
         document.getElementById('loadingDesc').textContent = 'Your report came back incomplete. Please start a new analysis — if this keeps happening, contact info@oneciak.com.';
         document.getElementById('loadingRetryBtn').style.display = 'none';
@@ -1541,7 +1632,6 @@ async function generateFullReport() {
 
   if (myGenId !== fullReportGenerationId) return;
   stopFullReportTimer();
-  document.getElementById('loadingSpinner').style.display = 'none';
   document.getElementById('loadingTitle').textContent = 'Almost there';
   document.getElementById('loadingDesc').textContent = 'Your report is taking a bit longer than usual to prepare. It\'s still being generated — we\'ll email it to you as soon as it\'s ready. Tap below to keep checking, or just close this page and check your inbox in a few minutes.';
   document.getElementById('loadingRetryBtn').style.display = 'inline-flex';
@@ -1625,7 +1715,7 @@ function renderFree(r, title) {
       '<div class="accordion-icon">'+sec.num+'</div>'+
       '<div><div class="accordion-label">'+sec.label+'</div><div class="accordion-sublabel">'+sec.sublabel+'</div></div>'+
       '</div>'+
-      '<span class="accordion-score score-'+c+'">'+(sec.score||0)+'<span class="denom">/10</span></span>'+
+      '<span class="accordion-score-wrap"><span class="accordion-score score-'+c+'">'+(sec.score||0)+'<span class="denom">/10</span></span><span class="accordion-score-label score-'+c+'">'+badgeText+'</span></span>'+
       '<span class="accordion-chevron">▾</span>'+
       '</button>'+
       '<div class="accordion-body" id="acc-body-'+idx+'">'+body+'</div>'+
@@ -1735,7 +1825,7 @@ function renderFull(r, title) {
   sections.forEach(function(sec, idx) {
     var c = sec.score !== null ? scoreColor(sec.score) : null;
     var scoreHtml = sec.score !== null
-      ? '<span class="accordion-score score-'+c+'">'+sec.score+'<span class="denom">/10</span></span>'
+      ? '<span class="accordion-score-wrap"><span class="accordion-score score-'+c+'">'+sec.score+'<span class="denom">/10</span></span><span class="accordion-score-label score-'+c+'">'+(c==='high'?'Strong':c==='mid'?'Moderate':'Weak')+'</span></span>'
       : '<span style="font-size:12px;color:var(--accent);font-weight:600;letter-spacing:0.04em">→</span>';
     html +=
       '<div class="accordion-item">'+
@@ -1763,7 +1853,6 @@ function renderFull(r, title) {
 /* ── ACCORDION BODY BUILDER ── */
 function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan, extra) {
   var col = scoreColor(score||0);
-  var badgeText = col==='high' ? 'Strong' : col==='mid' ? 'Moderate' : 'Weak';
   var out = '';
 
   // Score bar
@@ -2110,10 +2199,12 @@ async function runAnalysis() {
   showOnly('sec-loading');
   document.getElementById('loadingTitle').textContent = 'Analyzing your project…';
   document.getElementById('loadingDesc').textContent = 'Evaluating your project across five market dimensions with real industry data.';
+  startLoadingDims([3, 6, 9, 13]);
   try {
     var result = await callFullAPI([freePromptA(p), freePromptB(p), freePromptC(p)]);
     if (!isUsableReport(result)) throw new Error('The analysis came back incomplete. Please try again.');
     lastResult = result;
+    finishLoadingDims();
     showOnly('sec-results');
     renderFree(result, p.title);
     track('analysis_completed');
@@ -2299,6 +2390,7 @@ async function startFreeFullReport(email) {
     showOnly('sec-loading');
     document.getElementById('loadingTitle').textContent = 'Starting your full report…';
     document.getElementById('loadingDesc').textContent = 'This can take a few minutes to generate. Feel free to close this page any time — we\'ll email it to "'+email+'" the moment it\'s ready.';
+    startLoadingDims([3, 6, 9, 13]);
     var res = await fetch('/.netlify/functions/start-full-report', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
