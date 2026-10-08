@@ -9,6 +9,21 @@ function scoreLabel(s) {
   return n >= 7 ? 'Strong' : n >= 5 ? 'Moderate' : 'Weak';
 }
 
+const MONO = "'SFMono-Regular',Menlo,Consolas,monospace";
+
+function monoLabel(text, color) {
+  return '<p style="margin:0 0 8px;font-family:' + MONO + ';font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:' + color + '">' + esc(text) + '</p>';
+}
+
+// Label + rows with a colored left rule, same as the flags on the site. Nothing if the list is empty.
+function ruledList(label, items, color) {
+  items = (items || []).filter(Boolean);
+  if (!items.length) return '';
+  let html = '<div style="margin-top:16px">' + monoLabel(label, color);
+  items.forEach(t => { html += '<p style="margin:0 0 8px;padding:2px 0 2px 12px;border-left:2px solid ' + color + ';font-size:13px;line-height:1.55;color:#161616">' + esc(t) + '</p>'; });
+  return html + '</div>';
+}
+
 function section(title, score, verdict, detail, flags, strengths, tips, plan, extra) {
   let html = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6">';
   html += '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px"><tr>';
@@ -19,10 +34,10 @@ function section(title, score, verdict, detail, flags, strengths, tips, plan, ex
   html += '</tr></table>';
   if (verdict) html += '<p style="margin:0 0 8px;font-size:14px;color:#161616;font-weight:600">' + esc(verdict) + '</p>';
   if (detail) html += '<p style="margin:0 0 12px;font-size:13px;line-height:1.7;color:#3d3935">' + esc(detail) + '</p>';
-  (flags || []).forEach(f => { html += '<p style="margin:0 0 8px;padding:2px 0 2px 12px;border-left:2px solid #b13225;font-size:13px;line-height:1.55;color:#161616">' + esc(f) + '</p>'; });
-  (strengths || []).forEach(s => { html += '<p style="margin:0 0 8px;padding:2px 0 2px 12px;border-left:2px solid #0f7a3d;font-size:13px;line-height:1.55;color:#161616">' + esc(s) + '</p>'; });
+  html += ruledList('Red flags', flags, '#b13225');
+  html += ruledList('Strengths', strengths, '#0f7a3d');
   if (tips && tips.length) {
-    html += '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Recommendations</span>';
+    html += '<div style="margin-top:16px">' + monoLabel('Recommendations', '#5c5852');
     tips.forEach(t => {
       if (!t) return;
       const txt = typeof t === 'string' ? t : (t.advice || '');
@@ -196,8 +211,8 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
 
   if (r.risk_assessment && ((r.risk_assessment.top_risks && r.risk_assessment.top_risks.length) || (r.risk_assessment.mitigation && r.risk_assessment.mitigation.length))) {
     let ra = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Risk Assessment</span>';
-    (r.risk_assessment.top_risks || []).forEach(risk => { if (risk) ra += '<p style="margin:8px 0 0;font-size:13px;color:#b13225">⚑ ' + esc(risk) + '</p>'; });
-    (r.risk_assessment.mitigation || []).forEach(m => { if (m) ra += '<p style="margin:8px 0 0;font-size:13px;color:#0f7a3d">✓ ' + esc(m) + '</p>'; });
+    ra += ruledList('Top risks', r.risk_assessment.top_risks, '#b13225');
+    ra += ruledList('How to reduce them', r.risk_assessment.mitigation, '#0f7a3d');
     ra += '</td></tr>';
     body += ra;
   }
@@ -243,7 +258,6 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
   // image, because Gmail strips SVG and Outlook ignores CSS gradients; the
   // night bgcolor is the fallback), then the report on warm paper.
   const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
-  const MONO = "'SFMono-Regular',Menlo,Consolas,monospace";
   return '<!doctype html><html><head><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"></head><body style="margin:0;padding:0;background:#f4f1ec;font-family:' + FONT + '">' +
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1ec;padding:28px 0">' +
     '<tr><td align="center">' +
