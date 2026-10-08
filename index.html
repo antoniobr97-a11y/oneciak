@@ -1058,7 +1058,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 <div id="sec-loading" role="status" aria-live="polite">
   <div class="loading-wrap">
     <div class="loading-title" id="loadingTitle">Analyzing your project…</div>
-    <div class="loading-desc" id="loadingDesc">Evaluating your project across five market dimensions with real industry data.</div>
+    <div class="loading-desc" id="loadingDesc">Scoring your project across the five areas.</div>
     <div class="loading-dims" id="loadingDims" aria-hidden="true">
       <div class="loading-dim" data-dim="0"><span class="loading-dim-num">01</span><span class="loading-dim-name">Creative Package</span></div>
       <div class="loading-dim" data-dim="1"><span class="loading-dim-num">02</span><span class="loading-dim-name">Financial Plan</span></div>
@@ -2408,7 +2408,7 @@ async function runAnalysis() {
   document.getElementById('sampleBanner').style.display = 'none';
   showOnly('sec-loading');
   document.getElementById('loadingTitle').textContent = 'Analyzing your project…';
-  document.getElementById('loadingDesc').textContent = 'Evaluating your project across five market dimensions with real industry data.';
+  document.getElementById('loadingDesc').textContent = 'Scoring your project across the five areas.';
   startLoadingDims([3, 6, 9, 13]);
   try {
     var result = await callFullAPI([freePromptA(p), freePromptB(p), freePromptC(p)]);
