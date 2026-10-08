@@ -39,6 +39,7 @@ exports.handler = async (event) => {
     }
     return { statusCode: 200, headers, body: JSON.stringify({ ready: false }) };
   } catch (err) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    console.error('get-report:', err);
+    return { statusCode: 500, headers, body: JSON.stringify({ error: 'Something went wrong. Please try again.' }) };
   }
 };

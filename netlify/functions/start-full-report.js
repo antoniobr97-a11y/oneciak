@@ -1,7 +1,9 @@
 const crypto = require('crypto');
 const https = require('https');
 const { connectLambda, getStore } = require('@netlify/blobs');
-const { checkRateLimit } = require('./_util/rateLimit');
+const { checkRateLimit, checkKeyLimit } = require('./_util/rateLimit');
+const { sanitizeProject } = require('./_util/project');
+const payloadSig = require('./_util/payloadSig');
 const { sign: signReportToken } = require('./_util/reportToken');
 
 const ALLOWED_ORIGIN = process.env.SITE_URL || 'https://oneciak.com';
@@ -45,13 +47,18 @@ exports.handler = async (event) => {
 
     let parsedBody;
     try { parsedBody = JSON.parse(event.body || '{}'); } catch (e) { return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid request body.' }) }; }
-    const { project, email } = parsedBody;
-    if (!project || !project.title || typeof project.title !== 'string') {
+    const project = sanitizeProject(parsedBody.project);
+    if (!project) {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing project data.' }) };
     }
-    if (!email || typeof email !== 'string' || !EMAIL_RE.test(email) || email.length > 200) {
+    const email = typeof parsedBody.email === 'string' ? parsedBody.email.trim() : '';
+    if (!email || !EMAIL_RE.test(email) || email.length > 200) {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Please enter a valid email address.' }) };
     }
+    // Per recipient as well as per IP: stops the site being used to send a
+    // stream of reports to someone else's inbox from many connections.
+    const perEmail = await checkKeyLimit(email.toLowerCase(), { name: 'full-report-email', limit: 5, windowMinutes: 24 * 60 });
+    if (!perEmail) return { statusCode: 429, headers, body: JSON.stringify({ error: 'This email address has received the maximum number of reports for today. Please try again tomorrow.' }) };
 
     const id = 'free_' + crypto.randomBytes(16).toString('hex');
     const token = signReportToken(id);
@@ -59,10 +66,11 @@ exports.handler = async (event) => {
     const store = getStore('webhook-reports');
     try { await store.setJSON(id, { status: 'processing', startedAt: Date.now() }); } catch (e) { /* fail open */ }
 
-    await triggerBackground({ id, token, project, email });
+    await triggerBackground({ id, token, project, email, sig: payloadSig.sign(id, email, project) });
 
     return { statusCode: 200, headers, body: JSON.stringify({ id, token }) };
   } catch (err) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    console.error('start-full-report:', err);
+    return { statusCode: 500, headers, body: JSON.stringify({ error: 'Could not start the report. Please try again.' }) };
   }
 };

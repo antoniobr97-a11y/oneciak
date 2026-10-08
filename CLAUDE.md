@@ -185,6 +185,20 @@ Server locale per testare prima di pubblicare:
 (python3 -m http.server 8143 > /tmp/qualcosa.log 2>&1 &) ; sleep 2; curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8143/index.html
 ```
 
+## Sicurezza backend (revisione del 2026-10-08)
+
+- `analyze.js` accetta **solo** `{project}`: i prompt dell'anteprima si
+  costruiscono sul server (`_util/freePrompts.js`). Mai più accettare testo di
+  prompt dal browser, altrimenti chiunque usa la chiave Anthropic per altro.
+- Ogni progetto passa da `_util/project.js` (`sanitizeProject`: solo campi
+  noti, lunghezze massime uguali ai `maxlength` del form).
+- `start-full-report` firma id+email+progetto (`_util/payloadSig.js`);
+  `generate-report-background` rifiuta payload con firma non valida. Tetto di
+  5 report al giorno per indirizzo email (`checkKeyLimit`, email hashata).
+- Errori 500 generici verso il client, dettagli solo in `console.error`.
+- `admin-stats.html` manda la chiave nell'header `X-Admin-Key`, non nell'URL.
+- Consigliato ad Antonio: limite di spesa mensile nella console Anthropic.
+
 ## Principio di onestà (esplicito, non derogabile)
 
 Mai inventare o gonfiare numeri/statistiche mostrate agli utenti (es. il

@@ -9,7 +9,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LOGIN_LINK_TTL_MS = 20 * 60 * 1000; // long enough to find and click the email, short enough to limit replay risk
 
 function esc(s) {
-  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // "My Reports" login: no password, no separate account secret to manage —
@@ -74,6 +74,7 @@ exports.handler = async (event) => {
 
     return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
   } catch (err) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    console.error('request-login:', err);
+    return { statusCode: 500, headers, body: JSON.stringify({ error: 'Something went wrong. Please try again.' }) };
   }
 };
