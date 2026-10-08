@@ -40,7 +40,7 @@
   --border: #d9d3cb;
   --border-light: #e5dfd7;
   /* night: the landing hero, a dark room before the projector starts */
-  --night: #0f0e0d;
+  --night: #140d10;
   --on-night: #f2ede6;
   --on-night-2: #a5a09a;
   --ember: #d6784c;
@@ -133,11 +133,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   height: 64px; padding: 0 max(40px, calc((100vw - 1240px) / 2 + 40px));
   display: flex; align-items: center; justify-content: space-between;
-  background: rgba(15,14,13,0); color: var(--on-night);
+  background: rgba(20,13,16,0); color: var(--on-night);
   border-bottom: 1px solid rgba(255,255,255,0.08);
   transition: background 0.35s var(--ease), color 0.35s var(--ease), border-color 0.35s var(--ease);
 }
-.l-nav.is-scrolled { background: rgba(15,14,13,0.72); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); }
+.l-nav.is-scrolled { background: rgba(20,13,16,0.72); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); }
 .l-nav.is-light { background: rgba(244,241,236,0.84); color: var(--text); border-bottom-color: rgba(20,18,16,0.07); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); }
 .l-logo { font-family: var(--display); font-size: 16px; font-weight: 600; color: inherit; letter-spacing: -0.01em; display: inline-flex; align-items: center; gap: 9px; cursor: pointer; }
 .l-logo svg path, .l-logo svg rect { fill: currentColor; }
@@ -169,12 +169,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-hero::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
   background:
-    radial-gradient(55% 55% at 86% 22%, rgba(214,120,76,0.10), transparent 62%),
-    radial-gradient(30% 25% at 6% 78%, rgba(94,67,86,0.08), transparent 70%);
+    radial-gradient(75% 55% at 108% -6%, rgba(235,137,63,0.95) 0%, rgba(236,88,40,0.85) 22%, rgba(225,36,31,0.7) 38%, rgba(139,25,33,0.45) 52%, rgba(36,18,24,0) 70%),
+    radial-gradient(60% 38% at -12% 58%, rgba(24,43,48,0.95) 0%, rgba(24,43,48,0.6) 40%, rgba(24,43,48,0) 72%),
+    radial-gradient(55% 30% at 112% 78%, rgba(225,36,31,0.55) 0%, rgba(139,25,33,0.3) 40%, rgba(36,18,24,0) 70%);
 }
+/* Palette from Antonio's reference (2026-10-08, variant "C"): amber #eb893f,
+   orange #ec5828, red #e1241f, wine #8b1921, petrol #182b30 on a plum-black
+   night. Glows sit at the edges so the text column stays on dark ground. */
 .l-hero::after {
-  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.07; mix-blend-mode: screen;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch' seed='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.22; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 1.1 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px;
 }
 .l-wrap { max-width: 1240px; margin: 0 auto; padding: 0 40px; width: 100%; }
 .l-hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 72px; align-items: center; padding-top: 148px; }
@@ -220,9 +225,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
    the static sample report (showSampleReport), not invented ones. */
 .l-sheet {
   display: block; width: 100%; text-align: left; font: inherit; cursor: pointer;
-  background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.02));
+  background: linear-gradient(180deg, rgba(20,13,16,0.55), rgba(20,13,16,0.35));
   -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
-  color: var(--on-night); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px;
+  color: var(--on-night); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
   padding: 28px 28px 14px;
   animation: riseIn 0.9s 0.2s var(--ease) both;
@@ -273,10 +278,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
    page dimming rather than a white sheet sliding over it. Two short
    sections, hairlines, no cards. */
 .menu-overlay { position: fixed; inset: 0; z-index: 200; background: var(--night); color: var(--on-night); display: none; flex-direction: column; padding: 0; overflow-y: auto; }
-.menu-overlay::before { content: ''; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(45% 40% at 92% 8%, rgba(214,120,76,0.12), transparent 65%); }
+.menu-overlay::before { content: ''; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(70% 45% at 110% -8%, rgba(235,137,63,0.7) 0%, rgba(225,36,31,0.45) 35%, rgba(139,25,33,0.25) 52%, rgba(36,18,24,0) 70%), radial-gradient(50% 35% at -12% 85%, rgba(24,43,48,0.8) 0%, rgba(24,43,48,0) 70%); }
 .menu-overlay.open { display: flex; animation: menuIn 0.28s var(--ease) both; }
 @keyframes menuIn { from { opacity: 0; } to { opacity: 1; } }
-.menu-header { flex-shrink: 0; position: sticky; top: 0; z-index: 1; padding: 0 max(40px, calc((100vw - 1240px) / 2 + 40px)); height: 64px; display: flex; align-items: center; justify-content: space-between; background: rgba(15,14,13,0.9); border-bottom: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.menu-header { flex-shrink: 0; position: sticky; top: 0; z-index: 1; padding: 0 max(40px, calc((100vw - 1240px) / 2 + 40px)); height: 64px; display: flex; align-items: center; justify-content: space-between; background: rgba(20,13,16,0.9); border-bottom: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
 .menu-logo { font-family: var(--display); font-size: 16px; font-weight: 600; color: var(--on-night); display: inline-flex; align-items: center; gap: 9px; cursor: pointer; }
 .menu-logo svg path, .menu-logo svg rect { fill: currentColor; }
 .menu-close { position: relative; background: none; border: none; border-radius: 0; width: 34px; height: 34px; margin-right: -6px; font-size: 0; color: var(--on-night); cursor: pointer; transition: opacity 0.2s, transform 0.15s; }
@@ -334,7 +339,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 /* FORM: no white boxes on the ground. Sections are separated by a hair
    line and a mono number; fields are a tint of the paper itself. */
 #sec-form { position: relative; }
-#sec-form::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 280px; background: linear-gradient(180deg, rgba(15,14,13,0.07), rgba(15,14,13,0)); pointer-events: none; }
+#sec-form::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 280px; background: linear-gradient(180deg, rgba(20,13,16,0.07), rgba(20,13,16,0)); pointer-events: none; }
 .f-main { position: relative; max-width: 1240px; margin: 0 auto; padding: 64px 40px 120px; display: grid; grid-template-columns: 0.75fr 1.25fr; gap: 72px; align-items: start; }
 .f-side { position: sticky; top: 104px; }
 .f-kicker { color: var(--muted); }
@@ -663,7 +668,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
    Same language as the landing: night header dissolving into paper, light
    display type, mono labels, and no boxed cards sitting on the ground.
 ══════════════════════ */
-#sec-results .r-header, #sec-myreports .r-header { background: rgba(15,14,13,0.97); color: var(--on-night); border-bottom-color: rgba(255,255,255,0.08); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); height: 64px; transition: background 0.35s var(--ease), color 0.35s var(--ease), border-color 0.35s var(--ease); }
+#sec-results .r-header, #sec-myreports .r-header { background: rgba(20,13,16,0.97); color: var(--on-night); border-bottom-color: rgba(255,255,255,0.08); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); height: 64px; transition: background 0.35s var(--ease), color 0.35s var(--ease), border-color 0.35s var(--ease); }
 #sec-results .r-header.is-light, #sec-myreports .r-header.is-light { background: rgba(244,241,236,0.84); color: var(--text); border-bottom-color: rgba(20,18,16,0.07); }
 .r-logo { font-family: var(--display); font-size: 16px; color: inherit; }
 .r-logo svg path, .r-logo svg rect, .f-logo svg path, .f-logo svg rect { fill: currentColor; }
@@ -675,9 +680,9 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   background: linear-gradient(in oklab 180deg, var(--night) 0, var(--night) calc(100% - 250px), var(--paper) 100%);
   padding: 64px 24px 220px;
 }
-#sec-results .r-hero::before, #sec-myreports .r-hero::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(50% 50% at 88% 10%, rgba(214,120,76,0.11), transparent 62%); }
+#sec-results .r-hero::before, #sec-myreports .r-hero::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(60% 55% at 108% -10%, rgba(235,137,63,0.85) 0%, rgba(236,88,40,0.7) 22%, rgba(225,36,31,0.55) 38%, rgba(139,25,33,0.35) 52%, rgba(36,18,24,0) 70%), radial-gradient(45% 40% at -10% 70%, rgba(24,43,48,0.85) 0%, rgba(24,43,48,0) 70%); }
 #sec-results .r-hero-inner, #sec-myreports .r-hero-inner { position: relative; }
-.r-eyebrow { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-night-2); margin-bottom: 18px; }
+.r-eyebrow { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: #d6cec3; margin-bottom: 18px; }
 .r-title { font-family: var(--display); font-size: clamp(40px, 6vw, 72px); font-weight: 300; letter-spacing: -0.035em; line-height: 1; color: var(--on-night); margin-bottom: 20px; }
 .r-summary { font-size: 17px; line-height: 1.55; color: var(--on-night-2); max-width: 60ch; }
 #overallScore { margin-top: 36px; }
