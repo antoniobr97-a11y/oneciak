@@ -44,12 +44,20 @@ exports.handler = async (event) => {
     const siteBase = (process.env.URL || process.env.SITE_URL || 'https://oneciak.com').replace(/\/$/, '');
     const loginUrl = siteBase + '/?login_token=' + encodeURIComponent(loginToken) + '&login_email=' + encodeURIComponent(email);
 
-    const html = '<div style="font-family:sans-serif;font-size:15px;color:#111;line-height:1.6;max-width:480px;margin:0 auto;padding:24px">' +
-      '<p style="font-weight:700;font-size:17px">Your OneCiak sign-in link</p>' +
-      '<p>Click below to see every full report you\'ve requested with this email address. This link expires in 20 minutes.</p>' +
-      '<p style="margin:24px 0"><a href="' + esc(loginUrl) + '" style="background:#000;color:#fff;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:600">View my reports →</a></p>' +
-      '<p style="color:#6f6f6f;font-size:13px">If you didn\'t request this, you can safely ignore this email.</p>' +
-      '</div>';
+    // Same look as the report email and the site: night header, warm paper body.
+    const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
+    const html = '<!doctype html><html><head><meta name="color-scheme" content="light only"></head><body style="margin:0;padding:0;background:#f4f1ec;font-family:' + FONT + '">' +
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1ec;padding:28px 0"><tr><td align="center">' +
+      '<table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%;border-radius:14px;overflow:hidden;background:#fbf9f6">' +
+      '<tr><td bgcolor="#140d10" background="https://oneciak.com/email-header.jpg" style="background:#140d10 url(https://oneciak.com/email-header.jpg) center top / cover no-repeat;padding:24px 28px 26px">' +
+        '<div style="font-size:15px;font-weight:700;color:#f2ede6">OneCiak</div>' +
+        '<div style="margin-top:26px;font-size:24px;line-height:1.15;font-weight:700;color:#f2ede6;letter-spacing:-0.02em">Your sign-in link</div>' +
+      '</td></tr>' +
+      '<tr><td style="padding:24px 28px 28px;font-size:15px;line-height:1.6;color:#161616">' +
+        '<p style="margin:0">Click below to see every full report you\'ve requested with this email address. This link expires in 20 minutes.</p>' +
+        '<p style="margin:22px 0 0"><a href="' + esc(loginUrl) + '" style="display:inline-block;background:#140d10;color:#f2ede6;padding:13px 22px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px">View my reports</a></p>' +
+        '<p style="margin:22px 0 0;color:#5c5852;font-size:13px">If you didn\'t request this, you can safely ignore this email.</p>' +
+      '</td></tr></table></td></tr></table></body></html>';
 
     try {
       await sendReportEmail({
