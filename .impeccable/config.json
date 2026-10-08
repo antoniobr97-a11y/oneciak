@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-08T03:48:02.347Z",
+        "reason": "Agent: nav bars/guide-box use flex vertical-centering, text already has visual breathing room — verified with real screenshots, not actually flush"
+      },
+      {
+        "rule": "pulsing-dot",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-08T03:48:02.359Z",
+        "reason": "Agent: dot sits next to a live elapsed-time counter during real report generation, not decorative — tied to genuinely changing data per the rule's own exception"
+      }
+    ]
+  }
+}
