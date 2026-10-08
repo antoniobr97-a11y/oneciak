@@ -129,6 +129,10 @@ conversazione aspettando.
   statistiche anonime self-hosted; il localStorage serve solo al login
   "My Reports" scelto dall'utente. Non aggiungerlo senza un motivo nuovo.
 - Il disclaimer con casella sulla landing resta obbligatorio (`termsCheck`).
+- **Pagina risultati TUTTA scura** (2026-10-08, chiesto da Antonio: "perché
+  l'analisi è ancora chiara?"): i token colore sono ridefiniti dentro
+  `#sec-results` (testo chiaro, `--paper` = notte). Se si aggiunge un colore
+  fisso nei builder del report, controllare che si legga sullo scuro.
 - **Risultati e caricamento** (stesso giorno): header scuro che sfuma come la
   home, punteggio nella stessa scheda di vetro (`#overallScore` è dentro
   `.r-hero`), niente card, numeri mono. Home compattata su richiesta di
