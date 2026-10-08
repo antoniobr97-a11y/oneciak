@@ -486,13 +486,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 /* MY REPORTS — the sign-in moment gets a real card instead of a bare form
    pinned to the top of an otherwise-empty viewport; the logged-in report
    list stays full-width below since it's a list, not a single action. */
-.myreports-signin { padding-top: 10vh; }
-.myreports-card { background: var(--cream); border-radius: var(--radius-lg); padding: 38px 30px; text-align: center; }
-.myreports-icon { width: 48px; height: 48px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; margin: 0 auto 22px; }
-.myreports-icon svg path, .myreports-icon svg rect { fill: #fff; }
-.myreports-card h2 { text-align: center; }
-.myreports-card .field { text-align: left; }
-@media (max-width: 640px) { .myreports-signin { padding-top: 6vh; } }
+
 
 /* OVERALL SCORE */
 .overall-card {
@@ -662,19 +656,19 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
    Same language as the landing: night header dissolving into paper, light
    display type, mono labels, and no boxed cards sitting on the ground.
 ══════════════════════ */
-#sec-results .r-header { background: rgba(14,12,11,0.97); color: var(--on-night); border-bottom-color: rgba(255,255,255,0.08); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); height: 64px; transition: background 0.35s var(--ease), color 0.35s var(--ease), border-color 0.35s var(--ease); }
-#sec-results .r-header.is-light { background: rgba(244,241,236,0.84); color: var(--text); border-bottom-color: rgba(20,18,16,0.07); }
+#sec-results .r-header, #sec-myreports .r-header { background: rgba(14,12,11,0.97); color: var(--on-night); border-bottom-color: rgba(255,255,255,0.08); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); height: 64px; transition: background 0.35s var(--ease), color 0.35s var(--ease), border-color 0.35s var(--ease); }
+#sec-results .r-header.is-light, #sec-myreports .r-header.is-light { background: rgba(244,241,236,0.84); color: var(--text); border-bottom-color: rgba(20,18,16,0.07); }
 .r-logo { font-family: var(--display); font-size: 16px; color: inherit; }
 .r-logo svg path, .r-logo svg rect, .f-logo svg path, .f-logo svg rect { fill: currentColor; }
 .f-logo { font-family: var(--display); font-size: 16px; }
-#sec-results .back-btn { color: inherit; }
-#sec-results .r-hero {
+#sec-results .back-btn, #sec-myreports .back-btn { color: inherit; }
+#sec-results .r-hero, #sec-myreports .r-hero {
   color: var(--on-night); position: relative;
   background: linear-gradient(180deg, var(--night) 0, var(--night) calc(100% - 260px), #231e1b calc(100% - 200px), #4a413b calc(100% - 145px), #8f857c calc(100% - 88px), #d3cbc2 calc(100% - 40px), var(--paper) 100%);
   padding: 64px 24px 220px;
 }
-#sec-results .r-hero::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(50% 50% at 88% 10%, rgba(214,120,76,0.16), transparent 62%); }
-#sec-results .r-hero-inner { position: relative; }
+#sec-results .r-hero::before, #sec-myreports .r-hero::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(50% 50% at 88% 10%, rgba(214,120,76,0.16), transparent 62%); }
+#sec-results .r-hero-inner, #sec-myreports .r-hero-inner { position: relative; }
 .r-eyebrow { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-night-2); margin-bottom: 18px; }
 .r-title { font-family: var(--display); font-size: clamp(40px, 6vw, 72px); font-weight: 300; letter-spacing: -0.035em; line-height: 1; color: var(--on-night); margin-bottom: 20px; }
 .r-summary { font-size: 17px; line-height: 1.55; color: var(--on-night-2); max-width: 60ch; }
@@ -690,8 +684,10 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .overall-num .denom { font-family: var(--display); font-size: 22px; font-weight: 300; color: var(--on-night-2); }
 #overallScore > div:last-child:not(.overall-card) { color: var(--on-night-2) !important; font-weight: 400 !important; padding: 0 !important; margin-top: 14px !important; font-size: 13px !important; }
 /* the night hero above is the "header"; the body starts right at the dissolve */
-#sec-results .r-main { padding-top: 0; }
-@media (min-width: 901px) { #sec-results .r-main { max-width: 880px; } }
+/* body column lines up exactly with the header text: same max width plus
+   the same side padding as .r-hero (24px, 20px on phones) */
+#sec-results .r-main { padding: 0 24px 90px; max-width: 928px; }
+#sec-myreports .r-main { padding: 0 24px 90px; max-width: 688px; }
 .exec-card, .extra-card, .accordion-wrap, .pdf-card { background: transparent; box-shadow: none !important; border: 0 !important; border-radius: 0; padding-left: 0; padding-right: 0; }
 .exec-card { padding-top: 0; padding-bottom: 36px; margin-bottom: 28px; border-bottom: 1px solid var(--border) !important; }
 .exec-label, .tips-label, .action-label, .flags-label, .exec-box-label, .roadmap-phase { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; }
@@ -724,6 +720,31 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #sec-results .disclaimer-box, #sec-myreports .disclaimer-box { background: none; padding: 0; }
 .tip-link { background: var(--field); }
 .roadmap-num, .action-tag { background: var(--text); }
+/* MY REPORTS: same header as results; sign-in is a plain field on the
+   paper, the list is hairline rows (date, title, arrow), not boxes. */
+#sec-myreports .r-hero-inner { max-width: 640px; }
+#sec-results .r-hero-inner { max-width: 880px; }
+#sec-myreports .r-title { font-size: clamp(36px, 5vw, 56px); max-width: 16ch; }
+.myreports-signin .field { margin-bottom: 18px; }
+#sec-myreports input[type="email"] { background-color: var(--field); box-shadow: inset 0 0 0 1px transparent; border-radius: 10px; padding: 14px 16px; font-size: 15.5px; transition: background-color 0.2s var(--ease), box-shadow 0.2s var(--ease); }
+#sec-myreports input[type="email"]::placeholder { color: #655e57; }
+@media (hover: hover) and (pointer: fine) { #sec-myreports input[type="email"]:hover { background-color: var(--field-hover); } }
+#sec-myreports input[type="email"]:focus { background-color: rgba(255,255,255,0.6); box-shadow: inset 0 0 0 1px rgba(214,120,76,0.6), 0 0 0 4px rgba(214,120,76,0.12); }
+#sec-myreports label { font-weight: 500; font-size: 13.5px; margin-bottom: 9px; }
+.mr-btn { width: auto; padding: 15px 24px; background: var(--text); }
+.mr-status { margin-top: 14px; font-size: 13.5px; line-height: 1.5; }
+.mr-email { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+.mr-list { border-top: 1px solid var(--text); }
+.mr-note { color: var(--muted); font-size: 14px; padding: 18px 0; }
+.mr-row { display: grid; grid-template-columns: 112px 1fr 20px; align-items: baseline; gap: 16px; padding: 20px 4px; border-bottom: 1px solid var(--border); text-decoration: none; color: var(--text); transition: transform 0.2s var(--ease); }
+.mr-date { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.mr-title { font-family: var(--display); font-size: 21px; font-weight: 500; letter-spacing: -0.015em; }
+.mr-arrow { color: var(--muted); transition: transform 0.2s var(--ease), color 0.2s; }
+@media (hover: hover) and (pointer: fine) { .mr-row:hover .mr-arrow { transform: translateX(3px); color: var(--text); } }
+.mr-row:active { transform: scale(0.99); }
+.mr-logout { width: auto; padding: 14px 0; margin-top: 12px; }
+@media (max-width: 640px) { .mr-row { grid-template-columns: 1fr 20px; gap: 4px 12px; } .mr-date { grid-column: 1 / -1; } }
+
 /* LOADING: light display title, mono step numbers, no filled circles */
 .loading-wrap { max-width: 520px; }
 .loading-title { font-family: var(--display); font-size: clamp(30px, 5vw, 40px); font-weight: 300; letter-spacing: -0.03em; }
@@ -734,7 +755,8 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .loading-dim.is-done .loading-dim-num { background: none; color: var(--success); }
 .loading-dim-name { font-family: var(--display); font-size: 17px; font-weight: 500; letter-spacing: -0.01em; }
 @media (max-width: 640px) {
-  #sec-results .r-hero { padding: 44px 20px 200px; }
+  #sec-results .r-hero, #sec-myreports .r-hero { padding: 44px 20px 200px; }
+  #sec-results .r-main, #sec-myreports .r-main { padding-left: 20px; padding-right: 20px; }
   .overall-card { padding: 20px; }
   .overall-num { font-size: 52px; }
   .accordion-label { font-size: 18px; }
@@ -1158,24 +1180,25 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
     <div class="r-logo" onclick="goLanding()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')goLanding()"><svg width="18" height="18" viewBox="0 0 124 124" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><path d="M6 0L117 0A6 6 0 0 1 123 6L123 19Q123 25 117.11 26.15L5.89 47.85Q0 49 0 43L0 6A6 6 0 0 1 6 0Z" fill="#000"/><rect x="0" y="62" width="123" height="62" rx="6" fill="#000"/></svg>OneCiak</div>
     <button class="back-btn" onclick="goLanding()">← Back</button>
   </div>
+  <div class="r-hero mr-hero">
+    <div class="r-hero-inner">
+      <div class="r-eyebrow">My reports</div>
+      <h1 class="r-title">Every report you've requested, in one place.</h1>
+      <p class="r-summary">No password. We send a sign-in link to the email you used for your full report.</p>
+    </div>
+  </div>
   <div class="r-main myreports-main">
     <div id="myReportsLoggedOut" class="myreports-signin">
-      <div class="myreports-card">
-        <div class="myreports-icon"><svg width="20" height="20" viewBox="0 0 124 124" xmlns="http://www.w3.org/2000/svg"><path d="M6 0L117 0A6 6 0 0 1 123 6L123 19Q123 25 117.11 26.15L5.89 47.85Q0 49 0 43L0 6A6 6 0 0 1 6 0Z"/><rect x="0" y="62" width="123" height="62" rx="6"/></svg></div>
-        <h2 style="margin-bottom:8px">My Reports</h2>
-        <p style="color:var(--muted);font-size:14px;line-height:1.6">Enter the email you used to request a full report — we'll send you a link to see every report tied to it, no password needed.</p>
-        <div class="field" style="margin-top:18px;margin-bottom:14px"><label for="loginEmail">Your email</label><input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" inputmode="email"></div>
-        <div class="inline-error" id="loginError" style="display:none"></div>
-        <button class="btn-unlock" onclick="requestLogin()" id="loginSubmitBtn">Send me a sign-in link →</button>
-        <div id="loginStatus" style="margin-top:10px;font-size:13px"></div>
-      </div>
+      <div class="field"><label for="loginEmail">Your email</label><input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" inputmode="email"></div>
+      <div class="inline-error" id="loginError" style="display:none"></div>
+      <button class="btn-unlock mr-btn" onclick="requestLogin()" id="loginSubmitBtn">Send me a sign-in link</button>
+      <div id="loginStatus" class="mr-status"></div>
     </div>
 
     <div id="myReportsLoggedIn" style="display:none">
-      <h2 style="margin:24px 0 8px">My Reports</h2>
-      <p id="myReportsEmailLabel" style="color:var(--muted);font-size:13px;margin-bottom:16px"></p>
-      <div id="myReportsList"></div>
-      <button class="btn-secondary" onclick="logoutMyReports()" style="margin-top:20px">Log out</button>
+      <p id="myReportsEmailLabel" class="mr-email"></p>
+      <div id="myReportsList" class="mr-list"></div>
+      <button class="btn-secondary mr-logout" onclick="logoutMyReports()">Log out</button>
     </div>
   </div>
 </div>
@@ -1245,6 +1268,8 @@ function updateLandingNav() {
   nav.classList.toggle('is-light', y > lightAt);
   var rh = document.querySelector('#sec-results .r-header'), rhero = document.querySelector('#sec-results .r-hero');
   if (rh && rhero) rh.classList.toggle('is-light', y > rhero.offsetHeight - 160);
+  var mh = document.querySelector('#sec-myreports .r-header'), mhero = document.querySelector('#sec-myreports .r-hero');
+  if (mh && mhero) mh.classList.toggle('is-light', y > mhero.offsetHeight - 160);
 }
 window.addEventListener('scroll', updateLandingNav, { passive: true });
 window.addEventListener('resize', updateLandingNav);
@@ -1476,7 +1501,7 @@ async function submitReportIssue() {
   var btn = document.getElementById('reportIssueSubmitBtn');
   var message = document.getElementById('reportIssueMessage').value.trim();
   var category = document.getElementById('reportIssueCategory').value;
-  if (!message) { statusEl.textContent = 'Please describe the issue first.'; statusEl.style.color = '#c5382a'; return; }
+  if (!message) { statusEl.textContent = 'Please describe the issue first.'; statusEl.style.color = 'var(--danger)'; return; }
 
   // The report's session_id/token live in the URL for as long as the report
   // itself does (see handleFreeReportReturn / startFreeFullReport) — reading
@@ -1485,7 +1510,7 @@ async function submitReportIssue() {
   var params = new URLSearchParams(window.location.search);
   var sessionId = params.get('report_id');
   var token = params.get('report_token');
-  if (!sessionId || !token) { statusEl.textContent = 'Could not identify this report. Please reload the page and try again.'; statusEl.style.color = '#c5382a'; return; }
+  if (!sessionId || !token) { statusEl.textContent = 'Could not identify this report. Please reload the page and try again.'; statusEl.style.color = 'var(--danger)'; return; }
 
   btn.disabled = true;
   btn.textContent = 'Sending…';
@@ -1505,7 +1530,7 @@ async function submitReportIssue() {
     btn.textContent = 'Send';
   } catch (e) {
     statusEl.textContent = e.message || 'Could not send your report right now. Please try again later.';
-    statusEl.style.color = '#c5382a';
+    statusEl.style.color = 'var(--danger)';
     btn.disabled = false;
     btn.textContent = 'Send';
   }
@@ -1565,7 +1590,7 @@ async function requestLogin() {
     status.style.color = '#0f7a3d';
   } catch (e) {
     status.textContent = e.message || 'Could not send the sign-in link right now. Please try again later.';
-    status.style.color = '#c5382a';
+    status.style.color = 'var(--danger)';
   } finally {
     btn.disabled = false;
     btn.textContent = 'Send me a sign-in link →';
@@ -1600,7 +1625,7 @@ async function handleLoginReturn() {
     showMyReportsLoggedIn({ email: email, session_token: data.session_token });
   } catch (e) {
     document.getElementById('loginStatus').textContent = e.message || 'This sign-in link is invalid or has expired. Please request a new one.';
-    document.getElementById('loginStatus').style.color = '#c5382a';
+    document.getElementById('loginStatus').style.color = 'var(--danger)';
   }
 }
 
@@ -1609,7 +1634,7 @@ async function showMyReportsLoggedIn(session) {
   document.getElementById('myReportsLoggedIn').style.display = 'block';
   document.getElementById('myReportsEmailLabel').textContent = 'Signed in as ' + session.email;
   var list = document.getElementById('myReportsList');
-  list.innerHTML = '<p style="color:var(--muted);font-size:13px">Loading your reports…</p>';
+  list.innerHTML = '<p class="mr-note">Loading your reports…</p>';
 
   try {
     var res = await fetch('/.netlify/functions/list-reports', {
@@ -1624,23 +1649,24 @@ async function showMyReportsLoggedIn(session) {
       try { localStorage.removeItem('oneciak_login'); } catch (e) {}
       showMyReportsLoggedOut();
       document.getElementById('loginStatus').textContent = (data && data.error) || 'Your session has expired. Please sign in again.';
-      document.getElementById('loginStatus').style.color = '#c5382a';
+      document.getElementById('loginStatus').style.color = 'var(--danger)';
       return;
     }
     var reports = (data && data.reports) || [];
     if (!reports.length) {
-      list.innerHTML = '<p style="color:var(--muted);font-size:13px">No full reports found for this email yet.</p>';
+      list.innerHTML = '<p class="mr-note">No full reports found for this email yet.</p>';
       return;
     }
     list.innerHTML = reports.map(function (r) {
       var date = new Date(r.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-      return '<a href="' + esc(r.viewUrl) + '" style="display:block;padding:14px 16px;border:1px solid var(--border-light);border-radius:var(--radius);margin-bottom:10px;text-decoration:none;color:var(--text)">' +
-        '<div style="font-weight:600;font-size:14px">' + esc(r.title) + '</div>' +
-        '<div style="font-size:12px;color:var(--muted);margin-top:2px">' + esc(date) + '</div>' +
+      return '<a class="mr-row" href="' + esc(r.viewUrl) + '">' +
+        '<span class="mr-date">' + esc(date) + '</span>' +
+        '<span class="mr-title">' + esc(r.title) + '</span>' +
+        '<span class="mr-arrow" aria-hidden="true">→</span>' +
         '</a>';
     }).join('');
   } catch (e) {
-    list.innerHTML = '<p style="color:#c5382a;font-size:13px">Could not load your reports right now. Please try again later.</p>';
+    list.innerHTML = '<p class="mr-note" style="color:var(--danger)">Could not load your reports right now. Please try again later.</p>';
   }
 }
 
