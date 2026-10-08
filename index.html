@@ -28,17 +28,27 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ── RESET ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --sf: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Helvetica, Arial, sans-serif;
   --white: #ffffff;
-  --cream: #fafafa;
-  --paper: #fcfcfc;
-  --border: #dcdcdc;
-  --border-light: #ebebeb;
+  --cream: #ede8e1;
+  --paper: #f4f1ec;
+  --border: #d9d3cb;
+  --border-light: #e5dfd7;
+  /* night: the landing hero, a dark room before the projector starts */
+  --night: #0e0c0b;
+  --on-night: #f2ede6;
+  --on-night-2: #a49d94;
+  --ember: #d6784c;
+  /* form fields: a tint of the ground, not a white box on top of it */
+  --field: rgba(20,18,16,0.045);
+  --field-hover: rgba(20,18,16,0.07);
+  --display: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --text: #161616;
   --ink: #000000;
   --muted: #5c5c5c; /* darkened from #6f6f6f — against the hero's ambient orange wash at its most saturated point, #6f6f6f dropped to ~3.8:1, below WCAG AA's 4.5:1; #5c5c5c clears it with margin there and everywhere lighter */
@@ -60,7 +70,7 @@
   --ease: cubic-bezier(0.28, 0.11, 0.32, 1);
 }
 html { color-scheme: only light; scroll-behavior: smooth; }
-body { font-family: var(--sf); background: var(--white); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; letter-spacing: -0.011em; overflow-anchor: none; position: relative; }
+body { font-family: var(--sf); background: var(--paper); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; letter-spacing: -0.011em; overflow-anchor: none; position: relative; }
 /* Ambient background: a barely-there gradient wash for depth + a fine grain
    texture, both purely decorative (pointer-events:none, negative z-index)
    so they never intercept clicks or sit above real content. Kept
@@ -71,7 +81,7 @@ body { font-family: var(--sf); background: var(--white); color: var(--text); min
 body::before {
   content: ''; position: fixed; inset: 0; z-index: -2; pointer-events: none;
   background:
-    radial-gradient(ellipse 1300px 850px at 6% -4%, rgba(214,120,76,0.25) 0%, rgba(214,120,76,0.11) 42%, transparent 72%),
+    radial-gradient(ellipse 1300px 850px at 6% -4%, rgba(214,120,76,0.14) 0%, rgba(214,120,76,0.06) 42%, transparent 72%),
     radial-gradient(ellipse 650px 550px at 100% 118%, rgba(94,67,86,0.13) 0%, rgba(94,67,86,0.05) 45%, transparent 75%);
 }
 body::after {
@@ -98,16 +108,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   box-shadow: var(--shadow-md);
   border: 1px solid rgba(0,0,0,0.06);
 }
-.l-stat, .l-about-dim {
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
-}
-@media (hover: hover) and (pointer: fine) { .l-stat:hover, .l-about-dim:hover { box-shadow: var(--shadow-md); } }
 .l-btn, .btn-primary, .btn-unlock, .menu-cta {
   transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s;
 }
-@media (hover: hover) and (pointer: fine) { .l-btn:hover, .btn-primary:hover, .btn-unlock:hover, .menu-cta:hover { background: var(--accent-hover); } }
-.l-btn:active, .btn-primary:active, .btn-unlock:active, .menu-cta:active { background: var(--accent-press); transform: scale(0.98); }
+@media (hover: hover) and (pointer: fine) { .btn-primary:hover, .btn-unlock:hover, .menu-cta:hover { background: var(--accent-hover); } .l-btn:hover { background: #fff; } .l-close .l-btn:hover { background: #2a2622; } }
+.btn-primary:active, .btn-unlock:active, .menu-cta:active { background: var(--accent-press); transform: scale(0.98); }
+.l-btn:active { transform: scale(0.97); }
 
 /* ── SECTIONS ── */
 #sec-landing { display: block; }
@@ -119,120 +125,154 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
    LANDING
 ══════════════════════ */
 
-/* NAV */
+/* NAV: sits on the dark hero, then turns to frosted paper once the page
+   has scrolled past the night (toggled by .is-light in JS), so it never
+   reads as a dark bar pasted over the light sections. */
 .l-nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  height: 52px; padding: 0 22px;
+  height: 64px; padding: 0 max(40px, calc((100vw - 1240px) / 2 + 40px));
   display: flex; align-items: center; justify-content: space-between;
-  background: rgba(255,255,255,0.8);
-  backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  background: rgba(14,12,11,0); color: var(--on-night);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  transition: background 0.35s var(--ease), color 0.35s var(--ease), border-color 0.35s var(--ease);
 }
-.l-logo { font-family: var(--sf); font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.l-nav.is-scrolled { background: rgba(14,12,11,0.72); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); }
+.l-nav.is-light { background: rgba(244,241,236,0.84); color: var(--text); border-bottom-color: rgba(20,18,16,0.07); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); }
+.l-logo { font-family: var(--display); font-size: 16px; font-weight: 600; color: inherit; letter-spacing: -0.01em; display: inline-flex; align-items: center; gap: 9px; cursor: pointer; }
+.l-logo svg path, .l-logo svg rect { fill: currentColor; }
+.l-nav-right { display: flex; align-items: center; gap: 26px; }
+.l-nav-link { font-size: 14px; color: inherit; opacity: 0.72; text-decoration: none; white-space: nowrap; background: none; border: 0; cursor: pointer; font-family: var(--sf); padding: 0; transition: opacity 0.2s; }
+@media (hover: hover) and (pointer: fine) { .l-nav-link:hover { opacity: 1; } }
+.l-nav-link:active { transform: scale(0.97); }
+.l-nav-reports { font-size: 14px; font-weight: 500; color: inherit; text-decoration: none; white-space: nowrap; padding: 8px 14px; border-radius: 8px; border: 1px solid currentColor; border-color: rgba(255,255,255,0.22); transition: border-color 0.35s var(--ease), background 0.2s; }
+.l-nav.is-light .l-nav-reports { border-color: rgba(20,18,16,0.18); }
+.l-nav-reports:active { transform: scale(0.97); }
+.l-nav .hamburger { background: rgba(255,255,255,0.08); }
+.l-nav .hamburger span { background: currentColor; }
+.l-nav.is-light .hamburger { background: rgba(20,18,16,0.06); }
 
-/* HERO */
+/* HERO: night that dissolves into the paper below. The fade starts only
+   after the last line of text (padding-bottom reserves the fade band), so
+   no copy ever sits on the mid-tone and loses contrast. */
 .l-hero {
-  min-height: 100vh;
-  display: flex; flex-direction: column;
-  position: relative;
-  /* This section's own opaque white base sits in normal document flow, so
-     it paints above the page-level ambient wash (body::before, a fixed,
-     negative-z-index layer) and fully hides it for this section — the
-     wash has to be repeated here directly for the hero (the one section
-     that's full-bleed over the entire first screen) to actually show it. */
+  position: relative; overflow: hidden; color: var(--on-night);
+  background: linear-gradient(180deg, var(--night) 0, var(--night) calc(100% - 300px), #231e1b calc(100% - 230px), #4a413b calc(100% - 165px), #8f857c calc(100% - 100px), #d3cbc2 calc(100% - 45px), var(--paper) 100%);
+  padding-bottom: 250px;
+}
+/* Ember glow, deliberately lopsided: one dominant warm source top-right,
+   a small plum one low on the left. Never mirrored. */
+.l-hero::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
   background:
-    radial-gradient(ellipse 1400px 900px at 4% -6%, rgba(214,120,76,0.28) 0%, rgba(214,120,76,0.12) 42%, transparent 72%),
-    radial-gradient(ellipse 700px 600px at 100% 115%, rgba(94,67,86,0.14) 0%, rgba(94,67,86,0.05) 45%, transparent 75%),
-    var(--white);
+    radial-gradient(55% 55% at 86% 22%, rgba(214,120,76,0.20), transparent 62%),
+    radial-gradient(30% 25% at 6% 78%, rgba(94,67,86,0.18), transparent 70%);
 }
-/* The grain needs its own opacity, separate from .l-hero's actual content,
-   so it can't just be another layer in .l-hero's background shorthand —
-   that would need per-layer opacity, which CSS doesn't support. A
-   dedicated absolutely-positioned pseudo-element does it instead, with
-   .l-hero-inner raised above it via z-index. */
 .l-hero::after {
-  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.16;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch' seed='11' result='fine'/%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.12' numOctaves='2' stitchTiles='stitch' seed='3' result='coarse'/%3E%3CfeComposite in='fine' in2='coarse' operator='arithmetic' k1='0.5' k2='0.5' k3='0' k4='0'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='2.2' intercept='-0.6'/%3E%3CfeFuncG type='linear' slope='2.2' intercept='-0.6'/%3E%3CfeFuncB type='linear' slope='2.2' intercept='-0.6'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.07; mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch' seed='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-.l-hero-inner {
-  position: relative; z-index: 1;
-  flex: 1; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left;
-  max-width: 860px; margin: 0 auto; padding: 160px 24px 72px; width: 100%;
-}
-.l-eyebrow {
-  font-size: 15px; font-weight: 600; letter-spacing: -0.01em; text-transform: none;
-  color: var(--accent); margin-bottom: 18px; display: flex; align-items: center; gap: 10px;
-  animation: riseIn 0.6s var(--ease) both;
-}
-.l-eyebrow::before { content: none; }
+.l-wrap { max-width: 1240px; margin: 0 auto; padding: 0 40px; width: 100%; }
+.l-hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 72px; align-items: center; padding-top: 168px; }
+.l-mono { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; }
+.l-slate { display: flex; flex-wrap: wrap; gap: 10px 18px; color: var(--on-night-2); margin-bottom: 36px; animation: riseIn 0.6s var(--ease) both; }
+.l-slate span + span::before { content: '/'; margin-right: 18px; opacity: 0.4; }
 .l-headline {
-  font-family: var(--sf);
-  font-size: clamp(40px, 7.5vw, 80px);
-  font-weight: 700; line-height: 1.05; letter-spacing: -0.03em;
-  color: var(--text); margin-bottom: 22px;
+  font-family: var(--display); font-size: clamp(44px, 6.2vw, 86px);
+  font-weight: 300; line-height: 0.98; letter-spacing: -0.035em; color: var(--on-night);
   animation: riseIn 0.7s 0.05s var(--ease) both;
 }
-.l-headline em { font-style: normal; color: var(--muted); font-weight: 700; }
-.l-desc {
-  font-size: clamp(19px, 2.4vw, 24px); color: var(--muted); line-height: 1.42; font-weight: 400;
-  max-width: 620px; margin: 0 0 40px;
-  border-left: none; padding-left: 0;
-  animation: riseIn 0.7s 0.1s var(--ease) both;
+.l-headline b { font-weight: 500; }
+/* #8a8279 on the night: 5.2:1, and at this size AA only needs 3:1 */
+.l-headline .dim { color: #8a8279; }
+.l-desc { margin-top: 32px; max-width: 46ch; font-size: 18px; line-height: 1.55; color: var(--on-night-2); animation: riseIn 0.7s 0.1s var(--ease) both; }
+.l-actions { display: flex; flex-wrap: wrap; gap: 14px 26px; align-items: center; margin-top: 40px; animation: riseIn 0.7s 0.15s var(--ease) both; }
+.l-terms { display: flex; align-items: flex-start; gap: 11px; margin-top: 36px; max-width: 470px; text-align: left; animation: riseIn 0.7s 0.12s var(--ease) both; }
+.l-terms input[type="checkbox"] {
+  -webkit-appearance: none; appearance: none; width: 18px; height: 18px; margin-top: 1px; flex-shrink: 0; cursor: pointer;
+  border-radius: 5px; border: 1px solid rgba(255,255,255,0.32); background: rgba(255,255,255,0.04);
+  display: grid; place-content: center; transition: background 0.2s var(--ease), border-color 0.2s var(--ease);
 }
-.l-terms { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; max-width: 480px; text-align: left; }
-.l-terms input[type="checkbox"] { width: 17px; height: 17px; margin-top: 3px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
-.l-terms label { font-size: 12.5px; color: var(--muted); line-height: 1.6; cursor: pointer; font-weight: 400; }
-.l-terms-error { display: none; font-size: 12.5px; color: var(--danger); font-weight: 500; margin-bottom: 12px; }
+.l-terms input[type="checkbox"]::after { content: ''; width: 9px; height: 5px; border-left: 1.5px solid var(--night); border-bottom: 1.5px solid var(--night); transform: rotate(-45deg) scale(0); margin-top: -2px; transition: transform 0.18s var(--ease); }
+.l-terms input[type="checkbox"]:checked { background: var(--on-night); border-color: var(--on-night); }
+.l-terms input[type="checkbox"]:checked::after { transform: rotate(-45deg) scale(1); }
+.l-terms input[type="checkbox"]:focus-visible { outline: 2px solid var(--on-night); outline-offset: 3px; }
+.l-terms label { font-size: 12.5px; color: #9a928a; line-height: 1.55; cursor: pointer; font-weight: 400; margin: 0; letter-spacing: 0; }
+.l-terms-error { display: none; font-size: 12.5px; color: #f0a07c; font-weight: 500; margin-top: 10px; }
 .l-btn {
   display: inline-flex; align-items: center; gap: 10px;
-  padding: 15px 28px; background: var(--accent); color: #fff;
+  padding: 15px 22px; background: var(--on-night); color: var(--night);
   border: none; border-radius: 10px; font-family: var(--sf);
-  font-size: 16px; font-weight: 500; cursor: pointer;
-  width: fit-content; letter-spacing: -0.01em;
-  animation: riseIn 0.7s 0.15s var(--ease) both;
+  font-size: 15px; font-weight: 500; cursor: pointer; width: fit-content; letter-spacing: -0.01em;
 }
-.l-subnote { margin-top: 16px; font-size: 13px; color: var(--muted-light); font-weight: 400; }
-.l-sample-link { display: inline-block; margin-top: 10px; font-size: 13px; color: var(--text); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; background: none; border: none; padding: 0; font-family: var(--sf); }
-.l-sample-link:hover { opacity: 0.7; }
+.l-btn:focus-visible { outline: 2px solid var(--on-night); outline-offset: 3px; }
+.l-sample-link { font-size: 15px; color: var(--on-night); font-weight: 400; text-decoration: underline; text-decoration-color: rgba(255,255,255,0.35); text-underline-offset: 4px; cursor: pointer; background: none; border: none; padding: 0; font-family: var(--sf); transition: text-decoration-color 0.2s; }
+@media (hover: hover) and (pointer: fine) { .l-sample-link:hover { text-decoration-color: var(--on-night); } }
+.l-sample-link:active { transform: scale(0.98); }
+.l-specs { margin-top: 22px; color: var(--on-night-2); }
+.l-specs span + span::before { content: '·'; margin: 0 10px; opacity: 0.6; }
 .sample-banner { background: var(--ink); color: #fff; text-align: center; font-size: 13px; font-weight: 500; padding: 10px 16px; }
 
-/* STATS BAR — a plain spec-sheet strip, not cards: keeps it visually
-   distinct from the dimension tiles below instead of repeating the same
-   cream rounded-box pattern twice in a row. */
-.l-stats-bar {
-  padding: 0 24px 100px;
-  max-width: 980px; margin: 0 auto; width: 100%;
-  display: flex; align-items: stretch;
+/* Sample-report excerpt: smoked glass on the night, same surface as the
+   hero rather than a light card pasted on top of it. Real numbers from
+   the static sample report (showSampleReport), not invented ones. */
+.l-sheet {
+  display: block; width: 100%; text-align: left; font: inherit; cursor: pointer;
+  background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.02));
+  -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+  color: var(--on-night); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  padding: 28px 28px 14px;
+  animation: riseIn 0.9s 0.2s var(--ease) both;
+  transition: border-color 0.3s var(--ease), transform 0.3s var(--ease);
 }
-.l-stat {
-  flex: 1; padding: 0 28px;
-  text-align: left;
-  border-left: 1px solid var(--border);
-}
-.l-stat:first-child { border-left: none; padding-left: 0; }
-.l-stat-num { font-family: var(--sf); font-size: 30px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; line-height: 1; margin-bottom: 8px; }
-.l-stat-label { font-size: 13px; color: var(--muted); font-weight: 500; letter-spacing: 0; }
+@media (hover: hover) and (pointer: fine) { .l-sheet:hover { border-color: rgba(255,255,255,0.16); transform: translateY(-2px); } }
+.l-sheet:active { transform: scale(0.99); }
+.l-sheet:focus-visible { outline: 2px solid var(--on-night); outline-offset: 4px; }
+.l-sheet-h { display: flex; justify-content: space-between; gap: 12px; color: var(--on-night-2); }
+.l-sheet-title { display: block; font-family: var(--display); font-weight: 500; font-size: 26px; letter-spacing: -0.02em; margin-top: 18px; }
+.l-sheet-log { display: block; font-size: 13.5px; line-height: 1.5; color: var(--on-night-2); margin-top: 8px; }
+.l-sheet-score { display: flex; align-items: baseline; gap: 12px; margin-top: 22px; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.09); }
+.l-sheet-score .n { font-family: var(--display); font-size: 56px; font-weight: 300; letter-spacing: -0.04em; line-height: 1; }
+.l-sheet-score .n small { font-size: 20px; color: var(--on-night-2); }
+.l-sheet-score .l { font-size: 14px; font-weight: 500; }
+.l-sheet-rows { display: block; }
+.l-sheet-row { display: grid; grid-template-columns: 28px 1fr 96px 18px; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.09); font-size: 14px; }
+.l-sheet-row .l-mono { color: var(--on-night-2); font-size: 11px; }
+.l-sheet-row b { font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
+.l-bar { display: block; height: 3px; background: rgba(255,255,255,0.12); border-radius: 2px; overflow: hidden; }
+.l-bar i { display: block; height: 100%; background: var(--on-night); border-radius: 2px; transform-origin: left; animation: barIn 1s var(--ease) both; }
+.l-bar i.ember { background: var(--ember); }
+.l-sheet-row:nth-child(1) .l-bar i { animation-delay: 0.45s; }
+.l-sheet-row:nth-child(2) .l-bar i { animation-delay: 0.52s; }
+.l-sheet-row:nth-child(3) .l-bar i { animation-delay: 0.59s; }
+.l-sheet-row:nth-child(4) .l-bar i { animation-delay: 0.66s; }
+.l-sheet-row:nth-child(5) .l-bar i { animation-delay: 0.73s; }
+@keyframes barIn { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.l-sheet-foot { display: flex; justify-content: space-between; padding-top: 14px; color: var(--on-night-2); font-size: 13px; }
+.l-sheet-foot .arrow { color: var(--on-night); transition: transform 0.2s var(--ease); }
+@media (hover: hover) and (pointer: fine) { .l-sheet:hover .l-sheet-foot .arrow { transform: translateX(3px); } }
 
-/* ABOUT SECTION */
-.l-about {
-  padding: 0 24px 120px;
-  max-width: 980px; margin: 0 auto; width: 100%;
-  display: block;
-}
-.l-about-eyebrow { font-size: 13px; color: var(--accent); letter-spacing: 0; text-transform: none; margin-bottom: 14px; font-weight: 600; text-align: center; }
-.l-about-title { font-family: var(--sf); font-size: clamp(30px,4.5vw,44px); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 16px; color: var(--text); text-align: center; max-width: 640px; margin-left: auto; margin-right: auto; }
-.l-about-text { font-size: 17px; color: var(--muted); line-height: 1.55; font-weight: 400; text-align: center; max-width: 620px; margin: 0 auto 56px; }
-.l-about-dims { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
-.l-about-dim {
-  padding: 28px 18px; border-bottom: none;
-  display: flex; flex-direction: column; align-items: flex-start; gap: 14px;
-  font-size: 14.5px; font-weight: 600; color: var(--text);
-  background: var(--cream); border-radius: var(--radius-lg);
-  transition: transform 0.3s var(--ease), background 0.3s;
-}
-@media (hover: hover) and (pointer: fine) { .l-about-dim:hover { transform: translateY(-4px); background: var(--border-light); } }
-.l-about-dim:first-child { border-top: none; }
-.l-about-dim-num { font-family: var(--sf); font-size: 15px; font-weight: 700; color: #fff; background: var(--accent); min-width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; letter-spacing: 0; }
+/* RUNNING ORDER: the five dimensions as a typeset list, not five cards */
+.l-order { padding: 24px 0 120px; }
+.l-order-grid { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 72px; }
+.l-order-title { font-family: var(--display); font-weight: 400; font-size: 40px; line-height: 1.08; letter-spacing: -0.025em; color: var(--text); position: sticky; top: 100px; }
+.l-order-title span { color: var(--muted); }
+.l-order-list { list-style: none; border-top: 1px solid var(--text); }
+.l-order-list li { display: grid; grid-template-columns: 64px 1fr; gap: 16px; padding: 28px 0; border-bottom: 1px solid var(--border); }
+.l-order-list .l-mono { color: var(--muted); padding-top: 12px; }
+.l-order-list h3 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 3.4vw, 46px); letter-spacing: -0.03em; line-height: 1; color: var(--text); }
+.l-order-list p { margin-top: 10px; color: var(--muted); font-size: 15px; line-height: 1.55; max-width: 52ch; }
+
+/* CLOSING: one quiet line and the action again, no banner block */
+.l-close { padding: 0 0 96px; }
+.l-close-inner { display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; border-top: 1px solid var(--border); padding-top: 56px; }
+.l-close h2 { font-family: var(--display); font-weight: 300; font-size: clamp(32px, 4vw, 52px); line-height: 1.02; letter-spacing: -0.03em; color: var(--text); max-width: 16ch; }
+.l-close h2 b { font-weight: 500; }
+.l-close .l-btn { background: var(--text); color: var(--paper); flex-shrink: 0; }
+.l-close .l-btn:focus-visible { outline-color: var(--text); }
+.l-foot { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 88px; padding: 28px 0 40px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--muted); }
+.l-foot a { color: inherit; text-underline-offset: 2px; }
+.l-foot nav { display: flex; gap: 18px; }
 
 /* MENU OVERLAY */
 .menu-overlay { position: fixed; inset: 0; z-index: 200; background: var(--white); display: none; flex-direction: column; padding: 0; overflow-y: auto; }
@@ -283,8 +323,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
    FORM
 ══════════════════════ */
 .f-header {
-  background: rgba(255,255,255,0.8); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  background: rgba(244,241,236,0.82); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(20,18,16,0.06);
   padding: 0 24px; height: 52px;
   display: flex; align-items: center; justify-content: space-between;
   position: sticky; top: 0; z-index: 100;
@@ -294,13 +334,39 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 @media (hover: hover) and (pointer: fine) { .back-btn:hover { opacity: 0.7; } }
 .back-btn:active { transform: scale(0.95); }
 
-.f-main { max-width: 640px; margin: 0 auto; padding: 48px 24px 110px; }
-.f-title { font-family: var(--sf); font-size: clamp(30px,5vw,40px); font-weight: 700; margin-bottom: 10px; letter-spacing: -0.02em; color: var(--text); }
-.f-subtitle { font-size: 16px; color: var(--muted); margin-bottom: 36px; font-weight: 400; }
+/* FORM: no white boxes on the ground. Sections are separated by a hair
+   line and a mono number; fields are a tint of the paper itself. */
+#sec-form { position: relative; }
+#sec-form::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 280px; background: linear-gradient(180deg, rgba(14,12,11,0.07), rgba(14,12,11,0)); pointer-events: none; }
+.f-main { position: relative; max-width: 1240px; margin: 0 auto; padding: 64px 40px 120px; display: grid; grid-template-columns: 0.75fr 1.25fr; gap: 72px; align-items: start; }
+.f-side { position: sticky; top: 104px; }
+.f-kicker { color: var(--muted); }
+.f-title { font-family: var(--display); font-size: clamp(38px, 4.2vw, 52px); font-weight: 300; line-height: 1; margin-top: 18px; letter-spacing: -0.035em; color: var(--text); }
+.f-title b { font-weight: 500; }
+.f-subtitle { margin-top: 20px; font-size: 15.5px; line-height: 1.55; color: var(--muted); max-width: 34ch; font-weight: 400; }
+.f-steps { list-style: none; margin-top: 40px; border-top: 1px solid var(--border); }
+.f-steps li { display: flex; gap: 14px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); transition: color 0.3s var(--ease); }
+.f-steps li .l-mono { transition: color 0.3s var(--ease); }
+.f-steps li.on { color: var(--text); }
+.f-steps li.on .l-mono { color: #b4552b; }
+#sec-form .card { background: transparent; box-shadow: none; border: 0; border-radius: 0; padding: 0 0 44px; margin-bottom: 44px; border-bottom: 1px solid var(--border); }
+#sec-form .card-title { display: flex; gap: 14px; align-items: baseline; font-family: var(--display); font-size: 22px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 28px; color: var(--text); }
+#sec-form .card-title .l-mono { color: var(--muted); }
+#sec-form label { font-weight: 500; font-size: 13.5px; margin-bottom: 9px; }
+#sec-form input[type="text"], #sec-form input[type="email"], #sec-form select, #sec-form textarea {
+  background-color: var(--field); box-shadow: inset 0 0 0 1px transparent; border-radius: 10px; padding: 14px 16px; font-size: 15.5px;
+  transition: background-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+/* #655e57: 5.2:1 on the field tint, 4.9:1 on its hover state */
+#sec-form input::placeholder, #sec-form textarea::placeholder { color: #655e57; }
+@media (hover: hover) and (pointer: fine) { #sec-form input[type="text"]:hover, #sec-form select:hover, #sec-form textarea:hover { background-color: var(--field-hover); } }
+#sec-form input[type="text"]:focus, #sec-form select:focus, #sec-form textarea:focus { background-color: rgba(255,255,255,0.6); box-shadow: inset 0 0 0 1px rgba(214,120,76,0.6), 0 0 0 4px rgba(214,120,76,0.12); }
+#sec-form .disclaimer-box { background: none; padding: 0; margin: 0 0 24px; }
+#sec-form .btn-primary { width: auto; padding: 15px 24px; background: var(--text); }
+#sec-form .error-box { margin-top: 16px; }
+.f-submit { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 24px; }
+.f-submit p { font-size: 13px; color: var(--muted); }
 
-.card { background: var(--cream); border: none; border-radius: var(--radius-lg); padding: 28px 24px; margin-bottom: 16px; }
-.card-title { font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--text); margin-bottom: 22px; display: flex; align-items: center; gap: 10px; }
-.card-title::after { content: none; }
 .field { margin-bottom: 18px; }
 .field:last-child { margin-bottom: 0; }
 /* A field-row's last .field matches :last-child relative to the row, not
@@ -324,6 +390,9 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
 /* ── BUDGET SLIDER ── */
 .budget-row { display: flex; gap: 10px; margin-bottom: 10px; }
+#sec-form .budget-row { align-items: center; justify-content: space-between; margin-bottom: 6px; }
+#sec-form .budget-row select { width: 112px; }
+#sec-form .budget-amount { flex: 0 1 auto; justify-content: flex-end; background: none; box-shadow: none; font-family: var(--display); font-weight: 300; font-size: 40px; letter-spacing: -0.03em; }
 .budget-row select { width: 120px; flex-shrink: 0; padding-right: 32px; background-position: right 10px center; }
 .budget-amount { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: var(--text); background: var(--cream); border-radius: var(--radius); box-shadow: inset 0 0 0 1px var(--border); }
 input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 34px; background: transparent; cursor: pointer; }
@@ -400,8 +469,8 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
    RESULTS
 ══════════════════════ */
 .r-header {
-  background: rgba(255,255,255,0.8); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  background: rgba(244,241,236,0.82); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(20,18,16,0.06);
   padding: 0 24px; height: 52px;
   display: flex; align-items: center; justify-content: space-between;
   position: sticky; top: 0; z-index: 100;
@@ -602,31 +671,45 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
    RESPONSIVE
 ══════════════════════ */
 @media (max-width: 900px) {
-  .l-about-dims { grid-template-columns: repeat(2, 1fr); }
+  .l-hero-grid { grid-template-columns: 1fr; gap: 56px; padding-top: 120px; }
+  .l-order-grid { grid-template-columns: 1fr; gap: 36px; }
+  .l-order-title { position: static; }
+  .f-main { grid-template-columns: 1fr; gap: 40px; padding-top: 40px; }
+  .f-side { position: static; }
+  .f-steps { display: none; }
 }
 /* Form/results stayed a fixed 640px column regardless of screen size — on a
    wide desktop monitor this looked like a mobile layout stretched into a
    sea of empty space either side. Widen it, and let paired fields sit
    side by side instead of stacking one under the other. */
 @media (min-width: 901px) {
-  .f-main, .r-main, .r-hero-inner { max-width: 880px; }
+  .r-main, .r-hero-inner { max-width: 880px; }
   .myreports-main { max-width: 640px; } /* a simple report list doesn't need the form's extra width */
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
   .field-row > .field { margin-bottom: 0; }
 }
 @media (max-width: 640px) {
-  .l-nav { padding: 0 18px; }
-  .l-hero-inner { padding: 96px 20px 56px; }
-  .l-stats-bar { padding-left: 18px; padding-right: 18px; flex-direction: column; }
-  .l-stat { border-left: none; padding: 18px 0 0; border-top: 1px solid var(--border); }
-  .l-stat:first-child { border-top: none; padding-top: 0; }
-  .l-about { padding-left: 18px; padding-right: 18px; padding-bottom: 80px; }
-  .l-about-dims { grid-template-columns: 1fr; }
+  .l-nav { padding: 0 20px; }
+  .l-nav-link { display: none; }
+  .l-nav-right { gap: 14px; }
+  .l-wrap { padding: 0 20px; }
+  .l-hero-grid { padding-top: 104px; }
+  .l-slate { margin-bottom: 24px; gap: 8px 10px; }
+  .l-slate span + span::before { margin-right: 10px; }
+  .l-desc { font-size: 16.5px; }
+  .l-sheet { padding: 22px 20px 12px; }
+  .l-sheet-row { grid-template-columns: 26px 1fr 72px 16px; gap: 10px; }
+  .l-order { padding: 8px 0 80px; }
+  .l-order-title { font-size: 31px; }
+  .l-order-list li { grid-template-columns: 40px 1fr; padding: 22px 0; }
+  .l-close-inner { flex-direction: column; align-items: flex-start; padding-top: 44px; }
+  .f-main { padding: 32px 20px 80px; }
   .menu-audience { grid-template-columns: 1fr; }
   .exec-row { grid-template-columns: 1fr; }
   .pdf-row { flex-direction: column; }
   .f-header, .r-header { padding: 0 18px; }
-  .f-main, .r-main, .menu-body { padding-left: 16px; padding-right: 16px; }
+  .r-main, .menu-body { padding-left: 16px; padding-right: 16px; }
+  .f-main { padding-left: 20px; padding-right: 20px; }
   .menu-header { padding: 0 18px; }
 }
 
@@ -688,60 +771,79 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   </div>
 
   <!-- Top Nav -->
-  <nav class="l-nav">
+  <nav class="l-nav" id="landingNav">
     <div class="l-logo" onclick="goLanding()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')goLanding()"><svg width="18" height="18" viewBox="0 0 124 124" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><path d="M6 0L117 0A6 6 0 0 1 123 6L123 19Q123 25 117.11 26.15L5.89 47.85Q0 49 0 43L0 6A6 6 0 0 1 6 0Z" fill="#000"/><rect x="0" y="62" width="123" height="62" rx="6" fill="#000"/></svg>OneCiak</div>
-    <div style="display:flex;align-items:center;gap:16px">
-      <a href="#" onclick="openMyReports();return false" style="font-size:13px;font-weight:600;color:var(--text);text-decoration:none;white-space:nowrap">My Reports</a>
+    <div class="l-nav-right">
+      <button class="l-nav-link" onclick="document.getElementById('landingOrder').scrollIntoView({behavior:'smooth'})">What it covers</button>
+      <button class="l-nav-link" onclick="showSampleReport()">Sample report</button>
+      <a href="#" class="l-nav-reports" onclick="openMyReports();return false">My Reports</a>
       <button class="hamburger" id="hamburgerBtn" onclick="openMenu()" aria-label="Open menu" aria-expanded="false" aria-controls="menuOverlay"><span></span><span></span><span></span></button>
     </div>
   </nav>
 
   <!-- Hero -->
-  <div class="l-hero">
-    <div class="l-hero-inner">
-      <div class="l-eyebrow">AI-Powered Analysis</div>
-      <h1 class="l-headline">Does your film<br>have a <em>real market?</em></h1>
-      <p class="l-desc">A professional market assessment across five industry dimensions — before you invest time and money into your project.</p>
-      <div class="l-terms">
-        <input type="checkbox" id="termsCheck">
-        <label for="termsCheck">I understand that OneCiak provides AI-generated analysis for informational purposes only. It does not constitute professional advice.</label>
-      </div>
-      <div class="l-terms-error" id="termsError" role="alert">Please accept the disclaimer to continue.</div>
-      <button class="l-btn" onclick="onStartClick()">Start Free Analysis →</button>
-      <p class="l-subnote">No account required</p>
-      <button class="l-sample-link" onclick="showSampleReport()">See a sample full report →</button>
-    </div>
-
-    <!-- Stats bar -->
-    <div style="border-top:1px solid var(--border);background:var(--white)">
-      <div class="l-stats-bar">
-        <div class="l-stat reveal"><div class="l-stat-num">5</div><div class="l-stat-label">Analysis Dimensions</div></div>
-        <div class="l-stat reveal" style="transition-delay:0.08s"><div class="l-stat-num">Free</div><div class="l-stat-label">Full Report</div></div>
-        <div class="l-stat reveal" style="transition-delay:0.16s"><div class="l-stat-num">PDF</div><div class="l-stat-label">Export Included</div></div>
-        <div class="l-stat reveal" style="transition-delay:0.24s"><div class="l-stat-num">90 Days</div><div class="l-stat-label">Report Access</div></div>
-      </div>
-    </div>
-
-    <!-- About section -->
-    <div style="border-top:1px solid var(--border);background:var(--cream)">
-      <div class="l-about">
-        <div class="reveal">
-          <div class="l-about-eyebrow">About OneCiak</div>
-          <h2 class="l-about-title">Professional intelligence for independent filmmakers.</h2>
-          <p class="l-about-text">OneCiak uses advanced AI trained on real film market data to give you the kind of honest, structured analysis that most filmmakers never have access to — before committing resources to a project.</p>
+  <header class="l-hero" id="landingHero">
+    <div class="l-wrap l-hero-grid">
+      <div>
+        <div class="l-slate l-mono"><span>Market analysis</span><span>For independent film</span><span>Free</span></div>
+        <h1 class="l-headline"><b>Does your film</b><br><b>have a market?</b><br><span class="dim">Find out before you spend a year on it.</span></h1>
+        <p class="l-desc">A five-dimension assessment of your project: creative package, financing, audience, festivals and distribution. A quick preview now, the full report by email.</p>
+        <div class="l-terms">
+          <input type="checkbox" id="termsCheck">
+          <label for="termsCheck">I understand that OneCiak provides AI-generated analysis for informational purposes only. It does not constitute professional advice.</label>
         </div>
-        <div class="l-about-dims">
-          <div class="l-about-dim reveal"><span class="l-about-dim-num">01</span> Creative Package</div>
-          <div class="l-about-dim reveal" style="transition-delay:0.06s"><span class="l-about-dim-num">02</span> Financial Plan</div>
-          <div class="l-about-dim reveal" style="transition-delay:0.12s"><span class="l-about-dim-num">03</span> Market &amp; Audience</div>
-          <div class="l-about-dim reveal" style="transition-delay:0.18s"><span class="l-about-dim-num">04</span> Festival Strategy</div>
-          <div class="l-about-dim reveal" style="transition-delay:0.24s"><span class="l-about-dim-num">05</span> Distribution &amp; Revenue</div>
+        <div class="l-terms-error" id="termsError" role="alert">Please accept the disclaimer to continue.</div>
+        <div class="l-actions">
+          <button class="l-btn" onclick="onStartClick()">Start free analysis</button>
+          <button class="l-sample-link" onclick="showSampleReport()">Read a sample report</button>
         </div>
+        <div class="l-specs l-mono"><span>No account</span><span>PDF export</span><span>90-day access</span></div>
       </div>
+      <button type="button" class="l-sheet" onclick="showSampleReport()" aria-label="Open the sample report for Northbound">
+        <span class="l-sheet-h l-mono"><span>Sample report</span><span>Drama / Feature</span></span>
+        <span class="l-sheet-title">Northbound</span>
+        <span class="l-sheet-log">A recently widowed lighthouse keeper and her estranged teenage son spend one final summer together before the automated station replaces them both.</span>
+        <span class="l-sheet-score"><span class="n">7.2<small>/10</small></span><span class="l">Strong festival prospect</span></span>
+        <span class="l-sheet-rows">
+          <span class="l-sheet-row"><span class="l-mono">01</span>Creative package<span class="l-bar"><i style="width:80%"></i></span><b>8</b></span>
+          <span class="l-sheet-row"><span class="l-mono">02</span>Financial plan<span class="l-bar"><i style="width:70%"></i></span><b>7</b></span>
+          <span class="l-sheet-row"><span class="l-mono">03</span>Market &amp; audience<span class="l-bar"><i style="width:70%"></i></span><b>7</b></span>
+          <span class="l-sheet-row"><span class="l-mono">04</span>Festival strategy<span class="l-bar"><i class="ember" style="width:80%"></i></span><b>8</b></span>
+          <span class="l-sheet-row" style="border-bottom:0"><span class="l-mono">05</span>Distribution<span class="l-bar"><i style="width:60%"></i></span><b>6</b></span>
+        </span>
+        <span class="l-sheet-foot"><span>Illustrative project</span><span>Open full report <span class="arrow">→</span></span></span>
+      </button>
     </div>
+  </header>
 
-    <p class="footer-note" style="padding:28px 24px">OneCiak — Film Market Intelligence · oneciak.com · <a href="/privacy.html" style="text-decoration:underline;text-underline-offset:2px">Privacy Policy</a> · <a href="/terms.html" style="text-decoration:underline;text-underline-offset:2px">Terms of Service</a></p>
-  </div>
+  <!-- Running order: the five dimensions -->
+  <section class="l-order" id="landingOrder">
+    <div class="l-wrap l-order-grid">
+      <div class="reveal">
+        <h2 class="l-order-title">The questions a sales agent asks, <span>answered before the meeting.</span></h2>
+      </div>
+      <ol class="l-order-list">
+        <li class="reveal"><span class="l-mono">01</span><div><h3>Creative package</h3><p>Logline strength, comparable titles, and which attachments would actually move financiers.</p></div></li>
+        <li class="reveal"><span class="l-mono">02</span><div><h3>Financial plan</h3><p>Whether the budget is realistic for the genre, and which public funds and tax credits fit.</p></div></li>
+        <li class="reveal"><span class="l-mono">03</span><div><h3>Market &amp; audience</h3><p>Who watches films like this, where they find them, and how comparable titles performed.</p></div></li>
+        <li class="reveal"><span class="l-mono">04</span><div><h3>Festival strategy</h3><p>Which festivals to target first, and how to avoid burning premiere status too early.</p></div></li>
+        <li class="reveal"><span class="l-mono">05</span><div><h3>Distribution &amp; revenue</h3><p>Realistic routes to buyers, from festival acquisition to streaming.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="l-close">
+    <div class="l-wrap">
+      <div class="l-close-inner reveal">
+        <h2><b>Know where your film stands</b> before you pitch it.</h2>
+        <button class="l-btn" onclick="window.scrollTo({top:0,behavior:'smooth'});setTimeout(function(){document.getElementById('termsCheck').focus({preventScroll:true})},500)">Start free analysis</button>
+      </div>
+      <footer class="l-foot">
+        <span>OneCiak, film market intelligence</span>
+        <nav><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></nav>
+      </footer>
+    </div>
+  </section>
 
 </div><!-- end sec-landing -->
 
@@ -753,10 +855,19 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
     <button class="back-btn" onclick="goLanding()">← Back</button>
   </div>
   <div class="f-main">
-    <div class="f-title">Tell us about your project</div>
-    <div class="f-subtitle">Free report covers all 5 dimensions. The full, in-depth report is free too — delivered to your email.</div>
+    <div class="f-side">
+      <div class="f-kicker l-mono">New analysis</div>
+      <h1 class="f-title"><b>Tell us about</b><br>your project.</h1>
+      <p class="f-subtitle">The preview covers all five dimensions. The full report is free too, and arrives by email.</p>
+      <ol class="f-steps" id="formSteps">
+        <li class="on"><span class="l-mono">01</span>Your project</li>
+        <li><span class="l-mono">02</span>Budget &amp; distribution</li>
+        <li><span class="l-mono">03</span>Context</li>
+      </ol>
+    </div>
+    <div class="f-body">
     <div class="card reveal" style="transition-delay:0s">
-      <div class="card-title">Your Project</div>
+      <div class="card-title"><span class="l-mono">01</span>Your project</div>
       <div class="field">
         <label for="title">Film Title <span class="hint">(or working title)</span></label>
         <input type="text" id="title" placeholder="e.g. The Last Harvest">
@@ -793,7 +904,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
       </div>
     </div>
     <div class="card reveal" style="transition-delay:0.06s">
-      <div class="card-title">Budget &amp; Distribution</div>
+      <div class="card-title"><span class="l-mono">02</span>Budget &amp; distribution</div>
       <div class="field">
         <label for="budgetSlider">Estimated Budget</label>
         <div class="budget-row">
@@ -847,7 +958,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
       </div>
     </div>
     <div class="card reveal" style="transition-delay:0.12s">
-      <div class="card-title">Context</div>
+      <div class="card-title"><span class="l-mono">03</span>Context</div>
       <div class="field-row">
         <div class="field">
           <label for="country">Production Country</label>
@@ -875,8 +986,9 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
     <div class="disclaimer-box">
       <div class="disclaimer-text"><strong>Disclaimer:</strong> Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. Results are estimates and do not guarantee any outcome.</div>
     </div>
-    <button class="btn-primary" onclick="runAnalysis()">Get Free Analysis →</button>
+    <div class="f-submit"><button class="btn-primary" onclick="runAnalysis()">Get free analysis</button><p>No account required.</p></div>
     <div class="error-box" id="errorBox" role="alert"></div>
+    </div>
   </div>
 </div>
 
@@ -1069,6 +1181,36 @@ function track(eventName) {
   } catch (e) {}
 }
 
+/* ── LANDING NAV STATE ──
+   Transparent over the top of the hero, smoked glass while still over the
+   night, frosted paper once the dissolve has handed over to the light
+   sections. */
+function updateLandingNav() {
+  var nav = document.getElementById('landingNav'), hero = document.getElementById('landingHero');
+  if (!nav || !hero) return;
+  var y = window.scrollY || 0, lightAt = hero.offsetHeight - 200;
+  nav.classList.toggle('is-scrolled', y > 8);
+  nav.classList.toggle('is-light', y > lightAt);
+}
+window.addEventListener('scroll', updateLandingNav, { passive: true });
+window.addEventListener('resize', updateLandingNav);
+
+/* Form side index: marks the section currently in view. */
+(function() {
+  if (!('IntersectionObserver' in window)) return;
+  var cards = document.querySelectorAll('#sec-form .card');
+  var steps = document.querySelectorAll('#formSteps li');
+  if (!cards.length || !steps.length) return;
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (!e.isIntersecting) return;
+      var i = Array.prototype.indexOf.call(cards, e.target);
+      steps.forEach(function(s, j) { s.classList.toggle('on', j === i); });
+    });
+  }, { rootMargin: '-35% 0px -55% 0px' });
+  cards.forEach(function(c) { io.observe(c); });
+})();
+
 /* ── NAV ── */
 function showOnly(id) {
   ['sec-landing','sec-form','sec-loading','sec-results','sec-myreports'].forEach(function(s) {
@@ -1078,6 +1220,7 @@ function showOnly(id) {
   var t = document.getElementById(id);
   if (t) t.style.display = (id === 'sec-loading') ? 'flex' : 'block';
   window.scrollTo(0,0);
+  updateLandingNav();
 }
 function goLanding() {
   fullReportGenerationId++;

@@ -20,6 +20,15 @@
         ],
         "createdAt": "2026-10-08T03:48:02.359Z",
         "reason": "Agent: dot sits next to a live elapsed-time counter during real report generation, not decorative — tied to genuinely changing data per the rule's own exception"
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-08T08:37:13.236Z",
+        "reason": "Founder explicitly chose and approved this warm paper ground on 2026-10-08 after an A/B review of mockups; it is the light half of the night-to-paper hero dissolve, not a reflex default"
       }
     ]
   }
