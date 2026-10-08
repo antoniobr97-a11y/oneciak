@@ -104,15 +104,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 /* Scroll reveal: only hides content once JS confirms it can reveal it again (progressive enhancement — no JS/no observer support means everything just stays visible). */
 .js-ready .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
 .js-ready .reveal.in-view { opacity: 1; transform: translateY(0); }
-.card, .overall-card, .exec-card, .extra-card, .locked-card, .pdf-card, .accordion-wrap, .menu-aud {
+.card, .overall-card, .exec-card, .extra-card, .locked-card, .pdf-card, .accordion-wrap {
   box-shadow: var(--shadow-md);
   border: 1px solid rgba(0,0,0,0.06);
 }
 .l-btn, .btn-primary, .btn-unlock, .menu-cta {
   transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s;
 }
-@media (hover: hover) and (pointer: fine) { .btn-primary:hover, .btn-unlock:hover, .menu-cta:hover { background: var(--accent-hover); } .l-btn:hover { background: #fff; } }
-.btn-primary:active, .btn-unlock:active, .menu-cta:active { background: var(--accent-press); transform: scale(0.98); }
+@media (hover: hover) and (pointer: fine) { .btn-primary:hover, .btn-unlock:hover { background: var(--accent-hover); } .l-btn:hover { background: #fff; } }
+.btn-primary:active, .btn-unlock:active { background: var(--accent-press); transform: scale(0.98); }
+.menu-cta:active { transform: scale(0.97); }
 .l-btn:active { transform: scale(0.97); }
 
 /* ── SECTIONS ── */
@@ -264,41 +265,40 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-foot a { color: inherit; text-underline-offset: 2px; }
 .l-foot nav { display: flex; gap: 18px; }
 
-/* MENU OVERLAY */
-.menu-overlay { position: fixed; inset: 0; z-index: 200; background: var(--white); display: none; flex-direction: column; padding: 0; overflow-y: auto; }
-.menu-overlay.open { display: flex; }
-.menu-header { padding: 0 22px; height: 52px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.06); background: rgba(255,255,255,0.8); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); position: sticky; top: 0; }
-.menu-logo { font-family: var(--sf); font-size: 15px; font-weight: 600; color: var(--text); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
-.menu-close { background: var(--cream); border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 14px; color: var(--muted); cursor: pointer; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background 0.2s, color 0.2s, transform 0.15s ease-out; }
-@media (hover: hover) and (pointer: fine) { .menu-close:hover { background: var(--border-light); color: var(--text); } }
+/* MENU OVERLAY: the same night as the hero, so opening it feels like the
+   page dimming rather than a white sheet sliding over it. Two short
+   sections, hairlines, no cards. */
+.menu-overlay { position: fixed; inset: 0; z-index: 200; background: var(--night); color: var(--on-night); display: none; flex-direction: column; padding: 0; overflow-y: auto; }
+.menu-overlay::before { content: ''; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(45% 40% at 92% 8%, rgba(214,120,76,0.18), transparent 65%); }
+.menu-overlay.open { display: flex; animation: menuIn 0.28s var(--ease) both; }
+@keyframes menuIn { from { opacity: 0; } to { opacity: 1; } }
+.menu-header { position: sticky; top: 0; z-index: 1; padding: 0 max(40px, calc((100vw - 1240px) / 2 + 40px)); height: 64px; display: flex; align-items: center; justify-content: space-between; background: rgba(14,12,11,0.9); border-bottom: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.menu-logo { font-family: var(--display); font-size: 16px; font-weight: 600; color: var(--on-night); display: inline-flex; align-items: center; gap: 9px; cursor: pointer; }
+.menu-logo svg path, .menu-logo svg rect { fill: currentColor; }
+.menu-close { background: rgba(255,255,255,0.08); border: none; border-radius: 50%; width: 34px; height: 34px; font-size: 14px; color: var(--on-night); cursor: pointer; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.15s; }
+@media (hover: hover) and (pointer: fine) { .menu-close:hover { background: rgba(255,255,255,0.16); } }
 .menu-close:active { transform: scale(0.92); }
-.menu-body { padding: 56px 24px 64px; max-width: 700px; margin: 0 auto; }
-.menu-sec { margin-bottom: 52px; }
-.menu-sec-title { font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--accent); margin-bottom: 24px; padding-bottom: 0; border-bottom: none; }
-.menu-steps { display: flex; flex-direction: column; gap: 24px; }
-.menu-step { display: flex; gap: 20px; }
-.menu-step-n { font-family: var(--sf); font-size: 15px; font-weight: 700; color: #fff; background: var(--accent); line-height: 1; min-width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.menu-step-title { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 5px; letter-spacing: -0.01em; }
-.menu-step-desc { font-size: 14.5px; color: var(--muted); line-height: 1.55; font-weight: 400; }
-.menu-audience { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.menu-aud { padding: 20px; border: none; border-radius: var(--radius-lg); background: var(--cream); transition: transform 0.2s var(--ease); }
-@media (hover: hover) and (pointer: fine) { .menu-aud:hover { transform: translateY(-3px); } }
-.menu-aud-title { font-size: 14.5px; font-weight: 600; color: var(--text); margin-bottom: 5px; letter-spacing: -0.01em; }
-.menu-aud-desc { font-size: 13.5px; color: var(--muted); line-height: 1.5; font-weight: 400; }
-/* FAQ as native <details> — collapsed by default so 8 answers don't all
-   render open at once (the menu already gets this right for the results
-   page's "How to read" / "Glossary" sections; this brings the FAQ list
-   in line with that pattern instead of being the one place that dumps
-   everything open). */
-.menu-faq-item { border-bottom: 1px solid var(--border-light); }
-.menu-faq-item:last-child { border-bottom: none; }
-.menu-faq-item summary { list-style: none; cursor: pointer; padding: 20px 0; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.menu-body { position: relative; width: 100%; max-width: 640px; margin: 0 auto; padding: 56px 24px 56px; }
+.menu-sec { margin-bottom: 48px; }
+.menu-sec-title { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-night-2); margin-bottom: 14px; }
+.menu-steps { list-style: none; border-top: 1px solid rgba(255,255,255,0.14); }
+.menu-steps li { display: flex; gap: 16px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.menu-step-n { font-family: var(--mono); font-size: 11px; color: var(--on-night-2); min-width: 22px; }
+.menu-step-title { font-family: var(--display); font-size: 20px; font-weight: 400; letter-spacing: -0.015em; color: var(--on-night); }
+.menu-faq-item { border-bottom: 1px solid rgba(255,255,255,0.08); }
+.menu-faq-item:first-of-type { border-top: 1px solid rgba(255,255,255,0.14); }
+.menu-faq-item summary { list-style: none; cursor: pointer; padding: 16px 0; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .menu-faq-item summary::-webkit-details-marker { display: none; }
-.menu-faq-item summary::after { content: '+'; font-size: 20px; font-weight: 400; color: var(--muted); flex-shrink: 0; transition: transform 0.2s var(--ease); }
+.menu-faq-item summary::after { content: '+'; font-size: 20px; font-weight: 300; color: var(--on-night-2); flex-shrink: 0; transition: transform 0.2s var(--ease); }
 .menu-faq-item[open] summary::after { transform: rotate(45deg); }
-.menu-faq-q { font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
-.menu-faq-a { font-size: 14.5px; color: var(--muted); line-height: 1.6; font-weight: 400; padding-bottom: 20px; }
-.menu-cta { width: 100%; padding: 16px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--sf); font-size: 16px; font-weight: 500; cursor: pointer; letter-spacing: -0.01em; }
+.menu-faq-item summary:active { transform: scale(0.99); }
+.menu-faq-q { font-size: 16px; font-weight: 500; color: var(--on-night); letter-spacing: -0.01em; }
+.menu-faq-a { font-size: 14.5px; color: var(--on-night-2); line-height: 1.6; padding: 0 28px 18px 0; }
+.menu-cta { padding: 15px 24px; background: var(--on-night); color: var(--night); border: none; border-radius: 10px; font-family: var(--sf); font-size: 15px; font-weight: 500; cursor: pointer; letter-spacing: -0.01em; }
+@media (hover: hover) and (pointer: fine) { .menu-cta:hover { background: #fff; } }
+.menu-cta:focus-visible, .menu-close:focus-visible, .menu-faq-item summary:focus-visible { outline: 2px solid var(--on-night); outline-offset: 3px; }
+.menu-legal { display: flex; gap: 18px; margin-top: 28px; font-size: 12.5px; }
+.menu-legal a { color: var(--on-night-2); text-underline-offset: 2px; }
 
 /* HAMBURGER */
 .hamburger { background: var(--cream); border: none; border-radius: 50%; width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px; transition: background 0.2s, transform 0.15s ease-out; }
@@ -793,13 +793,12 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   .l-order-list li { grid-template-columns: 36px 1fr; gap: 4px 12px; padding: 16px 0; }
   .l-order-list p { grid-column: 2; }
   .f-main { padding: 32px 20px 80px; }
-  .menu-audience { grid-template-columns: 1fr; }
   .exec-row { grid-template-columns: 1fr; }
   .pdf-row { flex-direction: column; }
   .f-header, .r-header { padding: 0 18px; }
-  .r-main, .menu-body { padding-left: 16px; padding-right: 16px; }
+  .r-main, .menu-body { padding-left: 20px; padding-right: 20px; }
   .f-main { padding-left: 20px; padding-right: 20px; }
-  .menu-header { padding: 0 18px; }
+  .menu-header { padding: 0 20px; }
 }
 
 </style>
@@ -828,34 +827,23 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
     <div class="menu-body">
       <div class="menu-sec">
         <div class="menu-sec-title">How it works</div>
-        <div class="menu-steps">
-          <div class="menu-step"><div class="menu-step-n">01</div><div><div class="menu-step-title">Describe your project</div><div class="menu-step-desc">Fill in your film's logline, genre, budget and distribution goals. Under 3 minutes.</div></div></div>
-          <div class="menu-step"><div class="menu-step-n">02</div><div><div class="menu-step-title">Get your analysis</div><div class="menu-step-desc">AI evaluates your project across five key industry dimensions with real benchmarks.</div></div></div>
-          <div class="menu-step"><div class="menu-step-n">03</div><div><div class="menu-step-title">Act on the insights</div><div class="menu-step-desc">Free report validates your direction. Full report gives you a complete actionable plan.</div></div></div>
-        </div>
+        <ol class="menu-steps">
+          <li><span class="menu-step-n">01</span><span class="menu-step-title">Describe your project</span></li>
+          <li><span class="menu-step-n">02</span><span class="menu-step-title">See a preview of all five scores</span></li>
+          <li><span class="menu-step-n">03</span><span class="menu-step-title">Get the full report by email, free</span></li>
+        </ol>
       </div>
       <div class="menu-sec">
-        <div class="menu-sec-title">Who is it for</div>
-        <div class="menu-audience">
-          <div class="menu-aud"><div class="menu-aud-title">First-time directors</div><div class="menu-aud-desc">Understand your market position before committing resources.</div></div>
-          <div class="menu-aud"><div class="menu-aud-title">Screenwriters</div><div class="menu-aud-desc">Validate your concept before writing the full script.</div></div>
-          <div class="menu-aud"><div class="menu-aud-title">Independent producers</div><div class="menu-aud-desc">Fast second opinion before presenting to investors.</div></div>
-          <div class="menu-aud"><div class="menu-aud-title">Film school graduates</div><div class="menu-aud-desc">Bridge academic training and the real film market.</div></div>
-        </div>
+        <div class="menu-sec-title">Questions</div>
+        <details class="menu-faq-item"><summary class="menu-faq-q">Is this a real consultant?</summary><div class="menu-faq-a">No. It's an AI analysis of what you describe, meant as a structured second opinion before you talk to people in the industry. It is not professional advice.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">Preview or full report?</summary><div class="menu-faq-a">The preview gives each of the five areas a score and one recommendation. The full report adds red flags, strengths, comparable films, funding sources, action plans and a roadmap. Both are free.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">Why do you ask for my email?</summary><div class="menu-faq-a">The full report takes a few minutes to generate, so we send it when it's ready. You don't need to keep the page open.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">Is my project data private?</summary><div class="menu-faq-a">Your project is shared only with the services needed to generate and deliver your report, listed in our Privacy Policy. It is never sold.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">I've never made a film. Is it still useful?</summary><div class="menu-faq-a">Yes, that's who it's built for. Pick "First film" in the Experience field and the advice adjusts.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">Where do I start after my report?</summary><div class="menu-faq-a">Open the Roadmap near the end of the full report. It's a step-by-step sequence for your project.</div></details>
       </div>
-      <div class="menu-sec">
-        <div class="menu-sec-title">FAQ</div>
-        <details class="menu-faq-item"><summary class="menu-faq-q">Is this a real consultant?</summary><div class="menu-faq-a">Advanced AI trained on film market data. Structured analysis most filmmakers never access.</div></details>
-        <details class="menu-faq-item"><summary class="menu-faq-q">What does the free report cover?</summary><div class="menu-faq-a">All five dimensions with a general assessment and one key recommendation each.</div></details>
-        <details class="menu-faq-item"><summary class="menu-faq-q">What does the full report add?</summary><div class="menu-faq-a">Deep analysis, red flags, strengths, 3 recommendations with real links, action plans, funding sources, comparable films, international markets and a 5-step roadmap — free, delivered by email.</div></details>
-        <details class="menu-faq-item"><summary class="menu-faq-q">Why do you ask for my email?</summary><div class="menu-faq-a">Generating the full report can take a few minutes, so we email it to you the moment it's ready — you don't have to keep the page open, and it also means you can't lose it if you close your browser.</div></details>
-        <details class="menu-faq-item"><summary class="menu-faq-q">Is my project data private?</summary><div class="menu-faq-a">Your project details are sent only to the providers needed to generate and deliver your report (see our Privacy Policy) — never sold, never used to train AI models.</div></details>
-        <details class="menu-faq-item"><summary class="menu-faq-q">I've never made a film before — is this still useful?</summary><div class="menu-faq-a">Yes — that's exactly who this is built for. You don't need any industry experience or connections to get a report; just describe your project as best you can. The "Experience" field even has a "First film" option, and the analysis adjusts its advice accordingly.</div></details>
-        <details class="menu-faq-item"><summary class="menu-faq-q">I don't understand a term in my report — what do I do?</summary><div class="menu-faq-a">Every report page has a "Glossary" you can expand near the top, explaining common industry terms (sales agent, tax incentive, E&O insurance, etc.) in plain language.</div></details>
-        <details class="menu-faq-item"><summary class="menu-faq-q">Where do I actually start after getting my report?</summary><div class="menu-faq-a">In the full report, open the Roadmap near the end — it's a 5-phase sequence (script & pitch, financing, pre-production, production, festivals & sales) built specifically for your project, not generic advice.</div></details>
-      </div>
-      <button class="menu-cta" onclick="closeMenuGoLanding()">Start Free Analysis →</button>
-      <p style="text-align:center;font-size:12px;color:var(--muted-light);margin-top:16px"><a href="/privacy.html" style="text-decoration:underline;text-underline-offset:2px">Privacy Policy</a> · <a href="/terms.html" style="text-decoration:underline;text-underline-offset:2px">Terms of Service</a></p>
+      <button class="menu-cta" onclick="closeMenuGoLanding()">Start free analysis</button>
+      <p class="menu-legal"><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></p>
     </div>
   </div>
 
@@ -872,8 +860,8 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   <header class="l-hero" id="landingHero">
     <div class="l-wrap l-hero-grid">
       <div>
-        <h1 class="l-headline"><b>Does your film</b><br><b>have a market?</b><br><span class="dim">Find out before you spend a year on it.</span></h1>
-        <p class="l-desc">A free market read on your project, before you commit time and money to it. Preview now, full report by email.</p>
+        <h1 class="l-headline"><b>Does your film</b><br><b>have a market?</b></h1>
+        <p class="l-desc">A free market analysis of your film project across five areas. See the scores now, get the full report by email.</p>
         <div class="l-terms">
           <input type="checkbox" id="termsCheck">
           <label for="termsCheck">I understand that OneCiak provides AI-generated analysis for informational purposes only. It does not constitute professional advice.</label>
@@ -887,7 +875,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
       <button type="button" class="l-sheet" onclick="showSampleReport()" aria-label="Open the sample report for Northbound">
         <span class="l-sheet-h l-mono"><span>Sample report</span><span>Drama / Feature</span></span>
         <span class="l-sheet-title">Northbound</span>
-        <span class="l-sheet-log">A recently widowed lighthouse keeper and her estranged teenage son spend one final summer together before the automated station replaces them both.</span>
         <span class="l-sheet-score"><span class="n">7.2<small>/10</small></span><span class="l">Strong festival prospect</span></span>
         <span class="l-sheet-rows">
           <span class="l-sheet-row"><span class="l-mono">01</span>Creative package<span class="l-bar"><i style="width:80%"></i></span><b>8</b></span>
@@ -904,7 +891,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   <!-- What each dimension answers: compact, the card above already shows the names and scores -->
   <section class="l-order" id="landingOrder">
     <div class="l-wrap">
-      <h2 class="l-order-title reveal">What each score answers</h2>
+      <h2 class="l-order-title reveal">The five areas</h2>
       <ol class="l-order-list">
         <li class="reveal"><span class="l-mono">01</span><h3>Creative package</h3><p>Is the logline strong, which attachments would move financiers.</p></li>
         <li class="reveal"><span class="l-mono">02</span><h3>Financial plan</h3><p>Is the budget realistic, which funds and tax credits fit.</p></li>
