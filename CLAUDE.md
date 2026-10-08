@@ -128,18 +128,19 @@ senza motivo):
   Falsi positivi già documentati con motivazione in `.impeccable/config.json`
   (`ignores add-value <rule> "*" --file index.html --reason "..."`) — non
   cancellarli senza motivo, c'è scritto perché sono stati ignorati.
-- **Taste** (`~/.claude/skills/taste`, **non committato**, è a livello
-  utente/account, non di progetto — persiste tra sessioni comunque). Studia
-  lo stile di siti di riferimento. Richiede Playwright MCP funzionante.
-- **Playwright MCP**: configurato con
-  `npx @playwright/mcp@latest --executable-path /opt/pw-browsers/chromium --headless`
-  perché il canale "chrome" di default non esiste in questo sandbox. **Ogni
-  volta che la configurazione MCP cambia, serve riavviare la sessione** perché
-  il server già in esecuzione non si auto-aggiorna — se `mcp__playwright__*`
-  dà errore "chrome not found at /opt/google/chrome/chrome", è questo.
-  Nel frattempo: script Playwright scritti a mano via Bash con
-  `executablePath: '/opt/pw-browsers/chromium'` funzionano sempre e sono il
-  metodo collaudato per screenshot/test in tutta questa sessione.
+- **Taste**: era installata in `~/.claude/skills/taste`, ma **NON persiste**.
+  Il container cloud è nuovo a ogni sessione e `~/.claude` viene azzerata
+  (verificato il 2026-10-08: sparita insieme alla config MCP utente). Per
+  averla stabile va messa nel repo in `.claude/skills/taste` e committata.
+  Fonte originale da chiedere ad Antonio se serve reinstallarla.
+- **Playwright MCP**: configurato a livello di progetto in `.mcp.json`
+  (committato, così sopravvive al reset del container) con
+  `--executable-path /opt/pw-browsers/chromium --headless`, perché il canale
+  "chrome" di default non esiste in questo sandbox. Un server MCP aggiunto o
+  cambiato si carica solo **all'avvio di una nuova sessione**. Se
+  `mcp__playwright__*` non c'è o dà "chrome not found", usare intanto script
+  Playwright a mano via Bash con `executablePath: '/opt/pw-browsers/chromium'`
+  (metodo collaudato, funziona sempre).
 
 ## Test di regressione
 
