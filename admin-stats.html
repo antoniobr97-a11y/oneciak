@@ -70,7 +70,7 @@ async function loadStats() {
   errEl.style.display = 'none';
   if (!key) return;
   try {
-    var res = await fetch('/.netlify/functions/analytics-summary?days=30&key=' + encodeURIComponent(key));
+    var res = await fetch('/.netlify/functions/analytics-summary?days=30', { headers: { 'X-Admin-Key': key } });
     if (res.status === 403) { errEl.textContent = 'Wrong key.'; errEl.style.display = 'block'; return; }
     if (!res.ok) { errEl.textContent = 'Could not load stats. Please try again.'; errEl.style.display = 'block'; return; }
     var data = await res.json();

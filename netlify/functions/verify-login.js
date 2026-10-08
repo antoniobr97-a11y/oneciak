@@ -35,6 +35,7 @@ exports.handler = async (event) => {
     const sessionToken = signedToken.sign(email, SESSION_TTL_MS, 'REPORT_TOKEN_SECRET');
     return { statusCode: 200, headers, body: JSON.stringify({ ok: true, session_token: sessionToken }) };
   } catch (err) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    console.error('verify-login:', err);
+    return { statusCode: 500, headers, body: JSON.stringify({ error: 'Something went wrong. Please try again.' }) };
   }
 };

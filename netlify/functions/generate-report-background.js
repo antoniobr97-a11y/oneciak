@@ -1,5 +1,6 @@
 const { connectLambda, getStore } = require('@netlify/blobs');
 const { verify: verifyReportToken } = require('./_util/reportToken');
+const payloadSig = require('./_util/payloadSig');
 const { generateAndDeliverFullReport, PROCESSING_STALE_MS } = require('./_util/generateFullReport');
 
 const SITE_BASE = (process.env.URL || process.env.SITE_URL || 'https://oneciak.com').replace(/\/$/, '');
@@ -26,12 +27,17 @@ exports.handler = async (event) => {
   let payload;
   try { payload = JSON.parse(event.body || '{}'); } catch (e) { return { statusCode: 400, body: 'Invalid body' }; }
 
-  const { id, token, project, email } = payload;
+  const { id, token, project, email, sig } = payload;
   if (!id || !verifyReportToken(token, id)) {
     return { statusCode: 403, body: 'Invalid or expired token' };
   }
   if (!project || !project.title || !email) {
     return { statusCode: 400, body: 'Missing data' };
+  }
+  // The token alone only proves the id; this proves the email and project
+  // are the ones start-full-report validated for that id.
+  if (!payloadSig.verify(sig, id, email, project)) {
+    return { statusCode: 403, body: 'Invalid payload signature' };
   }
 
   connectLambda(event);

@@ -7,7 +7,7 @@ const ALLOWED_ORIGIN = process.env.SITE_URL || 'https://oneciak.com';
 const MAX_MESSAGE_LEN = 2000;
 
 function esc(s) {
-  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // Lets a filmmaker flag something wrong in their own report (a dead link, a
@@ -33,6 +33,7 @@ exports.handler = async (event) => {
     if (!session_id || !verifyReportToken(token, session_id)) {
       return { statusCode: 403, headers, body: JSON.stringify({ error: 'Invalid or expired report link.' }) };
     }
+    const cleanCategory = String(category || '').slice(0, 100);
     const trimmedMessage = String(message || '').trim().slice(0, MAX_MESSAGE_LEN);
     if (!trimmedMessage) {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Please describe the issue.' }) };
@@ -56,7 +57,7 @@ exports.handler = async (event) => {
       '<p><strong>Report issue flagged on OneCiak</strong></p>' +
       '<p><strong>Project:</strong> ' + esc(projectTitle) + '<br>' +
       '<strong>Submitted by:</strong> ' + esc(reportedBy) + '<br>' +
-      '<strong>Category:</strong> ' + esc(category || 'Not specified') + '<br>' +
+      '<strong>Category:</strong> ' + esc(cleanCategory || 'Not specified') + '<br>' +
       '<strong>Session:</strong> ' + esc(session_id) + '</p>' +
       '<p><strong>Message:</strong><br>' + esc(trimmedMessage).replace(/\n/g, '<br>') + '</p>' +
       '<p><a href="' + esc(viewUrl) + '">Open this report</a></p>' +
@@ -77,6 +78,7 @@ exports.handler = async (event) => {
 
     return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
   } catch (err) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    console.error('report-issue:', err);
+    return { statusCode: 500, headers, body: JSON.stringify({ error: 'Something went wrong. Please try again.' }) };
   }
 };
