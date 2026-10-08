@@ -272,13 +272,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .menu-overlay::before { content: ''; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(45% 40% at 92% 8%, rgba(214,120,76,0.12), transparent 65%); }
 .menu-overlay.open { display: flex; animation: menuIn 0.28s var(--ease) both; }
 @keyframes menuIn { from { opacity: 0; } to { opacity: 1; } }
-.menu-header { position: sticky; top: 0; z-index: 1; padding: 0 max(40px, calc((100vw - 1240px) / 2 + 40px)); height: 64px; display: flex; align-items: center; justify-content: space-between; background: rgba(15,14,13,0.9); border-bottom: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.menu-header { flex-shrink: 0; position: sticky; top: 0; z-index: 1; padding: 0 max(40px, calc((100vw - 1240px) / 2 + 40px)); height: 64px; display: flex; align-items: center; justify-content: space-between; background: rgba(15,14,13,0.9); border-bottom: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
 .menu-logo { font-family: var(--display); font-size: 16px; font-weight: 600; color: var(--on-night); display: inline-flex; align-items: center; gap: 9px; cursor: pointer; }
 .menu-logo svg path, .menu-logo svg rect { fill: currentColor; }
 .menu-close { background: rgba(255,255,255,0.08); border: none; border-radius: 50%; width: 34px; height: 34px; font-size: 14px; color: var(--on-night); cursor: pointer; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.15s; }
 @media (hover: hover) and (pointer: fine) { .menu-close:hover { background: rgba(255,255,255,0.16); } }
 .menu-close:active { transform: scale(0.92); }
-.menu-body { position: relative; width: 100%; max-width: 640px; margin: 0 auto; padding: 56px 24px 56px; }
+.menu-body { flex-shrink: 0; position: relative; width: 100%; max-width: 640px; margin: 0 auto; padding: 56px 24px 56px; }
 .menu-sec { margin-bottom: 48px; }
 .menu-sec-title { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-night-2); margin-bottom: 14px; }
 .menu-steps { list-style: none; border-top: 1px solid rgba(255,255,255,0.14); }
