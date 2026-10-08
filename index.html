@@ -27,7 +27,7 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preload" href="/fonts/inter-400-800-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/inter-tight-300-600-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link href="/fonts/fonts.css" rel="stylesheet">
 <style>
 /* ── RESET ── */
@@ -47,7 +47,7 @@
   /* form fields: a tint of the ground, not a white box on top of it */
   --field: rgba(20,18,16,0.045);
   --field-hover: rgba(20,18,16,0.07);
-  --display: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  --display: 'Geist', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --text: #161616;
   --ink: #000000;
@@ -186,10 +186,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-mono { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; }
 .l-headline {
   font-family: var(--display); font-size: clamp(44px, 6.2vw, 86px);
-  font-weight: 300; line-height: 0.98; letter-spacing: -0.035em; color: var(--on-night);
+  font-weight: 300; line-height: 0.98; letter-spacing: -0.045em; color: var(--on-night);
   animation: riseIn 0.7s 0.05s var(--ease) both;
 }
-.l-headline b { font-weight: 500; }
+.l-headline b { font-weight: 700; }
 /* #8a8279 on the night: 5.2:1, and at this size AA only needs 3:1 */
 .l-headline .dim { color: #8c8a86; }
 .l-desc { margin-top: 28px; max-width: 40ch; font-size: 18px; line-height: 1.55; color: var(--on-night-2); animation: riseIn 0.7s 0.1s var(--ease) both; }
@@ -344,7 +344,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .f-side { position: sticky; top: 104px; }
 .f-kicker { color: var(--muted); }
 .f-title { font-family: var(--display); font-size: clamp(38px, 4.2vw, 52px); font-weight: 300; line-height: 1; margin-top: 18px; letter-spacing: -0.035em; color: var(--text); }
-.f-title b { font-weight: 500; }
+.f-title b { font-weight: 700; }
 .f-subtitle { margin-top: 20px; font-size: 15.5px; line-height: 1.55; color: var(--muted); max-width: 34ch; font-weight: 400; }
 .f-steps { list-style: none; margin-top: 40px; border-top: 1px solid var(--border); }
 .f-steps li { display: flex; gap: 14px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); transition: color 0.3s var(--ease); }
@@ -683,7 +683,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #sec-results .r-hero::before, #sec-myreports .r-hero::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(60% 55% at 108% -10%, rgba(235,137,63,0.85) 0%, rgba(236,88,40,0.7) 22%, rgba(225,36,31,0.55) 38%, rgba(139,25,33,0.35) 52%, rgba(36,18,24,0) 70%), radial-gradient(45% 40% at -10% 70%, rgba(24,43,48,0.85) 0%, rgba(24,43,48,0) 70%); }
 #sec-results .r-hero-inner, #sec-myreports .r-hero-inner { position: relative; }
 .r-eyebrow { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: #d6cec3; margin-bottom: 18px; }
-.r-title { font-family: var(--display); font-size: clamp(40px, 6vw, 72px); font-weight: 300; letter-spacing: -0.035em; line-height: 1; color: var(--on-night); margin-bottom: 20px; }
+.r-title { font-family: var(--display); font-size: clamp(40px, 6vw, 72px); font-weight: 700; letter-spacing: -0.035em; line-height: 1; color: var(--on-night); margin-bottom: 20px; }
 .r-summary { font-size: 17px; line-height: 1.55; color: var(--on-night-2); max-width: 60ch; }
 #overallScore { margin-top: 36px; }
 .overall-card {

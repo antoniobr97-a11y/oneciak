@@ -113,7 +113,10 @@ conversazione aspettando.
   tutto il testo (così il testo non finisce mai sui toni intermedi).
 - **Scheda report di esempio in vetro scuro** (variante "B" scelta da lui, non
   quella chiara). Numeri veri dal report statico Northbound.
-- **Font**: `--display` Inter Tight (titoli, peso 300/500), Inter per il
+- **Font**: `--display` **Geist** (scelto da Antonio il 2026-10-08, "C" nel
+  confronto; titoli principali in Bold 700, numeri grandi sottili). Gli
+  piaceva il Raptor Text Bold ma è a pagamento: serve licenza web, non
+  usarlo senza. Prima era Inter Tight. Inter per il
   testo, `--mono` IBM Plex Mono per le etichette piccole maiuscole.
   **Self-hosted in `/fonts`** (niente Google Fonts, per il GDPR). Il CSP in
   `netlify.toml` ha `font-src 'self'`: se si aggiunge un font esterno va
