@@ -91,30 +91,42 @@ conversazione aspettando.
 
 ## Design — decisioni prese, non ripartire da zero
 
-Stato attuale di `:root` in `index.html` (già a posto, non toccare i valori
-senza motivo):
-- `--muted:#5c5c5c`, `--muted-light:#606060`, `--danger:#b13225` — scuriti
-  apposta per restare sopra il minimo di contrasto WCAG AA (4.5:1) anche sopra
-  il gradiente ambientale più intenso dell'hero. Se si schiarisce di nuovo lo
-  sfondo o si intensifica il gradiente, **ricontrollare il contrasto**, non
-  dare per scontato che vada bene.
-- Bottoni: `border-radius: 10px` ovunque (non più `980px`/pillola piena —
-  cambiato apposta, è uno dei tratti "AI generico" corretti).
-- Sfondo ambientale: due macchie radiali (arancio `rgba(214,120,76,...)` +
-  prugna `rgba(94,67,86,...)`) **asimmetriche** (una dominante, una piccola in
-  un angolo) — non renderle di nuovo speculari/bilanciate.
-- Hero della landing: testo **allineato a sinistra**, non centrato
-  (`.l-hero-inner { align-items: flex-start; text-align: left }`).
-- Hover con ombra/spostamento sono dentro
-  `@media (hover: hover) and (pointer: fine)` — altrimenti restano "incollati"
-  su mobile dopo un tap. Ogni elemento cliccabile ha un `:active` con
-  `transform: scale(...)` per dare feedback al tocco.
-- La schermata di caricamento (`#sec-loading`) mostra le 5 dimensioni
-  (01-05, stessa numerazione di landing/risultati) che avanzano
-  pending → active → done mentre si aspetta, invece di uno spinner generico.
-  Guidato da `startLoadingDims([...secondi])` / `finishLoadingDims()` /
-  `resetLoadingDims()` in JS — pacing plausibile basato sul tempo trascorso,
-  non telemetria reale per-dimensione (le chiamate API non la espongono).
+**Redesign del 2026-10-08 (approvato da Antonio, pubblicato):** direzione
+"sala buia" ispirata a A24/NEON/Stripe, scelta tramite mockup A/B.
+- **Hero landing scuro** (`--night:#0e0c0b`) che **sfuma** nel crema
+  (`--paper:#f4f1ec`) in ~300px, senza linea netta. Antonio odia gli
+  "stacchi" tra sfondo e contenuto: niente bordi netti, niente card bianche
+  incollate sullo sfondo. La sfumatura è nel `padding-bottom` dell'hero, sotto
+  tutto il testo (così il testo non finisce mai sui toni intermedi).
+- **Scheda report di esempio in vetro scuro** (variante "B" scelta da lui, non
+  quella chiara). Numeri veri dal report statico Northbound.
+- **Font**: `--display` Inter Tight (titoli, peso 300/500), Inter per il
+  testo, `--mono` IBM Plex Mono per le etichette piccole maiuscole.
+  **Self-hosted in `/fonts`** (niente Google Fonts, per il GDPR). Il CSP in
+  `netlify.toml` ha `font-src 'self'`: se si aggiunge un font esterno va
+  cambiato anche lì, altrimenti viene bloccato.
+- **Form senza card**: sezioni separate da una linea sottile e un numero mono,
+  campi = tinta dello sfondo (`--field`), focus con anello arancio morbido.
+- **Navbar landing**: trasparente, poi vetro scuro, poi carta chiara oltre la
+  sfumatura (`updateLandingNav()`).
+- **Banner cookie: NON serve** (verificato): nessun cookie, nessun tracker,
+  statistiche anonime self-hosted; il localStorage serve solo al login
+  "My Reports" scelto dall'utente. Non aggiungerlo senza un motivo nuovo.
+- Il disclaimer con casella sulla landing resta obbligatorio (`termsCheck`).
+- **Ancora da fare**: schermate di caricamento e risultati nello stesso stile
+  (per ora hanno solo preso i nuovi colori).
+
+Regole che restano valide:
+- Contrasto: misurarlo sui **pixel veri** (nascondere il testo, campionare lo
+  sfondo), non fidarsi solo di Impeccable: sui gradienti dà falsi positivi.
+  Testo piccolo almeno 4.5:1, titoli grandi almeno 3:1.
+- Bottoni: `border-radius: 10px`, mai pillola piena.
+- Macchie di colore ambientali **asimmetriche**, mai speculari.
+- Testo allineato a sinistra, non centrato.
+- Hover dentro `@media (hover: hover) and (pointer: fine)`, ogni elemento
+  cliccabile ha `:active` con `scale(...)`.
+- Caricamento (`#sec-loading`): 5 dimensioni 01-05 che avanzano invece di uno
+  spinner (`startLoadingDims` / `finishLoadingDims` / `resetLoadingDims`).
 
 ## Strumenti di design installati (2026-10-08)
 
