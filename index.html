@@ -350,7 +350,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .f-steps li { display: flex; gap: 14px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); transition: color 0.3s var(--ease); }
 .f-steps li .l-mono { transition: color 0.3s var(--ease); }
 .f-steps li.on { color: var(--text); }
-.f-steps li.on .l-mono { color: #b4552b; }
+.f-steps li.on { box-shadow: inset 2px 0 0 #b4552b; padding-left: 12px; }
+.f-steps li { transition: color 0.3s var(--ease), padding-left 0.3s var(--ease), box-shadow 0.3s var(--ease); }
 #sec-form .card { background: transparent; box-shadow: none; border: 0; border-radius: 0; padding: 0 0 44px; margin-bottom: 44px; border-bottom: 1px solid var(--border); }
 #sec-form .card-title { display: flex; gap: 14px; align-items: baseline; font-family: var(--display); font-size: 22px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 28px; color: var(--text); }
 #sec-form .card-title .l-mono { color: var(--muted); }
@@ -966,14 +967,14 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
       <h1 class="f-title"><b>Tell us about</b><br>your project.</h1>
       <p class="f-subtitle">The preview covers all five dimensions. The full report is free too, and arrives by email.</p>
       <ol class="f-steps" id="formSteps">
-        <li class="on"><span class="l-mono">01</span>Your project</li>
-        <li><span class="l-mono">02</span>Budget &amp; distribution</li>
-        <li><span class="l-mono">03</span>Context</li>
+        <li class="on">Your project</li>
+        <li>Budget &amp; distribution</li>
+        <li>Context</li>
       </ol>
     </div>
     <div class="f-body">
     <div class="card reveal" style="transition-delay:0s">
-      <div class="card-title"><span class="l-mono">01</span>Your project</div>
+      <div class="card-title">Your project</div>
       <div class="field">
         <label for="title">Film Title <span class="hint">(or working title)</span></label>
         <input type="text" id="title" placeholder="e.g. The Last Harvest">
@@ -1010,7 +1011,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
       </div>
     </div>
     <div class="card reveal" style="transition-delay:0.06s">
-      <div class="card-title"><span class="l-mono">02</span>Budget &amp; distribution</div>
+      <div class="card-title">Budget &amp; distribution</div>
       <div class="field">
         <label for="budgetSlider">Estimated Budget</label>
         <div class="budget-row">
@@ -1064,7 +1065,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
       </div>
     </div>
     <div class="card reveal" style="transition-delay:0.12s">
-      <div class="card-title"><span class="l-mono">03</span>Context</div>
+      <div class="card-title">Context</div>
       <div class="field-row">
         <div class="field">
           <label for="country">Production Country</label>
