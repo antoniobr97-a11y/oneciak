@@ -120,7 +120,10 @@ conversazione aspettando.
   da una sua immagine di riferimento): `body::before` = riflessi larghi e
   morbidi (luce in alto a destra, ombra calda in basso a sinistra),
   `body::after` = grana fine uniforme (feTurbulence 1 ottava, opacity 0.22).
-  La vecchia grana a fibre di carta è stata tolta. Il nastro curvo luminoso
+  La vecchia grana a fibre di carta è stata tolta.
+  Provata e SCARTATA da Antonio (2026-10-10): grana forte calibrata sulla sua
+  foto (std ~5.6, overlay) e versioni con nastro/pieghe di raso. Ha detto
+  "va bene così basta": non riproporre altre varianti di satinato/grana. Il nastro curvo luminoso
   dello stesso riferimento è stato provato sull'hero ma NON scelto (per ora).
 - **Scheda report di esempio in vetro scuro** (variante "B" scelta da lui, non
   quella chiara). Numeri veri dal report statico Northbound.
