@@ -119,12 +119,8 @@ conversazione aspettando.
 - **Parti chiare satinate, non "carta"** (scelto da Antonio il 2026-10-10
   da una sua immagine di riferimento): `body::before` = riflessi larghi e
   morbidi (luce in alto a destra, ombra calda in basso a sinistra),
-  `body::after` = grana satinata calibrata sulla foto di Antonio (overlay,
-  rumore grigio centrato su 0.5, tile 100px). Misurata sui pixel: ~5.6 sul
-  crema, ~5.5 sui bagliori, ~2.2 sui neri (foto: 5.7 / 5.7 / 2.8). Antonio
-  vuole SOLO la texture della foto, i colori restano i nostri (2026-10-10).
-  Se chiede "torna come prima": `git revert` del commit "Satin grain matched
-  to the reference photo". La vecchia grana a fibre di carta è stata tolta. Il nastro curvo luminoso
+  `body::after` = grana fine uniforme (feTurbulence 1 ottava, opacity 0.22).
+  La vecchia grana a fibre di carta è stata tolta. Il nastro curvo luminoso
   dello stesso riferimento è stato provato sull'hero ma NON scelto (per ora).
 - **Scheda report di esempio in vetro scuro** (variante "B" scelta da lui, non
   quella chiara). Numeri veri dal report statico Northbound.

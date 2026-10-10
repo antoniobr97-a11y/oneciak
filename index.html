@@ -89,14 +89,11 @@ body::before {
     radial-gradient(ellipse 900px 600px at 100% 105%, rgba(150,96,84,0.14) 0%, rgba(150,96,84,0.04) 50%, transparent 78%);
 }
 body::after {
-  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.7; mix-blend-mode: overlay;
-  /* Satin grain matched to Antonio's reference photo (2026-10-10): fine
-     single-octave noise, gray centred on 0.5 so it lightens and darkens
-     around the colour underneath instead of greying it. Measured on real
-     pixels: ~5.6 std on the cream, same as the photo (5.7). Old version
-     (opacity 0.22, normal blend, alpha-only noise) measured 1.4. */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.6' numOctaves='1' stitchTiles='stitch' seed='5'/%3E%3CfeColorMatrix values='2.0 0 0 0 -0.500  2.0 0 0 0 -0.500  2.0 0 0 0 -0.500  0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 100px;
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.22;
+  /* Fine, even film grain (one octave), same family as the hero's grain.
+     Replaced the old two-octave "paper fibre" texture. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='1' stitchTiles='stitch' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 1.1 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px;
 }
 ::selection { background: var(--accent); color: #fff; }
 a { color: inherit; }
@@ -185,11 +182,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
    orange #ec5828, red #e1241f, wine #8b1921, petrol #182b30 on a plum-black
    night. Glows sit at the edges so the text column stays on dark ground. */
 .l-hero::after, #sec-results .r-hero::after, #sec-myreports .r-hero::after, #sec-loading::after {
-  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.36; mix-blend-mode: overlay;
-  /* Same satin grain as the page: ~5.5 std on the glows, ~2.2 on the
-     blacks (photo: 5.7 / 2.8). Previous: 0.9 / 0.5. */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.6' numOctaves='1' stitchTiles='stitch' seed='5'/%3E%3CfeColorMatrix values='2.0 0 0 0 -0.500  2.0 0 0 0 -0.500  2.0 0 0 0 -0.500  0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 100px;
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.22; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 1.1 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px;
 }
 /* No seam where the night meets the paper (2026-10-10): the dissolve ends
    transparent, so the page's own paper grain shows through instead of a
