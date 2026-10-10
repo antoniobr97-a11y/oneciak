@@ -284,7 +284,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-order-list h3 { font-family: var(--display); font-weight: 500; font-size: 20px; letter-spacing: -0.015em; color: var(--text); }
 .l-order-list p { color: var(--muted); font-size: 15px; line-height: 1.5; }
 .l-foot { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 64px; padding: 24px 0 36px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--muted); }
-.l-foot a { color: inherit; text-underline-offset: 2px; }
+.l-foot a { color: inherit; text-underline-offset: 2px; display: inline-block; padding: 6px 0; } /* 27px tall: easier to tap */
 .l-foot nav { display: flex; gap: 18px; }
 
 /* MENU OVERLAY: the same night as the hero, so opening it feels like the
@@ -739,7 +739,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .accordion-trigger.open .accordion-icon { color: #b4552b !important; }
 .accordion-label { font-family: var(--display); font-size: 21px; font-weight: 500; letter-spacing: -0.015em; }
 .accordion-score { font-family: var(--display); font-size: 24px; font-weight: 400; letter-spacing: -0.02em; }
-.accordion-score-label { font-family: var(--mono); font-weight: 400; letter-spacing: 0.08em; }
+.accordion-score-label { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; }
 .extra-title, .locked-title { font-family: var(--display); font-weight: 500; letter-spacing: -0.02em; }
 .extra-title { font-size: 22px; }
 .locked-card { background: var(--field); box-shadow: none !important; border: 0 !important; }
