@@ -161,7 +161,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   /* Chosen 2026-10-08 (variant B): the same long dissolve, interpolated in
      oklab so the midpoint stays warm instead of passing through muddy grey.
      Browsers without 'in oklab' keep the stepped gradient above. */
-  background: linear-gradient(in oklab 180deg, var(--night) 0, var(--night) calc(100% - 280px), var(--paper) 100%);
+  background: linear-gradient(in oklab 180deg, var(--night) 0, var(--night) calc(100% - 280px), rgb(244 241 236 / 0) 100%);
   padding-bottom: 270px;
 }
 /* Ember glow, deliberately lopsided: one dominant warm source top-right,
@@ -180,6 +180,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.22; mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 1.1 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 220px;
+}
+/* No seam where the night meets the paper (2026-10-10): the dissolve ends
+   transparent, so the page's own paper grain shows through instead of a
+   flat cream band, and the glows and the film grain fade out before the
+   bottom edge instead of being cut by it. */
+.l-hero::before, .l-hero::after, #sec-results .r-hero::before, #sec-results .r-hero::after, #sec-myreports .r-hero::before, #sec-myreports .r-hero::after {
+  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 220px), transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 220px), transparent 100%);
 }
 .l-wrap { max-width: 1240px; margin: 0 auto; padding: 0 40px; width: 100%; }
 .l-hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 72px; align-items: center; padding-top: 148px; }
@@ -681,7 +689,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #sec-results .r-hero, #sec-myreports .r-hero {
   color: var(--on-night); position: relative;
   background: linear-gradient(180deg, var(--night) 0, var(--night) calc(100% - 260px), #201e1c calc(100% - 200px), #4a4643 calc(100% - 145px), #908c86 calc(100% - 88px), #d5d0ca calc(100% - 40px), var(--paper) 100%);
-  background: linear-gradient(in oklab 180deg, var(--night) 0, var(--night) calc(100% - 250px), var(--paper) 100%);
+  background: linear-gradient(in oklab 180deg, var(--night) 0, var(--night) calc(100% - 250px), rgb(244 241 236 / 0) 100%);
   padding: 128px 24px 220px; margin-top: -64px;
 }
 #sec-results .r-hero-inner, #sec-myreports .r-hero-inner { position: relative; z-index: 1; }
