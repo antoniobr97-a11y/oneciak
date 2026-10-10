@@ -113,9 +113,15 @@ conversazione aspettando.
   tutto il testo (così il testo non finisce mai sui toni intermedi).
   **La sfumatura finisce trasparente** (non su `--paper` pieno) e bagliori +
   grana dell'hero sfumano con `mask-image` negli ultimi 220px: così sotto si
-  vede la stessa grana carta del resto della pagina. Prima c'era una riga
+  vede la stessa texture del resto della pagina. Prima c'era una riga
   visibile (crema liscio sopra, carta con grana sotto, rosso tagliato di
   netto). Segnalato da Antonio il 2026-10-10, non tornare indietro.
+- **Parti chiare satinate, non "carta"** (scelto da Antonio il 2026-10-10
+  da una sua immagine di riferimento): `body::before` = riflessi larghi e
+  morbidi (luce in alto a destra, ombra calda in basso a sinistra),
+  `body::after` = grana fine uniforme (feTurbulence 1 ottava, opacity 0.22).
+  La vecchia grana a fibre di carta è stata tolta. Il nastro curvo luminoso
+  dello stesso riferimento è stato provato sull'hero ma NON scelto (per ora).
 - **Scheda report di esempio in vetro scuro** (variante "B" scelta da lui, non
   quella chiara). Numeri veri dal report statico Northbound.
 - **Font**: `--display` **Geist** (scelto da Antonio il 2026-10-08, "C" nel
