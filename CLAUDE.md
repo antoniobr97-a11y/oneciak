@@ -213,6 +213,29 @@ Server locale per testare prima di pubblicare:
 - `admin-stats.html` manda la chiave nell'header `X-Admin-Key`, non nell'URL.
 - Limite di spesa mensile nella console Anthropic: impostato a 50 (confermato da Antonio il 2026-10-08). Se si raggiunge, le analisi falliscono fino al mese dopo.
 
+## Marketing e contenuti (dal 2026-10-19)
+
+- **Sezione Guide** in `/guides/` (pagine statiche, CSS condiviso in
+  `guides/guides.css` copiato dai token dell'app: se cambia il look del sito,
+  aggiornarlo anche lì). Prima guida:
+  `/guides/festival-strategy-first-film/`. Ogni dato verificato su fonti
+  ufficiali e ogni link controllato prima di pubblicare. Nuove guide:
+  aggiungerle a `guides/index.html` e `sitemap.xml`.
+- **Agente del lunedì** (Routine `trig_01LhjUc5ZkrXiqCkiqh5hiKo`, lunedì 8:52
+  ora italiana, notifica push+email ad Antonio): controlla il sito, prepara 3
+  post e la bozza della guida successiva sul branch `claude/guide-drafts`.
+  Non pubblica mai. Quando Antonio dice "pubblica la bozza guida <slug>":
+  portare la pagina da quel branch su main con la solita procedura e
+  aggiornare `guides/index.html` + `sitemap.xml`.
+- **Google indicizza già il sito** (confermato da Antonio il 2026-10-19). Lo
+  strumento WebSearch di Claude NON è Google: se non trova oneciak.com non
+  vuol dire che Google non lo conosca. Search Console resta utile per i dati
+  (query, clic), non per "farsi trovare".
+- Lista canali di promozione verificata (community con regole
+  sull'autopromozione, directory, scuole, riviste): consegnata ad Antonio il
+  2026-10-19. r/Screenwriting vieta contenuti AI; r/Filmmakers vieta i post
+  solo-link.
+
 ## Principio di onestà (esplicito, non derogabile)
 
 Mai inventare o gonfiare numeri/statistiche mostrate agli utenti (es. il
