@@ -38,6 +38,24 @@
         ],
         "createdAt": "2026-10-19T10:12:22.572Z",
         "reason": "Checked on real pixels 2026-10-19 (text hidden, background sampled): all body text passes; remaining flags are the night/paper gradient header and multi-line links whose box includes neighbouring text"
+      },
+      {
+        "rule": "overused-font",
+        "value": "geist",
+        "files": [
+          "guides/festival-strategy-first-film/index.html"
+        ],
+        "createdAt": "2026-10-19T10:15:54.610Z",
+        "reason": "Geist (titles) and Inter (body) chosen by Antonio on 2026-10-08, documented in CLAUDE.md; guides reuse the site's fonts"
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "files": [
+          "guides/festival-strategy-first-film/index.html"
+        ],
+        "createdAt": "2026-10-19T10:15:54.623Z",
+        "reason": "Geist (titles) and Inter (body) chosen by Antonio on 2026-10-08, documented in CLAUDE.md; guides reuse the site's fonts"
       }
     ]
   }
