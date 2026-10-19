@@ -29,6 +29,15 @@
         ],
         "createdAt": "2026-10-08T08:37:13.236Z",
         "reason": "Founder explicitly chose and approved this warm paper ground on 2026-10-08 after an A/B review of mockups; it is the light half of the night-to-paper hero dissolve, not a reflex default"
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "guides/festival-strategy-first-film/index.html"
+        ],
+        "createdAt": "2026-10-19T10:12:22.572Z",
+        "reason": "Checked on real pixels 2026-10-19 (text hidden, background sampled): all body text passes; remaining flags are the night/paper gradient header and multi-line links whose box includes neighbouring text"
       }
     ]
   }
