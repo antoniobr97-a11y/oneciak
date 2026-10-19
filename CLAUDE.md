@@ -259,6 +259,26 @@ Server locale per testare prima di pubblicare:
   2026-10-19. r/Screenwriting vieta contenuti AI; r/Filmmakers vieta i post
   solo-link.
 
+## Questioni legali (in sospeso dal 2026-10-19, Antonio sente un avvocato)
+
+Controllo fatto su fonti ufficiali il 2026-10-19 (GDPR, AI Act + Reg. UE
+2026/1744, linee guida cookie Garante, D.Lgs. 70/2003, DPR 633/72 art. 35,
+Codice del Consumo, L. 132/2025, termini Anthropic, Google Search Central).
+- Antonio NON ha partita IVA: niente P.IVA sul sito.
+- Privacy incompleta rispetto a GDPR art. 13: manca titolare (identità e
+  contatti), basi giuridiche, trasferimenti USA (Netlify/Resend nel DPF,
+  Anthropic con SCC del suo DPA), tempi di conservazione, diritto di reclamo
+  al Garante. Antonio ha paura a mettere il suo nome: NON scrivere il suo
+  nome nel sito finché non decide dopo l'avvocato.
+- Dati salvati oggi: report completi + email (store webhook-reports) e
+  indice My Reports (user-reports) senza scadenza. Proposta in attesa:
+  cancellazione automatica dopo 30 giorni e rimozione di My Reports
+  ("strada A"), oppure report solo a schermo senza email ("strada B").
+- Già fatto: IP mai più salvati in chiaro (HMAC) e contatori scaduti
+  cancellati da soli (rateLimit.js).
+- Da valutare con l'avvocato: AI Act art. 50(2) (marcatura leggibile a
+  macchina dei testi AI), domicilio ex D.Lgs. 70/2003 art. 7.
+
 ## Principio di onestà (esplicito, non derogabile)
 
 Mai inventare o gonfiare numeri/statistiche mostrate agli utenti (es. il
