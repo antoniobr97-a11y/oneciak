@@ -49,6 +49,21 @@ frustrato — non è un segnale di voler un tono più formale, il contrario.
   Cambiamenti piccoli/tecnici (bug fix, contrasto, accessibilità) si pubblicano
   senza aspettare.
 
+## REGOLA DI ANTONIO (2026-10-19, non derogabile): tutto verificato alla fonte
+
+"Ogni cosa che mi dici deve essere certificata alla fonte e corretta. Non
+sbagliare più, metti solo confusione." Nata dopo che gli ho detto che Google
+non indicizzava il sito basandomi su WebSearch (che NON è Google): era falso.
+In pratica:
+- Prima di affermare un fatto (su sito, codice, servizi esterni, dati,
+  regole) verificarlo direttamente: comando eseguito, pagina ufficiale aperta,
+  misura sui pixel. Dirgli da dove viene ("verificato su ...").
+- Mai dedurre una conclusione da uno strumento che non misura davvero quella
+  cosa (es. WebSearch per Google, Chromium per Safari, test locale per live).
+  Se non posso verificarlo, dirlo chiaro: "non verificato, perché ...".
+- Niente supposizioni presentate come fatti, niente numeri a memoria.
+- Se scopro un mio errore, dirlo subito e correggerlo.
+
 ## Bug critico di infrastruttura: il merge via API GitHub a volte è vuoto
 
 **Scoperto il 2026-10-04, importantissimo.** La PR #79 è stata creata e
