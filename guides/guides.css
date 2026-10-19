@@ -67,9 +67,9 @@ a { color: inherit; }
 /* article body on the paper */
 .g-main { padding: 0 0 100px; }
 .g-article { max-width: 680px; }
-.g-article h2 { margin: 56px 0 14px; font-family: var(--display); font-weight: 700; font-size: 28px; line-height: 1.15; letter-spacing: -0.025em; }
+.g-article h2 { margin: 56px 0 14px; font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1.15; letter-spacing: -0.025em; }
 .g-article h2 .mono { display: block; margin-bottom: 10px; color: var(--ember-text); }
-.g-article h3 { margin: 30px 0 8px; font-family: var(--display); font-weight: 600; font-size: 20px; letter-spacing: -0.015em; }
+.g-article h3 { margin: 30px 0 8px; font-family: var(--display); font-weight: 600; font-size: 22px; letter-spacing: -0.015em; }
 .g-article p, .g-article li { font-size: 17.5px; line-height: 1.7; }
 .g-article p + p { margin-top: 16px; }
 .g-article ul, .g-article ol { margin: 14px 0 0 22px; }
