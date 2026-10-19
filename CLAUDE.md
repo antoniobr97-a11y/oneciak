@@ -246,10 +246,15 @@ Server locale per testare prima di pubblicare:
   aggiungerle a `guides/index.html` e `sitemap.xml`.
 - **Agente del lunedì** (Routine `trig_01LhjUc5ZkrXiqCkiqh5hiKo`, lunedì 8:52
   ora italiana, notifica push+email ad Antonio): controlla il sito, prepara 3
-  post e la bozza della guida successiva sul branch `claude/guide-drafts`.
-  Non pubblica mai. Quando Antonio dice "pubblica la bozza guida <slug>":
-  portare la pagina da quel branch su main con la solita procedura e
-  aggiornare `guides/index.html` + `sitemap.xml`.
+  post e la bozza della guida successiva come **Artifact privato** (pagina di
+  anteprima). Le sessioni avviate da una Routine NON possono fare push: lo
+  strumento add_repo lì non esiste (verificato il 2026-10-19, ToolSearch "No
+  matching deferred tools found", git push 403). Non pubblica mai. Quando
+  Antonio dice "pubblica la bozza guida" con il link: leggere l'Artifact
+  (Artifact action read), riverificare fonti e link, rimettere il CSS come
+  `<link href="/guides/guides.css">`, salvare in `guides/<slug>/index.html`,
+  aggiornare `guides/index.html` + `sitemap.xml`, mostrargli l'anteprima e
+  pubblicare con la solita procedura.
 - **Google indicizza già il sito** (confermato da Antonio il 2026-10-19). Lo
   strumento WebSearch di Claude NON è Google: se non trova oneciak.com non
   vuol dire che Google non lo conosca. Search Console resta utile per i dati
