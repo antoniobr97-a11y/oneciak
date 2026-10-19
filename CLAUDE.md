@@ -64,6 +64,14 @@ In pratica:
 - Niente supposizioni presentate come fatti, niente numeri a memoria.
 - Se scopro un mio errore, dirlo subito e correggerlo.
 
+## REGOLA DI ANTONIO (2026-10-19): ogni pubblicità la vede prima lui
+
+Post social, testi per Product Hunt / Reddit / Hacker News, email a scuole o
+riviste, nuove guide, qualsiasi contenuto promozionale: prima si mostra ad
+Antonio il testo esatto (e l'anteprima visiva se c'è), poi si aspetta il suo
+ok esplicito. Claude e l'agente del lunedì non postano, non inviano email e
+non pubblicano mai contenuti promozionali da soli: preparano, Antonio decide.
+
 ## Bug critico di infrastruttura: il merge via API GitHub a volte è vuoto
 
 **Scoperto il 2026-10-04, importantissimo.** La PR #79 è stata creata e
