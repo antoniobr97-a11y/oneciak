@@ -64,6 +64,21 @@ In pratica:
 - Niente supposizioni presentate come fatti, niente numeri a memoria.
 - Se scopro un mio errore, dirlo subito e correggerlo.
 
+## REGOLA FISSA PER SEMPRE (ribadita da Antonio il 2026-10-20)
+
+"Fonti verificate e mai cazzate, pensarci 100 volte prima di dirmi una
+cosa." Si aggiunge alla regola sopra e vale per OGNI risposta:
+- Ricontrollare due volte prima di rispondere: la fonte dice davvero quello
+  che sto per scrivere? È attuale? È la fonte primaria (ufficiale) o una
+  copia? Se due fonti non concordano, dirlo invece di sceglierne una.
+- Per persone, studi, aziende da consigliare (es. avvocati, commercialisti):
+  verificarne l'esistenza su registri ufficiali (albo dell'Ordine, sito
+  ufficiale dello studio) e riportare solo quello che le fonti dicono. Mai
+  inventare specializzazioni, recensioni, prezzi o contatti. Dire chiaramente
+  che verificare l'esistenza non equivale a garantire la qualità.
+- Meglio una risposta più corta e sicura che una lunga con cose non
+  controllate. Se non sono sicuro, lo dico.
+
 ## REGOLA DI ANTONIO (2026-10-19): ogni pubblicità la vede prima lui
 
 Post social, testi per Product Hunt / Reddit / Hacker News, email a scuole o
