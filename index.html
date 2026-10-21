@@ -605,6 +605,10 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .comp-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
 .comp-detail { font-size: 13px; color: var(--muted); line-height: 1.5; font-weight: 400; }
 .comp-lesson { font-size: 13px; color: var(--text); font-weight: 400; margin-top: 6px; font-style: normal; padding-left: 13px; border-left: 2px solid var(--accent); }
+/* Where a fund, festival, film or company in the report was found, and when. */
+.src-line { display: inline-block; margin-top: 6px; padding: 4px 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.02em; color: var(--muted); text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 3px; transition: color 0.15s, transform 0.15s ease-out; }
+.src-line:active { transform: scale(0.98); }
+@media (hover: hover) and (pointer: fine) { .src-line:hover { color: var(--text); text-decoration-color: currentColor; } }
 .market-item { padding: 12px 0; border-bottom: 1px solid var(--border-light); }
 .market-item:last-child { border-bottom: none; padding-bottom: 0; }
 .market-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
@@ -1954,9 +1958,9 @@ function renderFree(r, title) {
       extra: r.logline_verdict ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light);font-size:13px;color:var(--text);line-height:1.6"><b>Logline verdict:</b> '+esc(r.logline_verdict)+'</div>' : '' },
     { num:'02', label:'Financial Plan',       sublabel:'Budget · Funding · Financing',   score:r.financial_score,    verdict:r.financial_verdict,    detail:r.financial_detail,    tip:r.financial_tip,    flag:r.financial_flag,    strength:r.financial_strength, extra:'' },
     { num:'03', label:'Market & Audience',    sublabel:'Demand · Trends · Comparables',  score:r.market_score,       verdict:r.market_verdict,       detail:r.market_detail,       tip:r.market_tip,       flag:r.market_flag,       strength:r.market_strength,
-      extra: oneComp.title ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)"><div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px">Comparable Film</div><div style="font-size:13px;color:var(--text)"><b>'+esc(oneComp.title)+'</b> ('+esc(oneComp.year)+') — '+esc(oneComp.result)+'</div>'+(oneComp.lesson?'<div style="font-size:12px;color:var(--muted);margin-top:4px">'+esc(oneComp.lesson)+'</div>':'')+'</div>' : '' },
+      extra: oneComp.title ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)"><div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px">Comparable Film</div><div style="font-size:13px;color:var(--text)"><b>'+esc(oneComp.title)+'</b>'+(oneComp.year?' ('+esc(oneComp.year)+')':'')+(oneComp.result?' — '+esc(oneComp.result):'')+'</div>'+(oneComp.lesson?'<div style="font-size:12px;color:var(--muted);margin-top:4px">'+esc(oneComp.lesson)+'</div>':'')+sourceLine(oneComp)+'</div>' : '' },
     { num:'04', label:'Festival Strategy',    sublabel:'Circuit · Festivals · Timing',   score:r.festival_score,     verdict:r.festival_verdict,     detail:r.festival_detail,     tip:r.festival_tip,     flag:r.festival_flag,     strength:r.festival_strength,
-      extra: oneFestival.name ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)"><div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px">Suggested Festival</div><div style="font-size:13px;color:var(--text)"><b>'+esc(oneFestival.name)+'</b>'+(oneFestival.tier?' (Tier '+esc(oneFestival.tier)+')':'')+' — '+esc(oneFestival.why)+'</div></div>' : '' },
+      extra: oneFestival.name ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)"><div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px">Suggested Festival</div><div style="font-size:13px;color:var(--text)"><b>'+esc(oneFestival.name)+'</b>'+(oneFestival.tier?' (Tier '+esc(oneFestival.tier)+')':'')+' — '+esc(oneFestival.why)+'</div>'+sourceLine(oneFestival)+'</div>' : '' },
     { num:'05', label:'Distribution & Revenue', sublabel:'Platforms · Pricing · Sales',  score:r.distribution_score, verdict:r.distribution_verdict, detail:r.distribution_detail, tip:r.distribution_tip, flag:r.distribution_flag, strength:r.distribution_strength, extra:'' }
   ];
 
@@ -2222,9 +2226,9 @@ function buildActionPlanBody(r) {
         '<div style="font-size:13px;font-weight:600">'+esc(f.festival)+'</div>'+
         '<span style="font-size:10px;font-weight:700;color:'+tc+';padding:1px 7px;border-radius:999px;border:1px solid var(--border);background:var(--field)">'+esc(f.tier)+'</span>'+
         '</div>'+
-        '<div style="font-size:12px;color:var(--muted);font-weight:300;margin-bottom:3px">'+esc(f.deadline)+'</div>'+
+        '<div style="font-size:12px;color:var(--muted);font-weight:300;margin-bottom:3px">'+esc(f.source ? 'Deadline: '+notStated(f.deadline, 'see the official page') : f.deadline)+'</div>'+
         '<div style="font-size:12px;color:var(--text);font-weight:300;margin-bottom:5px">'+esc(f.fit)+'</div>'+
-        (f.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+esc(f.url)+'" target="_blank" rel="noopener">Submit →</a>' : '')+
+        (f.source ? sourceLine(f) : f.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+esc(f.url)+'" target="_blank" rel="noopener">Submit →</a>' : '')+
         '</div>';
     });
     out += '</div>';
@@ -2239,7 +2243,7 @@ function buildActionPlanBody(r) {
         '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+esc(a.name)+'</div>'+
         '<div style="font-size:11px;color:var(--muted-light);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">'+esc(a.focus)+'</div>'+
         '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:5px">'+esc(a.why)+'</div>'+
-        (a.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+esc(a.url)+'" target="_blank" rel="noopener">Visit →</a>' : '')+
+        (a.source ? sourceLine(a) : a.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+esc(a.url)+'" target="_blank" rel="noopener">Visit →</a>' : '')+
         '</div>';
     });
     out += '</div>';
@@ -2266,7 +2270,18 @@ function buildActionPlanBody(r) {
   }
 
   // Revenue Projection
-  if (r.revenue_projection) {
+  // Newer reports describe revenue as scenarios in words (no data backs a
+  // currency forecast), so they get a stacked layout; older stored reports
+  // keep their original two-column figures.
+  if (r.revenue_projection && r.sources_checked) {
+    var rs = r.revenue_projection;
+    out += '<div style="padding-top:16px;border-top:1px solid var(--border-light)"><div class="tips-label" style="display:block;margin-bottom:12px">Revenue Scenarios</div>';
+    if (rs.total_realistic) out += '<div style="font-size:13px;color:var(--text);line-height:1.65;font-weight:400;margin-bottom:10px">'+esc(rs.total_realistic)+'</div>';
+    [{l:'Theatrical',v:rs.theatrical},{l:'Streaming (SVOD)',v:rs.streaming_svod},{l:'VOD / AVOD',v:rs.vod_avod},{l:'TV Rights',v:rs.tv_rights},{l:'International',v:rs.international}]
+      .forEach(function(w){ if(w.v) out += '<div style="padding:8px 0;border-bottom:1px solid var(--border-light)"><div style="font-size:12px;font-weight:600;margin-bottom:2px">'+w.l+'</div><div style="font-size:13px;color:var(--muted);line-height:1.6;font-weight:300">'+esc(w.v)+'</div></div>'; });
+    if (rs.breakeven_note) out += '<div style="font-size:12px;color:var(--muted);line-height:1.65;margin-top:8px">'+esc(rs.breakeven_note)+'</div>';
+    out += '</div>';
+  } else if (r.revenue_projection) {
     var rp = r.revenue_projection;
     out += '<div style="padding-top:16px;border-top:1px solid var(--border-light)"><div class="tips-label" style="display:block;margin-bottom:12px">Revenue Projection</div>';
     [{l:'Theatrical',v:rp.theatrical},{l:'Streaming (SVOD)',v:rp.streaming_svod},{l:'VOD / AVOD',v:rp.vod_avod},{l:'TV Rights',v:rp.tv_rights},{l:'International',v:rp.international}]
@@ -2318,6 +2333,32 @@ function toggleAccordion(idx) {
 
 
 /* ── INLINE EXTRA BUILDERS ── */
+/* Reports generated since the sourced-research update carry, for every
+   fund, festival, film, agent and platform, the page it was found on and
+   the date it was checked; older stored reports don't, and keep their
+   original links. */
+function sourceHost(url) {
+  try { return new URL(url).hostname.replace(/^www\./, ''); } catch (e) { return ''; }
+}
+function checkedDate(d) {
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d || '');
+  if (!m) return '';
+  return Number(m[3])+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][Number(m[2])-1]+' '+m[1];
+}
+function sourceLine(item) {
+  if (!item || !item.source) return '';
+  var when = checkedDate(item.checked);
+  return '<a class="src-line" href="'+esc(item.source)+'" target="_blank" rel="noopener">Source: '+esc(sourceHost(item.source))+(when?' · checked '+esc(when):'')+'</a>';
+}
+function pdfSource(item) {
+  if (!item || !item.source) return '';
+  var when = checkedDate(item.checked);
+  return 'Source: '+item.source+(when?' (checked '+when+')':'');
+}
+function notStated(v, fallback) {
+  return (v == null || v === '') ? fallback : v;
+}
+
 function buildFundingSources(sources) {
   if (!sources || !sources.length) return '';
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Funding Sources</div>';
@@ -2328,9 +2369,9 @@ function buildFundingSources(sources) {
       '<div style="font-size:13px;font-weight:700">'+esc(f.name)+'</div>'+
       '<div style="font-size:10px;font-weight:700;color:var(--muted);background:var(--field);padding:2px 7px;border-radius:3px;white-space:nowrap;flex-shrink:0">'+esc(f.type)+'</div>'+
       '</div>'+
-      '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:3px">'+esc(f.amount)+'</div>'+
-      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:5px">Deadline: '+esc(f.deadline)+' · '+esc(f.eligibility)+'</div>'+
-      (f.url ? '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px" href="'+esc(f.url)+'" target="_blank" rel="noopener">Apply →</a>' : '')+
+      (f.amount ? '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:3px">'+esc(f.amount)+'</div>' : '')+
+      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:5px">Deadline: '+esc(notStated(f.deadline, 'see the official page'))+' · '+esc(f.eligibility)+'</div>'+
+      (f.source ? sourceLine(f) : f.url ? '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px" href="'+esc(f.url)+'" target="_blank" rel="noopener">Apply →</a>' : '')+
       '</div>';
   });
   h += '</div>';
@@ -2385,7 +2426,7 @@ function buildLabOpportunities(labs) {
     h += '<div style="padding:10px 0;border-bottom:1px solid var(--border-light)">'+
       '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+esc(l.name)+'</div>'+
       '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:5px">'+esc(l.fit)+'</div>'+
-      (l.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+esc(l.url)+'" target="_blank" rel="noopener">Visit →</a>' : '')+
+      (l.source ? sourceLine(l) : l.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+esc(l.url)+'" target="_blank" rel="noopener">Visit →</a>' : '')+
       '</div>';
   });
   h += '</div>';
@@ -2393,16 +2434,17 @@ function buildLabOpportunities(labs) {
 }
 
 function buildTalentAndTax(talentLeverage, taxIncentive) {
-  if (!talentLeverage && !(taxIncentive && taxIncentive.estimate)) return '';
+  if (!talentLeverage && !(taxIncentive && (taxIncentive.estimate || taxIncentive.note))) return '';
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">';
   if (talentLeverage) {
     h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Talent Leverage</div>'+
       '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:14px">'+esc(talentLeverage)+'</div>';
   }
-  if (taxIncentive && taxIncentive.estimate) {
+  if (taxIncentive && (taxIncentive.estimate || taxIncentive.note)) {
     h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Tax Incentive'+(taxIncentive.region?' — '+esc(taxIncentive.region):'')+'</div>'+
-      '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:4px">'+esc(taxIncentive.estimate)+'</div>'+
-      (taxIncentive.note ? '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300">'+esc(taxIncentive.note)+'</div>' : '');
+      (taxIncentive.estimate ? '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:4px">'+esc(taxIncentive.estimate)+'</div>' : '')+
+      (taxIncentive.note ? '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300">'+esc(taxIncentive.note)+'</div>' : '')+
+      sourceLine(taxIncentive);
   }
   h += '</div>';
   return h;
@@ -2413,7 +2455,8 @@ function buildComparables(comps) {
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Comparable Films</div>';
   comps.forEach(function(c){
     if (!c) return;
-    h += '<div class="comp-item"><div class="comp-name">'+esc(c.title)+' ('+esc(c.year)+')</div><div class="comp-detail">Budget: '+esc(c.budget)+' — '+esc(c.result)+'</div><div class="comp-lesson">'+esc(c.lesson)+'</div></div>';
+    var detail = [c.budget ? 'Budget: '+c.budget : '', c.result || ''].filter(Boolean).join(' · ');
+    h += '<div class="comp-item"><div class="comp-name">'+esc(c.title)+(c.year?' ('+esc(c.year)+')':'')+'</div>'+(detail?'<div class="comp-detail">'+esc(detail)+'</div>':'')+'<div class="comp-lesson">'+esc(c.lesson)+'</div>'+sourceLine(c)+'</div>';
   });
   h += '</div>';
   return h;
@@ -2439,7 +2482,8 @@ function buildCautionaryComps(comps) {
   var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Cautionary Comparables</div>';
   comps.forEach(function(c){
     if (!c) return;
-    h += '<div class="comp-item"><div class="comp-name">'+esc(c.title)+' ('+esc(c.year)+')</div><div class="comp-detail">Budget: '+esc(c.budget)+' — '+esc(c.what_went_wrong)+'</div><div class="comp-lesson">'+esc(c.lesson)+'</div></div>';
+    var detail = [c.budget ? 'Budget: '+c.budget : '', c.what_went_wrong || ''].filter(Boolean).join(' · ');
+    h += '<div class="comp-item"><div class="comp-name">'+esc(c.title)+(c.year?' ('+esc(c.year)+')':'')+'</div>'+(detail?'<div class="comp-detail">'+esc(detail)+'</div>':'')+'<div class="comp-lesson">'+esc(c.lesson)+'</div>'+sourceLine(c)+'</div>';
   });
   h += '</div>';
   return h;
@@ -2454,7 +2498,7 @@ function buildPlatforms(platforms) {
       '<div style="font-size:9px;font-weight:700;color:#fff;background:var(--text);padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px;letter-spacing:0.04em">'+esc(pl.priority)+'</div>'+
       '<div><div style="font-size:13px;font-weight:700;margin-bottom:2px">'+esc(pl.name)+'</div>'+
       '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:4px">'+esc(pl.reason)+'</div>'+
-      (pl.url ? '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px;display:inline-block" href="'+esc(pl.url)+'" target="_blank" rel="noopener">Visit →</a>' : '')+
+      (pl.source ? sourceLine(pl) : pl.url ? '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px;display:inline-block" href="'+esc(pl.url)+'" target="_blank" rel="noopener">Visit →</a>' : '')+
       '</div></div>';
   });
   h += '</div>';
@@ -2778,19 +2822,21 @@ async function savePDF() {
       ln('FUNDING SOURCES',10,true);
       lastResult.financial_sources.forEach(function(f){
         if (!f) return;
-        ln((f.name||'')+' ('+(f.type||'')+') — '+(f.amount||''),10,true);
-        ln('Deadline: '+(f.deadline||'')+' · '+(f.eligibility||''),9,false,122,118,112);
+        ln((f.name||'')+' ('+(f.type||'')+')'+(f.amount?' — '+f.amount:''),10,true);
+        ln('Deadline: '+notStated(f.deadline, f.source ? 'see the official page' : '')+' · '+(f.eligibility||''),9,false,122,118,112);
+        if (f.source) ln(pdfSource(f),8,false,150,148,145);
         y+=1;
       });
       hr();
     }
 
-    if (isFullReport && (lastResult.talent_leverage || (lastResult.tax_incentive && lastResult.tax_incentive.estimate))) {
+    if (isFullReport && (lastResult.talent_leverage || (lastResult.tax_incentive && (lastResult.tax_incentive.estimate || lastResult.tax_incentive.note)))) {
       ln('TALENT LEVERAGE & TAX INCENTIVE',10,true);
       if (lastResult.talent_leverage) ln(lastResult.talent_leverage,10,false,122,118,112);
-      if (lastResult.tax_incentive && lastResult.tax_incentive.estimate) {
-        ln('Tax Incentive'+(lastResult.tax_incentive.region?' — '+lastResult.tax_incentive.region:'')+': '+lastResult.tax_incentive.estimate,10,true,22,101,52);
+      if (lastResult.tax_incentive && (lastResult.tax_incentive.estimate || lastResult.tax_incentive.note)) {
+        ln('Tax Incentive'+(lastResult.tax_incentive.region?' — '+lastResult.tax_incentive.region:'')+(lastResult.tax_incentive.estimate?': '+lastResult.tax_incentive.estimate:''),10,true,22,101,52);
         if (lastResult.tax_incentive.note) ln(lastResult.tax_incentive.note,9,false,122,118,112);
+        if (lastResult.tax_incentive.source) ln(pdfSource(lastResult.tax_incentive),8,false,150,148,145);
       }
       hr();
     }
@@ -2859,6 +2905,7 @@ async function savePDF() {
         if (!pl) return;
         ln((pl.priority||'')+': '+(pl.name||''),10,true);
         ln(pl.reason||'',9,false,122,118,112);
+        if (pl.source) ln(pdfSource(pl),8,false,150,148,145);
         y+=1;
       });
       hr();
@@ -2874,8 +2921,9 @@ async function savePDF() {
       ln('COMPARABLE FILMS',10,true);
       lastResult.market_comps.forEach(function(c){
         if (!c) return;
-        ln((c.title||'')+' ('+(c.year||'')+') — Budget: '+(c.budget||'')+' — '+(c.result||''),10,true);
+        ln((c.title||'')+(c.year?' ('+c.year+')':'')+(c.budget?' — Budget: '+c.budget:'')+(c.result?' — '+c.result:''),10,true);
         ln(c.lesson||'',9,false,122,118,112);
+        if (c.source) ln(pdfSource(c),8,false,150,148,145);
         y+=1;
       });
       hr();
@@ -2885,8 +2933,9 @@ async function savePDF() {
       ln('CAUTIONARY COMPARABLES',10,true);
       lastResult.cautionary_comps.forEach(function(c){
         if (!c) return;
-        ln((c.title||'')+' ('+(c.year||'')+') — Budget: '+(c.budget||'')+' — '+(c.what_went_wrong||''),10,true,185,28,28);
+        ln((c.title||'')+(c.year?' ('+c.year+')':'')+(c.budget?' — Budget: '+c.budget:'')+(c.what_went_wrong?' — '+c.what_went_wrong:''),10,true,185,28,28);
         ln(c.lesson||'',9,false,122,118,112);
+        if (c.source) ln(pdfSource(c),8,false,150,148,145);
         y+=1;
       });
       hr();
@@ -2896,8 +2945,9 @@ async function savePDF() {
       ln('FESTIVAL CALENDAR',10,true);
       lastResult.festival_calendar.forEach(function(f){
         if (!f) return;
-        ln((f.festival||'')+' (Tier '+(f.tier||'')+') — '+(f.deadline||''),10,true);
+        ln((f.festival||'')+' (Tier '+(f.tier||'')+') — '+(f.source ? 'Deadline: '+notStated(f.deadline, 'see the official page') : (f.deadline||'')),10,true);
         ln(f.fit||'',9,false,122,118,112);
+        if (f.source) ln(pdfSource(f),8,false,150,148,145);
         y+=1;
       });
       hr();
@@ -2909,6 +2959,7 @@ async function savePDF() {
         if (!l) return;
         ln(l.name||'',10,true);
         ln(l.fit||'',9,false,122,118,112);
+        if (l.source) ln(pdfSource(l),8,false,150,148,145);
         y+=1;
       });
       hr();
@@ -2920,6 +2971,7 @@ async function savePDF() {
         if (!a) return;
         ln(a.name||'',10,true);
         ln(a.why||'',9,false,122,118,112);
+        if (a.source) ln(pdfSource(a),8,false,150,148,145);
         y+=1;
       });
       hr();
@@ -2955,8 +3007,8 @@ async function savePDF() {
 
     if (isFullReport && lastResult.revenue_projection && lastResult.revenue_projection.total_realistic) {
       var rp = lastResult.revenue_projection;
-      ln('REVENUE PROJECTION',10,true);
-      ln('Total Realistic: '+rp.total_realistic,10,true,22,101,52);
+      ln(lastResult.sources_checked ? 'REVENUE SCENARIOS' : 'REVENUE PROJECTION',10,true);
+      ln((lastResult.sources_checked ? '' : 'Total Realistic: ')+rp.total_realistic,10,true,22,101,52);
       if (rp.breakeven_note) ln(rp.breakeven_note,9,false,122,118,112);
       hr();
     }
@@ -3031,7 +3083,7 @@ async function saveOneSheet() {
         ln('The Ask: '+lastResult.business_plan_summary.the_ask,10,true,26,25,22);
       }
       if (lastResult.revenue_projection && lastResult.revenue_projection.total_realistic) {
-        ln('Realistic Revenue Potential: '+lastResult.revenue_projection.total_realistic,10,true,22,101,52);
+        ln((lastResult.sources_checked ? 'Revenue outlook: ' : 'Realistic Revenue Potential: ')+lastResult.revenue_projection.total_realistic,10,true,22,101,52);
       }
       if (lastResult.roadmap && lastResult.roadmap[0] && lastResult.roadmap[0].action) {
         ln('Next Step: '+lastResult.roadmap[0].action,9,false,70,68,64);

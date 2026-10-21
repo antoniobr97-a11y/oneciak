@@ -64,10 +64,25 @@ function section(title, score, verdict, detail, flags, strengths, tips, plan, ex
   return html;
 }
 
+// Where a fund, festival, film or company was found and when it was
+// checked (reports generated before the sourced-research update have none).
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function sourceHtml(item) {
+  if (!item || !item.source) return '';
+  let host = '';
+  try { host = new URL(item.source).hostname.replace(/^www\./, ''); } catch (e) { return ''; }
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(item.checked || '');
+  const when = m ? ' · checked ' + Number(m[3]) + ' ' + MONTHS[Number(m[2]) - 1] + ' ' + m[1] : '';
+  return '<br><a href="' + esc(item.source) + '" style="font-family:' + MONO + ';font-size:11px;color:#6b665f;text-decoration:underline">Source: ' + esc(host) + esc(when) + '</a>';
+}
+function stated(v, item) {
+  return (v == null || v === '') ? (item && item.source ? 'see the official page' : '') : v;
+}
+
 function fundingSourcesHtml(sources) {
   if (!sources || !sources.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Funding Sources</span>';
-  sources.forEach(f => { if (!f) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.name) + '</b> (' + esc(f.type) + ') — ' + esc(f.amount) + '<br><span style="font-size:12px;color:#5c5852">Deadline: ' + esc(f.deadline) + ' · ' + esc(f.eligibility) + '</span></p>'; });
+  sources.forEach(f => { if (!f) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.name) + '</b> (' + esc(f.type) + ')' + (f.amount ? ' — ' + esc(f.amount) : '') + '<br><span style="font-size:12px;color:#5c5852">Deadline: ' + esc(stated(f.deadline, f)) + ' · ' + esc(f.eligibility) + '</span>' + sourceHtml(f) + '</p>'; });
   h += '</div>';
   return h;
 }
@@ -75,7 +90,7 @@ function fundingSourcesHtml(sources) {
 function comparablesHtml(comps) {
   if (!comps || !comps.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Comparable Films</span>';
-  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b> (' + esc(c.year) + ') — Budget: ' + esc(c.budget) + ' — ' + esc(c.result) + '<br><span style="font-size:12px;color:#5c5852">' + esc(c.lesson) + '</span></p>'; });
+  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b>' + (c.year ? ' (' + esc(c.year) + ')' : '') + (c.budget ? ' — Budget: ' + esc(c.budget) : '') + (c.result ? ' — ' + esc(c.result) : '') + '<br><span style="font-size:12px;color:#5c5852">' + esc(c.lesson) + '</span>' + sourceHtml(c) + '</p>'; });
   h += '</div>';
   return h;
 }
@@ -83,7 +98,7 @@ function comparablesHtml(comps) {
 function platformsHtml(platforms) {
   if (!platforms || !platforms.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Platform Priority</span>';
-  platforms.forEach(pl => { if (!pl) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(pl.priority) + ':</b> ' + esc(pl.name) + '<br><span style="font-size:12px;color:#5c5852">' + esc(pl.reason) + '</span></p>'; });
+  platforms.forEach(pl => { if (!pl) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(pl.priority) + ':</b> ' + esc(pl.name) + '<br><span style="font-size:12px;color:#5c5852">' + esc(pl.reason) + '</span>' + sourceHtml(pl) + '</p>'; });
   h += '</div>';
   return h;
 }
@@ -131,7 +146,7 @@ function labeledTextHtml(label, text) {
 function labOpportunitiesHtml(labs) {
   if (!labs || !labs.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Labs &amp; Market Opportunities</span>';
-  labs.forEach(l => { if (!l) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(l.name) + '</b><br><span style="font-size:12px;color:#5c5852">' + esc(l.fit) + '</span></p>'; });
+  labs.forEach(l => { if (!l) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(l.name) + '</b><br><span style="font-size:12px;color:#5c5852">' + esc(l.fit) + '</span>' + sourceHtml(l) + '</p>'; });
   h += '</div>';
   return h;
 }
@@ -147,22 +162,22 @@ function keyCrewHtml(crew) {
 function cautionaryCompsHtml(comps) {
   if (!comps || !comps.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Cautionary Comparables</span>';
-  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b> (' + esc(c.year) + ') — Budget: ' + esc(c.budget) + '<br><span style="font-size:12px;color:#b13225">' + esc(c.what_went_wrong) + '</span><br><span style="font-size:12px;color:#5c5852">' + esc(c.lesson) + '</span></p>'; });
+  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b>' + (c.year ? ' (' + esc(c.year) + ')' : '') + (c.budget ? ' — Budget: ' + esc(c.budget) : '') + (c.what_went_wrong ? '<br><span style="font-size:12px;color:#b13225">' + esc(c.what_went_wrong) + '</span>' : '') + '<br><span style="font-size:12px;color:#5c5852">' + esc(c.lesson) + '</span>' + sourceHtml(c) + '</p>'; });
   h += '</div>';
   return h;
 }
 
 function talentAndTaxHtml(talentLeverage, taxIncentive) {
-  if (!talentLeverage && !(taxIncentive && taxIncentive.estimate)) return '';
+  if (!talentLeverage && !(taxIncentive && (taxIncentive.estimate || taxIncentive.note))) return '';
   let h = '<div style="margin-top:10px">';
   if (talentLeverage) {
     h += '<span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Talent Leverage</span>' +
       '<p style="margin:6px 0 12px;font-size:13px;color:#161616;line-height:1.6">' + esc(talentLeverage) + '</p>';
   }
-  if (taxIncentive && taxIncentive.estimate) {
+  if (taxIncentive && (taxIncentive.estimate || taxIncentive.note)) {
     h += '<span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Tax Incentive' + (taxIncentive.region ? ' — ' + esc(taxIncentive.region) : '') + '</span>' +
-      '<p style="margin:6px 0 0;font-size:13px;font-weight:700;color:#0f7a3d">' + esc(taxIncentive.estimate) + '</p>' +
-      (taxIncentive.note ? '<p style="margin:2px 0 0;font-size:12px;color:#5c5852">' + esc(taxIncentive.note) + '</p>' : '');
+      (taxIncentive.estimate ? '<p style="margin:6px 0 0;font-size:13px;font-weight:700;color:#0f7a3d">' + esc(taxIncentive.estimate) + '</p>' : '') +
+      (taxIncentive.note ? '<p style="margin:2px 0 0;font-size:12px;color:#5c5852">' + esc(taxIncentive.note) + sourceHtml(taxIncentive) + '</p>' : '');
   }
   h += '</div>';
   return h;
@@ -197,14 +212,14 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
 
   if (r.festival_calendar && r.festival_calendar.length) {
     let fc = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Festival Calendar</span>';
-    r.festival_calendar.forEach(f => { if (!f) return; fc += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.festival) + '</b> (Tier ' + esc(f.tier) + ') — ' + esc(f.deadline) + '<br><span style="font-size:12px;color:#5c5852">' + esc(f.fit) + '</span></p>'; });
+    r.festival_calendar.forEach(f => { if (!f) return; fc += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.festival) + '</b> (Tier ' + esc(f.tier) + ') — ' + esc(f.source ? 'Deadline: ' + stated(f.deadline, f) : f.deadline) + '<br><span style="font-size:12px;color:#5c5852">' + esc(f.fit) + '</span>' + sourceHtml(f) + '</p>'; });
     fc += '</td></tr>';
     body += fc;
   }
 
   if (r.sales_agents && r.sales_agents.length) {
     let sa = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Sales Agents</span>';
-    r.sales_agents.forEach(a => { if (!a) return; sa += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(a.name) + '</b>' + (a.focus ? ' <span style="font-size:11px;color:#5c5852;text-transform:uppercase;letter-spacing:0.05em">' + esc(a.focus) + '</span>' : '') + '<br><span style="font-size:12px;color:#5c5852">' + esc(a.why) + '</span></p>'; });
+    r.sales_agents.forEach(a => { if (!a) return; sa += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(a.name) + '</b>' + (a.focus ? ' <span style="font-size:11px;color:#5c5852;text-transform:uppercase;letter-spacing:0.05em">' + esc(a.focus) + '</span>' : '') + '<br><span style="font-size:12px;color:#5c5852">' + esc(a.why) + '</span>' + sourceHtml(a) + '</p>'; });
     sa += '</td></tr>';
     body += sa;
   }
@@ -227,7 +242,17 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
       '<p style="margin:10px 0 0;font-size:13px;color:#161616;line-height:1.7">' + esc(r.legal_and_rights_considerations) + '</p></td></tr>';
   }
 
-  if (r.revenue_projection) {
+  if (r.revenue_projection && r.sources_checked) {
+    // Scenarios in words: no data backs a currency forecast.
+    const rs = r.revenue_projection;
+    let rv = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Revenue Scenarios</span>';
+    if (rs.total_realistic) rv += '<p style="margin:10px 0 0;font-size:13px;color:#161616;line-height:1.7">' + esc(rs.total_realistic) + '</p>';
+    [['Theatrical', rs.theatrical], ['Streaming (SVOD)', rs.streaming_svod], ['VOD / AVOD', rs.vod_avod], ['TV Rights', rs.tv_rights], ['International', rs.international]]
+      .forEach(([label, v]) => { if (v) rv += '<p style="margin:10px 0 0;font-size:13px;color:#161616;line-height:1.6"><b>' + esc(label) + ':</b> <span style="color:#3d3935">' + esc(v) + '</span></p>'; });
+    if (rs.breakeven_note) rv += '<p style="margin:10px 0 0;font-size:13px;color:#3d3935;line-height:1.6">' + esc(rs.breakeven_note) + '</p>';
+    rv += '</td></tr>';
+    body += rv;
+  } else if (r.revenue_projection) {
     const rp = r.revenue_projection;
     let rv = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Revenue Projection</span>';
     [['Theatrical', rp.theatrical], ['Streaming (SVOD)', rp.streaming_svod], ['VOD / AVOD', rp.vod_avod], ['TV Rights', rp.tv_rights], ['International', rp.international]]

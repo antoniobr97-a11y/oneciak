@@ -1,4 +1,5 @@
-const { callAnthropic, extractJSON } = require('./anthropic');
+const { callClaude, extractJSON } = require('./anthropic');
+const { groundReport } = require('./grounding');
 const { allFullPrompts } = require('./reportPrompts');
 const { buildReportEmailHtml, sendReportEmail } = require('./email');
 const { incrementUsageCount } = require('./stats');
@@ -6,27 +7,41 @@ const { verifyReportLinks } = require('./linkCheck');
 const { recordAndBenchmark } = require('./benchmarkStats');
 const { recordReportForEmail } = require('./userReports');
 
-const FULL_MODEL = 'claude-haiku-4-5-20251001';
-const FULL_MAX_TOKENS = 9500; // background function isn't bound by a sync response-time ceiling, so the deeper prompts get real room; raised alongside reportPrompts.js's expanded fields to keep headroom against truncated/malformed JSON
+const FULL_MODEL = 'claude-haiku-5-5';
+const FULL_MAX_TOKENS = 16000; // room for adaptive thinking plus the JSON (thinking counts toward max_tokens, and Haiku 5.5's tokenizer counts ~30% more tokens than Haiku 4.5's)
 const PROCESSING_STALE_MS = 8 * 60 * 1000; // generation can legitimately take a few minutes; give it plenty of room before a retry is treated as abandoned
 const PROMPT_ATTEMPTS = 3; // each of the 6 parallel prompts gets its own retries — an occasional malformed-JSON response from the model shouldn't fail the whole report
 const OVERALL_ATTEMPTS = 2; // a second full pass in case something broader (Resend, a transient network error) fails
 
-async function callAndParseWithRetry(apiKey, prompt, model, maxTokens) {
+// Returns the parsed section plus the URLs its web searches returned, which
+// grounding.js needs to tell sourced facts from remembered ones.
+async function callAndParseWithRetry(apiKey, section) {
   let lastErr;
   for (let i = 0; i < PROMPT_ATTEMPTS; i++) {
-    const result = await callAnthropic(apiKey, prompt, model, maxTokens);
-    if (result.status !== 200) {
-      lastErr = new Error('Anthropic API error: ' + (result.body.error && result.body.error.message));
+    const result = await callClaude({
+      apiKey, model: FULL_MODEL, maxTokens: FULL_MAX_TOKENS, prompt: section.prompt,
+      webSearch: section.maxSearches ? { maxUses: section.maxSearches } : null
+    });
+    if (!result.ok) {
+      lastErr = new Error('Anthropic API error: ' + result.error);
       continue;
     }
     try {
-      return extractJSON(result.body.content && result.body.content[0] ? result.body.content[0].text : '');
+      return { data: extractJSON(result.text), searchUrls: Array.from(result.searchUrls), searches: result.searches, usage: result.usage };
     } catch (e) {
       lastErr = e;
     }
   }
   throw lastErr;
+}
+
+// The overall score is the average of the five area scores, so it can never
+// contradict them (it used to be a separate guess from a different prompt).
+function overallFromAreas(r) {
+  const keys = ['creative_score', 'financial_score', 'market_score', 'festival_score', 'distribution_score'];
+  const vals = keys.map(k => Number(r[k])).filter(v => isFinite(v) && v >= 1 && v <= 10);
+  if (!vals.length) return null;
+  return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 10) / 10;
 }
 
 // Core used to generate and deliver a full report, kept separate from
@@ -44,9 +59,24 @@ async function generateAndDeliverFullReport({ store, key, project, email, anthro
   let lastErr;
   for (let attempt = 1; attempt <= OVERALL_ATTEMPTS; attempt++) {
     try {
-      const parsedResults = await Promise.all(prompts.map(p => callAndParseWithRetry(anthropicKey, p, FULL_MODEL, FULL_MAX_TOKENS)));
+      const parsedResults = await Promise.all(prompts.map(section => callAndParseWithRetry(anthropicKey, section)));
       const merged = {};
-      parsedResults.forEach(r => Object.assign(merged, r));
+      const searchUrlsByField = {};
+      parsedResults.forEach(r => {
+        Object.assign(merged, r.data);
+        Object.keys(r.data).forEach(k => { searchUrlsByField[k] = r.searchUrls; });
+      });
+      merged.overall_score = overallFromAreas(merged);
+
+      // Every festival, fund, film, sales agent and platform must come from
+      // a page found by this report's own searches, and every date or figure
+      // must appear on that page; anything else is removed, not shown.
+      const today = new Date().toISOString().slice(0, 10);
+      const grounding = await groundReport(merged, searchUrlsByField, today);
+      merged.sources_checked = today;
+      console.log('report', key, 'searches', parsedResults.reduce((a, r) => a + (r.searches || 0), 0),
+        'grounding', JSON.stringify(grounding),
+        'tokens', JSON.stringify(parsedResults.map(r => r.usage && [r.usage.input_tokens, r.usage.output_tokens])));
 
       // AI-generated URLs (funds, festivals, sales agents, platforms) can be
       // plausible hallucinations — strip any that don't actually resolve
