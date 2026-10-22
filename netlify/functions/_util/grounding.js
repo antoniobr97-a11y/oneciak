@@ -34,15 +34,17 @@ function isSourced(url, set) {
   return !!(n && set.has(n));
 }
 
-// List field -> the fields whose numbers must appear on the source page.
+// List field -> fields that are a single figure or date (cleared when its
+// numbers are not on the source page) and prose fields (where only the
+// sentences whose numbers are not on the page are removed).
 const LISTS = {
-  financial_sources: ['amount', 'deadline'],
-  market_comps: ['budget', 'result'],
-  cautionary_comps: ['budget', 'what_went_wrong'],
-  festival_calendar: ['deadline'],
-  lab_and_market_opportunities: [],
-  distribution_platforms: [],
-  sales_agents: []
+  financial_sources: { figures: ['amount', 'deadline'], prose: ['eligibility'] },
+  market_comps: { figures: ['budget'], prose: ['result'] },
+  cautionary_comps: { figures: ['budget'], prose: ['what_went_wrong'] },
+  festival_calendar: { figures: ['deadline'], prose: ['fit'] },
+  lab_and_market_opportunities: { figures: [], prose: ['fit'] },
+  distribution_platforms: { figures: [], prose: ['reason'] },
+  sales_agents: { figures: [], prose: ['focus', 'why'] }
 };
 
 const FETCH_TIMEOUT_MS = 6000;
@@ -93,13 +95,23 @@ function numbersOnPage(value, pageText) {
   return nums.every(n => new RegExp('(^|[^0-9])' + n.replace('.', '\\.') + '([^0-9]|$)').test(pageText));
 }
 
-async function checkFigures(item, fields, pages) {
-  const withNumbers = fields.filter(f => numbersIn(item[f]).length);
-  if (!withNumbers.length) return;
+// Drops the sentences of `text` that state a number the page does not
+// contain; sentences without numbers are kept as they are.
+function keepSupportedSentences(text, pageText) {
+  if (typeof text !== 'string' || !numbersIn(text).length) return text;
+  const sentences = text.match(/[^.!?]+(?:[.!?]+(?=\s|$)|$)/g) || [text];
+  const kept = sentences.filter(s => !numbersIn(s).length || (pageText && numbersOnPage(s, pageText)));
+  return kept.join('').trim() || null;
+}
+
+async function checkFigures(item, spec, pages) {
+  const figures = spec.figures.filter(f => numbersIn(item[f]).length);
+  const prose = spec.prose.filter(f => numbersIn(item[f]).length);
+  if (!figures.length && !prose.length) return;
   const html = await pages(item.source);
-  withNumbers.forEach(f => {
-    if (!html || !numbersOnPage(item[f], pageNumbers(html))) item[f] = null;
-  });
+  const text = html ? pageNumbers(html) : null;
+  figures.forEach(f => { if (!text || !numbersOnPage(item[f], text)) item[f] = null; });
+  prose.forEach(f => { item[f] = keepSupportedSentences(item[f], text); });
 }
 
 // Mutates `report` in place. `searchUrlsByField` maps each field to the URLs
@@ -124,9 +136,10 @@ async function groundReport(report, searchUrlsByField, today, fetcher) {
       const out = Object.assign({}, item, { source: item.source_url, url: item.source_url, checked: today });
       delete out.source_url;
       kept.push(out);
-      const before = LISTS[field].filter(f => out[f] != null).length;
+      const figs = LISTS[field].figures;
+      const before = figs.filter(f => out[f] != null).length;
       checks.push(checkFigures(out, LISTS[field], pages).then(() => {
-        stats.figuresCleared += before - LISTS[field].filter(f => out[f] != null).length;
+        stats.figuresCleared += before - figs.filter(f => out[f] != null).length;
       }));
     });
     report[field] = kept;
@@ -143,7 +156,7 @@ async function groundReport(report, searchUrlsByField, today, fetcher) {
       ti.source = ti.source_url;
       ti.checked = today;
       stats.kept++;
-      checks.push(checkFigures(ti, ['estimate'], pages));
+      checks.push(checkFigures(ti, { figures: ['estimate'], prose: ['note'] }, pages));
     } else {
       ti.estimate = null;
       stats.dropped++;
@@ -155,4 +168,14 @@ async function groundReport(report, searchUrlsByField, today, fetcher) {
   return stats;
 }
 
-module.exports = { groundReport, normalizeUrl, isSourced, sourcedSet, numbersOnPage, pageNumbers, numbersIn, LISTS };
+// For the preview's single comparable film and festival: kept only with a
+// searched source, and only the sentences whose numbers are on that page.
+async function groundOne(obj, set, prose, today, fetcher) {
+  if (!obj || typeof obj !== 'object' || !isSourced(obj.source_url, set)) return null;
+  const out = Object.assign({}, obj, { source: obj.source_url, url: obj.source_url, checked: today });
+  delete out.source_url;
+  await checkFigures(out, { figures: [], prose }, fetcher || fetchPage);
+  return out;
+}
+
+module.exports = { groundReport, groundOne, keepSupportedSentences, normalizeUrl, isSourced, sourcedSet, numbersOnPage, pageNumbers, numbersIn, LISTS };

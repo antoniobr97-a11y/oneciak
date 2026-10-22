@@ -1,7 +1,7 @@
 const { connectLambda } = require('@netlify/blobs');
 const { checkRateLimit } = require('./_util/rateLimit');
 const { callClaude, extractJSON } = require('./_util/anthropic');
-const { isSourced, sourcedSet } = require('./_util/grounding');
+const { groundOne, sourcedSet } = require('./_util/grounding');
 const { incrementUsageCount } = require('./_util/stats');
 const { sanitizeProject } = require('./_util/project');
 const { allFreePrompts } = require('./_util/freePrompts');
@@ -10,15 +10,6 @@ const ALLOWED_ORIGIN = process.env.SITE_URL || 'https://oneciak.com';
 const FREE_MODEL = 'claude-haiku-5-5';
 const FREE_MAX_TOKENS = 8000; // room for thinking plus the JSON; low effort keeps the preview fast
 const FREE_EFFORT = 'low';
-
-// A comparable film or festival is shown only when the model cites a page
-// its own search returned in this request; otherwise it is left out.
-function keepIfSourced(obj, set) {
-  if (!obj || typeof obj !== 'object' || !isSourced(obj.source_url, set)) return null;
-  const out = Object.assign({}, obj, { source: obj.source_url, url: obj.source_url, checked: new Date().toISOString().slice(0, 10) });
-  delete out.source_url;
-  return out;
-}
 
 function overallFromAreas(r) {
   const vals = ['creative_score', 'financial_score', 'market_score', 'festival_score', 'distribution_score']
@@ -68,8 +59,13 @@ exports.handler = async (event) => {
       return { statusCode: 502, headers, body: JSON.stringify({ error: 'Could not parse AI response. Please try again.' }) };
     }
     const set = sourcedSet(results[0].searchUrls);
-    merged.one_comp = keepIfSourced(merged.one_comp, set);
-    merged.one_festival = keepIfSourced(merged.one_festival, set);
+    // A comparable film or festival is shown only when the model cites a
+    // page its own search returned in this request (see grounding.js).
+    const today = new Date().toISOString().slice(0, 10);
+    [merged.one_comp, merged.one_festival] = await Promise.all([
+      groundOne(merged.one_comp, set, ['result', 'lesson'], today),
+      groundOne(merged.one_festival, set, ['why'], today)
+    ]);
     merged.overall_score = overallFromAreas(merged);
     console.log('analyze: searches', results[0].searches, 'comp', !!merged.one_comp, 'festival', !!merged.one_festival);
     await incrementUsageCount();
