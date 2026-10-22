@@ -324,6 +324,14 @@ anteprime 88% corrette, 0 inventati; report completi 64% corretti, 0 inventati.
 - Niente previsioni di incasso in euro né prezzi E&O: "Revenue Scenarios" a
   parole (i report vecchi salvati mantengono il layout vecchio).
 - Ogni voce mostra "Source: dominio · checked data" su sito, PDF e mail.
+- Fact-check finale sul sito live (2026-10-22): anteprime 90% corrette,
+  report completi 78% corretti, 0 enti inventati (vecchio motore: 23%).
+- `verifiedFacts.js`: fatti verificati A MANO sulla fonte primaria, per quando
+  le pagine trovate sono vecchie. Oggi: tax credit italiano 30% per produttori
+  indipendenti (film e corti), tetto 4 mln per opera, D.I. MiC-MEF 6 luglio
+  2026 n. 281 (la pagina riassuntiva DGCA mostrava ancora 25-40%). Va
+  ricontrollato quando cambia la legge. Viene messo nel prompt e sovrascrive
+  `tax_incentive` per i progetti italiani.
 - Problemi noti ancora aperti (fact-check 2026-10-22): regole di prima
   visione a volte parafrasate male, fondi chiusi o non accessibili senza
   scadenza scritta, alcuni film di confronto poco pertinenti.
