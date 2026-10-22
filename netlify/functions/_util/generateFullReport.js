@@ -1,5 +1,6 @@
 const { callClaude, extractJSON } = require('./anthropic');
 const { groundReport } = require('./grounding');
+const { applyFacts } = require('./verifiedFacts');
 const { allFullPrompts } = require('./reportPrompts');
 const { buildReportEmailHtml, sendReportEmail } = require('./email');
 const { incrementUsageCount } = require('./stats');
@@ -74,6 +75,7 @@ async function generateAndDeliverFullReport({ store, key, project, email, anthro
       const today = new Date().toISOString().slice(0, 10);
       const grounding = await groundReport(merged, searchUrlsByField, today);
       merged.sources_checked = today;
+      applyFacts(merged, project);
       console.log('report', key, 'searches', parsedResults.reduce((a, r) => a + (r.searches || 0), 0),
         'grounding', JSON.stringify(grounding),
         'tokens', JSON.stringify(parsedResults.map(r => r.usage && [r.usage.input_tokens, r.usage.output_tokens])));
