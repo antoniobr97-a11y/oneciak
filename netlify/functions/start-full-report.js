@@ -8,15 +8,24 @@ const { sign: signReportToken } = require('./_util/reportToken');
 
 const ALLOWED_ORIGIN = process.env.SITE_URL || 'https://oneciak.com';
 const SITE_BASE = (process.env.URL || process.env.SITE_URL || 'https://oneciak.com').replace(/\/$/, '');
+
+// On a Netlify deploy preview the generation must run on that same preview
+// (process.env.URL always points at the live site, which runs the live
+// code). Only the preview hostname pattern is trusted, never any Host header.
+function functionsBase(event) {
+  const host = event.headers && (event.headers.host || event.headers.Host);
+  if (host && /^deploy-preview-\d+--oneciak\.netlify\.app$/.test(host)) return 'https://' + host;
+  return SITE_BASE;
+}
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Fires the generation background function and returns immediately — the
 // Background Function itself acks with 202 right away, so this resolves
 // almost instantly and never blocks the client on the actual generation.
-function triggerBackground(payload) {
+function triggerBackground(payload, base) {
   return new Promise((resolve) => {
     try {
-      const url = new URL(SITE_BASE + '/.netlify/functions/generate-report-background');
+      const url = new URL(base + '/.netlify/functions/generate-report-background');
       const body = JSON.stringify(payload);
       const req = https.request({
         hostname: url.hostname, path: url.pathname, method: 'POST',
@@ -66,7 +75,7 @@ exports.handler = async (event) => {
     const store = getStore('webhook-reports');
     try { await store.setJSON(id, { status: 'processing', startedAt: Date.now() }); } catch (e) { /* fail open */ }
 
-    await triggerBackground({ id, token, project, email, sig: payloadSig.sign(id, email, project) });
+    await triggerBackground({ id, token, project, email, sig: payloadSig.sign(id, email, project) }, functionsBase(event));
 
     return { statusCode: 200, headers, body: JSON.stringify({ id, token }) };
   } catch (err) {
