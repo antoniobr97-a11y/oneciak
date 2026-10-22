@@ -299,6 +299,42 @@ Codice del Consumo, L. 132/2025, termini Anthropic, Google Search Central).
 - Da valutare con l'avvocato: AI Act art. 50(2) (marcatura leggibile a
   macchina dei testi AI), domicilio ex D.Lgs. 70/2003 art. 7.
 
+## Motore dei report con fonti (pubblicato il 2026-10-22, main 0bac6ce)
+
+Nato da un fact-check del 2026-10-21: nelle anteprime del vecchio motore
+(Haiku 4.5, tutto a memoria) solo il 23% dei 111 fatti controllabili era
+corretto (festival con scadenze passate, enti inventati, FAAN = aeroporti
+nigeriani proposto come fondo). Con il nuovo motore, sulla copia di prova:
+anteprime 88% corrette, 0 inventati; report completi 64% corretti, 0 inventati.
+- Modello `claude-haiku-5-5` (anteprima effort `low`). `anthropic.js`
+  `callClaude`: legge i blocchi per tipo (thinking prima), gestisce
+  `pause_turn` e `refusal`, raccoglie gli URL restituiti dalla ricerca.
+- Ricerca web Anthropic (`web_search_20250305`): anteprima 2 ricerche (un film
+  di confronto, un festival), report completo fino a 22 (sezioni B, C, D, E
+  in `reportPrompts.js`). Costo misurato: anteprima ~0,025 $, report
+  completo ~0,22-0,24 $ (3/4 sono le ricerche, 10 $ ogni 1000).
+- `grounding.js`: un fondo/festival/film/agente/piattaforma resta SOLO se il
+  suo `source_url` è tra gli URL della ricerca di quella richiesta; date e
+  cifre restano solo se i numeri sono sulla pagina scaricata; nei testi si
+  tolgono le frasi con importi o date non presenti nelle pagine; niente cifre
+  da siti aggregatori (lista `AGGREGATORS`); scadenze passate -> "Closed (...)";
+  via i tag `<cite>`. Test in scratchpad `tests/` (si perdono a fine sessione).
+- Punteggio: rubrica in `SCORING`; voto finale = media delle 5 aree (prima
+  6 progetti diversissimi prendevano tutti 7.2-7.5).
+- Niente previsioni di incasso in euro né prezzi E&O: "Revenue Scenarios" a
+  parole (i report vecchi salvati mantengono il layout vecchio).
+- Ogni voce mostra "Source: dominio · checked data" su sito, PDF e mail.
+- Problemi noti ancora aperti (fact-check 2026-10-22): regole di prima
+  visione a volte parafrasate male, fondi chiusi o non accessibili senza
+  scadenza scritta, alcuni film di confronto poco pertinenti.
+- Il report di esempio statico "Northbound" in `index.html` è ancora nel
+  formato vecchio (numeri non verificati): da rifare con un report vero.
+- Per testare: PR bozza #81 (`test-sourced-reports`) -> deploy preview
+  `deploy-preview-81--oneciak.netlify.app`; `start-full-report` lancia la
+  generazione sulla preview stessa. Mail di prova a `delivered+X@resend.dev`
+  (non arrivano a nessuno). Limite: 3 report completi ogni 3 ore per IP,
+  condiviso con il sito live (stesso store).
+
 ## Principio di onestà (esplicito, non derogabile)
 
 Mai inventare o gonfiare numeri/statistiche mostrate agli utenti (es. il
