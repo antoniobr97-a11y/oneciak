@@ -173,6 +173,16 @@ conversazione aspettando.
   **Self-hosted in `/fonts`** (niente Google Fonts, per il GDPR). Il CSP in
   `netlify.toml` ha `font-src 'self'`: se si aggiunge un font esterno va
   cambiato anche lì, altrimenti viene bloccato.
+- **Righe "Source" dei report in Carlito** (scelto da Antonio il 2026-10-23, voleva
+  Calibri): Calibri è di Microsoft, non scaricabile e serve licenza web, e non
+  c'è su iPhone/Mac/Android; Carlito è OFL 1.1 con le stesse misure.
+  Self-hosted in `/fonts` come gli altri. Nella mail: Calibri, Carlito, Arial.
+- **Modulo, sezione "Where you are"** (2026-10-23): fase del progetto
+  (obbligatoria), chi produce, durata, già mostrato. I prompt adattano i
+  consigli alla fase (`stageRules` in `reportPrompts.js`).
+- **Report di esempio Northbound** (2026-10-23): ora è un report VERO del
+  motore nuovo, con 35 correzioni dopo il controllo di ogni fonte; voto 5.0
+  (non più 7.2 inventato). La scheda in home mostra i suoi voti reali.
 - **Form senza card**: sezioni separate da una linea sottile e un numero mono,
   campi = tinta dello sfondo (`--field`), focus con anello arancio morbido.
 - **Navbar landing**: trasparente, poi vetro scuro, poi carta chiara oltre la
@@ -335,8 +345,6 @@ anteprime 88% corrette, 0 inventati; report completi 64% corretti, 0 inventati.
 - Problemi noti ancora aperti (fact-check 2026-10-22): regole di prima
   visione a volte parafrasate male, fondi chiusi o non accessibili senza
   scadenza scritta, alcuni film di confronto poco pertinenti.
-- Il report di esempio statico "Northbound" in `index.html` è ancora nel
-  formato vecchio (numeri non verificati): da rifare con un report vero.
 - Per testare: PR bozza #81 (`test-sourced-reports`) -> deploy preview
   `deploy-preview-81--oneciak.netlify.app`; `start-full-report` lancia la
   generazione sulla preview stessa. Mail di prova a `delivered+X@resend.dev`
