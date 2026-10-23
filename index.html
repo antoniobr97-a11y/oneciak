@@ -810,11 +810,11 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
    and green boxes. */
 .accordion-body { background: transparent; padding: 4px 4px 32px 46px; }
 .flag-item, .flag-item.red, .flag-item.green { background: none; border-radius: 0; padding: 4px 0 4px 16px; margin-bottom: 12px; color: var(--text); }
-.flag-item.red { border-left: 2px solid rgba(177,50,37,0.55); }
-.flag-item.green { border-left: 2px solid rgba(15,122,61,0.55); }
+.flag-item.red { border-left: 1px solid rgba(177,50,37,0.75); }
+.flag-item.green { border-left: 1px solid rgba(15,122,61,0.75); }
 .exec-box, .exec-box.risk, .exec-box.opp { background: none; border-radius: 0; padding: 2px 0 2px 16px; }
-.exec-box.risk { border-left: 2px solid rgba(177,50,37,0.55); }
-.exec-box.opp { border-left: 2px solid rgba(15,122,61,0.55); }
+.exec-box.risk { border-left: 1px solid rgba(177,50,37,0.75); }
+.exec-box.opp { border-left: 1px solid rgba(15,122,61,0.75); }
 .exec-row { gap: 24px; }
 .flags-block, .tips-block, .action-block { border-top-color: var(--border); }
 @media (max-width: 640px) { .accordion-body { padding-left: 4px; } }
@@ -836,8 +836,8 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .fs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); }
 .fs-col ul { list-style: none; margin: 0; padding: 0; }
 .fs-col li { font-size: 14.5px; line-height: 1.55; color: var(--text); padding: 2px 0 2px 14px; margin-bottom: 12px; }
-.fs-col.red li { border-left: 2px solid rgba(177,50,37,0.55); }
-.fs-col.green li { border-left: 2px solid rgba(15,122,61,0.55); }
+.fs-col.red li { border-left: 1px solid rgba(177,50,37,0.75); }
+.fs-col.green li { border-left: 1px solid rgba(15,122,61,0.75); }
 .fs-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
 .fs-col.red .fs-label { color: var(--danger); }
 .fs-col.green .fs-label { color: var(--success); }
@@ -878,12 +878,17 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .fact-v { font-size: 15px; font-weight: 700; color: var(--success); line-height: 1.4; }
 .fact-v.is-muted { color: var(--text); font-weight: 400; }
 .entry-text { margin-top: 10px; font-size: 14.5px; line-height: 1.6; color: var(--muted); }
-.entry-lesson { margin-top: 10px; font-size: 14.5px; line-height: 1.6; color: var(--text); padding-left: 13px; border-left: 2px solid var(--accent); }
+.entry-lesson { margin-top: 10px; font-size: 14.5px; line-height: 1.6; color: var(--text); padding-left: 12px; border-left: 1px solid #b4552b; }
+.entry-sub { margin-top: 4px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.the-ask { margin: 24px 0 8px; display: flex; flex-direction: column; gap: 6px; font-size: 17px; font-weight: 700; line-height: 1.45; color: var(--text); max-width: 62ch; }
+.bp-row { margin-top: 24px; }
+.bp-row .sub-k { margin-top: 0; }
+.action-item .action-tag:empty { display: none; }
 .entry .src-line { margin-top: 10px; }
 
 .sub-k { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
 .sub-k:first-child { margin-top: 0; }
-.pitch { margin: 0; padding-left: 14px; border-left: 2px solid var(--border); font-size: 15px; line-height: 1.65; font-style: italic; color: var(--text); max-width: 66ch; }
+.pitch { margin: 0; padding-left: 14px; border-left: 1px solid var(--muted); font-size: 15px; line-height: 1.65; font-style: italic; color: var(--text); max-width: 66ch; }
 .improved { margin-top: 12px; display: flex; flex-direction: column; gap: 4px; font-size: 15px; font-weight: 700; line-height: 1.5; color: var(--success); max-width: 66ch; }
 .checklist { list-style: none; margin: 0; padding: 0; max-width: 68ch; }
 .checklist li { position: relative; padding-left: 22px; margin-bottom: 8px; font-size: 14.5px; line-height: 1.55; color: var(--text); }
@@ -2112,7 +2117,7 @@ function renderFree(r, title) {
       '<div class="exec-box risk"><div class="exec-box-label">Main Risk</div><div class="exec-box-text">'+esc(r.biggest_risk)+'</div></div>'+
       '<div class="exec-box opp"><div class="exec-box-label">Main Opportunity</div><div class="exec-box-text">'+esc(r.biggest_opportunity)+'</div></div>'+
       '</div>' : '')+
-    (r.next_step ? '<div style="margin-top:16px;padding:14px 16px;background:var(--field);border-radius:var(--radius);font-size:13px;color:var(--text);line-height:1.55"><b>Your Next Step:</b> '+esc(r.next_step)+'</div>' : '')+
+    (r.next_step ? '<div class="the-ask"><span class="fact-k">Your next step</span>'+esc(r.next_step)+'</div>' : '')+
     '</div>';
 
   // Free accordion — same structure, limited content + blurred preview
@@ -2120,12 +2125,12 @@ function renderFree(r, title) {
   var oneFestival = r.one_festival || {};
   var freeSections = [
     { num:'01', label:'Creative Package',     sublabel:'Narrative · Logline · Pitch',    score:r.creative_score,     verdict:r.creative_verdict,     detail:r.creative_detail,     tip:r.creative_tip,     flag:r.creative_flag,     strength:r.creative_strength,
-      extra: r.logline_verdict ? '<div class="rblocks">'+rblock('Logline', null, paras(r.logline_verdict), true)+'</div>' : '' },
+      extra: r.logline_verdict ? '<div class="rblocks">'+rblock('Logline', null, paras(r.logline_verdict))+'</div>' : '' },
     { num:'02', label:'Financial Plan',       sublabel:'Budget · Funding · Financing',   score:r.financial_score,    verdict:r.financial_verdict,    detail:r.financial_detail,    tip:r.financial_tip,    flag:r.financial_flag,    strength:r.financial_strength, extra:'' },
     { num:'03', label:'Market & Audience',    sublabel:'Demand · Trends · Comparables',  score:r.market_score,       verdict:r.market_verdict,       detail:r.market_detail,       tip:r.market_tip,       flag:r.market_flag,       strength:r.market_strength,
-      extra: oneComp.title ? '<div class="rblocks">'+rblock('Comparable film', null, entry(oneComp.title + (oneComp.year ? ' ('+oneComp.year+')' : ''), null, '', oneComp.result, oneComp, oneComp.lesson), true)+'</div>' : '' },
+      extra: oneComp.title ? '<div class="rblocks">'+rblock('Comparable film', null, entry(oneComp.title + (oneComp.year ? ' ('+oneComp.year+')' : ''), null, '', oneComp.result, oneComp, oneComp.lesson))+'</div>' : '' },
     { num:'04', label:'Festival Strategy',    sublabel:'Circuit · Festivals · Timing',   score:r.festival_score,     verdict:r.festival_verdict,     detail:r.festival_detail,     tip:r.festival_tip,     flag:r.festival_flag,     strength:r.festival_strength,
-      extra: oneFestival.name ? '<div class="rblocks">'+rblock('Suggested festival', null, entry(oneFestival.name, oneFestival.tier ? 'Tier '+oneFestival.tier : null, '', oneFestival.why, oneFestival), true)+'</div>' : '' },
+      extra: oneFestival.name ? '<div class="rblocks">'+rblock('Suggested festival', null, entry(oneFestival.name, oneFestival.tier ? 'Tier '+oneFestival.tier : null, '', oneFestival.why, oneFestival))+'</div>' : '' },
     { num:'05', label:'Distribution & Revenue', sublabel:'Platforms · Pricing · Sales',  score:r.distribution_score, verdict:r.distribution_verdict, detail:r.distribution_detail, tip:r.distribution_tip, flag:r.distribution_flag, strength:r.distribution_strength, extra:'' }
   ];
 
@@ -2315,15 +2320,7 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
   out += paras(detail);
 
   // Risks and strengths side by side on wide screens
-  var fl = '', st = '';
-  (flags||[]).forEach(function(f){ if (f) fl += '<li>'+esc(f)+'</li>'; });
-  (strengths||[]).forEach(function(x){ if (x) st += '<li>'+esc(x)+'</li>'; });
-  if (fl || st) {
-    out += '<div class="fs-grid">'+
-      (fl ? '<div class="fs-col red"><div class="fs-label">Red flags</div><ul>'+fl+'</ul></div>' : '')+
-      (st ? '<div class="fs-col green"><div class="fs-label">Strengths</div><ul>'+st+'</ul></div>' : '')+
-      '</div>';
-  }
+  out += riskGrid(flags, strengths, 'Red flags', 'Strengths');
 
   // Recommendations, numbered
   if ((tips||[]).length) {
@@ -2344,13 +2341,8 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
 
   // 30 / 60 / 90 day plan
   if ((plan||[]).length) {
-    out += '<div class="action-block"><span class="action-label">Next 90 days</span>';
     var tags = ['30 days','60 days','90 days'];
-    plan.forEach(function(a,i){
-      var clean = String(a||'').replace(/^(30|60|90)\s*days?:?\s*/i,'');
-      out += '<div class="action-item"><span class="action-tag">'+(tags[i]||'')+'</span><span class="action-text">'+esc(clean)+'</span></div>';
-    });
-    out += '</div>';
+    out += timeline('Next 90 days', plan.map(function(a, i){ return { tag: tags[i] || '', text: String(a||'').replace(/^(30|60|90)\s*days?:?\s*/i,'') }; }));
   }
 
   // Sourced lists and deeper material, as collapsible rows
@@ -2362,131 +2354,101 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
 /* ── ACTION PLAN BODY ── */
 function buildActionPlanBody(r) {
   var out = '';
-
-  // Roadmap
+  // The roadmap leads, on the same timeline as the 90-day plans.
   if (r.roadmap && r.roadmap.length) {
-    out += '<div style="margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Roadmap</div>';
-    r.roadmap.forEach(function(s,i){
-      if (!s) return;
-      out += '<div class="roadmap-step"><div class="roadmap-num">'+(i+1)+'</div><div><div class="roadmap-phase">'+esc(s.phase)+'</div><div class="roadmap-action">'+esc(s.action)+'</div></div></div>';
-    });
-    out += '</div>';
+    out += timeline('Roadmap', r.roadmap.map(function(s){ return s ? { tag: s.phase, text: s.action } : null; }));
   }
-
-  // International Markets
-  if (r.international_markets && r.international_markets.length) {
-    out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">International Markets</div>';
-    r.international_markets.forEach(function(m){
-      if (!m) return;
-      out += '<div class="market-item"><div class="market-name">'+esc(m.country)+'</div><div class="market-reason">'+esc(m.reason)+'</div></div>';
-    });
-    out += '</div>';
-  }
-
-  // Festival Calendar
+  var blocks = '';
   if (r.festival_calendar && r.festival_calendar.length) {
-    out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Festival Calendar</div>';
+    var fc = '';
     r.festival_calendar.forEach(function(f){
       if (!f) return;
-      var tc = f.tier==='A' ? 'var(--text)' : f.tier==='B' ? 'var(--accent)' : 'var(--muted)';
-      out += '<div style="padding:10px 0;border-bottom:1px solid var(--border-light)">'+
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'+
-        '<div style="font-size:13px;font-weight:600">'+esc(f.festival)+'</div>'+
-        '<span style="font-size:10px;font-weight:700;color:'+tc+';padding:1px 7px;border-radius:999px;border:1px solid var(--border);background:var(--field)">'+esc(f.tier)+'</span>'+
-        '</div>'+
-        '<div style="font-size:12px;color:var(--muted);font-weight:300;margin-bottom:3px">'+esc(f.source ? 'Deadline: '+notStated(f.deadline, 'see the official page') : f.deadline)+'</div>'+
-        '<div style="font-size:12px;color:var(--text);font-weight:300;margin-bottom:5px">'+esc(f.fit)+'</div>'+
-        (f.source ? sourceLine(f) : f.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+esc(f.url)+'" target="_blank" rel="noopener">Submit →</a>' : '')+
-        '</div>';
+      var dl = f.source ? notStated(f.deadline, 'See the official page') : f.deadline;
+      fc += entry(f.festival, f.tier ? 'Tier '+f.tier : null, fact('Deadline', dl, isClosed(dl) || !f.deadline), f.fit, f);
     });
-    out += '</div>';
+    blocks += rblock('Festival calendar', r.festival_calendar.length, fc);
   }
-
-  // Sales Agents
   if (r.sales_agents && r.sales_agents.length) {
-    out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Sales Agents</div>';
-    r.sales_agents.forEach(function(a){
-      if (!a) return;
-      out += '<div style="padding:10px 0;border-bottom:1px solid var(--border-light)">'+
-        '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+esc(a.name)+'</div>'+
-        '<div style="font-size:11px;color:var(--muted-light);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">'+esc(a.focus)+'</div>'+
-        '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:5px">'+esc(a.why)+'</div>'+
-        (a.source ? sourceLine(a) : a.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+esc(a.url)+'" target="_blank" rel="noopener">Visit →</a>' : '')+
-        '</div>';
-    });
-    out += '</div>';
+    var sa = '';
+    r.sales_agents.forEach(function(a){ if (a) sa += entry(a.name, null, '', a.why, a, null, a.focus); });
+    blocks += rblock('Sales agents', r.sales_agents.length, sa);
   }
-
-  // Risk Assessment
-  if (r.risk_assessment && ((r.risk_assessment.top_risks && r.risk_assessment.top_risks.length) || (r.risk_assessment.mitigation && r.risk_assessment.mitigation.length))) {
-    out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Risk Assessment</div>';
-    (r.risk_assessment.top_risks||[]).forEach(function(risk){ if (risk) out += '<div class="flag-item red" style="margin-bottom:6px">'+esc(risk)+'</div>'; });
-    (r.risk_assessment.mitigation||[]).forEach(function(m){ if (m) out += '<div class="flag-item green" style="margin-bottom:6px">'+esc(m)+'</div>'; });
-    out += '</div>';
+  if (r.international_markets && r.international_markets.length) {
+    var im = '';
+    r.international_markets.forEach(function(m){ if (m) im += entry(m.country, null, '', m.reason, null); });
+    blocks += rblock('International markets', r.international_markets.length, im);
   }
-
-  // Awards Qualification Strategy
-  if (r.awards_qualification_strategy) {
-    out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Awards Qualification Strategy</div>'+
-      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300">'+esc(r.awards_qualification_strategy)+'</div></div>';
+  var ra = r.risk_assessment;
+  if (ra && ((ra.top_risks && ra.top_risks.length) || (ra.mitigation && ra.mitigation.length))) {
+    blocks += rblock('Risks and how to reduce them', null, riskGrid(ra.top_risks, ra.mitigation, 'Top risks', 'How to reduce them'));
   }
-
-  // Legal & Rights Considerations
-  if (r.legal_and_rights_considerations) {
-    out += '<div style="padding-top:16px;border-top:1px solid var(--border-light);margin-bottom:20px"><div class="tips-label" style="display:block;margin-bottom:12px">Legal &amp; Rights Considerations</div>'+
-      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300">'+esc(r.legal_and_rights_considerations)+'</div></div>';
+  if (r.awards_qualification_strategy) blocks += buildLabeledText('Awards', r.awards_qualification_strategy);
+  if (r.legal_and_rights_considerations) blocks += buildLabeledText('Legal and rights', r.legal_and_rights_considerations);
+  if (r.revenue_projection) {
+    var rp = r.revenue_projection, rv = '';
+    var streams = [{l:'Theatrical',v:rp.theatrical},{l:'Streaming (SVOD)',v:rp.streaming_svod},{l:'VOD / AVOD',v:rp.vod_avod},{l:'TV rights',v:rp.tv_rights},{l:'International',v:rp.international}];
+    if (r.sources_checked) {
+      // Newer reports: scenarios in words (no data backs a currency forecast).
+      rv += paras(rp.total_realistic);
+      streams.forEach(function(w){ if (w.v) rv += entry(w.l, null, '', w.v, null); });
+      if (rp.breakeven_note) rv += '<div class="sub-k">Breakeven</div>' + paras(rp.breakeven_note, 'is-small');
+      blocks += rblock('Revenue scenarios', null, rv);
+    } else {
+      // Older stored reports keep their figures.
+      streams.forEach(function(w){ if (w.v) rv += entry(w.l, null, fact('Estimate', w.v, true), '', null); });
+      if (rp.total_realistic) rv += entry('Total', null, fact('Estimate', rp.total_realistic), '', null);
+      if (rp.breakeven_note) rv += paras(rp.breakeven_note, 'is-small');
+      blocks += rblock('Revenue projection', null, rv);
+    }
   }
+  if (blocks) out += '<div class="rblocks">'+blocks+'</div>';
+  return out || '<div class="prose"><p>No action plan data available.</p></div>';
+}
 
-  // Revenue Projection
-  // Newer reports describe revenue as scenarios in words (no data backs a
-  // currency forecast), so they get a stacked layout; older stored reports
-  // keep their original two-column figures.
-  if (r.revenue_projection && r.sources_checked) {
-    var rs = r.revenue_projection;
-    out += '<div style="padding-top:16px;border-top:1px solid var(--border-light)"><div class="tips-label" style="display:block;margin-bottom:12px">Revenue Scenarios</div>';
-    if (rs.total_realistic) out += '<div style="font-size:13px;color:var(--text);line-height:1.65;font-weight:400;margin-bottom:10px">'+esc(rs.total_realistic)+'</div>';
-    [{l:'Theatrical',v:rs.theatrical},{l:'Streaming (SVOD)',v:rs.streaming_svod},{l:'VOD / AVOD',v:rs.vod_avod},{l:'TV Rights',v:rs.tv_rights},{l:'International',v:rs.international}]
-      .forEach(function(w){ if(w.v) out += '<div style="padding:8px 0;border-bottom:1px solid var(--border-light)"><div style="font-size:12px;font-weight:600;margin-bottom:2px">'+w.l+'</div><div style="font-size:13px;color:var(--muted);line-height:1.6;font-weight:300">'+esc(w.v)+'</div></div>'; });
-    if (rs.breakeven_note) out += '<div style="font-size:12px;color:var(--muted);line-height:1.65;margin-top:8px">'+esc(rs.breakeven_note)+'</div>';
-    out += '</div>';
-  } else if (r.revenue_projection) {
-    var rp = r.revenue_projection;
-    out += '<div style="padding-top:16px;border-top:1px solid var(--border-light)"><div class="tips-label" style="display:block;margin-bottom:12px">Revenue Projection</div>';
-    [{l:'Theatrical',v:rp.theatrical},{l:'Streaming (SVOD)',v:rp.streaming_svod},{l:'VOD / AVOD',v:rp.vod_avod},{l:'TV Rights',v:rp.tv_rights},{l:'International',v:rp.international}]
-      .forEach(function(w){ if(w.v) out += '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-light)"><span style="font-size:13px;font-weight:400">'+w.l+'</span><span style="font-size:13px;color:var(--muted);font-weight:300">'+esc(w.v)+'</span></div>'; });
-    if (rp.total_realistic) out += '<div style="display:flex;justify-content:space-between;padding:12px 0 4px"><span style="font-size:13px;font-weight:700">Total Realistic</span><span style="font-size:14px;font-weight:700;color:var(--accent)">'+esc(rp.total_realistic)+'</span></div>';
-    if (rp.breakeven_note) out += '<div style="font-size:12px;color:var(--muted);line-height:1.65;margin-top:8px">'+esc(rp.breakeven_note)+'</div>';
-    out += '</div>';
-  }
+// A short sequence of steps on a vertical line: the 90-day plans, the
+// roadmap and the business plan milestones all use it.
+function timeline(label, items) {
+  var h = '';
+  (items || []).forEach(function(it){
+    if (!it || !it.text) return;
+    h += '<div class="action-item">'+(it.tag ? '<span class="action-tag">'+esc(it.tag)+'</span>' : '')+'<span class="action-text">'+esc(it.text)+'</span></div>';
+  });
+  return h ? '<div class="action-block"><span class="action-label">'+label+'</span>'+h+'</div>' : '';
+}
 
-  return out || '<div style="font-size:13px;color:var(--muted);font-weight:300">No action plan data available.</div>';
+function riskGrid(left, right, leftLabel, rightLabel) {
+  var l = '', g = '';
+  (left||[]).forEach(function(x){ if (x) l += '<li>'+esc(x)+'</li>'; });
+  (right||[]).forEach(function(x){ if (x) g += '<li>'+esc(x)+'</li>'; });
+  if (!l && !g) return '';
+  return '<div class="fs-grid">'+
+    (l ? '<div class="fs-col red"><div class="fs-label">'+leftLabel+'</div><ul>'+l+'</ul></div>' : '')+
+    (g ? '<div class="fs-col green"><div class="fs-label">'+rightLabel+'</div><ul>'+g+'</ul></div>' : '')+
+    '</div>';
 }
 
 /* ── BUSINESS PLAN SUMMARY — a condensed, presentation-ready synthesis
    closing out the full report, so there's a single section a filmmaker can
-   screenshot or read aloud when pitching a financier, instead of having to
-   piece it together from the 6 sections above it. ── */
+   screenshot or read aloud when pitching a financier. It reads straight
+   through, so nothing in it is collapsed. ── */
 function buildBusinessPlanBody(bp) {
-  if (!bp) return '<div style="font-size:13px;color:var(--muted);font-weight:300">No business plan summary available.</div>';
+  if (!bp) return '<div class="prose"><p>No business plan summary available.</p></div>';
   var out = '';
-  if (bp.executive_summary) out += '<div style="font-size:13px;color:var(--text);line-height:1.7;font-weight:300;margin-bottom:16px">'+esc(bp.executive_summary)+'</div>';
-  if (bp.the_ask) out += '<div style="padding:12px 14px;background:var(--field);border-radius:var(--radius);font-size:13px;color:var(--text);line-height:1.55;margin-bottom:16px"><b>The Ask:</b> '+esc(bp.the_ask)+'</div>';
+  if (bp.executive_summary) out += paras(bp.executive_summary);
+  if (bp.the_ask) out += '<div class="the-ask"><span class="fact-k">The ask</span>'+esc(bp.the_ask)+'</div>';
   [
-    { label:'Market Opportunity', v:bp.market_opportunity },
-    { label:'Competitive Advantage', v:bp.competitive_advantage },
-    { label:'Use of Funds', v:bp.use_of_funds },
-    { label:'Team &amp; Experience', v:bp.team_and_experience }
+    { label:'Market opportunity', v:bp.market_opportunity },
+    { label:'Competitive advantage', v:bp.competitive_advantage },
+    { label:'Use of funds', v:bp.use_of_funds },
+    { label:'Team and experience', v:bp.team_and_experience }
   ].forEach(function(row){
-    if (!row.v) return;
-    out += '<div style="padding-top:14px;border-top:1px solid var(--border-light);margin-bottom:14px"><div class="tips-label" style="display:block;margin-bottom:8px">'+row.label+'</div><div style="font-size:13px;color:var(--text);line-height:1.65;font-weight:300">'+esc(row.v)+'</div></div>';
+    if (row.v) out += '<div class="bp-row"><div class="sub-k">'+row.label+'</div>'+paras(row.v, 'is-small')+'</div>';
   });
   if (bp.key_milestones && bp.key_milestones.length) {
-    out += '<div style="padding-top:14px;border-top:1px solid var(--border-light);margin-bottom:14px"><div class="tips-label" style="display:block;margin-bottom:10px">Key Milestones</div>';
-    bp.key_milestones.forEach(function(m){ if (m) out += '<div class="roadmap-step"><div class="roadmap-num">✓</div><div class="roadmap-action">'+esc(m)+'</div></div>'; });
-    out += '</div>';
+    out += timeline('Key milestones', bp.key_milestones.map(function(m){ return { text: m }; }));
   }
-  if (bp.risk_summary) out += '<div style="padding-top:14px;border-top:1px solid var(--border-light)"><div class="tips-label" style="display:block;margin-bottom:8px">Biggest Risk</div><div class="flag-item red">'+esc(bp.risk_summary)+'</div></div>';
-  return out || '<div style="font-size:13px;color:var(--muted);font-weight:300">No business plan summary available.</div>';
+  if (bp.risk_summary) out += riskGrid([bp.risk_summary], null, 'Biggest risk', '');
+  return out || '<div class="prose"><p>No business plan summary available.</p></div>';
 }
 
 /* ── TOGGLE ACCORDION ── */
@@ -2623,9 +2585,10 @@ function fact(label, value, muted) {
   if (value == null || value === '') return '';
   return '<div class="fact"><span class="fact-k">'+label+'</span><span class="fact-v'+(muted ? ' is-muted' : '')+'">'+esc(value)+'</span></div>';
 }
-function entry(name, chip, facts, text, item, extraText) {
+function entry(name, chip, facts, text, item, extraText, subline) {
   return '<div class="entry">'+
     '<div class="entry-head"><span class="entry-name">'+esc(name)+'</span>'+(chip ? '<span class="entry-chip">'+esc(chip)+'</span>' : '')+'</div>'+
+    (subline ? '<div class="entry-sub">'+esc(subline)+'</div>' : '')+
     (facts ? '<div class="entry-facts">'+facts+'</div>' : '')+
     (text ? '<div class="entry-text">'+esc(text)+'</div>' : '')+
     (extraText ? '<div class="entry-lesson">'+esc(extraText)+'</div>' : '')+
@@ -2642,7 +2605,7 @@ function buildFundingSources(sources) {
     var dl = f.source ? notStated(f.deadline, 'See the official page') : f.deadline;
     h += entry(f.name, f.type, fact('Amount', f.amount) + fact('Deadline', dl, isClosed(dl) || !f.deadline), f.eligibility, f);
   });
-  return rblock('Funding sources', sources.length, h, true);
+  return rblock('Funding sources', sources.length, h);
 }
 
 function buildPitchAssessment(pa) {
@@ -2685,13 +2648,13 @@ function buildLabOpportunities(labs) {
   if (!labs || !labs.length) return '';
   var h = '';
   labs.forEach(function(l){ if (l) h += entry(l.name, null, '', l.fit, l); });
-  return rblock('Labs &amp; markets', labs.length, h, true);
+  return rblock('Labs &amp; markets', labs.length, h);
 }
 
 function buildTalentAndTax(talentLeverage, taxIncentive) {
   var out = '';
   if (taxIncentive && (taxIncentive.estimate || taxIncentive.note)) {
-    out += rblock('Tax incentive', null, entry(taxIncentive.region || 'Tax incentive', null, fact('Rate', taxIncentive.estimate), taxIncentive.note, taxIncentive), false);
+    out += rblock('Tax incentive', null, entry(taxIncentive.region || 'Tax incentive', null, fact('Rate', taxIncentive.estimate), taxIncentive.note, taxIncentive));
   }
   if (talentLeverage) out += buildLabeledText('Talent leverage', talentLeverage);
   return out;
@@ -2703,7 +2666,7 @@ function buildComparables(comps) {
   comps.forEach(function(c){
     if (c) h += entry(c.title + (c.year ? ' ('+c.year+')' : ''), null, fact('Budget', c.budget), c.result, c, c.lesson);
   });
-  return rblock('Comparable films', comps.length, h, true);
+  return rblock('Comparable films', comps.length, h);
 }
 
 function buildKeyCrew(crew) {
@@ -2726,7 +2689,7 @@ function buildPlatforms(platforms) {
   if (!platforms || !platforms.length) return '';
   var h = '';
   platforms.forEach(function(pl){ if (pl) h += entry(pl.name, pl.priority, '', pl.reason, pl); });
-  return rblock('Platforms', platforms.length, h, true);
+  return rblock('Platforms', platforms.length, h);
 }
 
 /* ── RUN ANALYSIS (free quick preview — the full report always goes through start-full-report.js) ── */
