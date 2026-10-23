@@ -282,7 +282,7 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
   // Same language as the site: a night header carrying the glow (a hosted
   // image, because Gmail strips SVG and Outlook ignores CSS gradients; the
   // night bgcolor is the fallback), then the report on warm paper.
-  const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
+  const FONT = "Calibri,Carlito,-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
   return '<!doctype html><html><head><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"></head><body style="margin:0;padding:0;background:#f4f1ec;font-family:' + FONT + '">' +
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1ec;padding:28px 0">' +
     '<tr><td align="center">' +
