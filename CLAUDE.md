@@ -173,10 +173,20 @@ conversazione aspettando.
   **Self-hosted in `/fonts`** (niente Google Fonts, per il GDPR). Il CSP in
   `netlify.toml` ha `font-src 'self'`: se si aggiunge un font esterno va
   cambiato anche lì, altrimenti viene bloccato.
-- **Righe "Source" dei report in Carlito** (scelto da Antonio il 2026-10-23, voleva
-  Calibri): Calibri è di Microsoft, non scaricabile e serve licenza web, e non
-  c'è su iPhone/Mac/Android; Carlito è OFL 1.1 con le stesse misure.
-  Self-hosted in `/fonts` come gli altri. Nella mail: Calibri, Carlito, Arial.
+- **Tutto il testo in Carlito** (scelto da Antonio il 2026-10-23, voleva Calibri;
+  i titoli restano Geist, le etichette IBM Plex Mono): Calibri è di Microsoft,
+  non scaricabile e serve licenza web, e non c'è su iPhone/Mac/Android; Carlito
+  è OFL 1.1 con le stesse misure. Self-hosted in `/fonts` (400, 700, 400
+  italic) con `size-adjust: 112%` perché a parità di px è ~15% più piccolo di
+  Inter (misurato). Vale per index, guide, privacy, termini, 404. Mail:
+  Calibri, Carlito, Arial.
+- **Report leggibile** (2026-10-23, `paras()`, `rblock()`, `entry()` in
+  index.html): paragrafi di 2 frasi con la prima in evidenza, rischi e punti di
+  forza affiancati, consigli numerati, approfondimenti in tendine, fondi e
+  festival con importo/scadenza separati. In cima i 5 voti (`areaOverview`),
+  indice delle aree che segue lo scorrimento (`mountAreaNav`: colonna a
+  sinistra da 1360px, barra sotto l'header sotto), piano 30/60/90 a linea del
+  tempo. Un'area aperta è ~35% più corta di prima.
 - **Modulo, sezione "Where you are"** (2026-10-23): fase del progetto
   (obbligatoria), chi produce, durata, già mostrato. I prompt adattano i
   consigli alla fase (`stageRules` in `reportPrompts.js`).
