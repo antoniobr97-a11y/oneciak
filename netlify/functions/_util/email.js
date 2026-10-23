@@ -73,7 +73,7 @@ function sourceHtml(item) {
   try { host = new URL(item.source).hostname.replace(/^www\./, ''); } catch (e) { return ''; }
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(item.checked || '');
   const when = m ? ' · checked ' + Number(m[3]) + ' ' + MONTHS[Number(m[2]) - 1] + ' ' + m[1] : '';
-  return '<br><a href="' + esc(item.source) + '" style="font-family:' + MONO + ';font-size:11px;color:#6b665f;text-decoration:underline">Source: ' + esc(host) + esc(when) + '</a>';
+  return '<br><a href="' + esc(item.source) + '" style="font-family:Calibri,Carlito,Arial,sans-serif;font-size:13px;color:#6b665f;text-decoration:underline">Source: ' + esc(host) + esc(when) + '</a>';
 }
 function stated(v, item) {
   return (v == null || v === '') ? (item && item.source ? 'see the official page' : '') : v;
