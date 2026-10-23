@@ -819,6 +819,76 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .flags-block, .tips-block, .action-block { border-top-color: var(--border); }
 @media (max-width: 640px) { .accordion-body { padding-left: 4px; } }
 
+/* REPORT READING LAYOUT (2026-10-23): short paragraphs at a readable
+   measure, risks and strengths side by side, numbered steps, and every
+   secondary block as a collapsible row so an open area is not a wall of
+   text. Sourced items are entries with their facts pulled out. */
+.prose { max-width: 68ch; }
+.prose p { font-size: 15px; line-height: 1.7; color: var(--muted); margin: 0 0 12px; }
+.prose p.lead { color: var(--text); }
+.prose p:last-child { margin-bottom: 0; }
+.prose.is-small p { font-size: 14px; }
+.exec-text .prose { max-width: 62ch; }
+.exec-text .prose p { font-size: inherit; line-height: 1.6; }
+.exec-text .prose p:not(.lead) { color: var(--text); opacity: 0.86; }
+.score-verdict { font-size: 17px; line-height: 1.45; margin-bottom: 14px; max-width: 60ch; }
+
+.fs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); }
+.fs-col ul { list-style: none; margin: 0; padding: 0; }
+.fs-col li { font-size: 14.5px; line-height: 1.55; color: var(--text); padding: 2px 0 2px 14px; margin-bottom: 12px; }
+.fs-col.red li { border-left: 2px solid rgba(177,50,37,0.55); }
+.fs-col.green li { border-left: 2px solid rgba(15,122,61,0.55); }
+.fs-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
+.fs-col.red .fs-label { color: var(--danger); }
+.fs-col.green .fs-label { color: var(--success); }
+@media (max-width: 760px) { .fs-grid { grid-template-columns: 1fr; gap: 8px; } }
+
+.tips-block, .action-block { margin-top: 28px; padding-top: 24px; }
+.tips-label, .action-label { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: #b4552b; margin-bottom: 14px; }
+.tips-list { list-style: none; margin: 0; padding: 0; counter-reset: tip; max-width: 70ch; }
+.tips-list li { counter-increment: tip; position: relative; padding: 0 0 0 38px; margin-bottom: 16px; }
+.tips-list li::before { content: counter(tip, decimal-leading-zero); position: absolute; left: 0; top: 3px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--muted); }
+.tips-list .tip-text { padding-left: 0; font-size: 15px; line-height: 1.6; margin-bottom: 0; }
+.tips-list .tip-text::before { content: none; }
+.action-item { margin-bottom: 14px; }
+.action-text { font-size: 15px; line-height: 1.6; max-width: 66ch; }
+
+.rblocks { margin-top: 32px; border-bottom: 1px solid var(--border); }
+.rblock { border-top: 1px solid var(--border); }
+.rblock summary { list-style: none; display: flex; align-items: baseline; gap: 10px; padding: 16px 2px; cursor: pointer; transition: transform 0.15s ease-out; }
+.rblock summary::-webkit-details-marker { display: none; }
+.rblock summary:active { transform: scale(0.995); }
+.rblock-label { font-family: var(--display); font-size: 17px; font-weight: 500; letter-spacing: -0.01em; color: var(--text); }
+.rblock-count { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.rblock-icon { margin-left: auto; width: 12px; height: 12px; position: relative; flex-shrink: 0; align-self: center; }
+.rblock-icon::before, .rblock-icon::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1.5px; margin-top: -0.75px; background: var(--muted); transition: transform 0.2s var(--ease); }
+.rblock-icon::after { transform: rotate(90deg); }
+.rblock[open] .rblock-icon::after { transform: rotate(0deg); }
+@media (hover: hover) and (pointer: fine) { .rblock summary:hover .rblock-label { color: #000; } }
+.rblock-body { padding: 0 2px 22px; }
+
+.entry { padding: 16px 0; border-top: 1px solid var(--border-light); max-width: 72ch; }
+.entry:first-child { border-top: 0; padding-top: 4px; }
+.entry-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.entry-name { font-size: 15.5px; font-weight: 700; line-height: 1.35; color: var(--text); }
+.entry-chip { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.entry-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px 24px; margin-top: 10px; }
+.fact { display: flex; flex-direction: column; gap: 3px; }
+.fact-k { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.fact-v { font-size: 15px; font-weight: 700; color: var(--success); line-height: 1.4; }
+.fact-v.is-muted { color: var(--text); font-weight: 400; }
+.entry-text { margin-top: 10px; font-size: 14.5px; line-height: 1.6; color: var(--muted); }
+.entry-lesson { margin-top: 10px; font-size: 14.5px; line-height: 1.6; color: var(--text); padding-left: 13px; border-left: 2px solid var(--accent); }
+.entry .src-line { margin-top: 10px; }
+
+.sub-k { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
+.sub-k:first-child { margin-top: 0; }
+.pitch { margin: 0; padding-left: 14px; border-left: 2px solid var(--border); font-size: 15px; line-height: 1.65; font-style: italic; color: var(--text); max-width: 66ch; }
+.improved { margin-top: 12px; display: flex; flex-direction: column; gap: 4px; font-size: 15px; font-weight: 700; line-height: 1.5; color: var(--success); max-width: 66ch; }
+.checklist { list-style: none; margin: 0; padding: 0; max-width: 68ch; }
+.checklist li { position: relative; padding-left: 22px; margin-bottom: 8px; font-size: 14.5px; line-height: 1.55; color: var(--text); }
+.checklist li::before { content: ''; position: absolute; left: 0; top: 4px; width: 11px; height: 11px; border: 1.5px solid var(--muted); border-radius: 3px; }
+
 /* LOADING on the same night as the home (it sits between the form and the
    results, both of which now open on the night). */
 #sec-loading { background: var(--night); color: var(--on-night); overflow: hidden; }
@@ -1983,7 +2053,7 @@ function renderFree(r, title) {
   document.getElementById('execSummary').innerHTML =
     '<div class="exec-card">'+
     '<div class="exec-label">Summary</div>'+
-    '<div class="exec-text">'+esc(r.overall_summary)+'</div>'+
+    '<div class="exec-text">'+paras(r.overall_summary)+'</div>'+
     ((r.biggest_risk||r.biggest_opportunity) ? '<div class="exec-row">'+
       '<div class="exec-box risk"><div class="exec-box-label">Main Risk</div><div class="exec-box-text">'+esc(r.biggest_risk)+'</div></div>'+
       '<div class="exec-box opp"><div class="exec-box-label">Main Opportunity</div><div class="exec-box-text">'+esc(r.biggest_opportunity)+'</div></div>'+
@@ -1996,12 +2066,12 @@ function renderFree(r, title) {
   var oneFestival = r.one_festival || {};
   var freeSections = [
     { num:'01', label:'Creative Package',     sublabel:'Narrative · Logline · Pitch',    score:r.creative_score,     verdict:r.creative_verdict,     detail:r.creative_detail,     tip:r.creative_tip,     flag:r.creative_flag,     strength:r.creative_strength,
-      extra: r.logline_verdict ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light);font-size:13px;color:var(--text);line-height:1.6"><b>Logline verdict:</b> '+esc(r.logline_verdict)+'</div>' : '' },
+      extra: r.logline_verdict ? '<div class="rblocks">'+rblock('Logline', null, paras(r.logline_verdict), true)+'</div>' : '' },
     { num:'02', label:'Financial Plan',       sublabel:'Budget · Funding · Financing',   score:r.financial_score,    verdict:r.financial_verdict,    detail:r.financial_detail,    tip:r.financial_tip,    flag:r.financial_flag,    strength:r.financial_strength, extra:'' },
     { num:'03', label:'Market & Audience',    sublabel:'Demand · Trends · Comparables',  score:r.market_score,       verdict:r.market_verdict,       detail:r.market_detail,       tip:r.market_tip,       flag:r.market_flag,       strength:r.market_strength,
-      extra: oneComp.title ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)"><div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px">Comparable Film</div><div style="font-size:13px;color:var(--text)"><b>'+esc(oneComp.title)+'</b>'+(oneComp.year?' ('+esc(oneComp.year)+')':'')+(oneComp.result?' — '+esc(oneComp.result):'')+'</div>'+(oneComp.lesson?'<div style="font-size:12px;color:var(--muted);margin-top:4px">'+esc(oneComp.lesson)+'</div>':'')+sourceLine(oneComp)+'</div>' : '' },
+      extra: oneComp.title ? '<div class="rblocks">'+rblock('Comparable film', null, entry(oneComp.title + (oneComp.year ? ' ('+oneComp.year+')' : ''), null, '', oneComp.result, oneComp, oneComp.lesson), true)+'</div>' : '' },
     { num:'04', label:'Festival Strategy',    sublabel:'Circuit · Festivals · Timing',   score:r.festival_score,     verdict:r.festival_verdict,     detail:r.festival_detail,     tip:r.festival_tip,     flag:r.festival_flag,     strength:r.festival_strength,
-      extra: oneFestival.name ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)"><div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px">Suggested Festival</div><div style="font-size:13px;color:var(--text)"><b>'+esc(oneFestival.name)+'</b>'+(oneFestival.tier?' (Tier '+esc(oneFestival.tier)+')':'')+' — '+esc(oneFestival.why)+'</div>'+sourceLine(oneFestival)+'</div>' : '' },
+      extra: oneFestival.name ? '<div class="rblocks">'+rblock('Suggested festival', null, entry(oneFestival.name, oneFestival.tier ? 'Tier '+oneFestival.tier : null, '', oneFestival.why, oneFestival), true)+'</div>' : '' },
     { num:'05', label:'Distribution & Revenue', sublabel:'Platforms · Pricing · Sales',  score:r.distribution_score, verdict:r.distribution_verdict, detail:r.distribution_detail, tip:r.distribution_tip, flag:r.distribution_flag, strength:r.distribution_strength, extra:'' }
   ];
 
@@ -2017,8 +2087,8 @@ function renderFree(r, title) {
     body += '<div class="score-bar-bg" style="margin-bottom:14px"><div class="score-bar-fill bar-'+c+'" id="'+bid+'" style="width:0%"></div></div>';
     setTimeout(function(b,p){ return function(){ var el=document.getElementById(b); if(el) el.style.width=p+'%'; }; }(bid,pct), 80);
     body += '<div class="score-verdict">'+esc(sec.verdict)+'</div>';
-    body += '<div class="score-detail" style="margin-bottom:8px">'+esc(sec.detail)+'</div>';
-    if (sec.tip) body += '<div class="tips-block"><span class="tips-label">Key Recommendation</span><div class="tip-item"><div class="tip-text">'+esc(sec.tip)+'</div></div></div>';
+    body += paras(sec.detail);
+    if (sec.tip) body += '<div class="tips-block"><span class="tips-label">What to do</span><ol class="tips-list"><li><div class="tip-text">'+esc(sec.tip)+'</div></li></ol></div>';
     if (sec.extra) body += sec.extra;
 
     // Blurred preview of flag + strength
@@ -2089,7 +2159,7 @@ function renderFull(r, title) {
   document.getElementById('execSummary').innerHTML =
     '<div class="exec-card">'+
     '<div class="exec-label">Summary</div>'+
-    '<div class="exec-text">'+esc(r.executive_summary||r.overall_summary)+'</div>'+
+    '<div class="exec-text">'+paras(r.executive_summary||r.overall_summary)+'</div>'+
     '<div class="exec-row">'+
     '<div class="exec-box risk"><div class="exec-box-label">Main Risk</div><div class="exec-box-text">'+esc(r.biggest_risk)+'</div></div>'+
     '<div class="exec-box opp"><div class="exec-box-label">Main Opportunity</div><div class="exec-box-text">'+esc(r.biggest_opportunity)+'</div></div>'+
@@ -2181,43 +2251,44 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
   // Score bar
   var bid = 'abar_'+Math.random().toString(36).substr(2,6);
   var pct = ((score||0)/10)*100;
-  out += '<div class="score-bar-bg" style="margin-bottom:14px"><div class="score-bar-fill bar-'+col+'" id="'+bid+'" style="width:0%"></div></div>';
+  out += '<div class="score-bar-bg" style="margin-bottom:18px"><div class="score-bar-fill bar-'+col+'" id="'+bid+'" style="width:0%"></div></div>';
   setTimeout(function(b,p){ return function(){ var el=document.getElementById(b); if(el) el.style.width=p+'%'; }; }(bid,pct), 80);
 
-  // Verdict + detail
+  // Verdict, then the analysis in short paragraphs
   out += '<div class="score-verdict">'+esc(verdict)+'</div>';
-  out += '<div class="score-detail" style="margin-bottom:4px">'+esc(detail)+'</div>';
+  out += paras(detail);
 
-  // Flags
-  var fl = '';
-  (flags||[]).forEach(function(f){ if (f) fl += '<div class="flag-item red">'+esc(f)+'</div>'; });
-  if (fl) out += '<div class="flags-block"><div class="flags-label red">Red Flags</div>'+fl+'</div>';
+  // Risks and strengths side by side on wide screens
+  var fl = '', st = '';
+  (flags||[]).forEach(function(f){ if (f) fl += '<li>'+esc(f)+'</li>'; });
+  (strengths||[]).forEach(function(x){ if (x) st += '<li>'+esc(x)+'</li>'; });
+  if (fl || st) {
+    out += '<div class="fs-grid">'+
+      (fl ? '<div class="fs-col red"><div class="fs-label">Red flags</div><ul>'+fl+'</ul></div>' : '')+
+      (st ? '<div class="fs-col green"><div class="fs-label">Strengths</div><ul>'+st+'</ul></div>' : '')+
+      '</div>';
+  }
 
-  // Strengths
-  var st = '';
-  (strengths||[]).forEach(function(s){ if (s) st += '<div class="flag-item green">'+esc(s)+'</div>'; });
-  if (st) out += '<div class="flags-block"><div class="flags-label green">Strengths</div>'+st+'</div>';
-
-  // Tips
+  // Recommendations, numbered
   if ((tips||[]).length) {
-    out += '<div class="tips-block"><span class="tips-label">Recommendations</span>';
+    out += '<div class="tips-block"><span class="tips-label">What to do</span><ol class="tips-list">';
     tips.forEach(function(t){
       if (!t) return;
       var txt = typeof t==='string' ? t : (t.advice||'');
-      out += '<div class="tip-item"><div class="tip-text">'+esc(txt)+'</div>';
+      out += '<li><div class="tip-text">'+esc(txt)+'</div>';
       if (typeof t==='object' && t.links && t.links.length) {
         out += '<div class="tip-links">';
         t.links.forEach(function(l){ if (l && l.url) out += '<a class="tip-link" href="'+esc(l.url)+'" target="_blank" rel="noopener">'+esc(l.label)+'</a>'; else if (l && l.label) out += '<span class="tip-link" style="cursor:default">'+esc(l.label)+'</span>'; });
         out += '</div>';
       }
-      out += '</div>';
+      out += '</li>';
     });
-    out += '</div>';
+    out += '</ol></div>';
   }
 
-  // Action plan
+  // 30 / 60 / 90 day plan
   if ((plan||[]).length) {
-    out += '<div class="action-block"><span class="action-label">Action Plan</span>';
+    out += '<div class="action-block"><span class="action-label">Next 90 days</span>';
     var tags = ['30 days','60 days','90 days'];
     plan.forEach(function(a,i){
       var clean = String(a||'').replace(/^(30|60|90)\s*days?:?\s*/i,'');
@@ -2226,8 +2297,8 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
     out += '</div>';
   }
 
-  // Extra (funding sources, comparables, platforms)
-  if (extra) out += extra;
+  // Sourced lists and deeper material, as collapsible rows
+  if (extra) out += '<div class="rblocks">'+extra+'</div>';
 
   return out;
 }
@@ -2400,150 +2471,137 @@ function notStated(v, fallback) {
   return (v == null || v === '') ? fallback : v;
 }
 
+/* Report layout helpers. Long model text is split into short paragraphs
+   (two sentences each, the first one as a lead), every secondary block is a
+   collapsible row with a count, and sourced items are laid out as entries
+   with their key facts (amount, deadline) pulled out of the prose. */
+function sentencesOf(t) {
+  return String(t || '').replace(/([.!?])\s+(?=[A-Z0-9"“‘(])/g, '$1\u0001').split('\u0001').filter(function(x){ return x.trim(); });
+}
+function paras(t, cls) {
+  var s = sentencesOf(t);
+  if (!s.length) return '';
+  var out = '', i;
+  for (i = 0; i < s.length; i += 2) out += '<p'+(i === 0 ? ' class="lead"' : '')+'>'+esc(s.slice(i, i + 2).join(' '))+'</p>';
+  return '<div class="prose'+(cls ? ' '+cls : '')+'">'+out+'</div>';
+}
+function rblock(label, count, inner, open) {
+  if (!inner) return '';
+  return '<details class="rblock"'+(open ? ' open' : '')+'><summary><span class="rblock-label">'+label+'</span>'+(count ? '<span class="rblock-count">'+count+'</span>' : '')+'<span class="rblock-icon" aria-hidden="true"></span></summary><div class="rblock-body">'+inner+'</div></details>';
+}
+function linkOrSource(item, label) {
+  if (item && item.source) return sourceLine(item);
+  if (item && item.url) return '<a class="src-line" href="'+esc(item.url)+'" target="_blank" rel="noopener">'+(label || 'Official page')+'</a>';
+  return '';
+}
+function fact(label, value, muted) {
+  if (value == null || value === '') return '';
+  return '<div class="fact"><span class="fact-k">'+label+'</span><span class="fact-v'+(muted ? ' is-muted' : '')+'">'+esc(value)+'</span></div>';
+}
+function entry(name, chip, facts, text, item, extraText) {
+  return '<div class="entry">'+
+    '<div class="entry-head"><span class="entry-name">'+esc(name)+'</span>'+(chip ? '<span class="entry-chip">'+esc(chip)+'</span>' : '')+'</div>'+
+    (facts ? '<div class="entry-facts">'+facts+'</div>' : '')+
+    (text ? '<div class="entry-text">'+esc(text)+'</div>' : '')+
+    (extraText ? '<div class="entry-lesson">'+esc(extraText)+'</div>' : '')+
+    linkOrSource(item)+
+    '</div>';
+}
+function isClosed(v) { return /^closed\b/i.test(String(v || '')); }
+
 function buildFundingSources(sources) {
   if (!sources || !sources.length) return '';
-  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Funding Sources</div>';
+  var h = '';
   sources.forEach(function(f){
     if (!f) return;
-    h += '<div style="padding:11px 0;border-bottom:1px solid var(--border)">'+
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:3px">'+
-      '<div style="font-size:13px;font-weight:700">'+esc(f.name)+'</div>'+
-      '<div style="font-size:10px;font-weight:700;color:var(--muted);background:var(--field);padding:2px 7px;border-radius:3px;white-space:nowrap;flex-shrink:0">'+esc(f.type)+'</div>'+
-      '</div>'+
-      (f.amount ? '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:3px">'+esc(f.amount)+'</div>' : '')+
-      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:5px">Deadline: '+esc(notStated(f.deadline, 'see the official page'))+' · '+esc(f.eligibility)+'</div>'+
-      (f.source ? sourceLine(f) : f.url ? '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px" href="'+esc(f.url)+'" target="_blank" rel="noopener">Apply →</a>' : '')+
-      '</div>';
+    var dl = f.source ? notStated(f.deadline, 'See the official page') : f.deadline;
+    h += entry(f.name, f.type, fact('Amount', f.amount) + fact('Deadline', dl, isClosed(dl) || !f.deadline), f.eligibility, f);
   });
-  h += '</div>';
-  return h;
+  return rblock('Funding sources', sources.length, h, true);
 }
 
 function buildPitchAssessment(pa) {
   if (!pa) return '';
-  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">';
-  if (pa.thirty_second_pitch) {
-    h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">30-Second Pitch</div>'+
-      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;font-style:italic;margin-bottom:14px">"'+esc(pa.thirty_second_pitch)+'"</div>';
-  }
+  var h = '';
+  if (pa.thirty_second_pitch) h += '<div class="sub-k">30-second pitch</div><blockquote class="pitch">'+esc(pa.thirty_second_pitch)+'</blockquote>';
   if (pa.logline_improved) {
-    h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Logline Assessment'+(pa.logline_score?' — '+esc(pa.logline_score)+'/10':'')+'</div>';
-    if (pa.logline_issues) h += '<div style="font-size:13px;color:var(--muted);line-height:1.6;font-weight:300;margin-bottom:6px">'+esc(pa.logline_issues)+'</div>';
-    h += '<div style="font-size:13px;color:var(--success);line-height:1.6;font-weight:600;margin-bottom:14px">Improved: '+esc(pa.logline_improved)+'</div>';
+    h += '<div class="sub-k">Logline'+(pa.logline_score ? ', '+esc(pa.logline_score)+'/10' : '')+'</div>';
+    if (pa.logline_issues) h += paras(pa.logline_issues, 'is-small');
+    h += '<div class="improved"><span class="fact-k">Stronger version</span>'+esc(pa.logline_improved)+'</div>';
   }
   if (pa.pitch_deck_checklist && pa.pitch_deck_checklist.length) {
-    h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Pitch Deck Checklist</div>';
-    pa.pitch_deck_checklist.forEach(function(item){ if (item) h += '<div style="font-size:13px;color:var(--text);font-weight:300;margin-bottom:4px">☐ '+esc(item)+'</div>'; });
+    h += '<div class="sub-k">Pitch deck checklist</div><ul class="checklist">';
+    pa.pitch_deck_checklist.forEach(function(item){ if (item) h += '<li>'+esc(item)+'</li>'; });
+    h += '</ul>';
   }
-  h += '</div>';
-  return h;
+  return rblock('Pitch &amp; logline', null, h, false);
 }
 
 function buildMarketingStrategy(ms) {
   if (!ms) return '';
-  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Marketing Strategy</div>';
-  if (ms.overview) h += '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:10px">'+esc(ms.overview)+'</div>';
+  var h = ms.overview ? paras(ms.overview) : '';
   if (ms.pre_release && ms.pre_release.length) {
-    h += '<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px">Pre-Release Actions</div>';
-    ms.pre_release.forEach(function(a){ if (a) h += '<div style="font-size:13px;color:var(--muted);font-weight:300;margin-bottom:4px">• '+esc(a)+'</div>'; });
+    h += '<div class="sub-k">Before release</div><ul class="checklist">';
+    ms.pre_release.forEach(function(a){ if (a) h += '<li>'+esc(a)+'</li>'; });
+    h += '</ul>';
   }
-  if (ms.social_strategy) h += '<div style="font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;margin-top:8px"><b style="color:var(--text)">Social:</b> '+esc(ms.social_strategy)+'</div>';
-  if (ms.community) h += '<div style="font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;margin-top:6px"><b style="color:var(--text)">Community:</b> '+esc(ms.community)+'</div>';
-  if (ms.press) h += '<div style="font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;margin-top:6px"><b style="color:var(--text)">Press:</b> '+esc(ms.press)+'</div>';
-  h += '</div>';
-  return h;
+  [['Social', ms.social_strategy], ['Community', ms.community], ['Press', ms.press]].forEach(function(row){
+    if (row[1]) h += '<div class="sub-k">'+row[0]+'</div>'+paras(row[1], 'is-small');
+  });
+  return rblock('Marketing strategy', null, h, false);
 }
 
 function buildLabeledText(label, text) {
   if (!text) return '';
-  return '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">'+label+'</div><div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300">'+esc(text)+'</div></div>';
+  return rblock(label, null, paras(text), false);
 }
 
 function buildLabOpportunities(labs) {
   if (!labs || !labs.length) return '';
-  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Labs &amp; Market Opportunities</div>';
-  labs.forEach(function(l){
-    if (!l) return;
-    h += '<div style="padding:10px 0;border-bottom:1px solid var(--border-light)">'+
-      '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+esc(l.name)+'</div>'+
-      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:5px">'+esc(l.fit)+'</div>'+
-      (l.source ? sourceLine(l) : l.url ? '<a style="font-size:11px;font-weight:500;color:var(--accent);text-decoration:none" href="'+esc(l.url)+'" target="_blank" rel="noopener">Visit →</a>' : '')+
-      '</div>';
-  });
-  h += '</div>';
-  return h;
+  var h = '';
+  labs.forEach(function(l){ if (l) h += entry(l.name, null, '', l.fit, l); });
+  return rblock('Labs &amp; markets', labs.length, h, true);
 }
 
 function buildTalentAndTax(talentLeverage, taxIncentive) {
-  if (!talentLeverage && !(taxIncentive && (taxIncentive.estimate || taxIncentive.note))) return '';
-  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">';
-  if (talentLeverage) {
-    h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Talent Leverage</div>'+
-      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:14px">'+esc(talentLeverage)+'</div>';
-  }
+  var out = '';
   if (taxIncentive && (taxIncentive.estimate || taxIncentive.note)) {
-    h += '<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px">Tax Incentive'+(taxIncentive.region?' — '+esc(taxIncentive.region):'')+'</div>'+
-      (taxIncentive.estimate ? '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:4px">'+esc(taxIncentive.estimate)+'</div>' : '')+
-      (taxIncentive.note ? '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300">'+esc(taxIncentive.note)+'</div>' : '')+
-      sourceLine(taxIncentive);
+    out += rblock('Tax incentive', null, entry(taxIncentive.region || 'Tax incentive', null, fact('Rate', taxIncentive.estimate), taxIncentive.note, taxIncentive), false);
   }
-  h += '</div>';
-  return h;
+  if (talentLeverage) out += buildLabeledText('Talent leverage', talentLeverage);
+  return out;
 }
 
 function buildComparables(comps) {
   if (!comps || !comps.length) return '';
-  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Comparable Films</div>';
+  var h = '';
   comps.forEach(function(c){
-    if (!c) return;
-    var detail = [c.budget ? 'Budget: '+c.budget : '', c.result || ''].filter(Boolean).join(' · ');
-    h += '<div class="comp-item"><div class="comp-name">'+esc(c.title)+(c.year?' ('+esc(c.year)+')':'')+'</div>'+(detail?'<div class="comp-detail">'+esc(detail)+'</div>':'')+'<div class="comp-lesson">'+esc(c.lesson)+'</div>'+sourceLine(c)+'</div>';
+    if (c) h += entry(c.title + (c.year ? ' ('+c.year+')' : ''), null, fact('Budget', c.budget), c.result, c, c.lesson);
   });
-  h += '</div>';
-  return h;
+  return rblock('Comparable films', comps.length, h, true);
 }
 
 function buildKeyCrew(crew) {
   if (!crew || !crew.length) return '';
-  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Key Crew Recommendations</div>';
-  crew.forEach(function(c){
-    if (!c) return;
-    h += '<div style="padding:9px 0;border-bottom:1px solid var(--border-light)">'+
-      '<div style="font-size:13px;font-weight:700;margin-bottom:2px">'+esc(c.role)+'</div>'+
-      '<div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:3px">'+esc(c.profile)+'</div>'+
-      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300">'+esc(c.why)+'</div>'+
-      '</div>';
-  });
-  h += '</div>';
-  return h;
+  var h = '';
+  crew.forEach(function(c){ if (c) h += entry(c.role, null, '', c.profile, null, c.why); });
+  return rblock('Key crew', crew.length, h, false);
 }
 
 function buildCautionaryComps(comps) {
   if (!comps || !comps.length) return '';
-  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Cautionary Comparables</div>';
+  var h = '';
   comps.forEach(function(c){
-    if (!c) return;
-    var detail = [c.budget ? 'Budget: '+c.budget : '', c.what_went_wrong || ''].filter(Boolean).join(' · ');
-    h += '<div class="comp-item"><div class="comp-name">'+esc(c.title)+(c.year?' ('+esc(c.year)+')':'')+'</div>'+(detail?'<div class="comp-detail">'+esc(detail)+'</div>':'')+'<div class="comp-lesson">'+esc(c.lesson)+'</div>'+sourceLine(c)+'</div>';
+    if (c) h += entry(c.title + (c.year ? ' ('+c.year+')' : ''), null, fact('Budget', c.budget), c.what_went_wrong, c, c.lesson);
   });
-  h += '</div>';
-  return h;
+  return rblock('Cautionary films', comps.length, h, false);
 }
 
 function buildPlatforms(platforms) {
   if (!platforms || !platforms.length) return '';
-  var h = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:10px">Platform Priority</div>';
-  platforms.forEach(function(pl){
-    if (!pl) return;
-    h += '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px;background:var(--field);border-radius:7px;margin-bottom:7px">'+
-      '<div style="font-size:9px;font-weight:700;color:#fff;background:var(--text);padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px;letter-spacing:0.04em">'+esc(pl.priority)+'</div>'+
-      '<div><div style="font-size:13px;font-weight:700;margin-bottom:2px">'+esc(pl.name)+'</div>'+
-      '<div style="font-size:12px;color:var(--muted);line-height:1.5;font-weight:300;margin-bottom:4px">'+esc(pl.reason)+'</div>'+
-      (pl.source ? sourceLine(pl) : pl.url ? '<a style="font-size:11px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:2px 8px;display:inline-block" href="'+esc(pl.url)+'" target="_blank" rel="noopener">Visit →</a>' : '')+
-      '</div></div>';
-  });
-  h += '</div>';
-  return h;
+  var h = '';
+  platforms.forEach(function(pl){ if (pl) h += entry(pl.name, pl.priority, '', pl.reason, pl); });
+  return rblock('Platforms', platforms.length, h, true);
 }
 
 /* ── RUN ANALYSIS (free quick preview — the full report always goes through start-full-report.js) ── */
