@@ -13,6 +13,10 @@ const LIMITS = {
   country: 80,
   language: 60,
   experience: 80,
+  stage: 60,
+  producer: 60,
+  runtime: 4,
+  shown: 60,
   extra: 1500
 };
 
@@ -31,7 +35,7 @@ function sanitizeProject(raw) {
   const p = {};
   Object.keys(LIMITS).forEach(function (k) { p[k] = clean(raw[k], LIMITS[k]); });
   if (!p.title) return null;
-  ['country', 'language', 'experience'].forEach(function (k) { if (!p[k]) p[k] = 'Not specified'; });
+  ['country', 'language', 'experience', 'stage', 'producer', 'runtime', 'shown'].forEach(function (k) { if (!p[k]) p[k] = 'Not specified'; });
   return p;
 }
 
