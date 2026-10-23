@@ -6,7 +6,7 @@
   --text: #161616; --muted: #5c5c5c; --border: #d9d3cb; --field: rgba(20,18,16,0.045);
   --ember-text: #a8471f;
   --display: 'Geist', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-  --body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --body: 'Carlito', Calibri, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --ease: cubic-bezier(0.23, 1, 0.32, 1);
 }
