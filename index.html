@@ -1013,6 +1013,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
       <ol class="f-steps" id="formSteps">
         <li class="on">Your project</li>
         <li>Budget &amp; distribution</li>
+        <li>Where you are</li>
         <li>Context</li>
       </ol>
     </div>
@@ -1108,6 +1109,42 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
         </div>
       </div>
     </div>
+    <div class="card reveal" style="transition-delay:0.09s">
+      <div class="card-title">Where you are</div>
+      <div class="field-row">
+        <div class="field">
+          <label for="stage">Project stage</label>
+          <select id="stage">
+            <option value="">Select stage…</option>
+            <option>Idea / treatment</option><option>Writing the script</option>
+            <option>Script ready, looking for funding</option><option>Funded, preparing to shoot</option>
+            <option>Shooting</option><option>In post-production</option><option>Finished</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="producer">Who is producing <span class="hint">(optional)</span></label>
+          <select id="producer">
+            <option value="">Select…</option>
+            <option>Just me, no company yet</option><option>My own production company</option>
+            <option>A producer or company is attached</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="runtime">Running time <span class="hint">(minutes, optional)</span></label>
+          <input type="text" id="runtime" inputmode="numeric" maxlength="4" placeholder="e.g. 15 or 95">
+        </div>
+        <div class="field">
+          <label for="shown">Shown anywhere yet? <span class="hint">(optional)</span></label>
+          <select id="shown">
+            <option value="">Select…</option>
+            <option>Not shown anywhere</option><option>Screened at a festival or event</option>
+            <option>Online (YouTube, Vimeo…)</option><option>Released in cinemas or on TV</option>
+          </select>
+        </div>
+      </div>
+    </div>
     <div class="card reveal" style="transition-delay:0.12s">
       <div class="card-title">Context</div>
       <div class="field-row">
@@ -1131,7 +1168,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
       </div>
       <div class="field">
         <label for="extra">Anything else? <span class="hint">(optional)</span></label>
-        <textarea id="extra" maxlength="1500" placeholder="Co-production? Attached talent? Funding secured? Based on a true story?" style="min-height:66px"></textarea>
+        <textarea id="extra" maxlength="1500" placeholder="Co-production? Attached talent? Funding secured? Based on a true story? Using existing music or archive footage?" style="min-height:66px"></textarea>
       </div>
     </div>
     <div class="disclaimer-box">
@@ -1522,6 +1559,10 @@ function getProject() {
     country:    document.getElementById('country').value.trim() || 'Not specified',
     language:   document.getElementById('language').value.trim() || 'Not specified',
     experience: document.getElementById('experience').value || 'Not specified',
+    stage:      document.getElementById('stage').value,
+    producer:   document.getElementById('producer').value || 'Not specified',
+    runtime:    document.getElementById('runtime').value.replace(/[^0-9]/g, '') || 'Not specified',
+    shown:      document.getElementById('shown').value || 'Not specified',
     extra:      document.getElementById('extra').value.trim()
   };
 }
@@ -2508,8 +2549,8 @@ function buildPlatforms(platforms) {
 /* ── RUN ANALYSIS (free quick preview — the full report always goes through start-full-report.js) ── */
 async function runAnalysis() {
   var p = getProject();
-  if (!p.title||!p.logline||!p.genre||!p.format||!p.budget||!p.audience||!p.distrib) {
-    showError("Please fill in all required fields and select at least one genre.");
+  if (!p.title||!p.logline||!p.genre||!p.format||!p.budget||!p.audience||!p.distrib||!p.stage) {
+    showError("Please fill in all required fields (including the project stage) and select at least one genre.");
     return;
   }
   hideError();

@@ -30,8 +30,19 @@ function currentDateLine() {
   return 'Today\'s date is '+today+'. Only recommend festival editions, fund deadlines, lab/market calls and other time-bound opportunities that have not yet closed as of this date; if the current edition or deadline has passed, recommend the next upcoming one and say which year. Never present a concluded edition or deadline as open.';
 }
 
+// Where the project is and who is behind it decide what is actually
+// possible next: a film not yet shot cannot meet next month's festival
+// deadline, and an individual without a company cannot apply to calls
+// reserved to production companies (most public funds).
+function stageLines(p) {
+  return 'Stage="'+(p.stage||'Not specified')+'", Producing="'+(p.producer||'Not specified')+'", Running time (minutes)="'+(p.runtime||'Not specified')+'", Already shown="'+(p.shown||'Not specified')+'"';
+}
+function stageRules() {
+  return 'STAGE RULES: tailor every recommendation to the project\'s stage. Before the film exists (idea, writing, looking for funding), focus on development, packaging, funds and labs that accept projects at that stage; never present a festival submission deadline as a target unless the film can realistically be finished by then. In post-production or finished, focus on festival strategy, premiere status, delivery and sales. If the project was already screened or released online, check premiere and eligibility rules against that. If the filmmaker has no production company, say plainly which funds require one, and that a producer or company is the first step for those. Use the running time to check short or feature eligibility.';
+}
+
 function projectContext(p) {
-  var ctx = currentDateLine()+'\n\nProject: Title="'+p.title+'", Logline="'+p.logline+'", Genre="'+p.genre+'", Format="'+p.format+'", Budget="'+p.budget+'", Audience="'+p.audience+'", Distribution="'+p.distrib+'", Country="'+p.country+'", Language="'+(p.language||'Not specified')+'", Experience="'+p.experience+'", Notes="'+(p.extra||'None')+'"';
+  var ctx = currentDateLine()+'\n\n'+stageRules()+'\n\nProject: Title="'+p.title+'", Logline="'+p.logline+'", Genre="'+p.genre+'", Format="'+p.format+'", Budget="'+p.budget+'", Audience="'+p.audience+'", Distribution="'+p.distrib+'", Country="'+p.country+'", Language="'+(p.language||'Not specified')+'", Experience="'+p.experience+'", '+stageLines(p)+', Notes="'+(p.extra||'None')+'"';
   if (p.budget === 'Not sure yet') {
     ctx += '\n\nThe filmmaker has not set a budget yet. Before giving any financial assessment, recommend a realistic budget range for a project with this genre, format and scope, say it is a rough range to refine with a line producer, and use it as the basis for every other budget-dependent field in your response.';
   }
@@ -77,4 +88,4 @@ function allFullPrompts(p) {
   ];
 }
 
-module.exports = { fullPromptA, fullPromptB, fullPromptC, fullPromptD, fullPromptE, fullPromptF, allFullPrompts, PREAMBLE, SCORING };
+module.exports = { stageLines, stageRules, fullPromptA, fullPromptB, fullPromptC, fullPromptD, fullPromptE, fullPromptF, allFullPrompts, PREAMBLE, SCORING };
