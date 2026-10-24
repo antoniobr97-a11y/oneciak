@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://oneciak.com/</loc><lastmod>2026-10-19</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://oneciak.com/guides/</loc><lastmod>2026-10-19</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://oneciak.com/guides/festival-strategy-first-film/</loc><lastmod>2026-10-19</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://oneciak.com/roadmap/</loc><lastmod>2026-10-24</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://oneciak.com/guides/</loc><lastmod>2026-10-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://oneciak.com/guides/festival-strategy-first-film/</loc><lastmod>2026-10-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://oneciak.com/privacy.html</loc><lastmod>2026-10-08</lastmod><changefreq>yearly</changefreq><priority>0.2</priority></url>
   <url><loc>https://oneciak.com/terms.html</loc><lastmod>2026-10-08</lastmod><changefreq>yearly</changefreq><priority>0.2</priority></url>
 </urlset>
