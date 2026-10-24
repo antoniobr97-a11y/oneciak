@@ -362,8 +362,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 #sec-form::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 280px; background: linear-gradient(180deg, rgba(20,13,16,0.07), rgba(20,13,16,0)); pointer-events: none; }
 .f-main { position: relative; max-width: 1240px; margin: 0 auto; padding: 64px 40px 120px; display: grid; grid-template-columns: 0.75fr 1.25fr; gap: 72px; align-items: start; }
 .f-side { position: sticky; top: 104px; }
-.f-kicker { color: var(--muted); }
-.f-title { font-family: var(--display); font-size: clamp(38px, 4.2vw, 52px); font-weight: 300; line-height: 1; margin-top: 18px; letter-spacing: -0.035em; color: var(--text); }
+.f-title { font-family: var(--display); font-size: clamp(38px, 4.2vw, 52px); font-weight: 300; line-height: 1; margin-top: 0; letter-spacing: -0.035em; color: var(--text); }
 .f-title b { font-weight: 700; }
 .f-subtitle { margin-top: 20px; font-size: 15.5px; line-height: 1.55; color: var(--muted); max-width: 34ch; font-weight: 400; }
 .f-steps { list-style: none; margin-top: 40px; border-top: 1px solid var(--border); }
@@ -506,7 +505,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   padding: 56px 24px 44px;
 }
 .r-hero-inner { max-width: 640px; margin: 0 auto; }
-.r-eyebrow { font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--accent); margin-bottom: 14px; }
 .r-title {
   font-family: var(--sf);
   font-size: clamp(26px, 5vw, 40px);
@@ -709,7 +707,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   padding: 128px 24px 220px; margin-top: -64px;
 }
 #sec-results .r-hero-inner, #sec-myreports .r-hero-inner { position: relative; z-index: 1; }
-.r-eyebrow { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: #d6cec3; margin-bottom: 18px; }
 .r-title { font-family: var(--display); font-size: clamp(40px, 6vw, 72px); font-weight: 700; letter-spacing: -0.035em; line-height: 1; color: var(--on-night); margin-bottom: 20px; }
 .r-summary { font-size: 17px; line-height: 1.55; color: var(--on-night-2); max-width: 60ch; }
 #overallScore { margin-top: 36px; }
@@ -1136,7 +1133,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   </div>
   <div class="f-main">
     <div class="f-side">
-      <div class="f-kicker l-mono">New analysis</div>
       <h1 class="f-title"><b>Tell us about</b><br>your project.</h1>
       <p class="f-subtitle">The preview covers all five dimensions. The full report is free too, and arrives by email.</p>
       <ol class="f-steps" id="formSteps">
@@ -1337,7 +1333,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   </div>
   <div class="r-hero">
     <div class="r-hero-inner reveal">
-      <div class="r-eyebrow">Market report</div>
       <div class="r-title" id="resultTitle"></div>
       <div class="r-summary" id="resultSubtitle"></div>
       <div id="overallScore"></div>
@@ -1426,7 +1421,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   </div>
   <div class="r-hero mr-hero">
     <div class="r-hero-inner">
-      <div class="r-eyebrow">My reports</div>
       <h1 class="r-title">Every report you've requested, in one place.</h1>
       <p class="r-summary">No password. We send a sign-in link to the email you used for your full report.</p>
     </div>

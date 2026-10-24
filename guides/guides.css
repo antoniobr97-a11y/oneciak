@@ -60,6 +60,11 @@ a { color: inherit; }
 @media (hover: hover) and (pointer: fine) { .g-cta:hover { background: #fff; } .g-nav-r a:not(.g-cta):hover { color: var(--on-night); } }
 .g-head { position: relative; z-index: 1; padding-top: 88px; max-width: 820px; }
 .g-head .mono { color: #d6cec3; }
+/* Breadcrumb instead of a label above the title: it says where you are and links back. */
+.g-crumb { display: flex; flex-wrap: wrap; gap: 8px; font-size: 15px; color: var(--on-night-2); }
+.g-crumb a { color: var(--on-night); text-decoration: underline; text-decoration-color: rgba(242,237,230,0.35); text-underline-offset: 4px; transition: text-decoration-color .2s; }
+.g-crumb a:active { transform: scale(0.98); }
+@media (hover: hover) and (pointer: fine) { .g-crumb a:hover { text-decoration-color: currentColor; } }
 .g-head h1 { margin-top: 18px; font-family: var(--display); font-weight: 700; font-size: clamp(36px, 5.4vw, 64px); line-height: 1.02; letter-spacing: -0.035em; }
 .g-head .lede { margin-top: 22px; max-width: 58ch; font-size: 18px; line-height: 1.55; color: var(--on-night-2); }
 .g-meta { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 8px 22px; color: #d6cec3; }
@@ -105,7 +110,7 @@ a { color: inherit; }
 /* guides index list */
 .g-list { list-style: none; max-width: 820px; border-top: 1px solid var(--text); }
 .g-list li { border-bottom: 1px solid var(--border); }
-.g-list a { display: grid; grid-template-columns: 64px 1fr; gap: 16px; padding: 28px 0; text-decoration: none; transition: opacity .2s; }
+.g-list a { display: block; padding: 28px 0; text-decoration: none; transition: opacity .2s; }
 .g-list .mono { color: var(--muted); padding-top: 10px; }
 .g-list h2 { font-family: var(--display); font-weight: 700; font-size: clamp(24px, 3vw, 32px); line-height: 1.1; letter-spacing: -0.025em; }
 .g-list p { margin-top: 10px; font-size: 16px; line-height: 1.55; color: var(--muted); max-width: 60ch; }
@@ -126,5 +131,5 @@ a { color: inherit; }
   .g-table { font-size: 14px; }
   .g-table td:first-child { white-space: normal; }
   .g-stat b { font-size: 38px; }
-  .g-list a { grid-template-columns: 40px 1fr; padding: 22px 0; }
+  .g-list a { padding: 22px 0; }
 }
