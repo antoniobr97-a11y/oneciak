@@ -1026,6 +1026,48 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   .menu-header { padding: 0 20px; }
 }
 
+
+/* ── Report reading, phones first (2026-10-24) ──
+   Antonio on iPhone: too heavy, lines and windows on both sides. The point
+   of each block comes first and the long argument is one tap away; lists
+   use a small coloured dot instead of a vertical rule; one bar at the top. */
+details.more { margin-top: 6px; }
+details.more > summary { list-style: none; cursor: pointer; display: inline-block; padding: 6px 0; font-size: 14.5px; color: var(--text); text-decoration: underline; text-decoration-color: rgba(22,22,22,0.3); text-underline-offset: 3px; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more[open] > summary { display: none; }
+details.more .prose { margin-top: 12px; }
+.more-inline { margin-top: 2px; }
+.more-inline > summary { font-size: 14px; padding: 4px 0; }
+.action-rest { display: block; margin-top: 6px; }
+details.more > summary:active { transform: scale(0.98); }
+@media (hover: hover) and (pointer: fine) { details.more > summary:hover { text-decoration-color: currentColor; } }
+.fs-col li, .fs-col.red li, .fs-col.green li { border-left: 0; position: relative; padding: 0 0 0 16px; }
+.fs-col li::before { content: ''; position: absolute; left: 1px; top: 0.62em; width: 6px; height: 6px; border-radius: 50%; }
+.fs-col.red li::before { background: #b13225; }
+.fs-col.green li::before { background: #0f7a3d; }
+.exec-box, .exec-box.risk, .exec-box.opp { border-left: 0; padding: 0; }
+.tips-block { margin-top: 22px; }
+.next-area { display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: 12px; width: 100%; margin-top: 30px; padding: 16px 2px; border: 0; border-top: 1px solid var(--text); background: none; font: inherit; color: var(--text); text-align: left; cursor: pointer; transition: transform 0.15s ease-out; }
+.next-area:active { transform: scale(0.99); }
+.next-area-k { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.next-area-t { font-family: var(--display); font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.next-area-i { font-size: 18px; }
+@media (hover: hover) and (pointer: fine) { .next-area:hover .next-area-t { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; } }
+#overallScore { margin-bottom: 22px; }
+@media (max-width: 640px) {
+  #sec-results .r-header { transition: transform 0.3s var(--ease), background 0.35s var(--ease), color 0.35s var(--ease); }
+  body.rh-hidden #sec-results .r-header { transform: translateY(-100%); }
+  .area-nav { transition: opacity 0.25s var(--ease), transform 0.25s var(--ease), top 0.3s var(--ease); }
+  body.rh-hidden .area-nav { top: 0; }
+  #resultSubtitle { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+  #resultSubtitle.is-open { display: block; }
+  .r-more { margin-top: 6px; padding: 6px 0; border: 0; background: none; font: inherit; font-size: 14.5px; color: var(--on-night); text-decoration: underline; text-decoration-color: rgba(242,237,230,0.4); text-underline-offset: 3px; cursor: pointer; }
+  .r-more:active { transform: scale(0.98); }
+  .exec-text { font-size: 17px; }
+  .accordion-icon { display: none; }
+  .accordion-score-label { display: none; }
+}
+@media (min-width: 641px) { .r-more { display: none; } }
 </style>
 </head>
 <body>
@@ -1344,8 +1386,8 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   <div class="r-hero">
     <div class="r-hero-inner reveal">
       <div class="r-title" id="resultTitle"></div>
-      <div class="r-summary" id="resultSubtitle"></div>
       <div id="overallScore"></div>
+      <div class="r-summary" id="resultSubtitle"></div>
     </div>
   </div>
   <div class="r-main">
@@ -1508,6 +1550,7 @@ function track(eventName) {
    Transparent over the top of the hero, smoked glass while still over the
    night, frosted paper once the dissolve has handed over to the light
    sections. */
+var lastScrollY = 0;
 function updateLandingNav() {
   var nav = document.getElementById('landingNav'), hero = document.getElementById('landingHero');
   if (!nav || !hero) return;
@@ -1515,7 +1558,15 @@ function updateLandingNav() {
   nav.classList.toggle('is-scrolled', y > 8);
   nav.classList.toggle('is-light', y > lightAt);
   var rh = document.querySelector('#sec-results .r-header'), rhero = document.querySelector('#sec-results .r-hero');
-  if (rh && rhero) { rh.classList.toggle('is-light', y > rhero.offsetHeight - 160); rh.classList.toggle('is-scrolled', y > 8); }
+  if (rh && rhero) {
+    rh.classList.toggle('is-light', y > rhero.offsetHeight - 160); rh.classList.toggle('is-scrolled', y > 8);
+    // Phones: one bar at a time. Reading down, the header slides away and
+    // the area bar takes the top; any scroll up brings the header back.
+    var past = y > rhero.offsetHeight;
+    if (!past || y < lastScrollY - 6) document.body.classList.remove('rh-hidden');
+    else if (y > lastScrollY + 6) document.body.classList.add('rh-hidden');
+  }
+  lastScrollY = y;
   var mh = document.querySelector('#sec-myreports .r-header'), mhero = document.querySelector('#sec-myreports .r-hero');
   if (mh && mhero) { mh.classList.toggle('is-light', y > mhero.offsetHeight - 160); mh.classList.toggle('is-scrolled', y > 8); }
 }
@@ -2102,7 +2153,7 @@ function renderFree(r, title) {
   isFullReport = false;
   setPdfLabels();
   document.getElementById('resultTitle').textContent = '"'+title+'"';
-  document.getElementById('resultSubtitle').textContent = r.overall_summary||'';
+  setHeroSummary(r.overall_summary||'');
 
   // Overall score
   var col = scoreColor(Number(r.overall_score||5));
@@ -2199,7 +2250,7 @@ function renderFull(r, title) {
   isFullReport = true;
   setPdfLabels();
   document.getElementById('resultTitle').textContent = '"'+title+'"';
-  document.getElementById('resultSubtitle').textContent = r.overall_summary||'';
+  setHeroSummary(r.overall_summary||'');
 
   // Only a real, persisted full report has a session_id/token to flag an
   // issue against — hide it for the fictional sample report entirely.
@@ -2223,7 +2274,7 @@ function renderFull(r, title) {
   document.getElementById('execSummary').innerHTML =
     '<div class="exec-card">'+
     '<div class="exec-label">Summary</div>'+
-    '<div class="exec-text">'+paras(r.executive_summary||r.overall_summary)+'</div>'+
+    '<div class="exec-text">'+parasFold(r.executive_summary||r.overall_summary, 'Read the full summary')+'</div>'+
     '<div class="exec-row">'+
     '<div class="exec-box risk"><div class="exec-box-label">Main Risk</div><div class="exec-box-text">'+esc(r.biggest_risk)+'</div></div>'+
     '<div class="exec-box opp"><div class="exec-box-label">Main Opportunity</div><div class="exec-box-text">'+esc(r.biggest_opportunity)+'</div></div>'+
@@ -2297,6 +2348,7 @@ function renderFull(r, title) {
       '<div class="accordion-body" id="acc-body-'+idx+'">'+
       '<div class="accordion-divider"></div>'+
       sec.body+
+      (sections[idx+1] ? '<button type="button" class="next-area" onclick="nextArea('+idx+')"><span class="next-area-k">Next</span><span class="next-area-t">'+sections[idx+1].num+' '+sections[idx+1].label+'</span><span class="next-area-i" aria-hidden="true">→</span></button>' : '')+
       '</div>'+
       '</div>';
   });
@@ -2319,12 +2371,10 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
   out += '<div class="score-bar-bg" style="margin-bottom:18px"><div class="score-bar-fill bar-'+col+'" id="'+bid+'" style="width:0%"></div></div>';
   setTimeout(function(b,p){ return function(){ var el=document.getElementById(b); if(el) el.style.width=p+'%'; }; }(bid,pct), 80);
 
-  // Verdict, then the analysis in short paragraphs
+  // Verdict and the point of the analysis; the full argument is one tap
+  // away, so on a phone "what to do" arrives on the first screen.
   out += '<div class="score-verdict">'+esc(verdict)+'</div>';
-  out += paras(detail);
-
-  // Risks and strengths side by side on wide screens
-  out += riskGrid(flags, strengths, 'Red flags', 'Strengths');
+  out += parasFold(detail, 'Read the full analysis');
 
   // Recommendations, numbered
   if ((tips||[]).length) {
@@ -2343,14 +2393,18 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
     out += '</ol></div>';
   }
 
-  // 30 / 60 / 90 day plan
+  // Risks and strengths side by side on wide screens
+  out += riskGrid(flags, strengths, 'Red flags', 'Strengths');
+
+  // 30 / 60 / 90 day plan, then sourced lists and deeper material, all as
+  // collapsible rows
+  var more = '';
   if ((plan||[]).length) {
     var tags = ['30 days','60 days','90 days'];
-    out += timeline('Next 90 days', plan.map(function(a, i){ return { tag: tags[i] || '', text: String(a||'').replace(/^(30|60|90)\s*days?:?\s*/i,'') }; }));
+    more += rblock('Next 90 days', null, timeline('', plan.map(function(a, i){ return { tag: tags[i] || '', text: String(a||'').replace(/^(30|60|90)\s*days?:?\s*/i,'') }; })));
   }
-
-  // Sourced lists and deeper material, as collapsible rows
-  if (extra) out += '<div class="rblocks">'+extra+'</div>';
+  if (extra) more += extra;
+  if (more) out += '<div class="rblocks">'+more+'</div>';
 
   return out;
 }
@@ -2415,9 +2469,12 @@ function timeline(label, items) {
   var h = '';
   (items || []).forEach(function(it){
     if (!it || !it.text) return;
-    h += '<div class="action-item">'+(it.tag ? '<span class="action-tag">'+esc(it.tag)+'</span>' : '')+'<span class="action-text">'+esc(it.text)+'</span></div>';
+    // First sentence visible, the rest one tap away (long phases on phones).
+    var ss = sentencesOf(it.text), txt = esc(ss[0] || it.text);
+    if (ss.length > 1) txt += '<details class="more more-inline"><summary>More</summary><span class="action-rest">'+esc(ss.slice(1).join(' '))+'</span></details>';
+    h += '<div class="action-item">'+(it.tag ? '<span class="action-tag">'+esc(it.tag)+'</span>' : '')+'<span class="action-text">'+txt+'</span></div>';
   });
-  return h ? '<div class="action-block"><span class="action-label">'+label+'</span>'+h+'</div>' : '';
+  return h ? '<div class="action-block">'+(label ? '<span class="action-label">'+label+'</span>' : '')+h+'</div>' : '';
 }
 
 function riskGrid(left, right, leftLabel, rightLabel) {
@@ -2501,8 +2558,15 @@ function goToArea(i) {
   var trigger = document.getElementById('acc-trigger-'+i);
   if (!trigger) return;
   if (body && !body.classList.contains('open')) toggleAccordion(i);
-  var y = trigger.getBoundingClientRect().top + window.scrollY - (window.innerWidth < 1360 ? 112 : 76);
+  // On phones the header hides while scrolling down, leaving only the area bar.
+  var y = trigger.getBoundingClientRect().top + window.scrollY - (window.innerWidth < 1360 ? 60 : 76);
   window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+}
+// Closes the area just read and opens the next one, like turning a page.
+function nextArea(i) {
+  var body = document.getElementById('acc-body-'+i);
+  if (body && body.classList.contains('open')) toggleAccordion(i);
+  goToArea(i + 1);
 }
 function goToOverview() {
   var el = document.getElementById('areaOverview');
@@ -2585,6 +2649,31 @@ function paras(t, cls) {
   var out = '', i;
   for (i = 0; i < s.length; i += 2) out += '<p'+(i === 0 ? ' class="lead"' : '')+'>'+esc(s.slice(i, i + 2).join(' '))+'</p>';
   return '<div class="prose'+(cls ? ' '+cls : '')+'">'+out+'</div>';
+}
+/* The hero summary is cut to four lines on phones (CSS) with a button to
+   read it all; the button only appears when the text is actually cut. */
+function setHeroSummary(text) {
+  var el = document.getElementById('resultSubtitle');
+  el.textContent = text;
+  el.classList.remove('is-open');
+  var btn = document.getElementById('heroMore');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.type = 'button'; btn.id = 'heroMore'; btn.className = 'r-more'; btn.textContent = 'Read more';
+    btn.onclick = function() { el.classList.add('is-open'); btn.hidden = true; };
+    el.parentNode.insertBefore(btn, el.nextSibling);
+  }
+  btn.hidden = true;
+  requestAnimationFrame(function() { btn.hidden = !(el.scrollHeight > el.clientHeight + 2); });
+}
+/* Lead paragraph visible, the rest one tap away: on a phone the reader sees
+   the point first and decides whether to read the whole argument. */
+function parasFold(t, moreLabel) {
+  var s = sentencesOf(t);
+  if (s.length <= 1) return paras(t);
+  var rest = s.slice(1).join(' ');
+  return '<div class="prose"><p class="lead">'+esc(s[0])+'</p></div>'+
+    '<details class="more"><summary>'+(moreLabel || 'Read more')+'</summary>'+paras(rest)+'</details>';
 }
 function rblock(label, count, inner, open) {
   if (!inner) return '';
