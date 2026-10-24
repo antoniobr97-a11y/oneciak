@@ -895,6 +895,13 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 
 /* Score overview at the top of the areas: the sample card's rows, on paper. */
 .r-overview { margin: 8px 0 36px; border-top: 1px solid var(--text); }
+.r-overview + .r-road { margin-top: -36px; border-top: 0; }
+.r-road { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: baseline; margin: 0 0 36px; padding: 14px 2px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); color: var(--text); text-decoration: none; transition: transform 0.15s ease-out; }
+.r-road:active { transform: scale(0.99); }
+.r-road-k { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.r-road-t { font-size: 16px; font-weight: 700; }
+.r-road-d { grid-column: 2; font-size: 14.5px; line-height: 1.5; color: var(--muted); text-decoration: underline; text-decoration-color: rgba(22,22,22,0.3); text-underline-offset: 3px; }
+@media (hover: hover) and (pointer: fine) { .r-road:hover .r-road-d { color: var(--text); text-decoration-color: currentColor; } }
 .ov-head { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 2px 6px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); }
 .ov-head span { color: var(--muted); letter-spacing: 0.04em; text-transform: none; font-family: var(--sf); font-size: 13px; }
 .ov-row { display: grid; grid-template-columns: 34px 1fr minmax(90px, 220px) 36px; align-items: center; gap: 14px; width: 100%; padding: 14px 2px; border: 0; border-bottom: 1px solid var(--border); background: none; font: inherit; color: var(--text); text-align: left; cursor: pointer; transition: transform 0.15s ease-out; }
@@ -1058,10 +1065,10 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
         <details class="menu-faq-item"><summary class="menu-faq-q">Why do you ask for my email?</summary><div class="menu-faq-a">The full report takes a few minutes to generate, so we send it when it's ready. You don't need to keep the page open.</div></details>
         <details class="menu-faq-item"><summary class="menu-faq-q">Is my project data private?</summary><div class="menu-faq-a">Your project is shared only with the services needed to generate and deliver your report, listed in our Privacy Policy. It is never sold.</div></details>
         <details class="menu-faq-item"><summary class="menu-faq-q">I've never made a film. Is it still useful?</summary><div class="menu-faq-a">Yes, that's who it's built for. Pick "First film" in the Experience field and the advice adjusts.</div></details>
-        <details class="menu-faq-item"><summary class="menu-faq-q">Where do I start after my report?</summary><div class="menu-faq-a">Open the Roadmap near the end of the full report. It's a step-by-step sequence for your project.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">Where do I start after my report?</summary><div class="menu-faq-a">Your report shows which of the nine stages your project is at. The <a href="/roadmap/">film roadmap</a> lists every job in each stage, from script to release, with the rules that apply quoted from official sources.</div></details>
       </div>
       <button class="menu-cta" onclick="closeMenuGoLanding()">Start free analysis</button>
-      <p class="menu-legal"><a href="/guides/">Guides</a><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></p>
+      <p class="menu-legal"><a href="/roadmap/">Film roadmap</a><a href="/guides/">Guides</a><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></p>
     </div>
   </div>
 
@@ -1119,7 +1126,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
       </ol>
       <footer class="l-foot">
         <span>OneCiak, film market intelligence</span>
-        <nav><a href="/guides/">Guides</a><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></nav>
+        <nav><a href="/roadmap/">Film roadmap</a><a href="/guides/">Guides</a><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></nav>
       </footer>
     </div>
   </section>
@@ -2170,7 +2177,7 @@ function renderFree(r, title) {
   });
   html += '</div>';
 
-  document.getElementById('accordionMenu').innerHTML = areaOverview(freeSections) + html;
+  document.getElementById('accordionMenu').innerHTML = areaOverview(freeSections) + roadmapBlock(lastProject) + html;
   document.getElementById('accordionMenu').style.display = 'block';
   mountAreaNav(freeSections);
 
@@ -2294,7 +2301,7 @@ function renderFull(r, title) {
   });
   html += '</div>';
 
-  document.getElementById('accordionMenu').innerHTML = areaOverview(sections) + html;
+  document.getElementById('accordionMenu').innerHTML = areaOverview(sections) + roadmapBlock(lastProject) + html;
   document.getElementById('accordionMenu').style.display = 'block';
   mountAreaNav(sections);
   document.getElementById('upgradeSection').innerHTML = '';
@@ -2477,6 +2484,16 @@ function areaOverview(sections) {
       '<span class="ov-score">'+v+'</span></button>';
   });
   return rows ? '<div class="r-overview" id="areaOverview"><div class="ov-head">The five areas<span>Tap one to open it</span></div>'+rows+'</div>' : '';
+}
+/* Link to the film roadmap (/roadmap/) at the stage the project is at, so
+   the report connects to the full list of jobs for that stage. */
+var ROADMAP_STAGES = ['Idea and script', 'Rights and company', 'Budget and schedule', 'Financing', 'Pre-production', 'Shooting', 'Post-production', 'Festivals', 'Sales and release'];
+var STAGE_TO_ROADMAP = { 'Idea / treatment': 1, 'Writing the script': 1, 'Script ready, looking for funding': 4, 'Funded, preparing to shoot': 5, 'Shooting': 6, 'In post-production': 7, 'Finished': 8 };
+function roadmapBlock(project) {
+  var n = project && STAGE_TO_ROADMAP[project.stage];
+  if (!n) return '<a class="r-road" href="/roadmap/"><span class="r-road-k">Film roadmap</span><span class="r-road-t">Every job between your idea and your release</span><span class="r-road-d">Nine stages, with the rules that apply quoted from official sources</span></a>';
+  var note = n === 4 ? 'Funders check rights and budget first, stages 2 and 3' : 'Every job in this stage, with the rules that apply quoted from official sources';
+  return '<a class="r-road" href="/roadmap/#stage-'+n+'"><span class="r-road-k">Your stage</span><span class="r-road-t">'+n+' of 9 · '+ROADMAP_STAGES[n-1]+'</span><span class="r-road-d">'+note+'</span></a>';
 }
 function goToArea(i) {
   var body = document.getElementById('acc-body-'+i);
