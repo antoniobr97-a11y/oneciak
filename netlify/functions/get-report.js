@@ -35,7 +35,9 @@ exports.handler = async (event) => {
     // repeating "almost there" forever for a generation that already died
     // server-side (e.g. the recipient email was undeliverable).
     if (record && record.status === 'failed') {
-      return { statusCode: 200, headers, body: JSON.stringify({ ready: false, failed: true }) };
+      // TEST BRANCH ONLY (deploy preview): show why a generation failed.
+      const dbg = process.env.CONTEXT === 'deploy-preview' ? { error: record.error } : {};
+      return { statusCode: 200, headers, body: JSON.stringify(Object.assign({ ready: false, failed: true }, dbg)) };
     }
     return { statusCode: 200, headers, body: JSON.stringify({ ready: false }) };
   } catch (err) {
