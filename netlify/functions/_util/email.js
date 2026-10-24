@@ -73,10 +73,12 @@ function sourceHtml(item) {
   try { host = new URL(item.source).hostname.replace(/^www\./, ''); } catch (e) { return ''; }
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(item.checked || '');
   const when = m ? ' · checked ' + Number(m[3]) + ' ' + MONTHS[Number(m[2]) - 1] + ' ' + m[1] : '';
-  return '<br><a href="' + esc(item.source) + '" style="font-family:Calibri,Carlito,Arial,sans-serif;font-size:13px;color:#6b665f;text-decoration:underline">Source: ' + esc(host) + esc(when) + '</a>';
+  // A rule quoted word for word (kept by grounding.js only if it is on the page).
+  const quote = item.rule_quote ? '<br><span style="font-size:12px;color:#5c5852">The rule, word for word:</span> <i style="font-size:13px;color:#161616">\u201C' + esc(item.rule_quote) + '\u201D</i>' : '';
+  return quote + '<br><a href="' + esc(item.source) + '" style="font-family:Calibri,Carlito,Arial,sans-serif;font-size:13px;color:#6b665f;text-decoration:underline">Source: ' + esc(host) + esc(when) + '</a>';
 }
 function stated(v, item) {
-  return (v == null || v === '') ? (item && item.source ? 'see the official page' : '') : v;
+  return (v == null || v === '') ? (item && item.source ? 'not published on the source, check before planning' : '') : v;
 }
 
 function fundingSourcesHtml(sources) {
@@ -90,7 +92,7 @@ function fundingSourcesHtml(sources) {
 function comparablesHtml(comps) {
   if (!comps || !comps.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Comparable Films</span>';
-  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b>' + (c.year ? ' (' + esc(c.year) + ')' : '') + (c.budget ? ' — Budget: ' + esc(c.budget) : '') + (c.result ? ' — ' + esc(c.result) : '') + '<br><span style="font-size:12px;color:#5c5852">' + esc(c.lesson) + '</span>' + sourceHtml(c) + '</p>'; });
+  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b>' + (c.year ? ' (' + esc(c.year) + ')' : '') + (c.budget ? ' — Budget: ' + esc(c.budget) : '') + (c.result ? ' — ' + esc(c.result) : '') + (c.match ? '<br><span style="font-size:12px;color:#5c5852">In common: ' + esc(c.match) + '</span>' : '') + '<br><span style="font-size:12px;color:#5c5852">' + esc(c.lesson) + '</span>' + sourceHtml(c) + '</p>'; });
   h += '</div>';
   return h;
 }

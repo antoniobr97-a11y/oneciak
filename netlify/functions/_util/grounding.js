@@ -39,13 +39,16 @@ function isSourced(url, set) {
 // sentences whose numbers are not on the page are removed).
 const LISTS = {
   financial_sources: { figures: ['amount', 'deadline'], prose: ['eligibility'] },
-  market_comps: { figures: ['budget'], prose: ['result'] },
-  cautionary_comps: { figures: ['budget'], prose: ['what_went_wrong'] },
+  market_comps: { figures: ['budget'], prose: ['result', 'match'] },
+  cautionary_comps: { figures: ['budget'], prose: ['what_went_wrong', 'match'] },
   festival_calendar: { figures: ['deadline'], prose: ['fit'] },
   lab_and_market_opportunities: { figures: [], prose: ['fit'] },
   distribution_platforms: { figures: [], prose: ['reason'] },
   sales_agents: { figures: [], prose: ['focus', 'why'] }
 };
+
+// Lists whose items may carry a `rule_quote` (checked by checkQuote).
+const QUOTED = ['financial_sources', 'festival_calendar', 'lab_and_market_opportunities'];
 
 const FETCH_TIMEOUT_MS = 6000;
 const MAX_PAGE_BYTES = 2 * 1024 * 1024;
@@ -172,6 +175,47 @@ function markIfClosed(item, field, today) {
   if (last !== null && last < Date.parse(today + 'T00:00:00Z')) { item.closed = true; item[field] = 'Closed (' + item[field] + ')'; }
 }
 
+// A rule quoted to the reader (premiere requirement, who can apply) is
+// shown only if it is on the source page word for word: a paraphrase of
+// an eligibility rule is how a first-time filmmaker loses a premiere or
+// applies to a fund they cannot get (fact-check of 2026-10-22). Case,
+// spacing, curly quotes, dashes and HTML entities are ignored, nothing else.
+const ENTITIES = { amp: '&', quot: '"', apos: "'", lt: '<', gt: '>', nbsp: ' ', rsquo: "'", lsquo: "'", rdquo: '"', ldquo: '"', ndash: '-', mdash: '-', hellip: '...', laquo: '"', raquo: '"' };
+function plainText(s) {
+  return String(s == null ? '' : s)
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&#x([0-9a-f]+);/gi, (m, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (m, d) => String.fromCodePoint(+d))
+    .replace(/&([a-z]+);/gi, (m, n) => ENTITIES[n.toLowerCase()] || m);
+}
+function quoteKey(s) {
+  return plainText(s)
+    .replace(/[‘’‚′`]/g, "'")
+    .replace(/[“”„«»″]/g, '"')
+    .replace(/[‐-―−]/g, '-')
+    .replace(/…/g, '...')
+    .replace(/\s+/g, ' ')
+    .toLowerCase()
+    .trim();
+}
+function cleanQuote(q) {
+  return quoteKey(q).replace(/^["']+|["']+$/g, '').replace(/^(\.\.\.)\s*|\s*(\.\.\.)$/g, '').replace(/[.;:,]$/, '').trim();
+}
+function quoteOnPage(quote, html) {
+  if (typeof quote !== 'string' || !html) return false;
+  const q = cleanQuote(quote);
+  if (q.length < 15 || q.length > 400) return false;
+  return quoteKey(html).includes(q);
+}
+async function checkQuote(item, pages) {
+  if (item.rule_quote == null) return;
+  const html = isAggregator(item.source) ? null : await pages(item.source);
+  if (!quoteOnPage(item.rule_quote, html)) item.rule_quote = null;
+  else item.rule_quote = String(item.rule_quote).trim().replace(/^["“]+|["”]+$/g, '');
+}
+
 // Model citation markup that sometimes leaks into JSON strings.
 function stripMarkup(value) {
   if (typeof value === 'string') return value.replace(/<\/?cite\b[^>]*>/gi, '').replace(/\(?cite index="[^"]*">?/gi, '').replace(/\s{2,}/g, ' ').trim();
@@ -229,6 +273,8 @@ async function groundReport(report, searchUrlsByField, today, fetcher) {
       checks.push(checkFigures(out, LISTS[field], pages).then(() => {
         stats.figuresCleared += before - figs.filter(f => out[f] != null).length;
       }));
+      if (QUOTED.includes(field)) checks.push(checkQuote(out, pages));
+      else delete out.rule_quote;
     });
     report[field] = kept;
     stats.kept += kept.length;
@@ -276,8 +322,10 @@ async function groundOne(obj, set, prose, today, fetcher) {
   stripMarkup(obj);
   const out = Object.assign({}, obj, { source: obj.source_url, url: obj.source_url, checked: today });
   delete out.source_url;
-  await checkFigures(out, { figures: [], prose }, fetcher || fetchPage);
+  const pages = fetcher || fetchPage;
+  await checkFigures(out, { figures: [], prose }, pages);
+  await checkQuote(out, pages);
   return out;
 }
 
-module.exports = { groundReport, groundOne, keepSupportedSentences, keepFactualSentences, factualNumbers, lastDateIn, isAggregator, stripMarkup, normalizeUrl, isSourced, sourcedSet, numbersOnPage, pageNumbers, numbersIn, LISTS };
+module.exports = { groundReport, groundOne, quoteOnPage, quoteKey, keepSupportedSentences, keepFactualSentences, factualNumbers, lastDateIn, isAggregator, stripMarkup, normalizeUrl, isSourced, sourcedSet, numbersOnPage, pageNumbers, numbersIn, LISTS };

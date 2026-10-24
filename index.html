@@ -877,6 +877,8 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .entry-text { margin-top: 10px; font-size: 14.5px; line-height: 1.6; color: var(--muted); }
 .entry-lesson { margin-top: 10px; font-size: 14.5px; line-height: 1.6; color: var(--text); padding-left: 12px; border-left: 1px solid #b4552b; }
 .entry-sub { margin-top: 4px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.entry-quote { margin: 12px 0 0; }
+.entry-quote blockquote { margin-top: 4px; font-size: 15px; line-height: 1.55; font-style: italic; color: var(--text); }
 .the-ask { margin: 24px 0 8px; display: flex; flex-direction: column; gap: 6px; font-size: 17px; font-weight: 700; line-height: 1.45; color: var(--text); max-width: 62ch; }
 .bp-row { margin-top: 24px; }
 .bp-row .sub-k { margin-top: 0; }
@@ -2357,7 +2359,7 @@ function buildActionPlanBody(r) {
     var fc = '';
     r.festival_calendar.forEach(function(f){
       if (!f) return;
-      var dl = f.source ? notStated(f.deadline, 'See the official page') : f.deadline;
+      var dl = f.source ? notStated(f.deadline, 'Not published on the source, check before planning') : f.deadline;
       fc += entry(f.festival, f.tier ? 'Tier '+f.tier : null, fact('Deadline', dl, isClosed(dl) || !f.deadline), f.fit, f);
     });
     blocks += rblock('Festival calendar', r.festival_calendar.length, fc);
@@ -2579,11 +2581,18 @@ function fact(label, value, muted) {
   if (value == null || value === '') return '';
   return '<div class="fact"><span class="fact-k">'+label+'</span><span class="fact-v'+(muted ? ' is-muted' : '')+'">'+esc(value)+'</span></div>';
 }
+/* A rule quoted from the official page. The server shows it only when the
+   sentence is on that page word for word (grounding.js, checkQuote). */
+function ruleQuote(item) {
+  if (!item || !item.source || !item.rule_quote) return '';
+  return '<figure class="entry-quote"><figcaption class="fact-k">The rule, word for word</figcaption><blockquote>\u201C'+esc(item.rule_quote)+'\u201D</blockquote></figure>';
+}
 function entry(name, chip, facts, text, item, extraText, subline) {
   return '<div class="entry">'+
     '<div class="entry-head"><span class="entry-name">'+esc(name)+'</span>'+(chip ? '<span class="entry-chip">'+esc(chip)+'</span>' : '')+'</div>'+
     (subline ? '<div class="entry-sub">'+esc(subline)+'</div>' : '')+
     (facts ? '<div class="entry-facts">'+facts+'</div>' : '')+
+    ruleQuote(item)+
     (text ? '<div class="entry-text">'+esc(text)+'</div>' : '')+
     (extraText ? '<div class="entry-lesson">'+esc(extraText)+'</div>' : '')+
     linkOrSource(item)+
@@ -2596,7 +2605,7 @@ function buildFundingSources(sources) {
   var h = '';
   sources.forEach(function(f){
     if (!f) return;
-    var dl = f.source ? notStated(f.deadline, 'See the official page') : f.deadline;
+    var dl = f.source ? notStated(f.deadline, 'Not published on the source, check before planning') : f.deadline;
     h += entry(f.name, f.type, fact('Amount', f.amount) + fact('Deadline', dl, isClosed(dl) || !f.deadline), f.eligibility, f);
   });
   return rblock('Funding sources', sources.length, h);
@@ -2658,7 +2667,7 @@ function buildComparables(comps) {
   if (!comps || !comps.length) return '';
   var h = '';
   comps.forEach(function(c){
-    if (c) h += entry(c.title + (c.year ? ' ('+c.year+')' : ''), null, fact('Budget', c.budget), c.result, c, c.lesson);
+    if (c) h += entry(c.title + (c.year ? ' ('+c.year+')' : ''), null, fact('Budget', c.budget), c.result, c, c.lesson, c.match ? 'In common: '+c.match : null);
   });
   return rblock('Comparable films', comps.length, h);
 }
@@ -2674,7 +2683,7 @@ function buildCautionaryComps(comps) {
   if (!comps || !comps.length) return '';
   var h = '';
   comps.forEach(function(c){
-    if (c) h += entry(c.title + (c.year ? ' ('+c.year+')' : ''), null, fact('Budget', c.budget), c.what_went_wrong, c, c.lesson);
+    if (c) h += entry(c.title + (c.year ? ' ('+c.year+')' : ''), null, fact('Budget', c.budget), c.what_went_wrong, c, c.lesson, c.match ? 'In common: '+c.match : null);
   });
   return rblock('Cautionary films', comps.length, h, false);
 }
@@ -2809,14 +2818,44 @@ function loadJsPDF() {
   return jsPDFLoadPromise;
 }
 
+/* Carlito for the PDF too, so the download matches the site. jsPDF reads
+   only TrueType, so /fonts has a Latin subset of Carlito as .ttf (OFL 1.1,
+   name table kept). If the font can't load the PDF falls back to Helvetica. */
+var pdfFontsPromise = null;
+function loadPdfFonts() {
+  if (pdfFontsPromise) return pdfFontsPromise;
+  pdfFontsPromise = Promise.all(['400', '700'].map(function(w) {
+    return fetch('/fonts/carlito-'+w+'-pdf.ttf').then(function(r) {
+      if (!r.ok) throw new Error('font');
+      return r.arrayBuffer();
+    }).then(function(buf) {
+      var bytes = new Uint8Array(buf), bin = '', i;
+      for (i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+      return btoa(bin);
+    });
+  })).catch(function() { pdfFontsPromise = null; return null; });
+  return pdfFontsPromise;
+}
+async function newPdfDoc() {
+  var fonts = await loadPdfFonts();
+  var doc = new window.jspdf.jsPDF();
+  doc.pdfFont = 'helvetica';
+  if (fonts) {
+    doc.addFileToVFS('Carlito-400.ttf', fonts[0]); doc.addFont('Carlito-400.ttf', 'Carlito', 'normal');
+    doc.addFileToVFS('Carlito-700.ttf', fonts[1]); doc.addFont('Carlito-700.ttf', 'Carlito', 'bold');
+    doc.pdfFont = 'Carlito';
+  }
+  return doc;
+}
+
 async function savePDF() {
   if (!lastResult||!lastProject) { alert('No report to save yet.'); return; }
   try {
     await loadJsPDF();
-    var doc = new jspdf.jsPDF();
+    var doc = await newPdfDoc();
     var y=22, margin=22, maxW=doc.internal.pageSize.getWidth()-margin*2;
     function ln(txt,sz,bold,r,g,b) {
-      doc.setFontSize(sz||11); doc.setFont('helvetica',bold?'bold':'normal');
+      doc.setFontSize(sz||11); doc.setFont(doc.pdfFont,bold?'bold':'normal');
       doc.setTextColor(r!==undefined?r:26, g!==undefined?g:25, b!==undefined?b:22);
       doc.splitTextToSize(String(txt||''),maxW).forEach(function(l){ if(y>272){doc.addPage();y=22;} doc.text(l,margin,y); y+=(sz||11)*0.52; }); y+=2;
     }
@@ -2876,7 +2915,8 @@ async function savePDF() {
       lastResult.financial_sources.forEach(function(f){
         if (!f) return;
         ln((f.name||'')+' ('+(f.type||'')+')'+(f.amount?' — '+f.amount:''),10,true);
-        ln('Deadline: '+notStated(f.deadline, f.source ? 'see the official page' : '')+' · '+(f.eligibility||''),9,false,122,118,112);
+        ln('Deadline: '+notStated(f.deadline, f.source ? 'not published on the source, check before planning' : '')+' · '+(f.eligibility||''),9,false,122,118,112);
+        if (f.source && f.rule_quote) ln('The rule, word for word: \u201C'+f.rule_quote+'\u201D',9,false,26,25,22);
         if (f.source) ln(pdfSource(f),8,false,150,148,145);
         y+=1;
       });
@@ -2975,6 +3015,7 @@ async function savePDF() {
       lastResult.market_comps.forEach(function(c){
         if (!c) return;
         ln((c.title||'')+(c.year?' ('+c.year+')':'')+(c.budget?' — Budget: '+c.budget:'')+(c.result?' — '+c.result:''),10,true);
+        if (c.match) ln('In common: '+c.match,9,false,122,118,112);
         ln(c.lesson||'',9,false,122,118,112);
         if (c.source) ln(pdfSource(c),8,false,150,148,145);
         y+=1;
@@ -2998,8 +3039,9 @@ async function savePDF() {
       ln('FESTIVAL CALENDAR',10,true);
       lastResult.festival_calendar.forEach(function(f){
         if (!f) return;
-        ln((f.festival||'')+' (Tier '+(f.tier||'')+') — '+(f.source ? 'Deadline: '+notStated(f.deadline, 'see the official page') : (f.deadline||'')),10,true);
+        ln((f.festival||'')+' (Tier '+(f.tier||'')+') — '+(f.source ? 'Deadline: '+notStated(f.deadline, 'not published on the source, check before planning') : (f.deadline||'')),10,true);
         ln(f.fit||'',9,false,122,118,112);
+        if (f.source && f.rule_quote) ln('The rule, word for word: \u201C'+f.rule_quote+'\u201D',9,false,26,25,22);
         if (f.source) ln(pdfSource(f),8,false,150,148,145);
         y+=1;
       });
@@ -3012,6 +3054,7 @@ async function savePDF() {
         if (!l) return;
         ln(l.name||'',10,true);
         ln(l.fit||'',9,false,122,118,112);
+        if (l.source && l.rule_quote) ln('The rule, word for word: \u201C'+l.rule_quote+'\u201D',9,false,26,25,22);
         if (l.source) ln(pdfSource(l),8,false,150,148,145);
         y+=1;
       });
@@ -3101,10 +3144,10 @@ async function saveOneSheet() {
   if (!lastResult||!lastProject) { alert('No report to save yet.'); return; }
   try {
     await loadJsPDF();
-    var doc = new jspdf.jsPDF();
+    var doc = await newPdfDoc();
     var y=24, margin=24, maxW=doc.internal.pageSize.getWidth()-margin*2;
     function ln(txt,sz,bold,r,g,b) {
-      doc.setFontSize(sz||11); doc.setFont('helvetica',bold?'bold':'normal');
+      doc.setFontSize(sz||11); doc.setFont(doc.pdfFont,bold?'bold':'normal');
       doc.setTextColor(r!==undefined?r:26, g!==undefined?g:25, b!==undefined?b:22);
       doc.splitTextToSize(String(txt||''),maxW).forEach(function(l){ if(y>272){doc.addPage();y=24;} doc.text(l,margin,y); y+=(sz||11)*0.5; }); y+=2;
     }
