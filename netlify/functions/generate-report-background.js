@@ -61,7 +61,7 @@ exports.handler = async (event) => {
   const result = await generateAndDeliverFullReport({
     store, key: id, project, email, anthropicKey, resendKey,
     fromEmail: process.env.REPORT_FROM_EMAIL || 'OneCiak <onboarding@resend.dev>',
-    subjectPrefix: 'Your OneCiak Full Report —',
+    subjectPrefix: 'Your OneCiak full report:',
     viewUrl
   });
 

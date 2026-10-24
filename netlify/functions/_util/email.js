@@ -84,7 +84,7 @@ function stated(v, item) {
 function fundingSourcesHtml(sources) {
   if (!sources || !sources.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Funding Sources</span>';
-  sources.forEach(f => { if (!f) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.name) + '</b> (' + esc(f.type) + ')' + (f.amount ? ' — ' + esc(f.amount) : '') + '<br><span style="font-size:12px;color:#5c5852">Deadline: ' + esc(stated(f.deadline, f)) + ' · ' + esc(f.eligibility) + '</span>' + sourceHtml(f) + '</p>'; });
+  sources.forEach(f => { if (!f) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.name) + '</b> (' + esc(f.type) + ')' + (f.amount ? ' · ' + esc(f.amount) : '') + '<br><span style="font-size:12px;color:#5c5852">Deadline: ' + esc(stated(f.deadline, f)) + ' · ' + esc(f.eligibility) + '</span>' + sourceHtml(f) + '</p>'; });
   h += '</div>';
   return h;
 }
@@ -92,7 +92,7 @@ function fundingSourcesHtml(sources) {
 function comparablesHtml(comps) {
   if (!comps || !comps.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Comparable Films</span>';
-  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b>' + (c.year ? ' (' + esc(c.year) + ')' : '') + (c.budget ? ' — Budget: ' + esc(c.budget) : '') + (c.result ? ' — ' + esc(c.result) : '') + (c.match ? '<br><span style="font-size:12px;color:#5c5852">In common: ' + esc(c.match) + '</span>' : '') + '<br><span style="font-size:12px;color:#5c5852">' + esc(c.lesson) + '</span>' + sourceHtml(c) + '</p>'; });
+  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b>' + (c.year ? ' (' + esc(c.year) + ')' : '') + (c.budget ? ' · Budget: ' + esc(c.budget) : '') + (c.result ? '. ' + esc(c.result) : '') + (c.match ? '<br><span style="font-size:12px;color:#5c5852">In common: ' + esc(c.match) + '</span>' : '') + '<br><span style="font-size:12px;color:#5c5852">' + esc(c.lesson) + '</span>' + sourceHtml(c) + '</p>'; });
   h += '</div>';
   return h;
 }
@@ -113,7 +113,7 @@ function pitchAssessmentHtml(pa) {
       '<p style="margin:6px 0 12px;font-size:13px;color:#161616;font-style:italic;line-height:1.6">"' + esc(pa.thirty_second_pitch) + '"</p>';
   }
   if (pa.logline_improved) {
-    h += '<span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Logline Assessment' + (pa.logline_score ? ' — ' + esc(pa.logline_score) + '/10' : '') + '</span>';
+    h += '<span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Logline Assessment' + (pa.logline_score ? ' · ' + esc(pa.logline_score) + '/10' : '') + '</span>';
     if (pa.logline_issues) h += '<p style="margin:6px 0 0;font-size:13px;color:#5c5852;line-height:1.6">' + esc(pa.logline_issues) + '</p>';
     h += '<p style="margin:4px 0 12px;font-size:13px;color:#0f7a3d;font-weight:700;line-height:1.6">Improved: ' + esc(pa.logline_improved) + '</p>';
   }
@@ -177,7 +177,7 @@ function talentAndTaxHtml(talentLeverage, taxIncentive) {
       '<p style="margin:6px 0 12px;font-size:13px;color:#161616;line-height:1.6">' + esc(talentLeverage) + '</p>';
   }
   if (taxIncentive && (taxIncentive.estimate || taxIncentive.note)) {
-    h += '<span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Tax Incentive' + (taxIncentive.region ? ' — ' + esc(taxIncentive.region) : '') + '</span>' +
+    h += '<span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Tax Incentive' + (taxIncentive.region ? ': ' + esc(taxIncentive.region) : '') + '</span>' +
       (taxIncentive.estimate ? '<p style="margin:6px 0 0;font-size:13px;font-weight:700;color:#0f7a3d">' + esc(taxIncentive.estimate) + '</p>' : '') +
       (taxIncentive.note ? '<p style="margin:2px 0 0;font-size:12px;color:#5c5852">' + esc(taxIncentive.note) + sourceHtml(taxIncentive) + '</p>' : '');
   }
@@ -214,7 +214,7 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
 
   if (r.festival_calendar && r.festival_calendar.length) {
     let fc = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Festival Calendar</span>';
-    r.festival_calendar.forEach(f => { if (!f) return; fc += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.festival) + '</b> (Tier ' + esc(f.tier) + ') — ' + esc(f.source ? 'Deadline: ' + stated(f.deadline, f) : f.deadline) + '<br><span style="font-size:12px;color:#5c5852">' + esc(f.fit) + '</span>' + sourceHtml(f) + '</p>'; });
+    r.festival_calendar.forEach(f => { if (!f) return; fc += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.festival) + '</b> (Tier ' + esc(f.tier) + ') · ' + esc(f.source ? 'Deadline: ' + stated(f.deadline, f) : f.deadline) + '<br><span style="font-size:12px;color:#5c5852">' + esc(f.fit) + '</span>' + sourceHtml(f) + '</p>'; });
     fc += '</td></tr>';
     body += fc;
   }

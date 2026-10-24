@@ -1076,6 +1076,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   <nav class="l-nav" id="landingNav">
     <div class="l-logo" onclick="goLanding()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')goLanding()"><svg width="18" height="18" viewBox="0 0 124 124" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><path d="M6 0L117 0A6 6 0 0 1 123 6L123 19Q123 25 117.11 26.15L5.89 47.85Q0 49 0 43L0 6A6 6 0 0 1 6 0Z" fill="#000"/><rect x="0" y="62" width="123" height="62" rx="6" fill="#000"/></svg>OneCiak</div>
     <div class="l-nav-right">
+      <a href="/roadmap/" class="l-nav-link">Film roadmap</a>
       <a href="#" class="l-nav-reports" onclick="openMyReports();return false">My Reports</a>
       <button class="hamburger" id="hamburgerBtn" onclick="openMenu()" aria-label="Open menu" aria-expanded="false" aria-controls="menuOverlay"><span></span><span></span><span></span></button>
     </div>
@@ -1357,29 +1358,29 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
     <details class="guide-box reveal">
       <summary>New to this? How to read your report</summary>
       <div class="guide-box-body">
-        <p>The <strong>OneCiak Score</strong> is a rough overall signal, not a verdict — a high score doesn't guarantee success, and a low one doesn't mean give up. It's a starting point for asking better questions.</p>
-        <p>Each of the 5 dimensions below has its own score, a one-line <strong>verdict</strong>, <strong>red flags</strong> (real risks worth addressing), and <strong>strengths</strong> (what's already working). Read the flags first — they're the most actionable part.</p>
+        <p>The <strong>OneCiak Score</strong> is a rough overall signal, not a verdict: a high score doesn't guarantee success, and a low one doesn't mean give up. It's a starting point for asking better questions.</p>
+        <p>Each of the 5 dimensions below has its own score, a one-line <strong>verdict</strong>, <strong>red flags</strong> (real risks worth addressing), and <strong>strengths</strong> (what's already working). Read the flags first: they're the most actionable part.</p>
         <p><strong>Tips</strong> are concrete next actions, often with real links to funds, festivals, or companies to actually contact.</p>
-        <p>First film ever? In the full report, start with the <strong>Roadmap</strong> near the end — it's a step-by-step sequence, not just a list of separate ideas.</p>
+        <p>First film ever? Under the scores, <strong>Your stage</strong> links to the <a href="/roadmap/">film roadmap</a>: every job from script to release, stage by stage. In the full report, the <strong>Roadmap</strong> in the action plan turns it into steps for your project.</p>
         <p>Don't recognize a term like "sales agent" or "tax incentive"? Check the glossary below.</p>
       </div>
     </details>
 
     <details class="guide-box reveal">
-      <summary>Glossary — key terms explained</summary>
+      <summary>Glossary: key terms explained</summary>
       <div class="guide-box-body">
         <dl>
           <dt>Sales agent</dt><dd>A company that sells your finished film to distributors and streaming platforms in different countries, usually for a percentage of the deal.</dd>
           <dt>Tax incentive / rebate</dt><dd>Money a government or region gives back to productions that film there, usually a percentage of what you spent locally.</dd>
-          <dt>E&amp;O insurance</dt><dd>Insurance that protects you from lawsuits over your film's content (rights, defamation, etc.) — most distributors require it before buying a film.</dd>
-          <dt>Attachment</dt><dd>A known director, actor, or crew member who has committed to your project — attachments make financing and festival acceptance easier.</dd>
+          <dt>E&amp;O insurance</dt><dd>Insurance that protects you from lawsuits over your film's content (rights, defamation, etc.). Most distributors require it before buying a film.</dd>
+          <dt>Attachment</dt><dd>A known director, actor, or crew member who has committed to your project. Attachments make financing and festival acceptance easier.</dd>
           <dt>Comp / comparable film</dt><dd>A similar existing film used to judge whether yours has a realistic market, based on its budget and how it performed.</dd>
-          <dt>Festival tier (A/B/C)</dt><dd>A rough ranking of prestige — Tier A (Cannes, Sundance, Berlinale) opens the most doors; Tier B and C still help, reaching smaller audiences.</dd>
+          <dt>Festival tier (A/B/C)</dt><dd>A rough ranking of prestige. Tier A (Cannes, Sundance, Berlinale) opens the most doors; Tier B and C still help, reaching smaller audiences.</dd>
           <dt>Lab / market</dt><dd>A program where you pitch your project to industry professionals and potential financiers before it's fully made.</dd>
           <dt>SVOD / AVOD / VOD</dt><dd>SVOD = subscription streaming (e.g. Netflix). AVOD = free, ad-supported streaming. VOD = pay-per-view rental or purchase.</dd>
-          <dt>Self-distribution</dt><dd>Releasing and marketing your film yourself instead of selling it to a distributor — more work, but you keep all the revenue.</dd>
+          <dt>Self-distribution</dt><dd>Releasing and marketing your film yourself instead of selling it to a distributor: more work, but you keep all the revenue.</dd>
           <dt>Qualifying run</dt><dd>A festival screening or theatrical release that satisfies the eligibility rules for major awards like the Oscars.</dd>
-          <dt>Breakeven</dt><dd>The point where your film's revenue equals what it cost to make — after that, it's actually making money.</dd>
+          <dt>Breakeven</dt><dd>The point where your film's revenue equals what it cost to make. After that, it's actually making money.</dd>
           <dt>Pitch deck</dt><dd>A short visual document, like a slideshow, used to present your film to investors or financiers.</dd>
         </dl>
       </div>
@@ -1392,7 +1393,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
       <details>
         <summary>Found an outdated link or a mistake in this report? Let us know</summary>
         <div class="guide-box-body">
-          <p style="margin-top:0">We automatically check that every link in this report works before sending it — but if something still slipped through (a dead link, a festival date that's already passed, anything else), telling us helps us fix it fast.</p>
+          <p style="margin-top:0">We automatically check that every link in this report works before sending it, but if something still slipped through (a dead link, a festival date that's already passed, anything else), telling us helps us fix it fast.</p>
           <select id="reportIssueCategory" style="width:100%;margin-bottom:8px;padding:8px">
             <option value="A link doesn't work">A link doesn't work</option>
             <option value="A date or deadline is wrong">A date or deadline is wrong</option>
@@ -1748,7 +1749,7 @@ async function submitReportIssue() {
     });
     var data = await res.json().catch(function () { return {}; });
     if (!res.ok) throw new Error((data && data.error) || 'Could not send your report right now.');
-    statusEl.textContent = 'Thanks — we\'ll look into it.';
+    statusEl.textContent = 'Thanks, we\'ll look into it.';
     statusEl.style.color = '#0f7a3d';
     document.getElementById('reportIssueMessage').value = '';
     btn.disabled = false;
@@ -1811,7 +1812,7 @@ async function requestLogin() {
     });
     var data = await res.json().catch(function () { return {}; });
     if (!res.ok) throw new Error((data && data.error) || 'Could not send the sign-in link right now.');
-    status.textContent = 'Check your inbox — we\'ve sent a sign-in link to ' + email + '.';
+    status.textContent = 'Check your inbox: we\'ve sent a sign-in link to ' + email + '.';
     status.style.color = '#0f7a3d';
   } catch (e) {
     status.textContent = e.message || 'Could not send the sign-in link right now. Please try again later.';
@@ -1959,7 +1960,7 @@ function startFullReportTimer() {
   // languages. Only the clock (plain digits, nothing to translate) changes
   // every second; the label text node is only touched when it actually
   // changes (twice total over a full wait), so translation only reruns then.
-  el.innerHTML = '<span class="loading-timer-dot"></span><span id="loadingTimerClock">0:00</span> elapsed — <span id="loadingTimerLabel">Just started</span>';
+  el.innerHTML = '<span class="loading-timer-dot"></span><span id="loadingTimerClock">0:00</span> elapsed · <span id="loadingTimerLabel">Just started</span>';
   var clockEl = document.getElementById('loadingTimerClock');
   var labelEl = document.getElementById('loadingTimerLabel');
   var startedAt = Date.now();
@@ -1968,7 +1969,7 @@ function startFullReportTimer() {
     var secs = Math.floor((Date.now() - startedAt) / 1000);
     var m = Math.floor(secs / 60), s = secs % 60;
     if (clockEl) clockEl.textContent = m + ':' + (s < 10 ? '0' : '') + s;
-    var label = secs < 20 ? 'Just started' : secs < 90 ? 'This can take a few minutes for a deeply detailed report' : 'Still working — perfectly normal, feel free to close this page and check your email instead';
+    var label = secs < 20 ? 'Just started' : secs < 90 ? 'This can take a few minutes for a deeply detailed report' : 'Still working, perfectly normal. Feel free to close this page and check your email instead';
     if (label !== lastLabel) {
       if (labelEl) labelEl.textContent = label;
       lastLabel = label;
@@ -2033,7 +2034,7 @@ async function generateFullReport() {
   document.getElementById('sampleBanner').style.display = 'none';
   document.getElementById('loadingRetryBtn').style.display = 'none';
   document.getElementById('loadingTitle').textContent = 'Building your full report…';
-  document.getElementById('loadingDesc').textContent = 'Preparing a deeply detailed analysis — this can take a few minutes. Feel free to close this page: we\'ll email your full report the moment it\'s ready, and you can always come back here to view it.';
+  document.getElementById('loadingDesc').textContent = 'Preparing a deeply detailed analysis. This can take a few minutes. Feel free to close this page: we\'ll email your full report the moment it\'s ready, and you can always come back here to view it.';
   showOnly('sec-loading');
   startFullReportTimer();
   startLoadingDims([15, 45, 100, 180]);
@@ -2048,7 +2049,7 @@ async function generateFullReport() {
       stopFullReportTimer();
       resetLoadingDims();
       document.getElementById('loadingTitle').textContent = 'Something went wrong';
-      document.getElementById('loadingDesc').textContent = 'We couldn\'t finish generating your report. Please start a new analysis and double-check your email address — if this keeps happening, contact info@oneciak.com.';
+      document.getElementById('loadingDesc').textContent = 'We couldn\'t finish generating your report. Please start a new analysis and double-check your email address. If this keeps happening, contact info@oneciak.com.';
       document.getElementById('loadingRetryBtn').style.display = 'none';
       return;
     }
@@ -2060,7 +2061,7 @@ async function generateFullReport() {
         // again would just return the same incomplete data, so retrying
         // client-side can't help. A fresh report is the only real fix.
         document.getElementById('loadingTitle').textContent = 'Something went wrong';
-        document.getElementById('loadingDesc').textContent = 'Your report came back incomplete. Please start a new analysis — if this keeps happening, contact info@oneciak.com.';
+        document.getElementById('loadingDesc').textContent = 'Your report came back incomplete. Please start a new analysis. If this keeps happening, contact info@oneciak.com.';
         document.getElementById('loadingRetryBtn').style.display = 'none';
         return;
       }
@@ -2081,7 +2082,7 @@ async function generateFullReport() {
   if (myGenId !== fullReportGenerationId) return;
   stopFullReportTimer();
   document.getElementById('loadingTitle').textContent = 'Almost there';
-  document.getElementById('loadingDesc').textContent = 'Your report is taking a bit longer than usual to prepare. It\'s still being generated — we\'ll email it to you as soon as it\'s ready. Tap below to keep checking, or just close this page and check your inbox in a few minutes.';
+  document.getElementById('loadingDesc').textContent = 'Your report is taking a bit longer than usual to prepare. It\'s still being generated: we\'ll email it to you as soon as it\'s ready. Tap below to keep checking, or just close this page and check your inbox in a few minutes.';
   document.getElementById('loadingRetryBtn').style.display = 'inline-flex';
 }
 
@@ -2159,7 +2160,7 @@ function renderFree(r, title) {
       if (sec.flag) ph += '<div class="flag-item red" style="margin-bottom:6px">'+esc(sec.flag)+'</div>';
       if (sec.strength) ph += '<div class="flag-item green">'+esc(sec.strength)+'</div>';
       body += '<div class="preview-blur-wrap"><div class="preview-blur-content">'+ph+'</div>'+
-        '<div class="preview-blur-overlay"><span class="preview-blur-label">Get Full Report — Free</span></div></div>';
+        '<div class="preview-blur-overlay"><span class="preview-blur-label">Get the full report, free</span></div></div>';
     }
 
     html +=
@@ -2790,7 +2791,7 @@ async function startFreeFullReport(email) {
   try {
     showOnly('sec-loading');
     document.getElementById('loadingTitle').textContent = 'Starting your full report…';
-    document.getElementById('loadingDesc').textContent = 'This can take a few minutes to generate. Feel free to close this page any time — we\'ll email it to "'+email+'" the moment it\'s ready.';
+    document.getElementById('loadingDesc').textContent = 'This can take a few minutes to generate. Feel free to close this page any time: we\'ll email it to "'+email+'" the moment it\'s ready.';
     startLoadingDims([3, 6, 9, 13]);
     var res = await fetch('/.netlify/functions/start-full-report', {
       method: 'POST',
@@ -2878,11 +2879,11 @@ async function savePDF() {
     }
     function hr() { y+=3; doc.setDrawColor(226,224,219); doc.line(margin,y,doc.internal.pageSize.getWidth()-margin,y); y+=7; }
 
-    ln('ONECIAK — Film Market Intelligence',10,true,122,118,112);
+    ln('OneCiak · Film Market Intelligence',10,true,122,118,112);
     ln('"'+lastProject.title+'"',18);
     ln(lastResult.overall_summary||'',10,false,122,118,112);
     y+=2;
-    ln('OneCiak Score: '+Number(lastResult.overall_score||0).toFixed(1)+'/10 — '+(lastResult.overall_label||''),12,true);
+    ln('OneCiak Score: '+Number(lastResult.overall_score||0).toFixed(1)+'/10 · '+(lastResult.overall_label||''),12,true);
     hr();
 
     if (isFullReport && lastResult.executive_summary) {
@@ -2902,7 +2903,7 @@ async function savePDF() {
       {k:'distribution',l:'DISTRIBUTION & REVENUE'}
     ];
     dims.forEach(function(d){
-      ln(d.l+' — '+(lastResult[d.k+'_score']||'')+'/10',10,true);
+      ln(d.l+' · '+(lastResult[d.k+'_score']||'')+'/10',10,true);
       ln(lastResult[d.k+'_verdict']||'',11,true,50,50,50);
       ln(lastResult[d.k+'_detail']||'',10,false,122,118,112);
       if (isFullReport) {
@@ -2931,7 +2932,7 @@ async function savePDF() {
       ln('FUNDING SOURCES',10,true);
       lastResult.financial_sources.forEach(function(f){
         if (!f) return;
-        ln((f.name||'')+' ('+(f.type||'')+')'+(f.amount?' — '+f.amount:''),10,true);
+        ln((f.name||'')+' ('+(f.type||'')+')'+(f.amount?' · '+f.amount:''),10,true);
         ln('Deadline: '+notStated(f.deadline, f.source ? 'not published on the source, check before planning' : '')+' · '+(f.eligibility||''),9,false,122,118,112);
         if (f.source && f.rule_quote) ln('The rule, word for word: \u201C'+f.rule_quote+'\u201D',9,false,26,25,22);
         if (f.source) ln(pdfSource(f),8,false,150,148,145);
@@ -2944,7 +2945,7 @@ async function savePDF() {
       ln('TALENT LEVERAGE & TAX INCENTIVE',10,true);
       if (lastResult.talent_leverage) ln(lastResult.talent_leverage,10,false,122,118,112);
       if (lastResult.tax_incentive && (lastResult.tax_incentive.estimate || lastResult.tax_incentive.note)) {
-        ln('Tax Incentive'+(lastResult.tax_incentive.region?' — '+lastResult.tax_incentive.region:'')+(lastResult.tax_incentive.estimate?': '+lastResult.tax_incentive.estimate:''),10,true,22,101,52);
+        ln('Tax Incentive'+(lastResult.tax_incentive.region?': '+lastResult.tax_incentive.region:'')+(lastResult.tax_incentive.estimate?': '+lastResult.tax_incentive.estimate:''),10,true,22,101,52);
         if (lastResult.tax_incentive.note) ln(lastResult.tax_incentive.note,9,false,122,118,112);
         if (lastResult.tax_incentive.source) ln(pdfSource(lastResult.tax_incentive),8,false,150,148,145);
       }
@@ -2962,7 +2963,7 @@ async function savePDF() {
       ln('PITCH ASSESSMENT',10,true);
       if (pa.thirty_second_pitch) { ln('30-Second Pitch:',9,true); ln('"'+pa.thirty_second_pitch+'"',9,false,122,118,112); }
       if (pa.logline_improved) {
-        ln('Logline Assessment'+(pa.logline_score?' — '+pa.logline_score+'/10':''),9,true);
+        ln('Logline Assessment'+(pa.logline_score?' · '+pa.logline_score+'/10':''),9,true);
         if (pa.logline_issues) ln(pa.logline_issues,9,false,122,118,112);
         ln('Improved: '+pa.logline_improved,9,true,22,101,52);
       }
@@ -3031,7 +3032,7 @@ async function savePDF() {
       ln('COMPARABLE FILMS',10,true);
       lastResult.market_comps.forEach(function(c){
         if (!c) return;
-        ln((c.title||'')+(c.year?' ('+c.year+')':'')+(c.budget?' — Budget: '+c.budget:'')+(c.result?' — '+c.result:''),10,true);
+        ln((c.title||'')+(c.year?' ('+c.year+')':'')+(c.budget?' · Budget: '+c.budget:'')+(c.result?'. '+c.result:''),10,true);
         if (c.match) ln('In common: '+c.match,9,false,122,118,112);
         ln(c.lesson||'',9,false,122,118,112);
         if (c.source) ln(pdfSource(c),8,false,150,148,145);
@@ -3044,7 +3045,7 @@ async function savePDF() {
       ln('CAUTIONARY COMPARABLES',10,true);
       lastResult.cautionary_comps.forEach(function(c){
         if (!c) return;
-        ln((c.title||'')+(c.year?' ('+c.year+')':'')+(c.budget?' — Budget: '+c.budget:'')+(c.what_went_wrong?' — '+c.what_went_wrong:''),10,true,185,28,28);
+        ln((c.title||'')+(c.year?' ('+c.year+')':'')+(c.budget?' · Budget: '+c.budget:'')+(c.what_went_wrong?'. '+c.what_went_wrong:''),10,true,185,28,28);
         ln(c.lesson||'',9,false,122,118,112);
         if (c.source) ln(pdfSource(c),8,false,150,148,145);
         y+=1;
@@ -3056,7 +3057,7 @@ async function savePDF() {
       ln('FESTIVAL CALENDAR',10,true);
       lastResult.festival_calendar.forEach(function(f){
         if (!f) return;
-        ln((f.festival||'')+' (Tier '+(f.tier||'')+') — '+(f.source ? 'Deadline: '+notStated(f.deadline, 'not published on the source, check before planning') : (f.deadline||'')),10,true);
+        ln((f.festival||'')+' (Tier '+(f.tier||'')+') · '+(f.source ? 'Deadline: '+notStated(f.deadline, 'not published on the source, check before planning') : (f.deadline||'')),10,true);
         ln(f.fit||'',9,false,122,118,112);
         if (f.source && f.rule_quote) ln('The rule, word for word: \u201C'+f.rule_quote+'\u201D',9,false,26,25,22);
         if (f.source) ln(pdfSource(f),8,false,150,148,145);
@@ -3143,7 +3144,7 @@ async function savePDF() {
       hr();
     }
 
-    ln('Report by OneCiak — oneciak.com',9,false,122,118,112);
+    ln('Report by OneCiak · oneciak.com',9,false,122,118,112);
     y+=4; hr();
     ln('LEGAL DISCLAIMER',9,true,122,118,112);
     ln('Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. OneCiak assumes no liability. Results are estimates and do not guarantee any outcome. OneCiak is not a licensed consulting firm.',8,false,150,148,145);
@@ -3170,9 +3171,9 @@ async function saveOneSheet() {
     }
     function hr() { y+=2; doc.setDrawColor(226,224,219); doc.line(margin,y,doc.internal.pageSize.getWidth()-margin,y); y+=6; }
 
-    ln('ONECIAK — ONE-SHEET SUMMARY',9,true,122,118,112);
+    ln('OneCiak · One-sheet summary',9,true,122,118,112);
     ln('"'+lastProject.title+'"',19,true);
-    ln('OneCiak Score: '+Number(lastResult.overall_score||0).toFixed(1)+'/10 — '+(lastResult.overall_label||''),12,true);
+    ln('OneCiak Score: '+Number(lastResult.overall_score||0).toFixed(1)+'/10 · '+(lastResult.overall_label||''),12,true);
     hr();
 
     ln((isFullReport && lastResult.executive_summary) ? lastResult.executive_summary : (lastResult.overall_summary||''),10,false,70,68,64);
@@ -3187,7 +3188,7 @@ async function saveOneSheet() {
     ].forEach(function(d){
       var score = lastResult[d.k+'_score'];
       if (score === undefined || score === null) return;
-      ln(Number(score).toFixed(1)+'/10 — '+d.l+': '+(lastResult[d.k+'_verdict']||''),10,false,50,50,50);
+      ln(Number(score).toFixed(1)+'/10 · '+d.l+': '+(lastResult[d.k+'_verdict']||''),10,false,50,50,50);
     });
     hr();
 
@@ -3204,7 +3205,7 @@ async function saveOneSheet() {
       hr();
     }
 
-    ln('This is a condensed summary. The complete report — red flags, strengths, funding sources, festival calendar, full roadmap — is available at oneciak.com.',8,false,150,148,145);
+    ln('This is a condensed summary. The complete report, with red flags, strengths, funding sources, festival calendar and full roadmap, is available at oneciak.com.',8,false,150,148,145);
     ln('Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. Results are estimates and do not guarantee any outcome.',8,false,150,148,145);
 
     doc.save('OneCiak-OneSheet-'+lastProject.title.replace(/\s+/g,'-')+'.pdf');
