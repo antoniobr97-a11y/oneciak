@@ -193,6 +193,16 @@ conversazione aspettando.
 - **Report di esempio Northbound** (2026-10-23): ora è un report VERO del
   motore nuovo, con 35 correzioni dopo il controllo di ogni fonte; voto 5.0
   (non più 7.2 inventato). La scheda in home mostra i suoi voti reali.
+- **Niente etichette sopra i titoli** (2026-10-24, "meno AI possibile" con
+  Impeccable 4.7, craft floor: l'eyebrow sopra un titolo è vietato senza
+  eccezioni): tolte "New analysis", "Market report", "My reports", "Guides",
+  "404". Sulla guida al posto dell'etichetta c'è un breadcrumb vero
+  (`.g-crumb`). Tolti anche i numeri 01-06 sui titoli della guida e "01"
+  nell'indice guide. Restano apposta: i numeri 01-07 delle aree del report
+  (servono a orientarsi nell'indice) e 01-05 del caricamento. Ignorati in
+  `.impeccable/config.json` con motivo: low-contrast (falso positivo sui
+  gradienti, minimo misurato sui pixel 5.69:1), Geist (scelto da Antonio),
+  alone radiale del 404 (è la palette dell'hero). Non rimettere etichette.
 - **Form senza card**: sezioni separate da una linea sottile e un numero mono,
   campi = tinta dello sfondo (`--field`), focus con anello arancio morbido.
 - **Navbar landing**: trasparente, poi vetro scuro, poi carta chiara oltre la
