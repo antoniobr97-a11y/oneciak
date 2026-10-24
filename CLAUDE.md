@@ -371,6 +371,40 @@ anteprime 88% corrette, 0 inventati; report completi 64% corretti, 0 inventati.
   (non arrivano a nessuno). Limite: 3 report completi ogni 3 ore per IP,
   condiviso con il sito live (stesso store).
 
+## Percorso del film e regole citate alla lettera (2026-10-24)
+
+- **`/roadmap/`** ("Film roadmap"): 9 fasi (idea e sceneggiatura, diritti e
+  società, budget, finanziamento, preparazione, riprese, post, festival,
+  vendita e uscita), 49 lavori con spunta (salvate solo nel browser,
+  `oneciak-roadmap-v1`), 27 citazioni ciascuna verificata parola per parola
+  sulla fonte il 2026-10-24 (script `verify_page.js` in scratchpad
+  `roadmap/`, si perde). Stili in `guides/guides.css` (sezione roadmap).
+  Collegata da: barra in alto della home, menu, footer, guide, sitemap, e dal
+  report (`roadmapBlock()`: riga "Your stage" sotto i 5 voti, mappa
+  `STAGE_TO_ROADMAP` fase del modulo -> fase 1-9). Se cambia una regola
+  citata, ricontrollare la fonte e la data.
+- **Regole alla lettera nel report**: campo `rule_quote` per fondi, festival,
+  lab (e festival dell'anteprima). `grounding.js` `checkQuote`/`quoteOnPage`:
+  resta solo se la frase è sulla pagina della fonte identica (ignora
+  maiuscole, spazi, virgolette curve, trattini, entità HTML); mai da siti
+  aggregatori; i PDF non si leggono, quindi le citazioni da PDF cadono. Prova
+  del 2026-10-24 su 7 report veri: 21 citazioni tenute, tutte e 21 ritrovate
+  identiche sulla pagina con un controllo separato (`allq.js` in scratchpad).
+- Film di confronto: campo `match` ("In common: ...") e regola: fuori se le
+  fonti non confermano formato e genere.
+- Scadenza mancante: "Not published on the source, check before planning".
+- PDF in Carlito: `fonts/carlito-400-pdf.ttf` e `-700-pdf.ttf` (sottoinsieme
+  latino fatto con pyftsubset, nomi/licenza OFL conservati), caricati solo al
+  clic (`newPdfDoc()`), Helvetica se il font non carica.
+- Niente trattini lunghi nel testo visibile (UI, PDF, mail, oggetto mail).
+  Restano in privacy/termini: si riscrivono dopo l'avvocato.
+- `generateFullReport.js`: pausa 6 s / 12 s tra i tentativi dopo un errore
+  dell'API (prima riprovava subito). Il 2026-10-24 2 report su 3 lanciati
+  insieme sono falliti senza motivo registrato; rilanciati, sono andati.
+- Debug solo per la preview: il ramo `test-sourced-reports` (PR #81) ha in
+  più un commit "TEST ONLY" (motivo dell'errore in get-report e limite 12
+  report con `CONTEXT=deploy-preview`). MAI portarlo su main.
+
 ## Principio di onestà (esplicito, non derogabile)
 
 Mai inventare o gonfiare numeri/statistiche mostrate agli utenti (es. il
