@@ -19,3 +19,8 @@
   for = "/fonts/*.woff2"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/fonts/*.ttf"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
