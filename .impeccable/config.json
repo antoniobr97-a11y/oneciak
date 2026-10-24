@@ -56,6 +56,42 @@
         ],
         "createdAt": "2026-10-19T10:15:54.623Z",
         "reason": "Geist (titles) and Inter (body) chosen by Antonio on 2026-10-08, documented in CLAUDE.md; guides reuse the site's fonts"
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-24T14:54:38.823Z",
+        "reason": "Measured on real pixels 2026-10-24 (text hidden, brightest 5% of background sampled, desktop and phone): every flagged hero text passes, lowest 5.69:1. The detector compares light text on the night hero against the paper colour."
+      },
+      {
+        "rule": "overused-font",
+        "value": "geist",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-24T14:54:38.838Z",
+        "reason": "Geist was chosen by the founder on 2026-10-08 from a side-by-side comparison (documented in CLAUDE.md); the body text is Carlito, his later choice."
+      },
+      {
+        "rule": "overused-font",
+        "value": "geist",
+        "files": [
+          "404.html"
+        ],
+        "createdAt": "2026-10-24T14:54:46.447Z",
+        "reason": "Same founder choice as index.html (Geist for titles, 2026-10-08)."
+      },
+      {
+        "rule": "radial-halo",
+        "value": "*",
+        "files": [
+          "404.html"
+        ],
+        "createdAt": "2026-10-24T14:54:46.462Z",
+        "reason": "The 404 reuses the home hero's edge glow palette (amber/orange/red/wine, asymmetric), which the founder picked from his own grain-gradient reference on 2026-10-08."
       }
     ]
   }
