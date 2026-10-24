@@ -12,6 +12,7 @@ const FULL_MODEL = 'claude-haiku-5-5';
 const FULL_MAX_TOKENS = 16000; // room for adaptive thinking plus the JSON (thinking counts toward max_tokens, and Haiku 5.5's tokenizer counts ~30% more tokens than Haiku 4.5's)
 const PROCESSING_STALE_MS = 8 * 60 * 1000; // generation can legitimately take a few minutes; give it plenty of room before a retry is treated as abandoned
 const PROMPT_ATTEMPTS = 3; // each of the 6 parallel prompts gets its own retries — an occasional malformed-JSON response from the model shouldn't fail the whole report
+const RETRY_DELAY_MS = 6000;
 const OVERALL_ATTEMPTS = 2; // a second full pass in case something broader (Resend, a transient network error) fails
 
 // Returns the parsed section plus the URLs its web searches returned, which
@@ -25,6 +26,9 @@ async function callAndParseWithRetry(apiKey, section) {
     });
     if (!result.ok) {
       lastErr = new Error('Anthropic API error: ' + result.error);
+      // Overload and rate-limit errors clear in seconds; retrying at once
+      // (as before) can burn every attempt inside the same busy moment.
+      if (i < PROMPT_ATTEMPTS - 1) await new Promise(r => setTimeout(r, RETRY_DELAY_MS * (i + 1)));
       continue;
     }
     try {
