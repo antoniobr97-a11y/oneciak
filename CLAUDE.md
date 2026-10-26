@@ -405,6 +405,51 @@ anteprime 88% corrette, 0 inventati; report completi 64% corretti, 0 inventati.
   più un commit "TEST ONLY" (motivo dell'errore in get-report e limite 12
   report con `CONTEXT=deploy-preview`). MAI portarlo su main.
 
+## Report su iPhone (2026-10-24, IN ATTESA DELL'OK DI ANTONIO)
+
+Antonio: "il full report da iPhone è troppo pesante da leggere e pieno di
+finestre a destra e a sinistra, l'esperienza deve essere unica e piacevole".
+Fatto SOLO sul branch e sulla preview (`deploy-preview-81`), commit 92f75f0
+e 6e1d632, NON su main. Pubblicare solo quando Antonio dice "pubblica"
+(procedura solita, cherry-pick di quei due commit, MAI il commit "TEST ONLY").
+- Voto subito sotto il titolo; riassunto hero tagliato a 4 righe con
+  "Read more" (`setHeroSummary`, solo telefono).
+- `parasFold()`: prima frase visibile, il resto sotto "Read the full
+  analysis" / "Read the full summary" (`details.more`).
+- Ordine di ogni area: giudizio, una frase, "What to do", rischi/punti di
+  forza (pallino colorato invece della riga verticale), poi tendine (anche
+  "Next 90 days"). Fasi del piano d'azione: prima frase + "More".
+- Pulsante "Next" in fondo a ogni area (`nextArea()`): chiude e apre la
+  successiva. Su telefono l'intestazione sparisce scorrendo in giù
+  (`body.rh-hidden`), resta solo la barra delle aree.
+- Misure (Chromium come iPhone 13, NON Safari vero): voto da 678 a 184 px
+  dall'alto; "What to do" da 1.184-1.806 a 340-477 px dal titolo dell'area;
+  report tutto aperto da 17.676 a 13.505 px.
+- Dubbio aperto: non è certo cosa intendesse con "finestre a destra e a
+  sinistra". Gli è stato chiesto uno screenshot dal suo iPhone.
+
+## Stato al 2026-10-26 e cosa manca
+
+Online su oneciak.com (main 6cb3246): motore report con fonti, regole citate
+alla lettera, percorso del film `/roadmap/`, guide, Carlito ovunque (PDF
+compreso), niente etichette sopra i titoli, niente trattini lunghi.
+Da fare, in ordine:
+1. OK di Antonio sul report per iPhone, poi pubblicarlo (sezione sopra).
+2. Prossima chat: usare Impeccable 4.7.0 per migliorare ancora il sito
+   (`/impeccable critique`, `audit`, `polish`, `layout`, `typeset`, `adapt`
+   per i telefoni). Il controllo automatico gira già dopo ogni modifica (hook
+   in `.claude/settings.local.json`, committato). Regole: mostrare prima e
+   dopo con misure, aspettare l'ok per i cambi visivi grossi, non riaprire
+   satinato/grana, palette e font già scelti.
+3. Avvocato: privacy (titolare, basi giuridiche, trasferimenti USA, tempi di
+   conservazione), strada A o B, nome di Antonio sul sito. Dopo: riscrivere
+   privacy/termini (lì restano trattini lunghi).
+4. Lancio (Product Hunt, Reddit, scuole): dopo l'avvocato; serve la frase di
+   Antonio sul "perché" e una data. Ogni testo lo approva lui.
+5. Report: nei corti spesso nessun film di confronto (regola severa, voluto);
+   le regole dentro PDF non vengono citate (non si leggono i PDF).
+6. PR #81 resta bozza di prova: non va mai mergiata.
+
 ## Principio di onestà (esplicito, non derogabile)
 
 Mai inventare o gonfiare numeri/statistiche mostrate agli utenti (es. il
