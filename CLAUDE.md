@@ -481,6 +481,13 @@ pulsante, niente orario. Blocchi CSS in fondo agli stili di index.html
   bocciato ("non mi piace per niente") le fasce grigio-azzurre/rosa prese dal
   suo riferimento di vetro smerigliato: NON riproporle. Il testo piccolo in
   chiaro è un po' più scuro (#4a4a4a ecc.) per restare sopra 4.5:1.
+- **Chiaro, VERSIONE SCELTA (2026-10-26 notte, variante "B" scelta da
+  Antonio fra tre)**: luce calda che entra in diagonale dal bordo destro
+  (`linear-gradient(100deg, …)` + nucleo chiaro negli angoli a destra), FISSA
+  allo schermo (`body::before`), presente sempre in alto e in basso e sfumata
+  molto morbidamente verso il centro con una `mask-image` a 12 tappe. Grana
+  solo sulla luce. Menu pieno bianco con la stessa luce. Testo grigio in
+  chiaro #3a3a3a per restare sopra 4.5:1 sulla fascia calda.
 - **Scuro**: nero prugna ovunque, anche analisi, modulo, My Reports, guide,
   roadmap; bagliori blu/rosso fissi ai bordi (`body::before`), grana overlay.
   Antonio: "il blu/rosso con sfondo nero è bellissimo".
