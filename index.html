@@ -290,7 +290,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-order { padding: 8px 0 0; }
 .l-foot { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 64px; padding: 24px 0 36px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--muted); }
 .l-foot a { color: inherit; text-underline-offset: 2px; display: inline-block; padding: 6px 0; } /* 27px tall: easier to tap */
-.l-foot nav { display: flex; gap: 18px; }
+.l-foot nav { display: flex; flex-wrap: wrap; gap: 0 18px; }
+.l-foot nav a { white-space: nowrap; }
 
 /* MENU OVERLAY: the same night as the hero, so opening it feels like the
    page dimming rather than a white sheet sliding over it. Two short
@@ -765,7 +766,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
    other section, text on the left, field in the same tint as the form. */
 .unlock { border-top: 1px solid var(--border); margin-top: 36px; padding-top: 24px; }
 .unlock-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #b4552b; }
-.unlock-title { margin-top: 14px; font-family: var(--display); font-size: 28px; line-height: 1.12; font-weight: 700; letter-spacing: -0.025em; color: var(--text); }
+.unlock-title { margin-top: 0; font-family: var(--display); font-size: 28px; line-height: 1.12; font-weight: 700; letter-spacing: -0.025em; color: var(--text); }
 .unlock-desc { margin-top: 12px; max-width: 58ch; font-size: 15px; line-height: 1.6; color: var(--muted); }
 .unlock-field { margin: 24px 0 16px; max-width: 460px; }
 .unlock-field label { display: block; font-size: 13.5px; font-weight: 500; margin-bottom: 8px; color: var(--text); }
@@ -1009,6 +1010,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   .l-desc { font-size: 16.5px; }
   .l-sheet { padding: 22px 20px 12px; }
   .l-sheet-row { grid-template-columns: 26px 1fr 72px 16px; gap: 10px; }
+  @media (max-width: 360px) { .l-sheet-row { grid-template-columns: 20px 1fr 44px 24px; gap: 8px; } }
   .l-hero-grid { padding-top: 96px; }
   .f-main { padding: 32px 20px 80px; }
   .exec-row { grid-template-columns: 1fr; }
@@ -1172,9 +1174,8 @@ details.more > summary:active { transform: scale(0.98); }
   .flag-item { color: var(--text); }
   .action-item .action-tag { color: var(--muted); }
   .action-tag, .roadmap-num { background: var(--on-night); color: var(--night); }
-  .btn-primary, .btn-unlock, #sec-form .btn-primary, .unlock .btn-unlock, .pdf-row button { background: var(--on-night); color: var(--night); }
-  .pdf-row button small { color: #5c5650; }
-  @media (hover: hover) and (pointer: fine) { .btn-primary:hover, .btn-unlock:hover, .pdf-row button:hover { background: #fff; } }
+  .btn-primary, .btn-unlock, #sec-form .btn-primary, .unlock .btn-unlock { background: var(--on-night); color: var(--night); }
+  @media (hover: hover) and (pointer: fine) { .btn-primary:hover, .btn-unlock:hover { background: #fff; } }
   .tip-link { color: var(--text); }
   details.more > summary, .r-road-d { text-decoration-color: rgba(242,237,230,0.4); }
   input::placeholder, textarea::placeholder, #sec-form input::placeholder, #sec-form textarea::placeholder, #sec-myreports input[type="email"]::placeholder { color: #8f8880; }
@@ -2272,7 +2273,6 @@ function renderFree(r, title) {
   // Summary card
   document.getElementById('execSummary').innerHTML =
     '<div class="exec-card">'+
-        '<div class="exec-text">'+paras(r.overall_summary)+'</div>'+
     ((r.biggest_risk||r.biggest_opportunity) ? '<div class="exec-row">'+
       '<div class="exec-box risk"><p class="exec-box-text"><b class="exec-lead">Biggest risk.</b> '+esc(r.biggest_risk)+'</p></div>'+
       '<div class="exec-box opp"><p class="exec-box-text"><b class="exec-lead">Biggest opportunity.</b> '+esc(r.biggest_opportunity)+'</p></div>'+
@@ -2333,7 +2333,6 @@ function renderFree(r, title) {
 
   document.getElementById('upgradeSection').innerHTML =
     '<div class="unlock">'+
-    '<div class="unlock-label">Full report</div>'+
     '<h3 class="unlock-title">Get the full report by email, free.</h3>'+
     '<p class="unlock-desc">Each of the five areas in depth: red flags, strengths, recommendations with working links, funding sources, festivals, sales agents and a step by step roadmap. It takes a few minutes to write, so we email it to you when it\'s ready.</p>'+
     '<div class="field unlock-field"><label for="fullReportEmail">Your email</label><input type="email" id="fullReportEmail" placeholder="you@example.com" autocomplete="email" inputmode="email"></div>'+
@@ -2371,7 +2370,7 @@ function renderFull(r, title) {
   // Exec summary — synthesis always visible
   document.getElementById('execSummary').innerHTML =
     '<div class="exec-card">'+
-        '<div class="exec-text">'+parasFold(r.executive_summary||r.overall_summary, 'Read the full summary')+'</div>'+
+    (r.executive_summary && r.executive_summary !== r.overall_summary ? '<div class="exec-text">'+parasFold(r.executive_summary, 'Read the full summary')+'</div>' : '')+
     '<div class="exec-row">'+
     '<div class="exec-box risk"><p class="exec-box-text"><b class="exec-lead">Biggest risk.</b> '+esc(r.biggest_risk)+'</p></div>'+
     '<div class="exec-box opp"><p class="exec-box-text"><b class="exec-lead">Biggest opportunity.</b> '+esc(r.biggest_opportunity)+'</p></div>'+
