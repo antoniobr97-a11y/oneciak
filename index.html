@@ -898,6 +898,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 /* Score overview at the top of the areas: the sample card's rows, on paper. */
 .r-road { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: baseline; margin: 0 0 36px; padding: 14px 2px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); color: var(--text); text-decoration: none; transition: transform 0.15s ease-out; }
 .accordion-wrap + .r-road { margin-top: 28px; }
+#upgradeSection + .guide-box { margin-top: 32px; }
 .r-road:active { transform: scale(0.99); }
 .r-road-k { font-size: 14px; color: var(--muted); }
 .r-road-t { font-size: 16px; font-weight: 700; }
@@ -1379,13 +1380,15 @@ details.more > summary:active { transform: scale(0.98); }
     </div>
     <div id="execSummary" class="reveal" style="transition-delay:0.06s"></div>
 
+    <div id="accordionMenu" class="reveal" style="display:none"></div>
+    <div id="upgradeSection"></div>
     <details class="guide-box reveal">
       <summary>New to this? How to read your report</summary>
       <div class="guide-box-body">
         <p>The <strong>OneCiak Score</strong> is a rough overall signal, not a verdict: a high score doesn't guarantee success, and a low one doesn't mean give up. It's a starting point for asking better questions.</p>
-        <p>Each of the 5 dimensions below has its own score, a one-line <strong>verdict</strong>, <strong>red flags</strong> (real risks worth addressing), and <strong>strengths</strong> (what's already working). Read the flags first: they're the most actionable part.</p>
+        <p>Each of the 5 areas above has its own score, a one-line <strong>verdict</strong>, <strong>red flags</strong> (real risks worth addressing), and <strong>strengths</strong> (what's already working). Read the flags first: they're the most actionable part.</p>
         <p><strong>Tips</strong> are concrete next actions, often with real links to funds, festivals, or companies to actually contact.</p>
-        <p>First film ever? Under the scores, <strong>Your stage</strong> links to the <a href="/roadmap/">film roadmap</a>: every job from script to release, stage by stage. In the full report, the <strong>Roadmap</strong> in the action plan turns it into steps for your project.</p>
+        <p>First film ever? Under the areas, <strong>Your stage</strong> links to the <a href="/roadmap/">film roadmap</a>: every job from script to release, stage by stage. In the full report, the <strong>Roadmap</strong> in the action plan turns it into steps for your project.</p>
         <p>Don't recognize a term like "sales agent" or "tax incentive"? Check the glossary below.</p>
       </div>
     </details>
@@ -1409,9 +1412,6 @@ details.more > summary:active { transform: scale(0.98); }
         </dl>
       </div>
     </details>
-
-    <div id="accordionMenu" class="reveal" style="display:none"></div>
-    <div id="upgradeSection"></div>
 
     <div class="guide-box reveal" id="reportIssueBox" style="display:none">
       <details>
