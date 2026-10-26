@@ -236,9 +236,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-sample-link { font-size: 15px; color: var(--on-night); font-weight: 400; text-decoration: underline; text-decoration-color: rgba(255,255,255,0.35); text-underline-offset: 4px; cursor: pointer; background: none; border: none; padding: 0; font-family: var(--sf); transition: text-decoration-color 0.2s; }
 @media (hover: hover) and (pointer: fine) { .l-sample-link:hover { text-decoration-color: var(--on-night); } }
 .l-sample-link:active { transform: scale(0.98); }
-.l-specs { margin-top: 18px; color: var(--on-night-2); }
-.l-specs span + span::before { content: '·'; margin: 0 10px; opacity: 0.6; }
-.sample-banner { background: var(--ink); color: #fff; text-align: center; font-size: 13px; font-weight: 500; padding: 10px 16px; }
+.l-specs { margin-top: 16px; font-size: 14px; color: var(--on-night-2); }
+.sample-banner { background: var(--night); color: var(--on-night); text-align: left; font-size: 13px; font-weight: 500; padding: 10px 16px; }
 
 /* Sample-report excerpt: smoked glass on the night, same surface as the
    hero rather than a light card pasted on top of it. Real numbers from
@@ -266,6 +265,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-sheet-rows { display: block; }
 .l-sheet-row { display: grid; grid-template-columns: 28px 1fr 96px 26px; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.09); font-size: 14px; }
 .l-sheet-row .l-mono { color: var(--on-night-2); font-size: 11px; }
+.l-sheet-row { align-items: start; }
+.l-sheet-row .l-mono { padding-top: 3px; }
+.l-sheet-row .l-bar { margin-top: 9px; }
+.l-sheet-name small { display: block; margin-top: 3px; font-size: 13px; line-height: 1.4; color: var(--on-night-2); }
 .l-sheet-row b { font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
 .l-bar { display: block; height: 3px; background: rgba(255,255,255,0.12); border-radius: 2px; overflow: hidden; }
 .l-bar i { display: block; height: 100%; background: var(--on-night); border-radius: 2px; transform-origin: left; animation: barIn 1s var(--ease) both; }
@@ -276,7 +279,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-sheet-row:nth-child(4) .l-bar i { animation-delay: 0.66s; }
 .l-sheet-row:nth-child(5) .l-bar i { animation-delay: 0.73s; }
 @keyframes barIn { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-.l-sheet-foot { display: flex; justify-content: space-between; padding-top: 14px; color: var(--on-night-2); font-size: 13px; }
+.l-sheet-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; padding-top: 14px; color: var(--on-night-2); font-size: 13px; }
 .l-sheet-foot .arrow { color: var(--on-night); transition: transform 0.2s var(--ease); }
 @media (hover: hover) and (pointer: fine) { .l-sheet:hover .l-sheet-foot .arrow { transform: translateX(3px); } }
 
@@ -284,12 +287,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
    are already in the hero card, so this only adds the one line each that
    the card can't hold. */
 .l-order { padding: 8px 0 0; }
-.l-order-title { font-family: var(--display); font-weight: 400; font-size: 26px; letter-spacing: -0.02em; color: var(--text); margin-bottom: 20px; }
-.l-order-list { list-style: none; border-top: 1px solid var(--text); }
-.l-order-list li { display: grid; grid-template-columns: 48px minmax(180px, 0.42fr) 1fr; align-items: baseline; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--border); }
-.l-order-list .l-mono { color: var(--muted); }
-.l-order-list h3 { font-family: var(--display); font-weight: 500; font-size: 20px; letter-spacing: -0.015em; color: var(--text); }
-.l-order-list p { color: var(--muted); font-size: 15px; line-height: 1.5; }
 .l-foot { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 64px; padding: 24px 0 36px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--muted); }
 .l-foot a { color: inherit; text-underline-offset: 2px; display: inline-block; padding: 6px 0; } /* 27px tall: easier to tap */
 .l-foot nav { display: flex; gap: 18px; }
@@ -456,9 +453,9 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
    LOADING
 ══════════════════════ */
 #sec-loading { min-height: 100vh; align-items: center; justify-content: center; position: relative; }
-.loading-wrap { text-align: center; padding: 40px 24px; max-width: 420px; width: 100%; position: relative; z-index: 1; }
+.loading-wrap { text-align: left; padding: 40px 24px; max-width: 420px; width: 100%; position: relative; z-index: 1; }
 .loading-title { font-family: var(--sf); font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 12px; letter-spacing: -0.02em; }
-.loading-desc { font-size: 14.5px; color: var(--muted); font-weight: 400; line-height: 1.6; max-width: 320px; margin: 0 auto 36px; }
+.loading-desc { font-size: 14.5px; color: var(--muted); font-weight: 400; line-height: 1.6; max-width: 420px; margin: 0 0 36px; }
 /* Dimension progress — walks through the same 01-05 numbering used on the
    landing page and results accordion, so the wait itself previews the
    product's own structure instead of a generic spinner that could belong
@@ -550,12 +547,15 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .exec-box-label { font-size: 11px; font-weight: 600; letter-spacing: 0.02em; text-transform: none; margin-bottom: 8px; }
 .exec-box.risk .exec-box-label { color: var(--danger); }
 .exec-box.opp  .exec-box-label { color: var(--success); }
+.exec-lead { font-weight: 700; }
+.exec-box.risk .exec-lead { color: #9c2a1f; }
+.exec-box.opp .exec-lead { color: #0c6b35; }
 .exec-box-text { font-size: 13px; color: var(--text); line-height: 1.55; font-weight: 400; }
 
 
 /* Dynamic colors */
 .score-high { color: var(--success); }
-.score-mid  { color: #b26a00; }
+.score-mid  { color: #965800; } /* 5.05:1 on --paper; #b26a00 was 3.76:1 */
 .score-low  { color: var(--danger); }
 .bar-high { background: var(--success); }
 .bar-mid  { background: #d98c00; }
@@ -678,7 +678,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 
 /* PDF */
 .pdf-card { background: var(--cream); border: none; border-radius: var(--radius-lg); padding: 24px 22px; margin-bottom: 16px; margin-top: 28px; }
-.pdf-label { font-size: 14px; font-weight: 600; margin-bottom: 13px; color: var(--text); }
 .pdf-row { display: flex; gap: 9px; }
 .pdf-row button { width: 100%; padding: 13px 20px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--sf); font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background 0.2s, transform 0.15s ease-out; }
 @media (hover: hover) and (pointer: fine) { .pdf-row button:hover { background: var(--accent-hover); } }
@@ -703,8 +702,8 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #sec-results .r-hero, #sec-myreports .r-hero {
   color: var(--on-night); position: relative;
   background: linear-gradient(180deg, var(--night) 0, var(--night) calc(100% - 260px), #201e1c calc(100% - 200px), #4a4643 calc(100% - 145px), #908c86 calc(100% - 88px), #d5d0ca calc(100% - 40px), var(--paper) 100%);
-  background: linear-gradient(in oklab 180deg, var(--night) 0, var(--night) calc(100% - 250px), rgb(244 241 236 / 0) 100%);
-  padding: 128px 24px 220px; margin-top: -64px;
+  background: linear-gradient(in oklab 180deg, var(--night) 0, var(--night) calc(100% - 180px), rgb(244 241 236 / 0) 100%);
+  padding: 128px 24px 150px; margin-top: -64px;
 }
 #sec-results .r-hero-inner, #sec-myreports .r-hero-inner { position: relative; z-index: 1; }
 .r-title { font-family: var(--display); font-size: clamp(40px, 6vw, 72px); font-weight: 700; letter-spacing: -0.035em; line-height: 1; color: var(--on-night); margin-bottom: 20px; }
@@ -747,12 +746,15 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .accordion-trigger.open .accordion-icon { color: #b4552b !important; }
 .accordion-label { font-family: var(--display); font-size: 21px; font-weight: 500; letter-spacing: -0.015em; }
 .accordion-score { font-family: var(--display); font-size: 24px; font-weight: 400; letter-spacing: -0.02em; }
-.accordion-score-label { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; }
+.accordion-score-label { font-family: var(--sf); font-size: 13px; font-weight: 400; letter-spacing: 0; text-transform: none; }
+.acc-bar { flex: 0 1 180px; height: 4px; margin: 0 6px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.acc-bar i { display: block; height: 100%; border-radius: 2px; }
+#accordionMenu .accordion-score-wrap { min-width: 76px; }
+@media (max-width: 640px) { .acc-bar { flex-basis: 56px; margin: 0 2px; } #accordionMenu .accordion-score-wrap { min-width: 62px; } }
 .extra-title, .locked-title { font-family: var(--display); font-weight: 500; letter-spacing: -0.02em; }
 .extra-title { font-size: 22px; }
 .locked-card { background: var(--field); box-shadow: none !important; border: 0 !important; }
 .pdf-card { border-top: 1px solid var(--border) !important; padding-top: 24px; margin-top: 36px; }
-.pdf-label { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .pdf-row button { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; white-space: normal; padding: 14px 16px; background: var(--field); color: var(--text); font-weight: 500; }
 .pdf-row button small { font-size: 12.5px; font-weight: 400; color: var(--muted); }
 @media (hover: hover) and (pointer: fine) { .pdf-row button:hover { background: var(--field-hover); } }
@@ -894,26 +896,13 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .checklist li::before { content: ''; position: absolute; left: 0; top: 4px; width: 11px; height: 11px; border: 1.5px solid var(--muted); border-radius: 3px; }
 
 /* Score overview at the top of the areas: the sample card's rows, on paper. */
-.r-overview { margin: 8px 0 36px; border-top: 1px solid var(--text); }
-.r-overview + .r-road { margin-top: -36px; border-top: 0; }
 .r-road { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: baseline; margin: 0 0 36px; padding: 14px 2px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); color: var(--text); text-decoration: none; transition: transform 0.15s ease-out; }
+.accordion-wrap + .r-road { margin-top: 28px; }
 .r-road:active { transform: scale(0.99); }
-.r-road-k { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.r-road-k { font-size: 14px; color: var(--muted); }
 .r-road-t { font-size: 16px; font-weight: 700; }
 .r-road-d { grid-column: 2; font-size: 14.5px; line-height: 1.5; color: var(--muted); text-decoration: underline; text-decoration-color: rgba(22,22,22,0.3); text-underline-offset: 3px; }
 @media (hover: hover) and (pointer: fine) { .r-road:hover .r-road-d { color: var(--text); text-decoration-color: currentColor; } }
-.ov-head { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 2px 6px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); }
-.ov-head span { color: var(--muted); letter-spacing: 0.04em; text-transform: none; font-family: var(--sf); font-size: 13px; }
-.ov-row { display: grid; grid-template-columns: 34px 1fr minmax(90px, 220px) 36px; align-items: center; gap: 14px; width: 100%; padding: 14px 2px; border: 0; border-bottom: 1px solid var(--border); background: none; font: inherit; color: var(--text); text-align: left; cursor: pointer; transition: transform 0.15s ease-out; }
-.ov-row:active { transform: scale(0.99); }
-.ov-num { font-family: var(--mono); font-size: 11px; color: var(--muted); }
-.ov-label { font-size: 16px; }
-.ov-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.ov-bar i { display: block; height: 100%; border-radius: 2px; background: var(--text); }
-.ov-bar i.bar-low { background: var(--danger); }
-.ov-score { font-family: var(--display); font-size: 18px; font-weight: 400; text-align: right; font-variant-numeric: tabular-nums; }
-@media (hover: hover) and (pointer: fine) { .ov-row:hover .ov-label { color: #000; } .ov-row:hover .ov-num { color: #b4552b; } }
-@media (max-width: 560px) { .ov-row { grid-template-columns: 26px 1fr 64px 30px; gap: 10px; } .ov-label { font-size: 15px; } }
 
 /* Area index that follows the scroll. */
 .area-nav { position: fixed; z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.25s var(--ease), transform 0.25s var(--ease); }
@@ -979,8 +968,12 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .loading-dim.is-active .loading-dim-num { background: none; color: #b4552b; animation: none; }
 .loading-dim.is-done .loading-dim-num { background: none; color: var(--success); }
 .loading-dim-name { font-family: var(--display); font-size: 17px; font-weight: 500; letter-spacing: -0.01em; }
+.loading-dim { align-items: flex-start; }
+.loading-dim-num { height: auto; padding-top: 4px; justify-content: flex-start; }
+.loading-dim-name small { display: none; margin-top: 4px; font-family: var(--sf); font-size: 14px; font-weight: 400; line-height: 1.45; letter-spacing: 0; color: var(--on-night-2); }
+.loading-dim.is-active .loading-dim-name small { display: block; }
 @media (max-width: 640px) {
-  #sec-results .r-hero, #sec-myreports .r-hero { padding: 108px 20px 200px; }
+  #sec-results .r-hero, #sec-myreports .r-hero { padding: 108px 20px 130px; }
   #sec-results .r-main, #sec-myreports .r-main { padding-left: 20px; padding-right: 20px; }
   .overall-card { padding: 20px; }
   .overall-num { font-size: 52px; }
@@ -1015,8 +1008,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   .l-sheet { padding: 22px 20px 12px; }
   .l-sheet-row { grid-template-columns: 26px 1fr 72px 16px; gap: 10px; }
   .l-hero-grid { padding-top: 96px; }
-  .l-order-list li { grid-template-columns: 36px 1fr; gap: 4px 12px; padding: 16px 0; }
-  .l-order-list p { grid-column: 2; }
   .f-main { padding: 32px 20px 80px; }
   .exec-row { grid-template-columns: 1fr; }
   .pdf-row { flex-direction: column; }
@@ -1109,7 +1100,7 @@ details.more > summary:active { transform: scale(0.98); }
         <details class="menu-faq-item"><summary class="menu-faq-q">I've never made a film. Is it still useful?</summary><div class="menu-faq-a">Yes, that's who it's built for. Pick "First film" in the Experience field and the advice adjusts.</div></details>
         <details class="menu-faq-item"><summary class="menu-faq-q">Where do I start after my report?</summary><div class="menu-faq-a">Your report shows which of the nine stages your project is at. The <a href="/roadmap/">film roadmap</a> lists every job in each stage, from script to release, with the rules that apply quoted from official sources.</div></details>
       </div>
-      <button class="menu-cta" onclick="closeMenuGoLanding()">Start free analysis</button>
+      <button class="menu-cta" onclick="closeMenuGoLanding()">Analyze your film</button>
       <p class="menu-legal"><a href="/roadmap/">Film roadmap</a><a href="/guides/">Guides</a><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></p>
     </div>
   </div>
@@ -1136,37 +1127,28 @@ details.more > summary:active { transform: scale(0.98); }
         </div>
         <div class="l-terms-error" id="termsError" role="alert">Please accept the disclaimer to continue.</div>
         <div class="l-actions">
-          <button class="l-btn" onclick="onStartClick()">Start free analysis</button>
+          <button class="l-btn" onclick="onStartClick()">Analyze your film</button>
         </div>
-        <div class="l-specs l-mono"><span>No account</span><span>PDF export</span></div>
+        <p class="l-specs">No account needed. Save it as a PDF.</p>
       </div>
       <button type="button" class="l-sheet" onclick="showSampleReport()">
-        <span class="l-sheet-h l-mono"><span>Sample report</span><span>Drama / Feature</span></span>
+        <span class="l-sheet-h l-mono"><span>Drama / Feature</span></span>
         <span class="l-sheet-title">Northbound</span>
         <span class="l-sheet-score"><span class="n">5.0<small>/10</small></span><span class="l">Promising intimate concept, underdeveloped</span></span>
         <span class="l-sheet-rows">
-          <span class="l-sheet-row"><span class="l-mono">01</span>Creative package<span class="l-bar"><i class="ember" style="width:65%"></i></span><b>6.5</b></span>
-          <span class="l-sheet-row"><span class="l-mono">02</span>Financial plan<span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
-          <span class="l-sheet-row"><span class="l-mono">03</span>Market &amp; audience<span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
-          <span class="l-sheet-row"><span class="l-mono">04</span>Festival strategy<span class="l-bar"><i style="width:50%"></i></span><b>5</b></span>
-          <span class="l-sheet-row" style="border-bottom:0"><span class="l-mono">05</span>Distribution<span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
+          <span class="l-sheet-row"><span class="l-mono">01</span><span class="l-sheet-name">Creative package<small>Is the logline strong, which attachments would move financiers.</small></span><span class="l-bar"><i class="ember" style="width:65%"></i></span><b>6.5</b></span>
+          <span class="l-sheet-row"><span class="l-mono">02</span><span class="l-sheet-name">Financial plan<small>Is the budget realistic, which funds and tax credits fit.</small></span><span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
+          <span class="l-sheet-row"><span class="l-mono">03</span><span class="l-sheet-name">Market &amp; audience<small>Who watches films like this, how comparable titles did.</small></span><span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
+          <span class="l-sheet-row"><span class="l-mono">04</span><span class="l-sheet-name">Festival strategy<small>Where to premiere first without burning your status.</small></span><span class="l-bar"><i style="width:50%"></i></span><b>5</b></span>
+          <span class="l-sheet-row" style="border-bottom:0"><span class="l-mono">05</span><span class="l-sheet-name">Distribution<small>Realistic routes to buyers, from festivals to streaming.</small></span><span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
         </span>
-        <span class="l-sheet-foot"><span>Illustrative project</span><span>Open full report <span class="arrow">→</span></span></span>
+        <span class="l-sheet-foot"><span>Sample report, illustrative project</span><span>Open full report <span class="arrow">→</span></span></span>
       </button>
     </div>
   </header>
 
-  <!-- What each dimension answers: compact, the card above already shows the names and scores -->
   <section class="l-order" id="landingOrder">
     <div class="l-wrap">
-      <h2 class="l-order-title reveal">The five areas</h2>
-      <ol class="l-order-list">
-        <li class="reveal"><span class="l-mono">01</span><h3>Creative package</h3><p>Is the logline strong, which attachments would move financiers.</p></li>
-        <li class="reveal"><span class="l-mono">02</span><h3>Financial plan</h3><p>Is the budget realistic, which funds and tax credits fit.</p></li>
-        <li class="reveal"><span class="l-mono">03</span><h3>Market &amp; audience</h3><p>Who watches films like this, how comparable titles did.</p></li>
-        <li class="reveal"><span class="l-mono">04</span><h3>Festival strategy</h3><p>Where to premiere first without burning your status.</p></li>
-        <li class="reveal"><span class="l-mono">05</span><h3>Distribution</h3><p>Realistic routes to buyers, from festivals to streaming.</p></li>
-      </ol>
       <footer class="l-foot">
         <span>OneCiak, film market intelligence</span>
         <nav><a href="/roadmap/">Film roadmap</a><a href="/guides/">Guides</a><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></nav>
@@ -1185,8 +1167,8 @@ details.more > summary:active { transform: scale(0.98); }
   </div>
   <div class="f-main">
     <div class="f-side">
-      <h1 class="f-title"><b>Tell us about</b><br>your project.</h1>
-      <p class="f-subtitle">The preview covers all five dimensions. The full report is free too, and arrives by email.</p>
+      <h1 class="f-title"><b>Tell us about your project.</b></h1>
+      <p class="f-subtitle">The preview covers all five areas. The full report is free too, and arrives by email.</p>
       <ol class="f-steps" id="formSteps">
         <li class="on">Your project</li>
         <li>Budget &amp; distribution</li>
@@ -1198,7 +1180,7 @@ details.more > summary:active { transform: scale(0.98); }
     <div class="card reveal" style="transition-delay:0s">
       <div class="card-title">Your project</div>
       <div class="field">
-        <label for="title">Film Title <span class="hint">(or working title)</span></label>
+        <label for="title">Film title <span class="hint">(or working title)</span></label>
         <input type="text" id="title" maxlength="120" placeholder="e.g. The Last Harvest">
       </div>
       <div class="field">
@@ -1235,7 +1217,7 @@ details.more > summary:active { transform: scale(0.98); }
     <div class="card reveal" style="transition-delay:0.06s">
       <div class="card-title">Budget &amp; distribution</div>
       <div class="field">
-        <label for="budgetSlider">Estimated Budget</label>
+        <label for="budgetSlider">Estimated budget</label>
         <div class="budget-row">
           <select id="budgetCurrency" aria-label="Currency" onchange="updateBudgetDisplay()">
             <option value="EUR">€ EUR</option>
@@ -1267,7 +1249,7 @@ details.more > summary:active { transform: scale(0.98); }
       </div>
       <div class="field-row">
         <div class="field">
-          <label for="audience">Target Audience</label>
+          <label for="audience">Target audience</label>
           <select id="audience">
             <option value="">Select audience…</option>
             <option>General / Mainstream</option><option>Art house / Cinephiles</option>
@@ -1276,7 +1258,7 @@ details.more > summary:active { transform: scale(0.98); }
           </select>
         </div>
         <div class="field">
-          <label for="distrib">Distribution Goal</label>
+          <label for="distrib">Distribution goal</label>
           <select id="distrib">
             <option value="">Select goal…</option>
             <option>Major streaming platforms (Netflix, Amazon…)</option>
@@ -1326,16 +1308,16 @@ details.more > summary:active { transform: scale(0.98); }
       <div class="card-title">Context</div>
       <div class="field-row">
         <div class="field">
-          <label for="country">Production Country</label>
+          <label for="country">Production country</label>
           <input type="text" id="country" maxlength="80" placeholder="e.g. Italy, France, USA" autocomplete="country-name">
         </div>
         <div class="field">
-          <label for="language">Original Language <span class="hint">(optional)</span></label>
+          <label for="language">Original language <span class="hint">(optional)</span></label>
           <input type="text" id="language" maxlength="60" placeholder="e.g. English, Italian, French">
         </div>
       </div>
       <div class="field">
-        <label for="experience">Director Experience <span class="hint">(optional)</span></label>
+        <label for="experience">Director experience <span class="hint">(optional)</span></label>
         <select id="experience">
           <option value="">Select level…</option>
           <option>First film</option><option>1–2 short films</option>
@@ -1351,7 +1333,7 @@ details.more > summary:active { transform: scale(0.98); }
     <div class="disclaimer-box">
       <div class="disclaimer-text"><strong>Disclaimer:</strong> Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. Results are estimates and do not guarantee any outcome.</div>
     </div>
-    <div class="f-submit"><button class="btn-primary" onclick="runAnalysis()">Get free analysis</button><p>No account required.</p></div>
+    <div class="f-submit"><button class="btn-primary" onclick="runAnalysis()">Analyze my film</button><p>No account required.</p></div>
     <div class="error-box" id="errorBox" role="alert"></div>
     </div>
   </div>
@@ -1361,14 +1343,14 @@ details.more > summary:active { transform: scale(0.98); }
 <!-- ══ LOADING ══ -->
 <div id="sec-loading" role="status" aria-live="polite">
   <div class="loading-wrap">
-    <div class="loading-title" id="loadingTitle">Analyzing your project…</div>
+    <div class="loading-title" id="loadingTitle">Reading your project</div>
     <div class="loading-desc" id="loadingDesc">Scoring your project across the five areas.</div>
     <div class="loading-dims" id="loadingDims" aria-hidden="true">
-      <div class="loading-dim" data-dim="0"><span class="loading-dim-num">01</span><span class="loading-dim-name">Creative Package</span></div>
-      <div class="loading-dim" data-dim="1"><span class="loading-dim-num">02</span><span class="loading-dim-name">Financial Plan</span></div>
-      <div class="loading-dim" data-dim="2"><span class="loading-dim-num">03</span><span class="loading-dim-name">Market &amp; Audience</span></div>
-      <div class="loading-dim" data-dim="3"><span class="loading-dim-num">04</span><span class="loading-dim-name">Festival Strategy</span></div>
-      <div class="loading-dim" data-dim="4"><span class="loading-dim-num">05</span><span class="loading-dim-name">Distribution &amp; Revenue</span></div>
+      <div class="loading-dim" data-dim="0"><span class="loading-dim-num">01</span><span class="loading-dim-name">Creative Package<small>Is the logline strong, which attachments would move financiers.</small></span></div>
+      <div class="loading-dim" data-dim="1"><span class="loading-dim-num">02</span><span class="loading-dim-name">Financial Plan<small>Is the budget realistic, which funds and tax credits fit.</small></span></div>
+      <div class="loading-dim" data-dim="2"><span class="loading-dim-num">03</span><span class="loading-dim-name">Market &amp; Audience<small>Who watches films like this, how comparable titles did.</small></span></div>
+      <div class="loading-dim" data-dim="3"><span class="loading-dim-num">04</span><span class="loading-dim-name">Festival Strategy<small>Where to premiere first without burning your status.</small></span></div>
+      <div class="loading-dim" data-dim="4"><span class="loading-dim-num">05</span><span class="loading-dim-name">Distribution &amp; Revenue<small>Realistic routes to buyers, from festivals to streaming.</small></span></div>
     </div>
     <div class="loading-timer" id="loadingTimer" style="display:none"></div>
     <button class="btn-primary" id="loadingRetryBtn" style="display:none;margin-top:20px;max-width:280px" onclick="retryLastAction()">Try again →</button>
@@ -1378,7 +1360,7 @@ details.more > summary:active { transform: scale(0.98); }
 
 <!-- ══ RESULTS ══ -->
 <div id="sec-results">
-  <div class="sample-banner" id="sampleBanner" style="display:none">This is a real OneCiak report for an illustrative project, generated on 23 October 2026, with every source checked. <a href="#" onclick="goLanding();return false" style="color:#fff;text-decoration:underline">Analyze your own project →</a></div>
+  <div class="sample-banner" id="sampleBanner" style="display:none">This is a real OneCiak report for an illustrative project, generated on 23 October 2026, with every source checked. <a href="#" onclick="goLanding();return false" style="color:#fff;text-decoration:underline">Analyze your own film →</a></div>
   <div class="r-header">
     <div class="r-logo" onclick="goLanding()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')goLanding()"><svg width="18" height="18" viewBox="0 0 124 124" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><path d="M6 0L117 0A6 6 0 0 1 123 6L123 19Q123 25 117.11 26.15L5.89 47.85Q0 49 0 43L0 6A6 6 0 0 1 6 0Z" fill="#000"/><rect x="0" y="62" width="123" height="62" rx="6" fill="#000"/></svg>OneCiak</div>
     <button class="back-btn" onclick="goLanding()">← New Analysis</button>
@@ -1449,20 +1431,20 @@ details.more > summary:active { transform: scale(0.98); }
     </div>
 
     <div class="pdf-card reveal">
-      <div class="pdf-label">Download</div>
       <div class="pdf-row">
         <button onclick="savePDF()"><span id="pdfMainLabel">This preview</span><small>PDF, all sections</small></button>
         <button onclick="saveOneSheet()"><span>One-page summary</span><small>PDF, to print or share</small></button>
       </div>
       <p class="pdf-note" id="pdfNote">The full report is not included here, it arrives by email.</p>
       <div class="success-msg" id="pdfSuccess">PDF saved. Check your downloads.</div>
+      <div class="inline-error" id="pdfError" role="alert" style="margin-top:12px"></div>
       <div class="success-msg" id="oneSheetSuccess">One-page summary saved. Check your downloads.</div>
     </div>
     <button class="btn-secondary" onclick="goLanding()">← New Analysis</button>
     <div class="disclaimer-box" style="margin-top:14px">
       <div class="disclaimer-text"><strong>Legal Disclaimer:</strong> Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. OneCiak assumes no liability. Results are estimates and do not guarantee any outcome. OneCiak is not a licensed consulting firm.</div>
     </div>
-    <p class="footer-note">OneCiak, Film Market Intelligence · oneciak.com · <a href="/privacy.html" style="text-decoration:underline;text-underline-offset:2px">Privacy Policy</a> · <a href="/terms.html" style="text-decoration:underline;text-underline-offset:2px">Terms of Service</a></p>
+    <p class="footer-note">OneCiak, film market intelligence · oneciak.com · <a href="/privacy.html" style="text-decoration:underline;text-underline-offset:2px">Privacy Policy</a> · <a href="/terms.html" style="text-decoration:underline;text-underline-offset:2px">Terms of Service</a></p>
   </div>
 </div>
 
@@ -2152,25 +2134,24 @@ function scoreColor(s) { return s >= 7 ? 'high' : s >= 5 ? 'mid' : 'low'; }
 function renderFree(r, title) {
   isFullReport = false;
   setPdfLabels();
-  document.getElementById('resultTitle').textContent = '"'+title+'"';
+  document.getElementById('resultTitle').textContent = '\u201C'+title+'\u201D';
   setHeroSummary(r.overall_summary||'');
 
   // Overall score
   var col = scoreColor(Number(r.overall_score||5));
   document.getElementById('overallScore').innerHTML =
     '<div class="overall-card">'+
-    '<div><div class="overall-label">OneCiak Score</div><div class="overall-sublabel">'+esc(r.overall_label)+'</div></div>'+
+    '<div><div class="overall-sublabel">'+esc(r.overall_label)+'</div></div>'+
     '<div class="overall-num score-'+col+'">'+Number(r.overall_score||5).toFixed(1)+'<span class="denom">/10</span></div>'+
     '</div>';
 
   // Summary card
   document.getElementById('execSummary').innerHTML =
     '<div class="exec-card">'+
-    '<div class="exec-label">Summary</div>'+
-    '<div class="exec-text">'+paras(r.overall_summary)+'</div>'+
+        '<div class="exec-text">'+paras(r.overall_summary)+'</div>'+
     ((r.biggest_risk||r.biggest_opportunity) ? '<div class="exec-row">'+
-      '<div class="exec-box risk"><div class="exec-box-label">Main Risk</div><div class="exec-box-text">'+esc(r.biggest_risk)+'</div></div>'+
-      '<div class="exec-box opp"><div class="exec-box-label">Main Opportunity</div><div class="exec-box-text">'+esc(r.biggest_opportunity)+'</div></div>'+
+      '<div class="exec-box risk"><p class="exec-box-text"><b class="exec-lead">Biggest risk.</b> '+esc(r.biggest_risk)+'</p></div>'+
+      '<div class="exec-box opp"><p class="exec-box-text"><b class="exec-lead">Biggest opportunity.</b> '+esc(r.biggest_opportunity)+'</p></div>'+
       '</div>' : '')+
     (r.next_step ? '<div class="the-ask"><span class="fact-k">Your next step</span>'+esc(r.next_step)+'</div>' : '')+
     '</div>';
@@ -2191,15 +2172,8 @@ function renderFree(r, title) {
 
   var html = '<div class="accordion-wrap">';
   freeSections.forEach(function(sec, idx) {
-    var c = scoreColor(sec.score||0);
-    var badgeText = c==='high' ? 'Strong' : c==='mid' ? 'Moderate' : 'Weak';
-
     // Body content
-    var bid = 'fbar_'+idx+'_'+Math.random().toString(36).substr(2,4);
-    var pct = ((sec.score||0)/10)*100;
     var body = '<div class="accordion-divider"></div>';
-    body += '<div class="score-bar-bg" style="margin-bottom:14px"><div class="score-bar-fill bar-'+c+'" id="'+bid+'" style="width:0%"></div></div>';
-    setTimeout(function(b,p){ return function(){ var el=document.getElementById(b); if(el) el.style.width=p+'%'; }; }(bid,pct), 80);
     body += '<div class="score-verdict">'+esc(sec.verdict)+'</div>';
     body += paras(sec.detail);
     if (sec.tip) body += '<div class="tips-block"><span class="tips-label">What to do</span><ol class="tips-list"><li><div class="tip-text">'+esc(sec.tip)+'</div></li></ol></div>';
@@ -2221,7 +2195,7 @@ function renderFree(r, title) {
       '<div class="accordion-icon">'+sec.num+'</div>'+
       '<div><div class="accordion-label">'+sec.label+'</div><div class="accordion-sublabel">'+sec.sublabel+'</div></div>'+
       '</div>'+
-      '<span class="accordion-score-wrap"><span class="accordion-score score-'+c+'">'+(sec.score||0)+'<span class="denom">/10</span></span><span class="accordion-score-label score-'+c+'">'+badgeText+'</span></span>'+
+      accScore(sec.score)+
       '<span class="accordion-chevron">▾</span>'+
       '</button>'+
       '<div class="accordion-body" id="acc-body-'+idx+'">'+body+'</div>'+
@@ -2229,7 +2203,7 @@ function renderFree(r, title) {
   });
   html += '</div>';
 
-  document.getElementById('accordionMenu').innerHTML = areaOverview(freeSections) + roadmapBlock(lastProject) + html;
+  document.getElementById('accordionMenu').innerHTML = html + roadmapBlock(lastProject);
   document.getElementById('accordionMenu').style.display = 'block';
   mountAreaNav(freeSections);
 
@@ -2249,7 +2223,7 @@ function renderFree(r, title) {
 function renderFull(r, title) {
   isFullReport = true;
   setPdfLabels();
-  document.getElementById('resultTitle').textContent = '"'+title+'"';
+  document.getElementById('resultTitle').textContent = '\u201C'+title+'\u201D';
   setHeroSummary(r.overall_summary||'');
 
   // Only a real, persisted full report has a session_id/token to flag an
@@ -2264,7 +2238,7 @@ function renderFull(r, title) {
   var col = scoreColor(Number(r.overall_score||5));
   document.getElementById('overallScore').innerHTML =
     '<div class="overall-card">'+
-    '<div><div class="overall-label">OneCiak Score</div><div class="overall-sublabel">'+esc(r.overall_label)+'</div></div>'+
+    '<div><div class="overall-sublabel">'+esc(r.overall_label)+'</div></div>'+
     '<div style="text-align:right">'+
     '<div class="overall-num score-'+col+'">'+Number(r.overall_score||5).toFixed(1)+'<span class="denom">/10</span></div>'+
     '</div></div>'+
@@ -2273,11 +2247,10 @@ function renderFull(r, title) {
   // Exec summary — synthesis always visible
   document.getElementById('execSummary').innerHTML =
     '<div class="exec-card">'+
-    '<div class="exec-label">Summary</div>'+
-    '<div class="exec-text">'+parasFold(r.executive_summary||r.overall_summary, 'Read the full summary')+'</div>'+
+        '<div class="exec-text">'+parasFold(r.executive_summary||r.overall_summary, 'Read the full summary')+'</div>'+
     '<div class="exec-row">'+
-    '<div class="exec-box risk"><div class="exec-box-label">Main Risk</div><div class="exec-box-text">'+esc(r.biggest_risk)+'</div></div>'+
-    '<div class="exec-box opp"><div class="exec-box-label">Main Opportunity</div><div class="exec-box-text">'+esc(r.biggest_opportunity)+'</div></div>'+
+    '<div class="exec-box risk"><p class="exec-box-text"><b class="exec-lead">Biggest risk.</b> '+esc(r.biggest_risk)+'</p></div>'+
+    '<div class="exec-box opp"><p class="exec-box-text"><b class="exec-lead">Biggest opportunity.</b> '+esc(r.biggest_opportunity)+'</p></div>'+
     '</div></div>';
 
   // Build accordion
@@ -2332,9 +2305,7 @@ function renderFull(r, title) {
   var html = '<div class="accordion-wrap">';
   sections.forEach(function(sec, idx) {
     var c = sec.score !== null ? scoreColor(sec.score) : null;
-    var scoreHtml = sec.score !== null
-      ? '<span class="accordion-score-wrap"><span class="accordion-score score-'+c+'">'+sec.score+'<span class="denom">/10</span></span><span class="accordion-score-label score-'+c+'">'+(c==='high'?'Strong':c==='mid'?'Moderate':'Weak')+'</span></span>'
-      : '<span style="font-size:12px;color:var(--accent);font-weight:600;letter-spacing:0.04em">→</span>';
+    var scoreHtml = sec.score !== null ? accScore(sec.score) : '';
     html +=
       '<div class="accordion-item">'+
       '<button class="accordion-trigger" onclick="toggleAccordion('+idx+')" id="acc-trigger-'+idx+'">'+
@@ -2354,7 +2325,7 @@ function renderFull(r, title) {
   });
   html += '</div>';
 
-  document.getElementById('accordionMenu').innerHTML = areaOverview(sections) + roadmapBlock(lastProject) + html;
+  document.getElementById('accordionMenu').innerHTML = html + roadmapBlock(lastProject);
   document.getElementById('accordionMenu').style.display = 'block';
   mountAreaNav(sections);
   document.getElementById('upgradeSection').innerHTML = '';
@@ -2362,14 +2333,7 @@ function renderFull(r, title) {
 
 /* ── ACCORDION BODY BUILDER ── */
 function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan, extra) {
-  var col = scoreColor(score||0);
   var out = '';
-
-  // Score bar
-  var bid = 'abar_'+Math.random().toString(36).substr(2,6);
-  var pct = ((score||0)/10)*100;
-  out += '<div class="score-bar-bg" style="margin-bottom:18px"><div class="score-bar-fill bar-'+col+'" id="'+bid+'" style="width:0%"></div></div>';
-  setTimeout(function(b,p){ return function(){ var el=document.getElementById(b); if(el) el.style.width=p+'%'; }; }(bid,pct), 80);
 
   // Verdict and the point of the analysis; the full argument is one tap
   // away, so on a phone "what to do" arrives on the first screen.
@@ -2531,17 +2495,10 @@ function shortLabel(label) {
   var map = { 'Creative Package': 'Creative', 'Financial Plan': 'Financing', 'Market & Audience': 'Market', 'Festival Strategy': 'Festivals', 'Distribution & Revenue': 'Distribution', 'Business Plan Summary': 'Business plan' };
   return map[label] || label;
 }
-function areaOverview(sections) {
-  var rows = '';
-  sections.forEach(function(sec, i) {
-    if (sec.score == null) return;
-    var v = Number(sec.score) || 0, c = scoreColor(v);
-    rows += '<button type="button" class="ov-row" onclick="goToArea('+i+')">'+
-      '<span class="ov-num">'+sec.num+'</span><span class="ov-label">'+esc(sec.label)+'</span>'+
-      '<span class="ov-bar"><i class="bar-'+c+'" style="width:'+Math.round(v*10)+'%"></i></span>'+
-      '<span class="ov-score">'+v+'</span></button>';
-  });
-  return rows ? '<div class="r-overview" id="areaOverview"><div class="ov-head">The five areas<span>Tap one to open it</span></div>'+rows+'</div>' : '';
+function accScore(score) {
+  var v = Number(score) || 0, c = scoreColor(v);
+  return '<span class="acc-bar" aria-hidden="true"><i class="bar-'+c+'" style="width:'+Math.round(v*10)+'%"></i></span>'+
+    '<span class="accordion-score-wrap"><span class="accordion-score score-'+c+'">'+v+'<span class="denom">/10</span></span><span class="accordion-score-label score-'+c+'">'+(c==='high'?'Strong':c==='mid'?'Moderate':'Weak')+'</span></span>';
 }
 /* Link to the film roadmap (/roadmap/) at the stage the project is at, so
    the report connects to the full list of jobs for that stage. */
@@ -2569,7 +2526,7 @@ function nextArea(i) {
   goToArea(i + 1);
 }
 function goToOverview() {
-  var el = document.getElementById('areaOverview');
+  var el = document.querySelector('#accordionMenu .accordion-wrap');
   if (!el) return;
   window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.scrollY - 80), behavior: 'smooth' });
 }
@@ -2816,8 +2773,8 @@ async function runAnalysis() {
   stopFullReportTimer();
   document.getElementById('sampleBanner').style.display = 'none';
   showOnly('sec-loading');
-  document.getElementById('loadingTitle').textContent = 'Analyzing your project…';
-  document.getElementById('loadingDesc').textContent = 'Scoring your project across the five areas.';
+  document.getElementById('loadingTitle').textContent = 'Reading \u201C'+p.title+'\u201D';
+  document.getElementById('loadingDesc').textContent = 'Scoring it across the five areas.';
   startLoadingDims([3, 6, 9, 13]);
   try {
     var result = await callFullAPI(p);
@@ -2873,9 +2830,21 @@ function onUnlockClick() {
   startFreeFullReport(email);
 }
 
+/* Errors are said in the page, next to what failed, never in a browser
+   dialog: what happened, and that the answers are still there. */
+function unlockFail(msg) {
+  var err = document.getElementById('unlockError');
+  if (!err) { showOnly('sec-form'); showError(msg); return; }
+  err.textContent = msg; err.style.display = 'block';
+  err.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+function pdfFail(msg) {
+  var el = document.getElementById('pdfError');
+  el.textContent = msg; el.style.display = 'block';
+}
 async function startFreeFullReport(email) {
   var p = lastProject;
-  if (!p) { alert("Project data missing. Please run the free analysis first."); return; }
+  if (!p) { unlockFail("The project details were lost, please run the free analysis again."); return; }
   track('full_report_requested');
   try {
     showOnly('sec-loading');
@@ -2892,7 +2861,7 @@ async function startFreeFullReport(email) {
     try { data = JSON.parse(text); } catch(e) { throw new Error('Could not start the report. Please try again.'); }
     if (!res.ok || !data.id || !data.token) {
       showOnly('sec-results');
-      alert('Error: ' + (data.error || 'Could not start the report. Please try again.'));
+      unlockFail(data.error || 'The full report could not be started. Your email is still filled in, try again in a moment.');
       return;
     }
     pendingFullReportAuth = { project: p, token: data.token, session_id: data.id };
@@ -2904,7 +2873,9 @@ async function startFreeFullReport(email) {
     await generateFullReport();
   } catch(err) {
     showOnly('sec-results');
-    alert('Error: ' + err.message);
+    unlockFail(err instanceof TypeError
+      ? 'OneCiak could not be reached. Check your connection and try again, your email is still filled in.'
+      : err.message);
   }
 }
 
@@ -2956,7 +2927,8 @@ async function newPdfDoc() {
 }
 
 async function savePDF() {
-  if (!lastResult||!lastProject) { alert('No report to save yet.'); return; }
+  document.getElementById('pdfError').style.display = 'none';
+  if (!lastResult||!lastProject) { pdfFail('There is no report on this page to save yet.'); return; }
   try {
     await loadJsPDF();
     var doc = await newPdfDoc();
@@ -3241,14 +3213,15 @@ async function savePDF() {
     doc.save('OneCiak-'+lastProject.title.replace(/\s+/g,'-')+'.pdf');
     document.getElementById('pdfSuccess').style.display = 'block';
     setTimeout(function(){ document.getElementById('pdfSuccess').style.display='none'; }, 4000);
-  } catch(e) { alert('PDF generation failed. Please try again.'); }
+  } catch(e) { pdfFail('The PDF could not be created. Try again, and check that your browser allows downloads.'); }
 }
 
 /* ── ONE-SHEET PDF — a condensed single-page summary suitable for printing
    or sharing with a financier, built from whatever data the current
    report has (works for both the free preview and the full report). ── */
 async function saveOneSheet() {
-  if (!lastResult||!lastProject) { alert('No report to save yet.'); return; }
+  document.getElementById('pdfError').style.display = 'none';
+  if (!lastResult||!lastProject) { pdfFail('There is no report on this page to save yet.'); return; }
   try {
     await loadJsPDF();
     var doc = await newPdfDoc();
@@ -3300,7 +3273,7 @@ async function saveOneSheet() {
     doc.save('OneCiak-OneSheet-'+lastProject.title.replace(/\s+/g,'-')+'.pdf');
     document.getElementById('oneSheetSuccess').style.display = 'block';
     setTimeout(function(){ document.getElementById('oneSheetSuccess').style.display='none'; }, 4000);
-  } catch(e) { alert('One-sheet generation failed. Please try again.'); }
+  } catch(e) { pdfFail('The one-page summary could not be created. Try again, and check that your browser allows downloads.'); }
 }
 
 function showError(msg) { var b=document.getElementById('errorBox'); b.textContent=msg; b.style.display='block'; }
