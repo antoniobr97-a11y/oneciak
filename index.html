@@ -1103,19 +1103,11 @@ details.more > summary:active { transform: scale(0.98); }
 @media (prefers-color-scheme: light) {
   /* the "night" surfaces become the paper: same components, inverted tokens */
   .l-hero, .l-nav, .menu-overlay, #sec-results, #sec-myreports, #sec-loading { --night: #ffffff; --on-night: #161616; --on-night-2: #47423e; }
-  .l-hero::before, #sec-results .r-hero::before, #sec-myreports .r-hero::before, #sec-loading::before {
-    background:
-      radial-gradient(62% 74% at 104% -4%, rgba(235,137,63,0.72) 0%, rgba(236,88,40,0.52) 24%, rgba(225,36,31,0.30) 44%, rgba(225,36,31,0) 70%),
-      radial-gradient(48% 58% at -6% 78%, rgba(64,124,196,0.40) 0%, rgba(64,124,196,0.17) 45%, rgba(64,124,196,0) 76%),
-      radial-gradient(34% 28% at 88% 100%, rgba(225,36,31,0.26) 0%, rgba(225,36,31,0.08) 45%, rgba(225,36,31,0) 72%);
-  }
-  .l-hero::after, #sec-results .r-hero::after, #sec-myreports .r-hero::after, #sec-loading::after { display: none; }
-  .menu-overlay::before { background: radial-gradient(70% 45% at 110% -8%, rgba(235,137,63,0.45) 0%, rgba(225,36,31,0.22) 35%, rgba(225,36,31,0) 60%), radial-gradient(50% 35% at -12% 85%, rgba(88,146,196,0.16) 0%, rgba(88,146,196,0) 70%); }
   /* white means white (Antonio, 2026-10-26): no satin sheen, no grain, no cream */
   :root { --paper: #ffffff; --cream: #f5f5f4; --border: #e2e0dd; --border-light: #ecebe9; --field: rgba(20,18,16,0.04); --field-hover: rgba(20,18,16,0.065); }
   body { background: #ffffff; }
-  /* Small text stays above 4.5:1 where it scrolls over the coloured bands
-     (values worked out from the darkest band pixel measured, 2026-10-26). */
+  body::before, body::after { display: none; }
+  /* Small text slightly darker in light mode (kept from the measured pass of 2026-10-26). */
   :root { --muted: #4a4a4a; --muted-light: #4a4a4a; --success: #0a5c2d; --danger: #8a2419; }
   .score-mid { color: #6e3f00; }
   .tips-label, .action-label, .unlock-label, .an-top, .accordion-trigger.open .accordion-icon, #sec-loading .loading-dim.is-active .loading-dim-num { color: #93391a !important; }
@@ -1123,28 +1115,23 @@ details.more > summary:active { transform: scale(0.98); }
   .exec-box.opp .exec-lead { color: var(--success); }
   .fs-col.red li::before { background: var(--danger); }
   .fs-col.green li::before { background: var(--success); }
-  /* Daylight (Antonio's reference, 2026-10-26, colours sampled from it):
-     frosted blue-grey coming in from the top, a warm blush with a ring of
-     sky blue coming up from the bottom, both centred; white in the middle
-     where the text is. Fixed to the screen, so reading always happens on
-     white and the colour frames it. */
-  body::before { display: block; background:
-      radial-gradient(ellipse 110% 58% at 50% -10%, rgba(150,168,190,0.78) 0%, rgba(188,191,199,0.55) 34%, rgba(116,169,201,0.32) 58%, rgba(255,255,255,0) 82%),
-      radial-gradient(ellipse 110% 56% at 50% 110%, rgba(206,176,164,0.85) 0%, rgba(216,194,183,0.6) 30%, rgba(116,169,201,0.36) 58%, rgba(255,255,255,0) 84%); }
-  body::after { display: block; opacity: 0.12; mix-blend-mode: multiply;
-    -webkit-mask-image: linear-gradient(180deg, #000 0, transparent 30%, transparent 70%, #000 100%);
-    mask-image: linear-gradient(180deg, #000 0, transparent 30%, transparent 70%, #000 100%); }
+  /* Light leak (2026-10-26, after the frosted bands were turned down): the
+     burn of light that enters a film frame from its edge. Warm, from the
+     right edge only, with a hot core high up and film grain on it; a thin
+     cool line on the far left. The page itself stays plain white. */
   .l-hero, #sec-results .r-hero, #sec-myreports .r-hero, #sec-loading { background: transparent; }
-  .l-hero::before, #sec-results .r-hero::before, #sec-myreports .r-hero::before, #sec-loading::before { display: none; }
-  @media (max-width: 640px) { body::before { background:
-      radial-gradient(ellipse 170% 46% at 50% -8%, rgba(150,168,190,0.82) 0%, rgba(188,191,199,0.6) 34%, rgba(116,169,201,0.36) 60%, rgba(255,255,255,0) 84%),
-      radial-gradient(ellipse 170% 44% at 50% 108%, rgba(206,176,164,0.88) 0%, rgba(216,194,183,0.62) 30%, rgba(116,169,201,0.38) 60%, rgba(255,255,255,0) 86%); } }
-  @media (max-width: 1359px) { .area-nav { background: rgba(255,255,255,0.6) !important; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); } }
-  .menu-overlay::before { background:
-      radial-gradient(ellipse 110% 58% at 50% -10%, rgba(150,168,190,0.78) 0%, rgba(188,191,199,0.55) 34%, rgba(116,169,201,0.32) 58%, rgba(255,255,255,0) 82%),
-      radial-gradient(ellipse 110% 56% at 50% 110%, rgba(206,176,164,0.85) 0%, rgba(216,194,183,0.6) 30%, rgba(116,169,201,0.36) 58%, rgba(255,255,255,0) 84%) !important; }
+  .l-hero::before, #sec-results .r-hero::before, #sec-myreports .r-hero::before, #sec-loading::before, .menu-overlay::before {
+    display: block; filter: blur(2px); background:
+      radial-gradient(5% 24% at 100% 20%, rgba(255,250,236,1) 0%, rgba(255,226,170,0.85) 45%, rgba(255,226,170,0) 100%),
+      radial-gradient(9% 85% at 100% 40%, rgba(255,246,220,1) 0%, rgba(255,200,130,0.9) 30%, rgba(240,110,50,0.65) 60%, rgba(220,40,30,0) 100%),
+      radial-gradient(26% 90% at 104% 40%, rgba(236,88,40,0.5) 0%, rgba(225,36,31,0.28) 45%, rgba(139,25,33,0.12) 70%, rgba(139,25,33,0) 100%),
+      radial-gradient(5% 40% at 0% 20%, rgba(88,146,196,0.35) 0%, rgba(88,146,196,0) 100%) !important; }
+  @media (max-width: 640px) { .l-hero::before, #sec-results .r-hero::before, #sec-myreports .r-hero::before, #sec-loading::before, .menu-overlay::before { opacity: 0.85; } }
+  .l-hero::after, #sec-results .r-hero::after, #sec-myreports .r-hero::after, #sec-loading::after {
+    display: block; opacity: 0.4; mix-blend-mode: multiply;
+    -webkit-mask-image: radial-gradient(28% 90% at 100% 40%, #000 30%, transparent); mask-image: radial-gradient(28% 90% at 100% 40%, #000 30%, transparent); }
   #sec-form::before { display: none; }
-  .l-nav.is-light, .l-nav.is-scrolled, #sec-results .r-header.is-light, #sec-myreports .r-header.is-light, #sec-results .r-header.is-scrolled, #sec-myreports .r-header.is-scrolled, .f-header, .r-header { background: rgba(255,255,255,0.45); }
+  .l-nav.is-light, .l-nav.is-scrolled, #sec-results .r-header.is-light, #sec-myreports .r-header.is-light, #sec-results .r-header.is-scrolled, #sec-myreports .r-header.is-scrolled, .f-header, .r-header { background: rgba(255,255,255,0.86); }
   .menu-header { background: rgba(255,255,255,0.9); }
   @media (max-width: 1359px) { .area-nav { background: rgba(255,255,255,0.94); } }
   #sec-loading .loading-dim.is-active { background: #f5f5f4; }
