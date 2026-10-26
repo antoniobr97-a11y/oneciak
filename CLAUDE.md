@@ -405,7 +405,7 @@ anteprime 88% corrette, 0 inventati; report completi 64% corretti, 0 inventati.
   più un commit "TEST ONLY" (motivo dell'errore in get-report e limite 12
   report con `CONTEXT=deploy-preview`). MAI portarlo su main.
 
-## Report su iPhone (2026-10-24, IN ATTESA DELL'OK DI ANTONIO)
+## Report su iPhone (2026-10-24, PUBBLICATO il 2026-10-26, main e98d964)
 
 Antonio: "il full report da iPhone è troppo pesante da leggere e pieno di
 finestre a destra e a sinistra, l'esperienza deve essere unica e piacevole".
@@ -449,6 +449,22 @@ Da fare, in ordine:
 5. Report: nei corti spesso nessun film di confronto (regola severa, voluto);
    le regole dentro PDF non vengono citate (non si leggono i PDF).
 6. PR #81 resta bozza di prova: non va mai mergiata.
+
+## Giro Impeccable del 2026-10-26 (pubblicato, main e98d964)
+
+Critica 26/40 (`.impeccable/critique/`). Fatto: le 5 aree non si ripetono più
+(domande dentro la scheda della home, nel report una sola lista con barra in
+ogni riga, niente `areaOverview`), niente micro-etichette mono (Summary,
+OneCiak score, Download, Sample report), rischio/opportunità come inizio di
+frase, errori nella pagina invece di `alert()` (`unlockFail`, `pdfFail`),
+caricamento allineato a sinistra con il titolo del film, bottone sempre
+"Analyze your film", arancio "Moderate" #965800 (prima 3,76:1).
+Antonio: accorciare la sfumatura del report la rendeva uno "stacco di colpo",
+rimessa lunga. Gli piace "il blu/rosso con sfondo nero". In attesa della sua
+scelta: A sfumatura lunga (~480px) o B report tutto scuro con bagliori fissi
+(CSS in scratchpad `shots/dark-base.css`, 1.509 testi misurati tutti sopra
+soglia). Nota: l'8 ottobre un report tutto scuro (a119ff5) era stato
+annullato su sua richiesta (138e1bd), quella versione non aveva i bagliori.
 
 ## Principio di onestà (esplicito, non derogabile)
 
