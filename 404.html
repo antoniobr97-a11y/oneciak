@@ -19,6 +19,14 @@ a.btn{display:inline-block;margin-top:34px;background:#f2ede6;color:#140d10;font
 a.btn:active{transform:scale(.97)}
 @media (hover:hover) and (pointer:fine){a.btn:hover{background:#fff}}
 @media (max-width:640px){main{padding:0 20px}.logo{left:20px}}
+/* light mode follows the device, like the rest of the site (2026-10-26) */
+@media (prefers-color-scheme: light){
+body{background:#f4f1ec;color:#161616}
+body::before{background:radial-gradient(70% 52% at 108% -6%,rgba(235,137,63,.55) 0%,rgba(236,88,40,.4) 24%,rgba(225,36,31,.22) 42%,rgba(225,36,31,0) 66%),radial-gradient(55% 36% at -12% 58%,rgba(52,96,118,.26) 0%,rgba(52,96,118,.12) 42%,rgba(52,96,118,0) 72%)}
+p{color:#57524d}
+a.btn{background:#161616;color:#f4f1ec}
+@media (hover:hover) and (pointer:fine){a.btn:hover{background:#000}}
+}
 </style>
 </head>
 <body>
