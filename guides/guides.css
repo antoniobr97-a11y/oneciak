@@ -186,14 +186,17 @@ a { color: inherit; }
 /* Light and dark (2026-10-26), same rules as index.html: light mode is light
    everywhere with soft glows, dark mode is the night everywhere. */
 @media (prefers-color-scheme: light) {
-  .g-hero { --night: #f4f1ec; --on-night: #161616; --on-night-2: #57524d; padding-bottom: 72px; }
+  :root { --paper: #ffffff; --border: #e2e0dd; }
+  body { background: #ffffff; }
+  body::before, body::after { display: none; }
+  .g-hero { --night: #ffffff; --on-night: #161616; --on-night-2: #57524d; padding-bottom: 72px; }
   .g-hero::before {
     background:
       radial-gradient(70% 52% at 108% -6%, rgba(235,137,63,0.55) 0%, rgba(236,88,40,0.40) 24%, rgba(225,36,31,0.22) 42%, rgba(225,36,31,0) 66%),
-      radial-gradient(55% 36% at -12% 58%, rgba(52,96,118,0.26) 0%, rgba(52,96,118,0.12) 42%, rgba(52,96,118,0) 72%),
+      radial-gradient(55% 36% at -12% 58%, rgba(88,146,196,0.20) 0%, rgba(88,146,196,0.08) 42%, rgba(88,146,196,0) 72%),
       radial-gradient(50% 28% at 112% 78%, rgba(225,36,31,0.20) 0%, rgba(225,36,31,0.07) 42%, rgba(225,36,31,0) 70%);
   }
-  .g-hero::after { opacity: 0.16; }
+  .g-hero::after { display: none; }
   .g-nav { border-bottom-color: rgba(20,18,16,0.07); }
   .g-head .mono, .g-meta { color: var(--muted); }
   .g-crumb a { text-decoration-color: rgba(22,22,22,0.35); }
