@@ -7,7 +7,7 @@
 <meta name="google" content="notranslate">
 <title>OneCiak · Film market analysis</title>
 <meta name="description" content="Does your film have a market? A free market analysis of your project across five areas: creative package, financing, audience, festivals and distribution.">
-<meta name="theme-color" content="#f4f1ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#140d10" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://oneciak.com/">
 <meta property="og:type" content="website">
@@ -477,7 +477,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 }
 .loading-dim.is-active .loading-dim-num { color: #fff; background: var(--accent); box-shadow: none; animation: loadingDimPulse 1.6s ease-in-out infinite; }
 .loading-dim.is-done .loading-dim-num { color: #fff; background: var(--success); box-shadow: none; font-size: 0; }
-.loading-dim.is-done .loading-dim-num::after { content: '✓'; font-size: 12px; }
+.loading-dim.is-done .loading-dim-num::after { content: ''; display: block; width: 9px; height: 5px; margin-top: 2px; border-left: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); }
 @keyframes loadingDimPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0,0,0,0.18); } 50% { box-shadow: 0 0 0 5px rgba(0,0,0,0); } }
 .loading-dim-name { font-size: 14.5px; font-weight: 600; color: var(--text); }
 .loading-timer { margin-top: 28px; font-size: 13px; color: var(--muted-light); font-weight: 500; font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border-light); border-radius: 999px; padding: 6px 14px; }
@@ -648,7 +648,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .accordion-score { font-family: var(--sf); font-size: 19px; font-weight: 700; }
 .accordion-score .denom { font-size: 12px; color: var(--muted); font-weight: 500; }
 .accordion-score-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
-.accordion-chevron { font-size: 13px; color: var(--muted-light); flex-shrink: 0; transition: transform 0.25s var(--ease); }
+.accordion-chevron { display: inline-flex; color: var(--muted-light); flex-shrink: 0; transition: transform 0.25s var(--ease); }
 .accordion-trigger.open .accordion-chevron { transform: rotate(180deg); }
 .accordion-body { display: none; padding: 0 20px 22px; background: var(--white); }
 .accordion-body.open { display: block; animation: riseIn 0.3s var(--ease) both; }
@@ -726,7 +726,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #sec-results .r-main { padding: 0 24px 90px; max-width: 928px; }
 #sec-myreports .r-main { padding: 0 24px 90px; max-width: 688px; }
 .exec-card, .extra-card, .accordion-wrap, .pdf-card { background: transparent; box-shadow: none !important; border: 0 !important; border-radius: 0; padding-left: 0; padding-right: 0; }
-.exec-card { padding-top: 0; padding-bottom: 36px; margin-bottom: 28px; border-bottom: 1px solid var(--border) !important; }
+.exec-card { padding-top: 0; padding-bottom: 8px; margin-bottom: 28px; }
 .exec-label, .tips-label, .action-label, .flags-label, .exec-box-label, .roadmap-phase { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; }
 .exec-label { color: var(--muted); }
 .exec-text { font-size: 18px; line-height: 1.6; }
@@ -1061,6 +1061,14 @@ details.more > summary:active { transform: scale(0.98); }
   .accordion-score-label { display: none; }
 }
 @media (min-width: 641px) { .r-more { display: none; } }
+/* Labels are words, so they are set as words (2026-10-26): sentence case in
+   the body face, small and bold. Mono caps stay only for numbers, dates and
+   counts, where the fixed width helps reading. */
+.menu-sec-title, .exec-label, .tips-label, .action-label, .flags-label, .exec-box-label, .unlock-label, .fs-label, .fact-k, .sub-k, .an-top, .next-area-k, .mr-email {
+  font-family: var(--sf); font-size: 14px; font-weight: 700; letter-spacing: 0; text-transform: none;
+}
+.next-area-k, .mr-email { font-weight: 400; }
+
 /* ══════════════════════
    LIGHT AND DARK (Antonio, 2026-10-26): the site follows the device.
    Light mode is light everywhere, the home hero included, with the same
@@ -1070,25 +1078,28 @@ details.more > summary:active { transform: scale(0.98); }
 ══════════════════════ */
 @media (prefers-color-scheme: light) {
   /* the "night" surfaces become the paper: same components, inverted tokens */
-  .l-hero, .l-nav, .menu-overlay, #sec-results, #sec-myreports, #sec-loading { --night: #f4f1ec; --on-night: #161616; --on-night-2: #57524d; }
+  .l-hero, .l-nav, .menu-overlay, #sec-results, #sec-myreports, #sec-loading { --night: #ffffff; --on-night: #161616; --on-night-2: #57524d; }
   .l-hero::before, #sec-results .r-hero::before, #sec-myreports .r-hero::before, #sec-loading::before {
     background:
       radial-gradient(70% 52% at 108% -6%, rgba(235,137,63,0.55) 0%, rgba(236,88,40,0.40) 24%, rgba(225,36,31,0.22) 42%, rgba(225,36,31,0) 66%),
-      radial-gradient(55% 36% at -12% 58%, rgba(52,96,118,0.26) 0%, rgba(52,96,118,0.12) 42%, rgba(52,96,118,0) 72%),
+      radial-gradient(55% 36% at -12% 58%, rgba(88,146,196,0.20) 0%, rgba(88,146,196,0.08) 42%, rgba(88,146,196,0) 72%),
       radial-gradient(50% 28% at 112% 78%, rgba(225,36,31,0.20) 0%, rgba(225,36,31,0.07) 42%, rgba(225,36,31,0) 70%);
   }
-  .l-hero::after, #sec-results .r-hero::after, #sec-myreports .r-hero::after, #sec-loading::after { opacity: 0.16; }
-  .menu-overlay::before { background: radial-gradient(70% 45% at 110% -8%, rgba(235,137,63,0.45) 0%, rgba(225,36,31,0.22) 35%, rgba(225,36,31,0) 60%), radial-gradient(50% 35% at -12% 85%, rgba(52,96,118,0.22) 0%, rgba(52,96,118,0) 70%); }
-  /* small text stays at 4.5:1 or more over the soft glows and the satin's darker folds (measured on pixels) */
-  :root { --muted: #4a4a4a; --muted-light: #4a4a4a; --success: #0a5c2d; --danger: #8a2419; }
-  .score-mid { color: #7a4700; }
-  .tips-label, .action-label, .unlock-label, .an-top, .accordion-trigger.open .accordion-icon, .loading-dim.is-active .loading-dim-num, #sec-loading .loading-dim.is-active .loading-dim-num { color: #93391a !important; }
-  .exec-box.risk .exec-lead { color: var(--danger); }
-  .exec-box.opp .exec-lead { color: var(--success); }
+  .l-hero::after, #sec-results .r-hero::after, #sec-myreports .r-hero::after, #sec-loading::after { display: none; }
+  .menu-overlay::before { background: radial-gradient(70% 45% at 110% -8%, rgba(235,137,63,0.45) 0%, rgba(225,36,31,0.22) 35%, rgba(225,36,31,0) 60%), radial-gradient(50% 35% at -12% 85%, rgba(88,146,196,0.16) 0%, rgba(88,146,196,0) 70%); }
+  /* white means white (Antonio, 2026-10-26): no satin sheen, no grain, no cream */
+  :root { --paper: #ffffff; --cream: #f5f5f4; --border: #e2e0dd; --border-light: #ecebe9; --field: rgba(20,18,16,0.04); --field-hover: rgba(20,18,16,0.065); }
+  body { background: #ffffff; }
+  body::before, body::after { display: none; }
+  #sec-form::before { display: none; }
+  .l-nav.is-light, .l-nav.is-scrolled, #sec-results .r-header.is-light, #sec-myreports .r-header.is-light, #sec-results .r-header.is-scrolled, #sec-myreports .r-header.is-scrolled, .f-header, .r-header { background: rgba(255,255,255,0.86); }
+  .menu-header { background: rgba(255,255,255,0.9); }
+  @media (max-width: 1359px) { .area-nav { background: rgba(255,255,255,0.94); } }
+  #sec-loading .loading-dim.is-active { background: #f5f5f4; }
+  .sample-banner { background: #f5f5f4; border-bottom: 1px solid var(--border-light); }
   .l-hero { padding-bottom: 120px; }
   #sec-results .r-hero, #sec-myreports .r-hero { padding-bottom: 56px; }
   .l-nav { border-bottom-color: rgba(20,18,16,0.07); }
-  .l-nav.is-scrolled { background: rgba(244,241,236,0.8); }
   .l-nav-reports { border-color: rgba(20,18,16,0.18); }
   @media (hover: hover) and (pointer: fine) { .l-btn:hover { background: #000; } }
   .l-terms input[type="checkbox"] { border-color: rgba(20,18,16,0.3); background: rgba(255,255,255,0.5); }
@@ -1100,15 +1111,13 @@ details.more > summary:active { transform: scale(0.98); }
   .l-sheet-score, .l-sheet-row { border-bottom-color: rgba(20,18,16,0.08); }
   .l-bar { background: rgba(20,18,16,0.1); }
   .l-bar i.ember { background: #c4562a; }
-  .menu-header { background: rgba(244,241,236,0.9); border-bottom-color: rgba(20,18,16,0.07); }
+  .menu-header { border-bottom-color: rgba(20,18,16,0.07); }
   .menu-steps, .menu-faq-item:first-of-type { border-top-color: rgba(20,18,16,0.14); }
   .menu-steps li, .menu-faq-item { border-bottom-color: rgba(20,18,16,0.08); }
   #sec-results .r-header, #sec-myreports .r-header { border-bottom-color: rgba(20,18,16,0.07); }
-  #sec-results .r-header.is-scrolled, #sec-myreports .r-header.is-scrolled { background: rgba(244,241,236,0.8); }
   #sec-results .back-btn, #sec-myreports .back-btn { background: rgba(255,255,255,0.45); border-color: rgba(20,18,16,0.18); }
   .overall-card { background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.4)); border-color: rgba(20,18,16,0.08) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.7) !important; }
   .sample-banner a { color: inherit !important; }
-  #sec-loading .loading-dim.is-active { background: rgba(255,255,255,0.5); }
   #sec-loading .loading-dim.is-active .loading-dim-num { color: #b4552b; }
   #sec-loading .loading-dim.is-done .loading-dim-num { color: var(--success); }
   #sec-loading .loading-timer { border-color: rgba(20,18,16,0.14); }
@@ -1167,6 +1176,7 @@ details.more > summary:active { transform: scale(0.98); }
   .pdf-row button small { color: #5c5650; }
   @media (hover: hover) and (pointer: fine) { .btn-primary:hover, .btn-unlock:hover, .pdf-row button:hover { background: #fff; } }
   .tip-link { color: var(--text); }
+  details.more > summary, .r-road-d { text-decoration-color: rgba(242,237,230,0.4); }
   input::placeholder, textarea::placeholder, #sec-form input::placeholder, #sec-form textarea::placeholder, #sec-myreports input[type="email"]::placeholder { color: #8f8880; }
   #sec-form input[type="text"]:focus, #sec-form select:focus, #sec-form textarea:focus, .unlock-field input:focus, #sec-myreports input[type="email"]:focus { background-color: rgba(255,255,255,0.08); }
   select option { color: #141210; background: #f2ede6; }
@@ -2310,7 +2320,7 @@ function renderFree(r, title) {
       '<div><div class="accordion-label">'+sec.label+'</div><div class="accordion-sublabel">'+sec.sublabel+'</div></div>'+
       '</div>'+
       accScore(sec.score)+
-      '<span class="accordion-chevron">▾</span>'+
+      '<span class="accordion-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'+
       '</button>'+
       '<div class="accordion-body" id="acc-body-'+idx+'">'+body+'</div>'+
       '</div>';
@@ -2428,7 +2438,7 @@ function renderFull(r, title) {
       '<div><div class="accordion-label">'+sec.label+'</div><div class="accordion-sublabel">'+sec.sublabel+'</div></div>'+
       '</div>'+
       scoreHtml+
-      '<span class="accordion-chevron">▾</span>'+
+      '<span class="accordion-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'+
       '</button>'+
       '<div class="accordion-body" id="acc-body-'+idx+'">'+
       '<div class="accordion-divider"></div>'+
