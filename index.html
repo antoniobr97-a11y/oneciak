@@ -1114,6 +1114,15 @@ details.more > summary:active { transform: scale(0.98); }
   /* white means white (Antonio, 2026-10-26): no satin sheen, no grain, no cream */
   :root { --paper: #ffffff; --cream: #f5f5f4; --border: #e2e0dd; --border-light: #ecebe9; --field: rgba(20,18,16,0.04); --field-hover: rgba(20,18,16,0.065); }
   body { background: #ffffff; }
+  /* Small text stays above 4.5:1 where it scrolls over the coloured bands
+     (values worked out from the darkest band pixel measured, 2026-10-26). */
+  :root { --muted: #4a4a4a; --muted-light: #4a4a4a; --success: #0a5c2d; --danger: #8a2419; }
+  .score-mid { color: #6e3f00; }
+  .tips-label, .action-label, .unlock-label, .an-top, .accordion-trigger.open .accordion-icon, #sec-loading .loading-dim.is-active .loading-dim-num { color: #93391a !important; }
+  .exec-box.risk .exec-lead { color: var(--danger); }
+  .exec-box.opp .exec-lead { color: var(--success); }
+  .fs-col.red li::before { background: var(--danger); }
+  .fs-col.green li::before { background: var(--success); }
   /* Daylight (Antonio's reference, 2026-10-26, colours sampled from it):
      frosted blue-grey coming in from the top, a warm blush with a ring of
      sky blue coming up from the bottom, both centred; white in the middle

@@ -195,6 +195,8 @@ a { color: inherit; }
     -webkit-mask-image: linear-gradient(180deg, #000 0, transparent 30%, transparent 70%, #000 100%);
     mask-image: linear-gradient(180deg, #000 0, transparent 30%, transparent 70%, #000 100%); }
   .g-hero { background: transparent; }
+  :root { --muted: #4a4a4a; --ember-text: #8f3a17; }
+  .rm-side a.is-complete .rm-nav-c { color: #0a5c2d; }
   .g-hero::before { display: none !important; }
   .g-hero { --night: #ffffff; --on-night: #161616; --on-night-2: #47423e; padding-bottom: 72px; }
   .g-hero::before {
