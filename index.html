@@ -1079,7 +1079,8 @@ details.more > summary:active { transform: scale(0.98); }
 .rblock-count { font-family: var(--sf); font-size: 14px; color: var(--muted); margin-left: 10px; }
 .action-item .action-tag { font-family: var(--sf) !important; font-size: 15px !important; font-weight: 700 !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--text) !important; }
 .accordion-trigger { flex-wrap: wrap; row-gap: 4px; }
-.accordion-sublabel { flex-basis: 100%; font-size: 14px; line-height: 1.45; margin-top: 0; max-width: 62ch; color: var(--muted); }
+.accordion-sublabel { flex-basis: 100%; font-size: 14px; line-height: 1.45; margin-top: 0; padding-right: 22%; color: var(--muted); }
+@media (max-width: 640px) { .accordion-sublabel { padding-right: 0; } }
 
 .r-summary-extra { margin-top: 14px; }
 .r-summary-extra p + p { margin-top: 10px; }
@@ -1101,7 +1102,7 @@ details.more > summary:active { transform: scale(0.98); }
 ══════════════════════ */
 @media (prefers-color-scheme: light) {
   /* the "night" surfaces become the paper: same components, inverted tokens */
-  .l-hero, .l-nav, .menu-overlay, #sec-results, #sec-myreports, #sec-loading { --night: #ffffff; --on-night: #161616; --on-night-2: #57524d; }
+  .l-hero, .l-nav, .menu-overlay, #sec-results, #sec-myreports, #sec-loading { --night: #ffffff; --on-night: #161616; --on-night-2: #47423e; }
   .l-hero::before, #sec-results .r-hero::before, #sec-myreports .r-hero::before, #sec-loading::before {
     background:
       radial-gradient(62% 74% at 104% -4%, rgba(235,137,63,0.72) 0%, rgba(236,88,40,0.52) 24%, rgba(225,36,31,0.30) 44%, rgba(225,36,31,0) 70%),
@@ -1126,7 +1127,7 @@ details.more > summary:active { transform: scale(0.98); }
   .l-nav-reports { border-color: rgba(20,18,16,0.18); }
   @media (hover: hover) and (pointer: fine) { .l-btn:hover { background: #000; } }
   .l-terms input[type="checkbox"] { border-color: rgba(20,18,16,0.3); background: rgba(255,255,255,0.5); }
-  .l-terms label { color: var(--muted); }
+  .l-terms label { color: #4a4a4a; } /* stays over 4.5:1 where the warm glow reaches the text on phones */
   .l-terms-error { color: var(--danger); }
   .l-sample-link { text-decoration-color: rgba(20,18,16,0.3); }
   .l-sheet { background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.42)); border-color: rgba(20,18,16,0.08); box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 18px 40px -24px rgba(90,40,20,0.25); }

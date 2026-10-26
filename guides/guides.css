@@ -189,7 +189,7 @@ a { color: inherit; }
   :root { --paper: #ffffff; --border: #e2e0dd; }
   body { background: #ffffff; }
   body::before, body::after { display: none; }
-  .g-hero { --night: #ffffff; --on-night: #161616; --on-night-2: #57524d; padding-bottom: 72px; }
+  .g-hero { --night: #ffffff; --on-night: #161616; --on-night-2: #47423e; padding-bottom: 72px; }
   .g-hero::before {
     background:
       radial-gradient(62% 74% at 104% -4%, rgba(235,137,63,0.72) 0%, rgba(236,88,40,0.52) 24%, rgba(225,36,31,0.30) 44%, rgba(225,36,31,0) 70%),
