@@ -192,9 +192,9 @@ a { color: inherit; }
   .g-hero { --night: #ffffff; --on-night: #161616; --on-night-2: #57524d; padding-bottom: 72px; }
   .g-hero::before {
     background:
-      radial-gradient(70% 52% at 108% -6%, rgba(235,137,63,0.55) 0%, rgba(236,88,40,0.40) 24%, rgba(225,36,31,0.22) 42%, rgba(225,36,31,0) 66%),
-      radial-gradient(55% 36% at -12% 58%, rgba(88,146,196,0.20) 0%, rgba(88,146,196,0.08) 42%, rgba(88,146,196,0) 72%),
-      radial-gradient(50% 28% at 112% 78%, rgba(225,36,31,0.20) 0%, rgba(225,36,31,0.07) 42%, rgba(225,36,31,0) 70%);
+      radial-gradient(62% 74% at 104% -4%, rgba(235,137,63,0.72) 0%, rgba(236,88,40,0.52) 24%, rgba(225,36,31,0.30) 44%, rgba(225,36,31,0) 70%),
+      radial-gradient(48% 58% at -6% 78%, rgba(64,124,196,0.40) 0%, rgba(64,124,196,0.17) 45%, rgba(64,124,196,0) 76%),
+      radial-gradient(34% 28% at 88% 100%, rgba(225,36,31,0.26) 0%, rgba(225,36,31,0.08) 45%, rgba(225,36,31,0) 72%);
   }
   .g-hero::after { display: none; }
   .g-nav { border-bottom-color: rgba(20,18,16,0.07); }

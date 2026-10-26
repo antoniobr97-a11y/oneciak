@@ -264,7 +264,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-sheet-score .n small { font-size: 20px; color: var(--on-night-2); }
 .l-sheet-score .l { font-size: 14px; font-weight: 500; }
 .l-sheet-rows { display: block; }
-.l-sheet-row { display: grid; grid-template-columns: 28px 1fr 96px 26px; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.09); font-size: 14px; }
+.l-sheet-row { display: grid; grid-template-columns: 1fr 96px 26px; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.09); font-size: 14px; }
 .l-sheet-row .l-mono { color: var(--on-night-2); font-size: 11px; }
 .l-sheet-row { align-items: start; }
 .l-sheet-row .l-mono { padding-top: 3px; }
@@ -847,8 +847,8 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .tips-block, .action-block { margin-top: 28px; padding-top: 24px; }
 .tips-label, .action-label { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: #b4552b; margin-bottom: 14px; }
 .tips-list { list-style: none; margin: 0; padding: 0; counter-reset: tip; max-width: 70ch; }
-.tips-list li { counter-increment: tip; position: relative; padding: 0 0 0 38px; margin-bottom: 16px; }
-.tips-list li::before { content: counter(tip, decimal-leading-zero); position: absolute; left: 0; top: 3px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--muted); }
+.tips-list li { position: relative; padding: 0 0 0 26px; margin-bottom: 16px; }
+.tips-list li::before { content: ''; position: absolute; left: 0; top: 0.8em; width: 12px; height: 1.5px; background: #b4552b; }
 .tips-list .tip-text { padding-left: 0; font-size: 15px; line-height: 1.6; margin-bottom: 0; }
 .tips-list .tip-text::before { content: none; }
 .action-item { margin-bottom: 14px; }
@@ -971,6 +971,9 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .loading-dim.is-active .loading-dim-num { background: none; color: #b4552b; animation: none; }
 .loading-dim.is-done .loading-dim-num { background: none; color: var(--success); }
 .loading-dim-name { font-family: var(--display); font-size: 17px; font-weight: 500; letter-spacing: -0.01em; }
+.loading-dim .loading-dim-num { min-width: 0; width: 10px; height: 10px; margin-top: 7px; padding: 0; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; font-size: 0; }
+.loading-dim.is-active .loading-dim-num { background: currentColor; }
+.loading-dim.is-done .loading-dim-num { width: 12px; box-shadow: none; border-radius: 0; background: none; }
 .loading-dim { align-items: flex-start; }
 .loading-dim-num { height: auto; padding-top: 4px; justify-content: flex-start; }
 .loading-dim-name small { display: none; margin-top: 4px; font-family: var(--sf); font-size: 14px; font-weight: 400; line-height: 1.45; letter-spacing: 0; color: var(--on-night-2); }
@@ -1009,8 +1012,8 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   .l-wrap { padding: 0 20px; }
   .l-desc { font-size: 16.5px; }
   .l-sheet { padding: 22px 20px 12px; }
-  .l-sheet-row { grid-template-columns: 26px 1fr 72px 16px; gap: 10px; }
-  @media (max-width: 360px) { .l-sheet-row { grid-template-columns: 20px 1fr 44px 24px; gap: 8px; } }
+  .l-sheet-row { grid-template-columns: 1fr 72px 26px; gap: 10px; }
+  @media (max-width: 360px) { .l-sheet-row { grid-template-columns: 1fr 48px 24px; gap: 8px; } }
   .l-hero-grid { padding-top: 96px; }
   .f-main { padding: 32px 20px 80px; }
   .exec-row { grid-template-columns: 1fr; }
@@ -1062,7 +1065,7 @@ details.more > summary:active { transform: scale(0.98); }
   .accordion-icon { display: none; }
   .accordion-score-label { display: none; }
 }
-@media (min-width: 641px) { .r-more { display: none; } }
+@media (min-width: 641px) { .r-more:not(.has-extra) { display: none; } }
 /* Labels are words, so they are set as words (2026-10-26): sentence case in
    the body face, small and bold. Mono caps stay only for numbers, dates and
    counts, where the fixed width helps reading. */
@@ -1070,6 +1073,24 @@ details.more > summary:active { transform: scale(0.98); }
   font-family: var(--sf); font-size: 14px; font-weight: 700; letter-spacing: 0; text-transform: none;
 }
 .next-area-k, .mr-email { font-weight: 400; }
+
+/* Report reorganised (2026-10-26): counts in words, phases in plain bold,
+   the verdict on the area row in readable size. */
+.rblock-count { font-family: var(--sf); font-size: 14px; color: var(--muted); margin-left: 10px; }
+.action-item .action-tag { font-family: var(--sf) !important; font-size: 15px !important; font-weight: 700 !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--text) !important; }
+.accordion-trigger { flex-wrap: wrap; row-gap: 4px; }
+.accordion-sublabel { flex-basis: 100%; font-size: 14px; line-height: 1.45; margin-top: 0; max-width: 62ch; color: var(--muted); }
+
+.r-summary-extra { margin-top: 14px; }
+.r-summary-extra p + p { margin-top: 10px; }
+@media (min-width: 641px) { .r-more.has-extra { display: inline-block; margin-top: 10px; padding: 6px 0; border: 0; background: none; font: inherit; font-size: 15px; color: var(--on-night); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; } }
+
+/* iPhone Safari zooms the whole page in when a field's text is under 16px
+   and does not zoom back out, which left the site cut off at both sides on
+   Antonio's phone (2026-10-26). Fields are 16px on touch screens. */
+@media (hover: none), (max-width: 1024px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea { font-size: 16px !important; }
+}
 
 /* ══════════════════════
    LIGHT AND DARK (Antonio, 2026-10-26): the site follows the device.
@@ -1083,9 +1104,9 @@ details.more > summary:active { transform: scale(0.98); }
   .l-hero, .l-nav, .menu-overlay, #sec-results, #sec-myreports, #sec-loading { --night: #ffffff; --on-night: #161616; --on-night-2: #57524d; }
   .l-hero::before, #sec-results .r-hero::before, #sec-myreports .r-hero::before, #sec-loading::before {
     background:
-      radial-gradient(70% 52% at 108% -6%, rgba(235,137,63,0.55) 0%, rgba(236,88,40,0.40) 24%, rgba(225,36,31,0.22) 42%, rgba(225,36,31,0) 66%),
-      radial-gradient(55% 36% at -12% 58%, rgba(88,146,196,0.20) 0%, rgba(88,146,196,0.08) 42%, rgba(88,146,196,0) 72%),
-      radial-gradient(50% 28% at 112% 78%, rgba(225,36,31,0.20) 0%, rgba(225,36,31,0.07) 42%, rgba(225,36,31,0) 70%);
+      radial-gradient(62% 74% at 104% -4%, rgba(235,137,63,0.72) 0%, rgba(236,88,40,0.52) 24%, rgba(225,36,31,0.30) 44%, rgba(225,36,31,0) 70%),
+      radial-gradient(48% 58% at -6% 78%, rgba(64,124,196,0.40) 0%, rgba(64,124,196,0.17) 45%, rgba(64,124,196,0) 76%),
+      radial-gradient(34% 28% at 88% 100%, rgba(225,36,31,0.26) 0%, rgba(225,36,31,0.08) 45%, rgba(225,36,31,0) 72%);
   }
   .l-hero::after, #sec-results .r-hero::after, #sec-myreports .r-hero::after, #sec-loading::after { display: none; }
   .menu-overlay::before { background: radial-gradient(70% 45% at 110% -8%, rgba(235,137,63,0.45) 0%, rgba(225,36,31,0.22) 35%, rgba(225,36,31,0) 60%), radial-gradient(50% 35% at -12% 85%, rgba(88,146,196,0.16) 0%, rgba(88,146,196,0) 70%); }
@@ -1212,9 +1233,9 @@ details.more > summary:active { transform: scale(0.98); }
       <div class="menu-sec">
         <div class="menu-sec-title">How it works</div>
         <ol class="menu-steps">
-          <li><span class="menu-step-n">01</span><span class="menu-step-title">Describe your project</span></li>
-          <li><span class="menu-step-n">02</span><span class="menu-step-title">See a preview of all five scores</span></li>
-          <li><span class="menu-step-n">03</span><span class="menu-step-title">Get the full report by email, free</span></li>
+          <li><span class="menu-step-title">Describe your project</span></li>
+          <li><span class="menu-step-title">See a preview of all five scores</span></li>
+          <li><span class="menu-step-title">Get the full report by email, free</span></li>
         </ol>
       </div>
       <div class="menu-sec">
@@ -1226,7 +1247,7 @@ details.more > summary:active { transform: scale(0.98); }
         <details class="menu-faq-item"><summary class="menu-faq-q">I've never made a film. Is it still useful?</summary><div class="menu-faq-a">Yes, that's who it's built for. Pick "First film" in the Experience field and the advice adjusts.</div></details>
         <details class="menu-faq-item"><summary class="menu-faq-q">Where do I start after my report?</summary><div class="menu-faq-a">Your report shows which of the nine stages your project is at. The <a href="/roadmap/">film roadmap</a> lists every job in each stage, from script to release, with the rules that apply quoted from official sources.</div></details>
       </div>
-      <button class="menu-cta" onclick="closeMenuGoLanding()">Analyze your film</button>
+      <button class="menu-cta" onclick="closeMenuGoLanding()">Analyze your project</button>
       <p class="menu-legal"><a href="/roadmap/">Film roadmap</a><a href="/guides/">Guides</a><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></p>
     </div>
   </div>
@@ -1253,7 +1274,7 @@ details.more > summary:active { transform: scale(0.98); }
         </div>
         <div class="l-terms-error" id="termsError" role="alert">Please accept the disclaimer to continue.</div>
         <div class="l-actions">
-          <button class="l-btn" onclick="onStartClick()">Analyze your film</button>
+          <button class="l-btn" onclick="onStartClick()">Analyze your project</button>
         </div>
         <p class="l-specs">No account needed. Save it as a PDF.</p>
       </div>
@@ -1262,11 +1283,11 @@ details.more > summary:active { transform: scale(0.98); }
         <span class="l-sheet-title">Northbound</span>
         <span class="l-sheet-score"><span class="n">5.0<small>/10</small></span><span class="l">Promising intimate concept, underdeveloped</span></span>
         <span class="l-sheet-rows">
-          <span class="l-sheet-row"><span class="l-mono">01</span><span class="l-sheet-name">Creative package<small>Is the logline strong, which attachments would move financiers.</small></span><span class="l-bar"><i class="ember" style="width:65%"></i></span><b>6.5</b></span>
-          <span class="l-sheet-row"><span class="l-mono">02</span><span class="l-sheet-name">Financial plan<small>Is the budget realistic, which funds and tax credits fit.</small></span><span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
-          <span class="l-sheet-row"><span class="l-mono">03</span><span class="l-sheet-name">Market &amp; audience<small>Who watches films like this, how comparable titles did.</small></span><span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
-          <span class="l-sheet-row"><span class="l-mono">04</span><span class="l-sheet-name">Festival strategy<small>Where to premiere first without burning your status.</small></span><span class="l-bar"><i style="width:50%"></i></span><b>5</b></span>
-          <span class="l-sheet-row" style="border-bottom:0"><span class="l-mono">05</span><span class="l-sheet-name">Distribution<small>Realistic routes to buyers, from festivals to streaming.</small></span><span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
+          <span class="l-sheet-row"><span class="l-sheet-name">Creative package<small>Is the logline strong, which attachments would move financiers.</small></span><span class="l-bar"><i class="ember" style="width:65%"></i></span><b>6.5</b></span>
+          <span class="l-sheet-row"><span class="l-sheet-name">Financial plan<small>Is the budget realistic, which funds and tax credits fit.</small></span><span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
+          <span class="l-sheet-row"><span class="l-sheet-name">Market &amp; audience<small>Who watches films like this, how comparable titles did.</small></span><span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
+          <span class="l-sheet-row"><span class="l-sheet-name">Festival strategy<small>Where to premiere first without burning your status.</small></span><span class="l-bar"><i style="width:50%"></i></span><b>5</b></span>
+          <span class="l-sheet-row" style="border-bottom:0"><span class="l-sheet-name">Distribution<small>Realistic routes to buyers, from festivals to streaming.</small></span><span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
         </span>
         <span class="l-sheet-foot"><span>Sample report, illustrative project</span><span>Open full report <span class="arrow">→</span></span></span>
       </button>
@@ -1459,7 +1480,7 @@ details.more > summary:active { transform: scale(0.98); }
     <div class="disclaimer-box">
       <div class="disclaimer-text"><strong>Disclaimer:</strong> Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. Results are estimates and do not guarantee any outcome.</div>
     </div>
-    <div class="f-submit"><button class="btn-primary" onclick="runAnalysis()">Analyze my film</button><p>No account required.</p></div>
+    <div class="f-submit"><button class="btn-primary" onclick="runAnalysis()">Analyze my project</button><p>No account required.</p></div>
     <div class="error-box" id="errorBox" role="alert"></div>
     </div>
   </div>
@@ -1472,11 +1493,11 @@ details.more > summary:active { transform: scale(0.98); }
     <div class="loading-title" id="loadingTitle">Reading your project</div>
     <div class="loading-desc" id="loadingDesc">Scoring your project across the five areas.</div>
     <div class="loading-dims" id="loadingDims" aria-hidden="true">
-      <div class="loading-dim" data-dim="0"><span class="loading-dim-num">01</span><span class="loading-dim-name">Creative Package<small>Is the logline strong, which attachments would move financiers.</small></span></div>
-      <div class="loading-dim" data-dim="1"><span class="loading-dim-num">02</span><span class="loading-dim-name">Financial Plan<small>Is the budget realistic, which funds and tax credits fit.</small></span></div>
-      <div class="loading-dim" data-dim="2"><span class="loading-dim-num">03</span><span class="loading-dim-name">Market &amp; Audience<small>Who watches films like this, how comparable titles did.</small></span></div>
-      <div class="loading-dim" data-dim="3"><span class="loading-dim-num">04</span><span class="loading-dim-name">Festival Strategy<small>Where to premiere first without burning your status.</small></span></div>
-      <div class="loading-dim" data-dim="4"><span class="loading-dim-num">05</span><span class="loading-dim-name">Distribution &amp; Revenue<small>Realistic routes to buyers, from festivals to streaming.</small></span></div>
+      <div class="loading-dim" data-dim="0"><span class="loading-dim-num" aria-hidden="true"></span><span class="loading-dim-name">Creative Package<small>Is the logline strong, which attachments would move financiers.</small></span></div>
+      <div class="loading-dim" data-dim="1"><span class="loading-dim-num" aria-hidden="true"></span><span class="loading-dim-name">Financial Plan<small>Is the budget realistic, which funds and tax credits fit.</small></span></div>
+      <div class="loading-dim" data-dim="2"><span class="loading-dim-num" aria-hidden="true"></span><span class="loading-dim-name">Market &amp; Audience<small>Who watches films like this, how comparable titles did.</small></span></div>
+      <div class="loading-dim" data-dim="3"><span class="loading-dim-num" aria-hidden="true"></span><span class="loading-dim-name">Festival Strategy<small>Where to premiere first without burning your status.</small></span></div>
+      <div class="loading-dim" data-dim="4"><span class="loading-dim-num" aria-hidden="true"></span><span class="loading-dim-name">Distribution &amp; Revenue<small>Realistic routes to buyers, from festivals to streaming.</small></span></div>
     </div>
     <div class="loading-timer" id="loadingTimer" style="display:none"></div>
     <button class="btn-primary" id="loadingRetryBtn" style="display:none;margin-top:20px;max-width:280px" onclick="retryLastAction()">Try again →</button>
@@ -1486,7 +1507,7 @@ details.more > summary:active { transform: scale(0.98); }
 
 <!-- ══ RESULTS ══ -->
 <div id="sec-results">
-  <div class="sample-banner" id="sampleBanner" style="display:none">This is a real OneCiak report for an illustrative project, generated on 23 October 2026, with every source checked. <a href="#" onclick="goLanding();return false" style="color:#fff;text-decoration:underline">Analyze your own film →</a></div>
+  <div class="sample-banner" id="sampleBanner" style="display:none">This is a real OneCiak report for an illustrative project, generated on 23 October 2026, with every source checked. <a href="#" onclick="goLanding();return false" style="color:#fff;text-decoration:underline">Analyze your own project →</a></div>
   <div class="r-header">
     <div class="r-logo" onclick="goLanding()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')goLanding()"><svg width="18" height="18" viewBox="0 0 124 124" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><path d="M6 0L117 0A6 6 0 0 1 123 6L123 19Q123 25 117.11 26.15L5.89 47.85Q0 49 0 43L0 6A6 6 0 0 1 6 0Z" fill="#000"/><rect x="0" y="62" width="123" height="62" rx="6" fill="#000"/></svg>OneCiak</div>
     <button class="back-btn" onclick="goLanding()">← New Analysis</button>
@@ -2284,21 +2305,20 @@ function renderFree(r, title) {
   var oneComp = r.one_comp || {};
   var oneFestival = r.one_festival || {};
   var freeSections = [
-    { num:'01', label:'Creative Package',     sublabel:'Narrative · Logline · Pitch',    score:r.creative_score,     verdict:r.creative_verdict,     detail:r.creative_detail,     tip:r.creative_tip,     flag:r.creative_flag,     strength:r.creative_strength,
+    { num:'01', label:'Creative package',     sublabel:'Narrative · Logline · Pitch',    score:r.creative_score,     verdict:r.creative_verdict,     detail:r.creative_detail,     tip:r.creative_tip,     flag:r.creative_flag,     strength:r.creative_strength,
       extra: r.logline_verdict ? '<div class="rblocks">'+rblock('Logline', null, paras(r.logline_verdict))+'</div>' : '' },
-    { num:'02', label:'Financial Plan',       sublabel:'Budget · Funding · Financing',   score:r.financial_score,    verdict:r.financial_verdict,    detail:r.financial_detail,    tip:r.financial_tip,    flag:r.financial_flag,    strength:r.financial_strength, extra:'' },
-    { num:'03', label:'Market & Audience',    sublabel:'Demand · Trends · Comparables',  score:r.market_score,       verdict:r.market_verdict,       detail:r.market_detail,       tip:r.market_tip,       flag:r.market_flag,       strength:r.market_strength,
+    { num:'02', label:'Financial plan',       sublabel:'Budget · Funding · Financing',   score:r.financial_score,    verdict:r.financial_verdict,    detail:r.financial_detail,    tip:r.financial_tip,    flag:r.financial_flag,    strength:r.financial_strength, extra:'' },
+    { num:'03', label:'Market and audience',    sublabel:'Demand · Trends · Comparables',  score:r.market_score,       verdict:r.market_verdict,       detail:r.market_detail,       tip:r.market_tip,       flag:r.market_flag,       strength:r.market_strength,
       extra: oneComp.title ? '<div class="rblocks">'+rblock('Comparable film', null, entry(oneComp.title + (oneComp.year ? ' ('+oneComp.year+')' : ''), null, '', oneComp.result, oneComp, oneComp.lesson))+'</div>' : '' },
-    { num:'04', label:'Festival Strategy',    sublabel:'Circuit · Festivals · Timing',   score:r.festival_score,     verdict:r.festival_verdict,     detail:r.festival_detail,     tip:r.festival_tip,     flag:r.festival_flag,     strength:r.festival_strength,
+    { num:'04', label:'Festival strategy',    sublabel:'Circuit · Festivals · Timing',   score:r.festival_score,     verdict:r.festival_verdict,     detail:r.festival_detail,     tip:r.festival_tip,     flag:r.festival_flag,     strength:r.festival_strength,
       extra: oneFestival.name ? '<div class="rblocks">'+rblock('Suggested festival', null, entry(oneFestival.name, oneFestival.tier ? 'Tier '+oneFestival.tier : null, '', oneFestival.why, oneFestival))+'</div>' : '' },
-    { num:'05', label:'Distribution & Revenue', sublabel:'Platforms · Pricing · Sales',  score:r.distribution_score, verdict:r.distribution_verdict, detail:r.distribution_detail, tip:r.distribution_tip, flag:r.distribution_flag, strength:r.distribution_strength, extra:'' }
+    { num:'05', label:'Distribution and revenue', sublabel:'Platforms · Pricing · Sales',  score:r.distribution_score, verdict:r.distribution_verdict, detail:r.distribution_detail, tip:r.distribution_tip, flag:r.distribution_flag, strength:r.distribution_strength, extra:'' }
   ];
 
   var html = '<div class="accordion-wrap">';
   freeSections.forEach(function(sec, idx) {
     // Body content
     var body = '<div class="accordion-divider"></div>';
-    body += '<div class="score-verdict">'+esc(sec.verdict)+'</div>';
     body += paras(sec.detail);
     if (sec.tip) body += '<div class="tips-block"><span class="tips-label">What to do</span><ol class="tips-list"><li><div class="tip-text">'+esc(sec.tip)+'</div></li></ol></div>';
     if (sec.extra) body += sec.extra;
@@ -2316,11 +2336,11 @@ function renderFree(r, title) {
       '<div class="accordion-item">'+
       '<button class="accordion-trigger" onclick="toggleAccordion('+idx+')" id="acc-trigger-'+idx+'">'+
       '<div class="accordion-left">'+
-      '<div class="accordion-icon">'+sec.num+'</div>'+
-      '<div><div class="accordion-label">'+sec.label+'</div><div class="accordion-sublabel">'+sec.sublabel+'</div></div>'+
+      '<div class="accordion-label">'+sec.label+'</div>'+
       '</div>'+
       accScore(sec.score)+
       '<span class="accordion-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'+
+      '<span class="accordion-sublabel">'+esc(sec.verdict || sec.sublabel)+'</span>'+
       '</button>'+
       '<div class="accordion-body" id="acc-body-'+idx+'">'+body+'</div>'+
       '</div>';
@@ -2347,7 +2367,8 @@ function renderFull(r, title) {
   isFullReport = true;
   setPdfLabels();
   document.getElementById('resultTitle').textContent = '\u201C'+title+'\u201D';
-  setHeroSummary(r.overall_summary||'');
+  var hasBoth = r.executive_summary && r.overall_summary && r.executive_summary !== r.overall_summary;
+  setHeroSummary(r.executive_summary || r.overall_summary || '', hasBoth ? r.overall_summary : '');
 
   // Only a real, persisted full report has a session_id/token to flag an
   // issue against — hide it for the fictional sample report entirely.
@@ -2370,7 +2391,6 @@ function renderFull(r, title) {
   // Exec summary — synthesis always visible
   document.getElementById('execSummary').innerHTML =
     '<div class="exec-card">'+
-    (r.executive_summary && r.executive_summary !== r.overall_summary ? '<div class="exec-text">'+parasFold(r.executive_summary, 'Read the full summary')+'</div>' : '')+
     '<div class="exec-row">'+
     '<div class="exec-box risk"><p class="exec-box-text"><b class="exec-lead">Biggest risk.</b> '+esc(r.biggest_risk)+'</p></div>'+
     '<div class="exec-box opp"><p class="exec-box-text"><b class="exec-lead">Biggest opportunity.</b> '+esc(r.biggest_opportunity)+'</p></div>'+
@@ -2379,47 +2399,47 @@ function renderFull(r, title) {
   // Build accordion
   var sections = [
     {
-      num:'01', label:'Creative Package', sublabel:'Narrative · Logline · Pitch',
-      score: r.creative_score,
+      num:'01', label:'Creative package', sublabel:'Narrative · Logline · Pitch',
+      score: r.creative_score, verdict: r.creative_verdict,
       body: buildAccordionBody(r.creative_score, r.creative_verdict, r.creative_detail,
         r.creative_flags, r.creative_strengths, r.creative_tips, null,
         buildPitchAssessment(r.pitch_assessment) + buildLabeledText('Attachment Strategy', r.attachment_strategy) + buildKeyCrew(r.key_crew_recommendations))
     },
     {
-      num:'02', label:'Financial Plan', sublabel:'Budget · Funding · Financing',
-      score: r.financial_score,
+      num:'02', label:'Financial plan', sublabel:'Budget · Funding · Financing',
+      score: r.financial_score, verdict: r.financial_verdict,
       body: buildAccordionBody(r.financial_score, r.financial_verdict, r.financial_detail,
         r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan,
         buildFundingSources(r.financial_sources) + buildTalentAndTax(r.talent_leverage, r.tax_incentive) + buildLabeledText('Budget Breakdown Guidance', r.budget_breakdown_guidance))
     },
     {
-      num:'03', label:'Market & Audience', sublabel:'Demand · Trends · Comparables',
-      score: r.market_score,
+      num:'03', label:'Market and audience', sublabel:'Demand · Trends · Comparables',
+      score: r.market_score, verdict: r.market_verdict,
       body: buildAccordionBody(r.market_score, r.market_verdict, r.market_detail,
         r.market_flags, r.market_strengths, r.market_tips, null,
         buildComparables(r.market_comps) + buildMarketingStrategy(r.marketing_strategy) + buildLabeledText('Target Audience Profile', r.target_audience_profile) + buildCautionaryComps(r.cautionary_comps))
     },
     {
-      num:'04', label:'Festival Strategy', sublabel:'Circuit · Festivals · Timing',
-      score: r.festival_score,
+      num:'04', label:'Festival strategy', sublabel:'Circuit · Festivals · Timing',
+      score: r.festival_score, verdict: r.festival_verdict,
       body: buildAccordionBody(r.festival_score, r.festival_verdict, r.festival_detail,
         r.festival_flags, r.festival_strengths, r.festival_tips, r.festival_action_plan,
         buildLabOpportunities(r.lab_and_market_opportunities))
     },
     {
-      num:'05', label:'Distribution & Revenue', sublabel:'Platforms · Pricing · Sales',
-      score: r.distribution_score,
+      num:'05', label:'Distribution and revenue', sublabel:'Platforms · Pricing · Sales',
+      score: r.distribution_score, verdict: r.distribution_verdict,
       body: buildAccordionBody(r.distribution_score, r.distribution_verdict, r.distribution_detail,
         r.distribution_flags, r.distribution_strengths, r.distribution_tips, r.distribution_action_plan,
         buildPlatforms(r.distribution_platforms) + buildLabeledText('Self-Distribution Playbook', r.self_distribution_playbook))
     },
     {
-      num:'06', label:'Action Plan', sublabel:'Roadmap · Markets · Revenue',
+      num:'06', label:'Your plan', sublabel:'What to do, in order, and who to contact',
       score: null,
       body: buildActionPlanBody(r)
     },
     {
-      num:'07', label:'Business Plan Summary', sublabel:'Ready to share with a financier',
+      num:'07', label:'Business plan summary', sublabel:'One page to show a financier',
       score: null,
       body: buildBusinessPlanBody(r.business_plan_summary)
     }
@@ -2433,16 +2453,16 @@ function renderFull(r, title) {
       '<div class="accordion-item">'+
       '<button class="accordion-trigger" onclick="toggleAccordion('+idx+')" id="acc-trigger-'+idx+'">'+
       '<div class="accordion-left">'+
-      '<div class="accordion-icon">'+sec.num+'</div>'+
-      '<div><div class="accordion-label">'+sec.label+'</div><div class="accordion-sublabel">'+sec.sublabel+'</div></div>'+
+      '<div class="accordion-label">'+sec.label+'</div>'+
       '</div>'+
       scoreHtml+
       '<span class="accordion-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'+
+      '<span class="accordion-sublabel">'+esc(sec.verdict || sec.sublabel)+'</span>'+
       '</button>'+
       '<div class="accordion-body" id="acc-body-'+idx+'">'+
       '<div class="accordion-divider"></div>'+
       sec.body+
-      (sections[idx+1] ? '<button type="button" class="next-area" onclick="nextArea('+idx+')"><span class="next-area-k">Next</span><span class="next-area-t">'+sections[idx+1].num+' '+sections[idx+1].label+'</span><span class="next-area-i" aria-hidden="true">→</span></button>' : '')+
+      (sections[idx+1] ? '<button type="button" class="next-area" onclick="nextArea('+idx+')"><span class="next-area-k">Next</span><span class="next-area-t">'+sections[idx+1].label+'</span><span class="next-area-i" aria-hidden="true">→</span></button>' : '')+
       '</div>'+
       '</div>';
   });
@@ -2460,7 +2480,6 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
 
   // Verdict and the point of the analysis; the full argument is one tap
   // away, so on a phone "what to do" arrives on the first screen.
-  out += '<div class="score-verdict">'+esc(verdict)+'</div>';
   out += parasFold(detail, 'Read the full analysis');
 
   // Recommendations, numbered
@@ -2501,7 +2520,7 @@ function buildActionPlanBody(r) {
   var out = '';
   // The roadmap leads, on the same timeline as the 90-day plans.
   if (r.roadmap && r.roadmap.length) {
-    out += timeline('Roadmap', r.roadmap.map(function(s){ return s ? { tag: s.phase, text: s.action } : null; }));
+    out += timeline('', r.roadmap.map(function(s){ return s ? { tag: s.phase, text: s.action } : null; }));
   }
   var blocks = '';
   if (r.festival_calendar && r.festival_calendar.length) {
@@ -2511,17 +2530,17 @@ function buildActionPlanBody(r) {
       var dl = f.source ? notStated(f.deadline, 'Not published on the source, check before planning') : f.deadline;
       fc += entry(f.festival, f.tier ? 'Tier '+f.tier : null, fact('Deadline', dl, isClosed(dl) || !f.deadline), f.fit, f);
     });
-    blocks += rblock('Festival calendar', r.festival_calendar.length, fc);
+    blocks += rblock('Festival calendar', howMany(r.festival_calendar, 'festival', 'festivals'), fc);
   }
   if (r.sales_agents && r.sales_agents.length) {
     var sa = '';
     r.sales_agents.forEach(function(a){ if (a) sa += entry(a.name, null, '', a.why, a, null, a.focus); });
-    blocks += rblock('Sales agents', r.sales_agents.length, sa);
+    blocks += rblock('Sales agents', howMany(r.sales_agents, 'company', 'companies'), sa);
   }
   if (r.international_markets && r.international_markets.length) {
     var im = '';
     r.international_markets.forEach(function(m){ if (m) im += entry(m.country, null, '', m.reason, null); });
-    blocks += rblock('International markets', r.international_markets.length, im);
+    blocks += rblock('International markets', howMany(r.international_markets, 'country', 'countries'), im);
   }
   var ra = r.risk_assessment;
   if (ra && ((ra.top_risks && ra.top_risks.length) || (ra.mitigation && ra.mitigation.length))) {
@@ -2615,7 +2634,7 @@ function toggleAccordion(idx) {
    - an index of all areas that follows the scroll: a column in the left
      margin on wide screens, a slim bar under the header on phones. */
 function shortLabel(label) {
-  var map = { 'Creative Package': 'Creative', 'Financial Plan': 'Financing', 'Market & Audience': 'Market', 'Festival Strategy': 'Festivals', 'Distribution & Revenue': 'Distribution', 'Business Plan Summary': 'Business plan' };
+  var map = { 'Creative package': 'Creative', 'Financial plan': 'Financing', 'Market and audience': 'Market', 'Festival strategy': 'Festivals', 'Distribution and revenue': 'Distribution', 'Business plan summary': 'Business plan' };
   return map[label] || label;
 }
 function accScore(score) {
@@ -2660,7 +2679,7 @@ function mountAreaNav(sections) {
   if (!nav) { nav = document.createElement('nav'); nav.id = 'areaNav'; nav.className = 'area-nav'; nav.setAttribute('aria-label', 'Report areas'); host.appendChild(nav); }
   var items = '';
   sections.forEach(function(sec, i) {
-    items += '<button type="button" class="an-item" data-i="'+i+'" onclick="goToArea('+i+')"><span class="an-num">'+sec.num+'</span><span class="an-label">'+esc(shortLabel(sec.label))+'</span>'+(sec.score != null ? '<span class="an-score">'+sec.score+'</span>' : '')+'</button>';
+    items += '<button type="button" class="an-item" data-i="'+i+'" onclick="goToArea('+i+')"><span class="an-label">'+esc(shortLabel(sec.label))+'</span>'+(sec.score != null ? '<span class="an-score">'+sec.score+'</span>' : '')+'</button>';
   });
   nav.innerHTML = '<div class="an-col">'+items+'</div>'+
     '<div class="an-bar"><span class="an-cur" id="areaNavCur"></span><button type="button" class="an-top" onclick="goToOverview()">All areas</button></div>';
@@ -2677,7 +2696,7 @@ function mountAreaNav(sections) {
       var i = Array.prototype.indexOf.call(list, e.target);
       nav.querySelectorAll('.an-item').forEach(function(b) { b.classList.toggle('on', Number(b.getAttribute('data-i')) === i); });
       nav.classList.add('has-cur');
-      if (cur && sections[i]) cur.innerHTML = '<span class="an-num">'+sections[i].num+'</span>'+esc(sections[i].label)+(sections[i].score != null ? '<span class="an-score">'+sections[i].score+'</span>' : '');
+      if (cur && sections[i]) cur.innerHTML = esc(sections[i].label)+(sections[i].score != null ? '<span class="an-score">'+sections[i].score+'</span>' : '');
     });
   }, { rootMargin: '-30% 0px -60% 0px' });
   list.forEach(function(el) { areaNavObserver.observe(el); });
@@ -2732,19 +2751,26 @@ function paras(t, cls) {
 }
 /* The hero summary is cut to four lines on phones (CSS) with a button to
    read it all; the button only appears when the text is actually cut. */
-function setHeroSummary(text) {
+function setHeroSummary(text, extra) {
   var el = document.getElementById('resultSubtitle');
   el.textContent = text;
   el.classList.remove('is-open');
+  // The longer summary, when there is one, opens under the short one with the
+  // same button: one "Read more" for the whole summary, never two links.
+  var ex = document.getElementById('heroExtra');
+  if (!ex) { ex = document.createElement('div'); ex.id = 'heroExtra'; ex.className = 'r-summary r-summary-extra'; el.parentNode.insertBefore(ex, el.nextSibling); }
+  ex.innerHTML = extra ? paras(extra) : '';
+  ex.hidden = true;
   var btn = document.getElementById('heroMore');
   if (!btn) {
     btn = document.createElement('button');
     btn.type = 'button'; btn.id = 'heroMore'; btn.className = 'r-more'; btn.textContent = 'Read more';
-    btn.onclick = function() { el.classList.add('is-open'); btn.hidden = true; };
-    el.parentNode.insertBefore(btn, el.nextSibling);
+    btn.onclick = function() { el.classList.add('is-open'); var x = document.getElementById('heroExtra'); if (x && x.innerHTML) x.hidden = false; btn.hidden = true; };
+    ex.parentNode.insertBefore(btn, ex.nextSibling);
   }
+  btn.classList.toggle('has-extra', !!extra);
   btn.hidden = true;
-  requestAnimationFrame(function() { btn.hidden = !(el.scrollHeight > el.clientHeight + 2); });
+  requestAnimationFrame(function() { btn.hidden = !(extra || el.scrollHeight > el.clientHeight + 2); });
 }
 /* Lead paragraph visible, the rest one tap away: on a phone the reader sees
    the point first and decides whether to read the whole argument. */
@@ -2755,9 +2781,13 @@ function parasFold(t, moreLabel) {
   return '<div class="prose"><p class="lead">'+esc(s[0])+'</p></div>'+
     '<details class="more"><summary>'+(moreLabel || 'Read more')+'</summary>'+paras(rest)+'</details>';
 }
+function howMany(list, one, many) {
+  var n = (list || []).filter(Boolean).length;
+  return n ? n + ' ' + (n === 1 ? one : many) : '';
+}
 function rblock(label, count, inner, open) {
   if (!inner) return '';
-  return '<details class="rblock"'+(open ? ' open' : '')+'><summary><span class="rblock-label">'+label+'</span>'+(count ? '<span class="rblock-count">'+count+'</span>' : '')+'<span class="rblock-icon" aria-hidden="true"></span></summary><div class="rblock-body">'+inner+'</div></details>';
+  return '<details class="rblock"'+(open ? ' open' : '')+'><summary><span class="rblock-label">'+label+'</span>'+(count ? '<span class="rblock-count">'+esc(count)+'</span>' : '')+'<span class="rblock-icon" aria-hidden="true"></span></summary><div class="rblock-body">'+inner+'</div></details>';
 }
 function linkOrSource(item, label) {
   if (item && item.source) return sourceLine(item);
@@ -2795,7 +2825,7 @@ function buildFundingSources(sources) {
     var dl = f.source ? notStated(f.deadline, 'Not published on the source, check before planning') : f.deadline;
     h += entry(f.name, f.type, fact('Amount', f.amount) + fact('Deadline', dl, isClosed(dl) || !f.deadline), f.eligibility, f);
   });
-  return rblock('Funding sources', sources.length, h);
+  return rblock('Funding sources', howMany(sources, 'fund', 'funds'), h);
 }
 
 function buildPitchAssessment(pa) {
@@ -2812,7 +2842,7 @@ function buildPitchAssessment(pa) {
     pa.pitch_deck_checklist.forEach(function(item){ if (item) h += '<li>'+esc(item)+'</li>'; });
     h += '</ul>';
   }
-  return rblock('Pitch &amp; logline', null, h, false);
+  return rblock('Pitch and logline', null, h, false);
 }
 
 function buildMarketingStrategy(ms) {
@@ -2838,7 +2868,7 @@ function buildLabOpportunities(labs) {
   if (!labs || !labs.length) return '';
   var h = '';
   labs.forEach(function(l){ if (l) h += entry(l.name, null, '', l.fit, l); });
-  return rblock('Labs &amp; markets', labs.length, h);
+  return rblock('Labs and markets', howMany(labs, 'programme', 'programmes'), h);
 }
 
 function buildTalentAndTax(talentLeverage, taxIncentive) {
@@ -2856,14 +2886,14 @@ function buildComparables(comps) {
   comps.forEach(function(c){
     if (c) h += entry(c.title + (c.year ? ' ('+c.year+')' : ''), null, fact('Budget', c.budget), c.result, c, c.lesson, c.match ? 'In common: '+c.match : null);
   });
-  return rblock('Comparable films', comps.length, h);
+  return rblock('Comparable films', howMany(comps, 'film', 'films'), h);
 }
 
 function buildKeyCrew(crew) {
   if (!crew || !crew.length) return '';
   var h = '';
   crew.forEach(function(c){ if (c) h += entry(c.role, null, '', c.profile, null, c.why); });
-  return rblock('Key crew', crew.length, h, false);
+  return rblock('Key crew', howMany(crew, 'role', 'roles'), h, false);
 }
 
 function buildCautionaryComps(comps) {
@@ -2872,14 +2902,14 @@ function buildCautionaryComps(comps) {
   comps.forEach(function(c){
     if (c) h += entry(c.title + (c.year ? ' ('+c.year+')' : ''), null, fact('Budget', c.budget), c.what_went_wrong, c, c.lesson, c.match ? 'In common: '+c.match : null);
   });
-  return rblock('Cautionary films', comps.length, h, false);
+  return rblock('Films that struggled', howMany(comps, 'film', 'films'), h, false);
 }
 
 function buildPlatforms(platforms) {
   if (!platforms || !platforms.length) return '';
   var h = '';
   platforms.forEach(function(pl){ if (pl) h += entry(pl.name, pl.priority, '', pl.reason, pl); });
-  return rblock('Platforms', platforms.length, h);
+  return rblock('Platforms', howMany(platforms, 'platform', 'platforms'), h);
 }
 
 /* ── RUN ANALYSIS (free quick preview — the full report always goes through start-full-report.js) ── */
