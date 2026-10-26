@@ -101,6 +101,15 @@
         ],
         "createdAt": "2026-10-24T16:38:13.468Z",
         "reason": "Hero glow is the palette C chosen by Antonio on 2026-10-08 (same as 404). Gradient unchanged on 2026-10-24: diff touches no radial-gradient; the finding appeared after reordering the score card in the results hero."
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "404.html"
+        ],
+        "createdAt": "2026-10-26T18:02:43.680Z",
+        "reason": "Light mode of the 404 (2026-10-26) uses the same warm paper ground the founder chose for the whole site on 2026-10-08; it follows the device setting, dark mode keeps the night"
       }
     ]
   }

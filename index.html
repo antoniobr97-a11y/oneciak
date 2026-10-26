@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="color-scheme" content="only light">
+<meta name="color-scheme" content="light dark">
 <meta name="google" content="notranslate">
 <title>OneCiak · Film market analysis</title>
 <meta name="description" content="Does your film have a market? A free market analysis of your project across five areas: creative package, financing, audience, festivals and distribution.">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#f4f1ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#140d10" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://oneciak.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="OneCiak">
@@ -76,7 +77,7 @@
   --shadow-lg: 0 28px 64px rgba(0,0,0,0.18), 0 8px 20px rgba(0,0,0,0.08);
   --ease: cubic-bezier(0.28, 0.11, 0.32, 1);
 }
-html { color-scheme: only light; scroll-behavior: smooth; }
+html { color-scheme: light; scroll-behavior: smooth; }
 body { font-family: var(--sf); background: var(--paper); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; letter-spacing: -0.011em; overflow-anchor: none; position: relative; }
 /* Ambient background: a barely-there gradient wash for depth + a fine grain
    texture, both purely decorative (pointer-events:none, negative z-index)
@@ -1060,6 +1061,119 @@ details.more > summary:active { transform: scale(0.98); }
   .accordion-score-label { display: none; }
 }
 @media (min-width: 641px) { .r-more { display: none; } }
+/* ══════════════════════
+   LIGHT AND DARK (Antonio, 2026-10-26): the site follows the device.
+   Light mode is light everywhere, the home hero included, with the same
+   amber/red/petrol glows made soft and kept to the edges. Dark mode is the
+   night everywhere, the analysis included, with the glows fixed at the
+   edges while reading. Without a preference the rules above apply.
+══════════════════════ */
+@media (prefers-color-scheme: light) {
+  /* the "night" surfaces become the paper: same components, inverted tokens */
+  .l-hero, .l-nav, .menu-overlay, #sec-results, #sec-myreports, #sec-loading { --night: #f4f1ec; --on-night: #161616; --on-night-2: #57524d; }
+  .l-hero::before, #sec-results .r-hero::before, #sec-myreports .r-hero::before, #sec-loading::before {
+    background:
+      radial-gradient(70% 52% at 108% -6%, rgba(235,137,63,0.55) 0%, rgba(236,88,40,0.40) 24%, rgba(225,36,31,0.22) 42%, rgba(225,36,31,0) 66%),
+      radial-gradient(55% 36% at -12% 58%, rgba(52,96,118,0.26) 0%, rgba(52,96,118,0.12) 42%, rgba(52,96,118,0) 72%),
+      radial-gradient(50% 28% at 112% 78%, rgba(225,36,31,0.20) 0%, rgba(225,36,31,0.07) 42%, rgba(225,36,31,0) 70%);
+  }
+  .l-hero::after, #sec-results .r-hero::after, #sec-myreports .r-hero::after, #sec-loading::after { opacity: 0.16; }
+  .menu-overlay::before { background: radial-gradient(70% 45% at 110% -8%, rgba(235,137,63,0.45) 0%, rgba(225,36,31,0.22) 35%, rgba(225,36,31,0) 60%), radial-gradient(50% 35% at -12% 85%, rgba(52,96,118,0.22) 0%, rgba(52,96,118,0) 70%); }
+  /* small text stays at 4.5:1 or more over the soft glows and the satin's darker folds (measured on pixels) */
+  :root { --muted: #4a4a4a; --muted-light: #4a4a4a; --success: #0a5c2d; --danger: #8a2419; }
+  .score-mid { color: #7a4700; }
+  .tips-label, .action-label, .unlock-label, .an-top, .accordion-trigger.open .accordion-icon, .loading-dim.is-active .loading-dim-num, #sec-loading .loading-dim.is-active .loading-dim-num { color: #93391a !important; }
+  .exec-box.risk .exec-lead { color: var(--danger); }
+  .exec-box.opp .exec-lead { color: var(--success); }
+  .l-hero { padding-bottom: 120px; }
+  #sec-results .r-hero, #sec-myreports .r-hero { padding-bottom: 56px; }
+  .l-nav { border-bottom-color: rgba(20,18,16,0.07); }
+  .l-nav.is-scrolled { background: rgba(244,241,236,0.8); }
+  .l-nav-reports { border-color: rgba(20,18,16,0.18); }
+  @media (hover: hover) and (pointer: fine) { .l-btn:hover { background: #000; } }
+  .l-terms input[type="checkbox"] { border-color: rgba(20,18,16,0.3); background: rgba(255,255,255,0.5); }
+  .l-terms label { color: var(--muted); }
+  .l-terms-error { color: var(--danger); }
+  .l-sample-link { text-decoration-color: rgba(20,18,16,0.3); }
+  .l-sheet { background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.42)); border-color: rgba(20,18,16,0.08); box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 18px 40px -24px rgba(90,40,20,0.25); }
+  @media (hover: hover) and (pointer: fine) { .l-sheet:hover { border-color: rgba(20,18,16,0.16); } }
+  .l-sheet-score, .l-sheet-row { border-bottom-color: rgba(20,18,16,0.08); }
+  .l-bar { background: rgba(20,18,16,0.1); }
+  .l-bar i.ember { background: #c4562a; }
+  .menu-header { background: rgba(244,241,236,0.9); border-bottom-color: rgba(20,18,16,0.07); }
+  .menu-steps, .menu-faq-item:first-of-type { border-top-color: rgba(20,18,16,0.14); }
+  .menu-steps li, .menu-faq-item { border-bottom-color: rgba(20,18,16,0.08); }
+  #sec-results .r-header, #sec-myreports .r-header { border-bottom-color: rgba(20,18,16,0.07); }
+  #sec-results .r-header.is-scrolled, #sec-myreports .r-header.is-scrolled { background: rgba(244,241,236,0.8); }
+  #sec-results .back-btn, #sec-myreports .back-btn { background: rgba(255,255,255,0.45); border-color: rgba(20,18,16,0.18); }
+  .overall-card { background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.4)); border-color: rgba(20,18,16,0.08) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.7) !important; }
+  .sample-banner a { color: inherit !important; }
+  #sec-loading .loading-dim.is-active { background: rgba(255,255,255,0.5); }
+  #sec-loading .loading-dim.is-active .loading-dim-num { color: #b4552b; }
+  #sec-loading .loading-dim.is-done .loading-dim-num { color: var(--success); }
+  #sec-loading .loading-timer { border-color: rgba(20,18,16,0.14); }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #140d10; --text: #f2ede6; --ink: #f2ede6;
+    --accent: #f2ede6; --accent-hover: #ffffff; --accent-press: #f2ede6; --accent-wash: rgba(255,255,255,0.08);
+    --muted: #b3aca4; --muted-light: #b3aca4;
+    --border: rgba(255,255,255,0.13); --border-light: rgba(255,255,255,0.08);
+    --cream: rgba(255,255,255,0.05); --white: rgba(255,255,255,0.05);
+    --field: rgba(255,255,255,0.06); --field-hover: rgba(255,255,255,0.09);
+    --success: #74d6a0; --danger: #ff9a87; --danger-wash: rgba(255,154,135,0.1); --success-wash: rgba(116,214,160,0.1);
+  }
+  html { color-scheme: dark; }
+  input, select, textarea { color-scheme: dark !important; }
+  body { background: var(--night); }
+  /* the glows stay at the edges while the page scrolls; the hero keeps its own, stronger ones on top */
+  body::before {
+    background:
+      radial-gradient(50% 42% at 108% 6%, rgba(235,137,63,0.32) 0%, rgba(225,36,31,0.24) 32%, rgba(139,25,33,0.12) 55%, rgba(20,13,16,0) 75%),
+      radial-gradient(46% 40% at -10% 62%, rgba(24,43,48,0.9) 0%, rgba(24,43,48,0.45) 45%, rgba(24,43,48,0) 75%),
+      radial-gradient(40% 30% at 104% 96%, rgba(225,36,31,0.34) 0%, rgba(139,25,33,0.18) 45%, rgba(20,13,16,0) 75%);
+  }
+  body::after { mix-blend-mode: overlay; }
+  ::selection { background: var(--on-night); color: var(--night); }
+  /* no light band at the end of the headers: the dissolve now ends on the night */
+  .l-hero { padding-bottom: 120px; }
+  #sec-results .r-hero, #sec-myreports .r-hero { padding-bottom: 56px; }
+  .l-nav.is-light { background: rgba(20,13,16,0.72); color: var(--on-night); border-bottom-color: rgba(255,255,255,0.08); }
+  .l-nav.is-light .l-nav-reports { border-color: rgba(255,255,255,0.22); }
+  #sec-results .r-header.is-light, #sec-myreports .r-header.is-light { background: rgba(20,13,16,0.72); color: var(--on-night); border-bottom-color: rgba(255,255,255,0.08); }
+  #sec-results .r-header.is-light .back-btn, #sec-myreports .r-header.is-light .back-btn { background: rgba(20,13,16,0.62); border-color: rgba(255,255,255,0.22); }
+  .f-header { background: rgba(20,13,16,0.82); border-bottom-color: rgba(255,255,255,0.08); }
+  #sec-form::before { background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0)); }
+  @media (max-width: 1359px) { .area-nav { background: rgba(20,13,16,0.92); } }
+  /* rust labels lighten on the night */
+  .f-steps li.on, .an-item.on { box-shadow: inset 2px 0 0 #f0a07c; }
+  .accordion-trigger.open .accordion-icon { color: #f0a07c !important; }
+  .unlock-label, .tips-label, .action-label, .an-top, .loading-dim.is-active .loading-dim-num { color: #f0a07c; }
+  #sec-loading .loading-dim.is-active .loading-dim-num { color: #ffe0cf; }
+  .l-hero, .menu-overlay, #sec-results, #sec-myreports, #sec-loading, .l-nav { --on-night-2: #b8b2ab; }
+  .action-item:first-child::after { background: #f0a07c; }
+  .entry-lesson { border-left-color: rgba(240,160,124,0.6); }
+  .score-mid { color: #f2b25c; }
+  .bar-mid { background: #f2b25c; }
+  .exec-box.risk .exec-lead { color: #ff9a87; }
+  .exec-box.opp .exec-lead { color: #74d6a0; }
+  .exec-box.risk { border-left-color: rgba(255,154,135,0.7); }
+  .exec-box.opp { border-left-color: rgba(116,214,160,0.7); }
+  .flag-item { color: var(--text); }
+  .action-item .action-tag { color: var(--muted); }
+  .action-tag, .roadmap-num { background: var(--on-night); color: var(--night); }
+  .btn-primary, .btn-unlock, #sec-form .btn-primary, .unlock .btn-unlock, .pdf-row button { background: var(--on-night); color: var(--night); }
+  .pdf-row button small { color: #5c5650; }
+  @media (hover: hover) and (pointer: fine) { .btn-primary:hover, .btn-unlock:hover, .pdf-row button:hover { background: #fff; } }
+  .tip-link { color: var(--text); }
+  input::placeholder, textarea::placeholder, #sec-form input::placeholder, #sec-form textarea::placeholder, #sec-myreports input[type="email"]::placeholder { color: #8f8880; }
+  #sec-form input[type="text"]:focus, #sec-form select:focus, #sec-form textarea:focus, .unlock-field input:focus, #sec-myreports input[type="email"]:focus { background-color: rgba(255,255,255,0.08); }
+  select option { color: #141210; background: #f2ede6; }
+  .translate-banner { background: rgba(255,200,120,0.12); color: #f2c98a; }
+  .translate-banner button { color: #f2c98a; }
+}
+
 </style>
 </head>
 <body>
