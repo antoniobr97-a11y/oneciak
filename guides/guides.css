@@ -51,6 +51,14 @@ a { color: inherit; }
 }.g-hero::before, .g-hero::after {
   -webkit-mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 200px), transparent 100%);
   mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 200px), transparent 100%); }
+/* index of guides: two entries do not need a full-height header */
+.g-hero.is-compact { padding-bottom: 130px;
+  background: linear-gradient(180deg, var(--night) 0, var(--night) calc(100% - 160px), #4a4643 calc(100% - 95px), #d5d0ca calc(100% - 30px), var(--paper) 100%);
+  background: linear-gradient(in oklab 180deg, var(--night) 0, var(--night) calc(100% - 150px), rgb(244 241 236 / 0) 100%); }
+.g-hero.is-compact::before, .g-hero.is-compact::after {
+  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 140px), transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 140px), transparent 100%); }
+.g-hero.is-compact .g-head { padding-top: 56px; }
 .g-nav { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; height: 68px; border-bottom: 1px solid rgba(255,255,255,0.10); }
 .g-logo { display: flex; align-items: center; gap: 9px; font-family: var(--display); font-weight: 600; font-size: 16px; text-decoration: none; }
 .g-nav-r { display: flex; align-items: center; gap: 24px; font-size: 14px; }
