@@ -473,6 +473,14 @@ pulsante, niente orario. Blocchi CSS in fondo agli stili di index.html
   crema. Bagliori leggeri solo ai bordi: pesca/rosso in alto a destra, azzurro
   `rgba(88,146,196,…)` a sinistra (il petrolio su bianco sembrava una macchia
   grigia sporca). Scheda Northbound in vetro chiaro.
+- **Chiaro, AGGIORNATO il 2026-10-26 sera**: fondo bianco, e al posto dei
+  bagliori una "luce parassita" da pellicola (light leak) che entra dal bordo
+  destro: nucleo chiaro caldo in alto, arancio/rosso, un filo azzurro a
+  sinistra, grana solo sulla luce. Su header home, report, My Reports,
+  caricamento, menu, guide, 404. Scelta da Claude dopo che Antonio ha
+  bocciato ("non mi piace per niente") le fasce grigio-azzurre/rosa prese dal
+  suo riferimento di vetro smerigliato: NON riproporle. Il testo piccolo in
+  chiaro è un po' più scuro (#4a4a4a ecc.) per restare sopra 4.5:1.
 - **Scuro**: nero prugna ovunque, anche analisi, modulo, My Reports, guide,
   roadmap; bagliori blu/rosso fissi ai bordi (`body::before`), grana overlay.
   Antonio: "il blu/rosso con sfondo nero è bellissimo".

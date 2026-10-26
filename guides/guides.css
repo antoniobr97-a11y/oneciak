@@ -188,24 +188,18 @@ a { color: inherit; }
 @media (prefers-color-scheme: light) {
   :root { --paper: #ffffff; --border: #e2e0dd; }
   body { background: #ffffff; }
-  body::before { display: block; background:
-      radial-gradient(ellipse 110% 58% at 50% -10%, rgba(150,168,190,0.78) 0%, rgba(188,191,199,0.55) 34%, rgba(116,169,201,0.32) 58%, rgba(255,255,255,0) 82%),
-      radial-gradient(ellipse 110% 56% at 50% 110%, rgba(206,176,164,0.85) 0%, rgba(216,194,183,0.6) 30%, rgba(116,169,201,0.36) 58%, rgba(255,255,255,0) 84%); }
-  body::after { display: block; opacity: 0.12; mix-blend-mode: multiply;
-    -webkit-mask-image: linear-gradient(180deg, #000 0, transparent 30%, transparent 70%, #000 100%);
-    mask-image: linear-gradient(180deg, #000 0, transparent 30%, transparent 70%, #000 100%); }
+  body::before, body::after { display: none; }
   .g-hero { background: transparent; }
-  :root { --muted: #4a4a4a; --ember-text: #8f3a17; }
-  .rm-side a.is-complete .rm-nav-c { color: #0a5c2d; }
-  .g-hero::before { display: none !important; }
-  .g-hero { --night: #ffffff; --on-night: #161616; --on-night-2: #47423e; padding-bottom: 72px; }
-  .g-hero::before {
-    background:
-      radial-gradient(62% 74% at 104% -4%, rgba(235,137,63,0.72) 0%, rgba(236,88,40,0.52) 24%, rgba(225,36,31,0.30) 44%, rgba(225,36,31,0) 70%),
-      radial-gradient(48% 58% at -6% 78%, rgba(64,124,196,0.40) 0%, rgba(64,124,196,0.17) 45%, rgba(64,124,196,0) 76%),
-      radial-gradient(34% 28% at 88% 100%, rgba(225,36,31,0.26) 0%, rgba(225,36,31,0.08) 45%, rgba(225,36,31,0) 72%);
-  }
-  .g-hero::after { display: none; }
+  /* light leak from the right edge, as on the app (index.html) */
+  .g-hero::before { filter: blur(2px); background:
+      radial-gradient(5% 24% at 100% 20%, rgba(255,250,236,1) 0%, rgba(255,226,170,0.85) 45%, rgba(255,226,170,0) 100%),
+      radial-gradient(9% 85% at 100% 40%, rgba(255,246,220,1) 0%, rgba(255,200,130,0.9) 30%, rgba(240,110,50,0.65) 60%, rgba(220,40,30,0) 100%),
+      radial-gradient(26% 90% at 104% 40%, rgba(236,88,40,0.5) 0%, rgba(225,36,31,0.28) 45%, rgba(139,25,33,0.12) 70%, rgba(139,25,33,0) 100%),
+      radial-gradient(5% 40% at 0% 20%, rgba(88,146,196,0.35) 0%, rgba(88,146,196,0) 100%) !important; }
+  .g-hero::after { display: block !important; opacity: 0.4; mix-blend-mode: multiply;
+    -webkit-mask-image: radial-gradient(28% 90% at 100% 40%, #000 30%, transparent); mask-image: radial-gradient(28% 90% at 100% 40%, #000 30%, transparent); }
+  .g-hero { --night: #ffffff; --on-night: #161616; --on-night-2: #3a3532; padding-bottom: 72px; }
+  @media (max-width: 640px) { .g-hero::before { opacity: 0.85; } }
   .g-nav { border-bottom-color: rgba(20,18,16,0.07); }
   .g-head .mono, .g-meta { color: var(--muted); }
   .g-crumb a { text-decoration-color: rgba(22,22,22,0.35); }
