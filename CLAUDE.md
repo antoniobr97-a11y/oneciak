@@ -405,7 +405,7 @@ anteprime 88% corrette, 0 inventati; report completi 64% corretti, 0 inventati.
   più un commit "TEST ONLY" (motivo dell'errore in get-report e limite 12
   report con `CONTEXT=deploy-preview`). MAI portarlo su main.
 
-## Report su iPhone (2026-10-24, IN ATTESA DELL'OK DI ANTONIO)
+## Report su iPhone (2026-10-24, PUBBLICATO il 2026-10-26, main e98d964)
 
 Antonio: "il full report da iPhone è troppo pesante da leggere e pieno di
 finestre a destra e a sinistra, l'esperienza deve essere unica e piacevole".
@@ -430,12 +430,12 @@ e 6e1d632, NON su main. Pubblicare solo quando Antonio dice "pubblica"
 
 ## Stato al 2026-10-26 e cosa manca
 
-Online su oneciak.com (main 6cb3246): motore report con fonti, regole citate
+Online su oneciak.com (vedi sezioni sopra per il 2026-10-26): motore report con fonti, regole citate
 alla lettera, percorso del film `/roadmap/`, guide, Carlito ovunque (PDF
 compreso), niente etichette sopra i titoli, niente trattini lunghi.
 Da fare, in ordine:
-1. OK di Antonio sul report per iPhone, poi pubblicarlo (sezione sopra).
-2. Prossima chat: usare Impeccable 4.7.0 per migliorare ancora il sito
+1. Fatto il 2026-10-26: report iPhone, giro Impeccable, chiaro/scuro.
+2. Eventuali altri giri Impeccable 4.7.0 per migliorare ancora il sito
    (`/impeccable critique`, `audit`, `polish`, `layout`, `typeset`, `adapt`
    per i telefoni). Il controllo automatico gira già dopo ogni modifica (hook
    in `.claude/settings.local.json`, committato). Regole: mostrare prima e
@@ -449,6 +449,39 @@ Da fare, in ordine:
 5. Report: nei corti spesso nessun film di confronto (regola severa, voluto);
    le regole dentro PDF non vengono citate (non si leggono i PDF).
 6. PR #81 resta bozza di prova: non va mai mergiata.
+
+## Giro Impeccable del 2026-10-26 (pubblicato)
+
+Critica 26/40 (`.impeccable/critique/`). Fatto: le 5 aree non si ripetono più
+(domande dentro la scheda della home, nel report una sola lista con barra in
+ogni riga, niente `areaOverview`), niente etichette mono maiuscole come
+etichette (restano solo su numeri, date, conteggi: le etichette sono parole in
+Carlito grassetto), rischio/opportunità come inizio di frase, errori nella
+pagina invece di `alert()` (`unlockFail`, `pdfFail`), caricamento allineato a
+sinistra con il titolo del film, bottone sempre "Analyze your film", icone
+disegnate (chevron, spunta) invece dei simboli ▾ ✓, "How to read" e glossario
+sotto le aree, l'anteprima non ripete più il riassunto due volte.
+
+## CHIARO E SCURO (deciso da Antonio il 2026-10-26, pubblicato)
+
+Il sito segue l'impostazione del dispositivo (`prefers-color-scheme`), niente
+pulsante, niente orario. Blocchi CSS in fondo agli stili di index.html
+("LIGHT AND DARK") e in fondo a `guides/guides.css`; anche privacy, termini,
+404.
+- **Chiaro**: BIANCO VERO `#ffffff` ovunque, home compresa ("quando è bianco
+  deve essere bianco, non quel grigino"): niente satinato, niente grana, niente
+  crema. Bagliori leggeri solo ai bordi: pesca/rosso in alto a destra, azzurro
+  `rgba(88,146,196,…)` a sinistra (il petrolio su bianco sembrava una macchia
+  grigia sporca). Scheda Northbound in vetro chiaro.
+- **Scuro**: nero prugna ovunque, anche analisi, modulo, My Reports, guide,
+  roadmap; bagliori blu/rosso fissi ai bordi (`body::before`), grana overlay.
+  Antonio: "il blu/rosso con sfondo nero è bellissimo".
+- Senza preferenza vale il vecchio stile (hero scuro, resto chiaro).
+- Contrasto misurato sui pixel in entrambe le modalità, 320-1440px, ogni
+  schermata: tutto sopra soglia. 140 stati controllati: nessun errore JS,
+  nessuno scorrimento orizzontale. Verifica in Chromium, NON Safari vero.
+- Il satinato/grana delle parti chiare descritto sopra NON si usa più in
+  modalità chiara (resta solo come stile senza preferenza).
 
 ## Principio di onestà (esplicito, non derogabile)
 
