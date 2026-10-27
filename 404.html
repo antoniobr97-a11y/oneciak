@@ -22,7 +22,7 @@ a.btn:active{transform:scale(.97)}
 /* light mode follows the device, like the rest of the site (2026-10-26) */
 @media (prefers-color-scheme: light){
 body{background:#fff;color:#161616}
-body::before{background:linear-gradient(100deg, rgba(255,255,255,0) 60%, rgba(255,222,176,0.5) 72%, rgba(244,134,72,0.55) 83%, rgba(216,58,36,0.5) 93%, rgba(128,28,32,0.45) 100%),radial-gradient(42% 46% at 100% 0%, rgba(255,242,214,0.95) 0%, rgba(255,242,214,0) 72%),radial-gradient(36% 40% at 100% 100%, rgba(255,232,200,0.8) 0%, rgba(255,232,200,0) 72%);-webkit-mask-image:linear-gradient(180deg, #000 0%, rgba(0,0,0,0.85) 10%, rgba(0,0,0,0.5) 20%, rgba(0,0,0,0.18) 30%, rgba(0,0,0,0.04) 40%, rgba(0,0,0,0) 48%, rgba(0,0,0,0) 54%, rgba(0,0,0,0.04) 62%, rgba(0,0,0,0.18) 72%, rgba(0,0,0,0.5) 82%, rgba(0,0,0,0.85) 91%, #000 100%);mask-image:linear-gradient(180deg, #000 0%, rgba(0,0,0,0.85) 10%, rgba(0,0,0,0.5) 20%, rgba(0,0,0,0.18) 30%, rgba(0,0,0,0.04) 40%, rgba(0,0,0,0) 48%, rgba(0,0,0,0) 54%, rgba(0,0,0,0.04) 62%, rgba(0,0,0,0.18) 72%, rgba(0,0,0,0.5) 82%, rgba(0,0,0,0.85) 91%, #000 100%)}
+body::before{position:fixed;background:radial-gradient(46% 40% at -10% 62%,rgba(64,115,129,.3) 0%,rgba(64,115,129,.13) 45%,rgba(64,115,129,0) 75%),radial-gradient(40% 30% at 104% 96%,rgba(225,36,31,.2) 0%,rgba(139,25,33,.08) 45%,rgba(255,255,255,0) 75%)}
 p{color:#57524d}
 a.btn{background:#161616;color:#fff}
 @media (hover:hover) and (pointer:fine){a.btn:hover{background:#000}}
