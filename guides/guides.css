@@ -198,7 +198,7 @@ a { color: inherit; }
      the near-black #182b30 reads as a grey smudge on white. */
   body::before { display: block; background:
       radial-gradient(46% 40% at -10% 62%, rgba(64,115,129,0.30) 0%, rgba(64,115,129,0.13) 45%, rgba(64,115,129,0) 75%),
-      radial-gradient(40% 30% at 104% 96%, rgba(225,36,31,0.20) 0%, rgba(139,25,33,0.08) 45%, rgba(255,255,255,0) 75%); -webkit-mask-image: none; mask-image: none; }
+      radial-gradient(30% 20% at 106% 102%, rgba(225,36,31,0.14) 0%, rgba(139,25,33,0.05) 45%, rgba(255,255,255,0) 75%); -webkit-mask-image: none; mask-image: none; }
   body::after { display: none; }
   .g-hero { --night: #ffffff; --on-night: #161616; --on-night-2: #3a3532; padding-bottom: 72px; }
   .g-nav { border-bottom-color: rgba(20,18,16,0.07); }
