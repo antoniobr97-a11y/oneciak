@@ -1046,12 +1046,6 @@ details.more > summary:active { transform: scale(0.98); }
 .fs-col.green li::before { background: #0f7a3d; }
 .exec-box, .exec-box.risk, .exec-box.opp { border-left: 0; padding: 0; }
 .tips-block { margin-top: 22px; }
-.next-area { display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: 12px; width: 100%; margin-top: 30px; padding: 16px 2px; border: 0; border-top: 1px solid var(--text); background: none; font: inherit; color: var(--text); text-align: left; cursor: pointer; transition: transform 0.15s ease-out; }
-.next-area:active { transform: scale(0.99); }
-.next-area-k { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-.next-area-t { font-family: var(--display); font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
-.next-area-i { font-size: 18px; }
-@media (hover: hover) and (pointer: fine) { .next-area:hover .next-area-t { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; } }
 #overallScore { margin-bottom: 22px; }
 @media (max-width: 640px) {
   #sec-results .r-header { transition: transform 0.3s var(--ease), background 0.35s var(--ease), color 0.35s var(--ease); }
@@ -1070,10 +1064,9 @@ details.more > summary:active { transform: scale(0.98); }
 /* Labels are words, so they are set as words (2026-10-26): sentence case in
    the body face, small and bold. Mono caps stay only for numbers, dates and
    counts, where the fixed width helps reading. */
-.menu-sec-title, .exec-label, .tips-label, .action-label, .flags-label, .exec-box-label, .unlock-label, .fs-label, .fact-k, .sub-k, .an-top, .next-area-k, .mr-email {
+.menu-sec-title, .exec-label, .tips-label, .action-label, .flags-label, .exec-box-label, .unlock-label, .fs-label, .fact-k, .sub-k, .an-top, .mr-email {
   font-family: var(--sf); font-size: 14px; font-weight: 700; letter-spacing: 0; text-transform: none;
 }
-.next-area-k, .mr-email { font-weight: 400; }
 
 /* Report reorganised (2026-10-26): counts in words, phases in plain bold,
    the verdict on the area row in readable size. */
@@ -2492,7 +2485,6 @@ function renderFull(r, title) {
       '<div class="accordion-body" id="acc-body-'+idx+'">'+
       '<div class="accordion-divider"></div>'+
       sec.body+
-      (sections[idx+1] ? '<button type="button" class="next-area" onclick="nextArea('+idx+')"><span class="next-area-k">Next</span><span class="next-area-t">'+sections[idx+1].label+'</span><span class="next-area-i" aria-hidden="true">→</span></button>' : '')+
       '</div>'+
       '</div>';
   });
@@ -2649,13 +2641,28 @@ function buildBusinessPlanBody(bp) {
 }
 
 /* ── TOGGLE ACCORDION ── */
+/* One area open at a time, and no jumps (Antonio, 2026-10-27: "troppi su e
+   giù"): opening an area closes the one that was open, and the row that was
+   tapped stays exactly where it was on screen, even when a long area above
+   it closes. */
 function toggleAccordion(idx) {
   var trigger = document.getElementById('acc-trigger-'+idx);
   var body = document.getElementById('acc-body-'+idx);
   if (!trigger || !body) return;
+  var before = trigger.getBoundingClientRect().top;
   var isOpen = body.classList.contains('open');
+  if (!isOpen) {
+    document.querySelectorAll('#accordionMenu .accordion-body.open').forEach(function(b) {
+      if (b === body) return;
+      b.classList.remove('open');
+      var t = document.getElementById(b.id.replace('acc-body-', 'acc-trigger-'));
+      if (t) t.classList.remove('open');
+    });
+  }
   body.classList.toggle('open', !isOpen);
   trigger.classList.toggle('open', !isOpen);
+  var shift = trigger.getBoundingClientRect().top - before;
+  if (Math.abs(shift) > 1) window.scrollTo({ top: window.scrollY + shift, behavior: 'instant' });
 }
 
 /* AREA NAVIGATION (2026-10-23). A report is long, so it gets:
@@ -2690,12 +2697,6 @@ function goToArea(i) {
   // On phones the header hides while scrolling down, leaving only the area bar.
   var y = trigger.getBoundingClientRect().top + window.scrollY - (window.innerWidth < 1360 ? 60 : 76);
   window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-}
-// Closes the area just read and opens the next one, like turning a page.
-function nextArea(i) {
-  var body = document.getElementById('acc-body-'+i);
-  if (body && body.classList.contains('open')) toggleAccordion(i);
-  goToArea(i + 1);
 }
 function goToOverview() {
   var el = document.querySelector('#accordionMenu .accordion-wrap');
