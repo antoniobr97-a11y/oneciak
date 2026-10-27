@@ -232,8 +232,20 @@ Regole che restano valide:
 
 ## Strumenti di design installati (2026-10-08)
 
-- **Emil Kowalski design-eng** (`.claude/skills/emil-design-eng`, committato):
-  skill di filosofia su animazioni/craft. Letta per intero, sicura.
+- **Emil Kowalski design-eng**: CLAUDE.md diceva "committato" ma il
+  2026-10-27 NON era nel repo (`git ls-files` vuoto, mai committato). Se serve,
+  chiedere la fonte ad Antonio e committarla davvero.
+- **Playwright CLI** (`.claude/skills/playwright-cli`, aggiunto 2026-10-27):
+  skill ufficiale Microsoft, pacchetto npm `@playwright/cli` 0.1.22 (Apache-2.0,
+  maintainer Microsoft verificati su npm). Letto: unica chiamata di rete è il
+  controllo aggiornamenti su registry.npmjs.org (spegnerlo con
+  `NO_UPDATE_NOTIFIER=1`). Il comando NON persiste tra sessioni: ogni volta
+  `npm install -g @playwright/cli@0.1.22`. Config in `.playwright/cli.config.json`
+  (usa `/opt/pw-browsers/chromium`). Provato: apre oneciak.com e legge il titolo.
+- **SICUREZZA 2026-10-27**: Netlify pubblica la cartella intera (`publish = "."`):
+  CLAUDE.md, `netlify/functions/*.js` e `package.json` erano leggibili su
+  oneciak.com. Chiusi con redirect 404 in `netlify.toml`. Ogni nuovo file non
+  del sito messo alla radice va aggiunto lì.
 - **Impeccable** (`.claude/skills/impeccable`, committato, ~20MB con binario):
   scanner automatico di anti-pattern di design. Gira **in locale, zero
   chiamate di rete** (verificato con `strace`). Hook configurati in
