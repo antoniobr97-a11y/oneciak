@@ -419,8 +419,9 @@ e 6e1d632, NON su main. Pubblicare solo quando Antonio dice "pubblica"
 - Ordine di ogni area: giudizio, una frase, "What to do", rischi/punti di
   forza (pallino colorato invece della riga verticale), poi tendine (anche
   "Next 90 days"). Fasi del piano d'azione: prima frase + "More".
-- Pulsante "Next" in fondo a ogni area (`nextArea()`): chiude e apre la
-  successiva. Su telefono l'intestazione sparisce scorrendo in giù
+- ~~Pulsante "Next" in fondo a ogni area~~ TOLTO il 2026-10-27 (Antonio:
+  "troppi su e giù"): ora UNA sola area aperta alla volta e la riga toccata
+  resta ferma sullo schermo (`toggleAccordion` compensa lo scorrimento). Su telefono l'intestazione sparisce scorrendo in giù
   (`body.rh-hidden`), resta solo la barra delle aree.
 - Misure (Chromium come iPhone 13, NON Safari vero): voto da 678 a 184 px
   dall'alto; "What to do" da 1.184-1.806 a 340-477 px dal titolo dell'area;
