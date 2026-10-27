@@ -254,11 +254,17 @@ Regole che restano valide:
   Falsi positivi già documentati con motivazione in `.impeccable/config.json`
   (`ignores add-value <rule> "*" --file index.html --reason "..."`) — non
   cancellarli senza motivo, c'è scritto perché sono stati ignorati.
-- **Taste**: era installata in `~/.claude/skills/taste`, ma **NON persiste**.
-  Il container cloud è nuovo a ogni sessione e `~/.claude` viene azzerata
-  (verificato il 2026-10-08: sparita insieme alla config MCP utente). Per
-  averla stabile va messa nel repo in `.claude/skills/taste` e committata.
-  Fonte originale da chiedere ad Antonio se serve reinstallarla.
+- **Taste** (`.claude/skills/taste`, aggiunto 2026-10-27): Leonxlnx/taste-skill
+  v2 ("design-taste-frontend"), MIT, letto prima di installarlo. Rete SOLO se
+  si usa `scripts/assets.mjs` (cerca foto con licenza libera su Openverse,
+  Wikimedia, Art Institute of Chicago, Met, NASA, Internet Archive). Usa Chrome
+  via CDP: impostare `CHROME_PATH=/opt/pw-browsers/chromium`. ATTENZIONE: il
+  suo generatore propone font Google: per noi VIETATO (GDPR, CSP
+  `font-src 'self'`). Usarlo per `inspect.mjs`/`lint.mjs`/critica, NON per
+  ripartire con una nuova direzione visiva. Eseguire i suoi script la prima
+  volta ha chiesto l'ok di Antonio (permesso negato in automatico il
+  2026-10-27). Scartata `awesome-claude-design` (non è una skill: raccolta di
+  DESIGN.md che imitano marchi come BMW/Ferrari/Nvidia).
 - **Playwright MCP**: configurato a livello di progetto in `.mcp.json`
   (committato, così sopravvive al reset del container) con
   `--executable-path /opt/pw-browsers/chromium --headless`, perché il canale
