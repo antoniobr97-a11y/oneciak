@@ -254,17 +254,12 @@ Regole che restano valide:
   Falsi positivi già documentati con motivazione in `.impeccable/config.json`
   (`ignores add-value <rule> "*" --file index.html --reason "..."`) — non
   cancellarli senza motivo, c'è scritto perché sono stati ignorati.
-- **Taste** (`.claude/skills/taste`, aggiunto 2026-10-27): Leonxlnx/taste-skill
-  v2 ("design-taste-frontend"), MIT, letto prima di installarlo. Rete SOLO se
-  si usa `scripts/assets.mjs` (cerca foto con licenza libera su Openverse,
-  Wikimedia, Art Institute of Chicago, Met, NASA, Internet Archive). Usa Chrome
-  via CDP: impostare `CHROME_PATH=/opt/pw-browsers/chromium`. ATTENZIONE: il
-  suo generatore propone font Google: per noi VIETATO (GDPR, CSP
-  `font-src 'self'`). Usarlo per `inspect.mjs`/`lint.mjs`/critica, NON per
-  ripartire con una nuova direzione visiva. Eseguire i suoi script la prima
-  volta ha chiesto l'ok di Antonio (permesso negato in automatico il
-  2026-10-27). Scartata `awesome-claude-design` (non è una skill: raccolta di
-  DESIGN.md che imitano marchi come BMW/Ferrari/Nvidia).
+- **Taste: TOLTA il 2026-10-27** su richiesta di Antonio ("è una merda,
+  leva Taste"). Il rifacimento della home che proponeva (sito vestito da
+  carte di produzione, ciak nell'intestazione, tabellone delle aree, foto
+  d'archivio di set/Cinecittà/Moviola, footer con logo gigante) è stato
+  BOCCIATO e mai pubblicato: non riproporlo. Scartata anche
+  `awesome-claude-design`.
 - **Playwright MCP**: configurato a livello di progetto in `.mcp.json`
   (committato, così sopravvive al reset del container) con
   `--executable-path /opt/pw-browsers/chromium --headless`, perché il canale
