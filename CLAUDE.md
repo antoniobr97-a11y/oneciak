@@ -173,6 +173,7 @@ conversazione aspettando.
   **Self-hosted in `/fonts`** (niente Google Fonts, per il GDPR). Il CSP in
   `netlify.toml` ha `font-src 'self'`: se si aggiunge un font esterno va
   cambiato anche lì, altrimenti viene bloccato.
+- **2026-10-27: anche i dati piccoli in Carlito** (Antonio): `--mono` ora punta a Carlito in index.html e guides.css; IBM Plex Mono non è più usato (i file restano in /fonts).
 - **Tutto il testo in Carlito** (scelto da Antonio il 2026-10-23, voleva Calibri;
   i titoli restano Geist, le etichette IBM Plex Mono): Calibri è di Microsoft,
   non scaricabile e serve licenza web, e non c'è su iPhone/Mac/Android; Carlito
