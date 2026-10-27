@@ -218,11 +218,13 @@ a { color: inherit; }
   body { background: var(--night); }
   body::before {
     background:
-      radial-gradient(50% 42% at 108% 6%, rgba(235,137,63,0.32) 0%, rgba(225,36,31,0.24) 32%, rgba(139,25,33,0.12) 55%, rgba(20,13,16,0) 75%),
       radial-gradient(46% 40% at -10% 62%, rgba(24,43,48,0.9) 0%, rgba(24,43,48,0.45) 45%, rgba(24,43,48,0) 75%),
       radial-gradient(40% 30% at 104% 96%, rgba(225,36,31,0.34) 0%, rgba(139,25,33,0.18) 45%, rgba(20,13,16,0) 75%);
   }
   body::after { mix-blend-mode: overlay; }
+  /* one light everywhere, as on the app: no extra red patch in the header */
+  .g-hero { background: transparent; }
+  .g-hero::before, .g-hero::after { display: none; }
   .g-hero { padding-bottom: 72px; }
   .g-article a { text-decoration-color: rgba(242,237,230,0.4); }
   .g-note, .rm-ev { border-left-color: rgba(240,160,124,0.6); }

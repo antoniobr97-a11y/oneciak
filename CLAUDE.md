@@ -488,6 +488,13 @@ pulsante, niente orario. Blocchi CSS in fondo agli stili di index.html
   molto morbidamente verso il centro con una `mask-image` a 12 tappe. Grana
   solo sulla luce. Menu pieno bianco con la stessa luce. Testo grigio in
   chiaro #3a3a3a per restare sopra 4.5:1 sulla fascia calda.
+- **Scuro, AGGIORNATO 2026-10-27 (Antonio dal suo iPhone: "qui è stupendo il
+  nostro colore, facciamolo uguale ovunque")**: UNA sola luce su tutto il
+  sito, fissa allo schermo: petrolio a sinistra + rosso in basso a destra
+  (`body::before`). Tolta l'ambra in alto a destra e tolte le macchie rosse
+  forti delle intestazioni (home, report, My Reports, caricamento, menu,
+  guide, 404): "quella macchia di rosso in alto a destra non mi significa
+  nulla". Bocciata anche l'"ora d'oro" (cielo azzurro-sabbia-arancio) in chiaro.
 - **Scuro**: nero prugna ovunque, anche analisi, modulo, My Reports, guide,
   roadmap; bagliori blu/rosso fissi ai bordi (`body::before`), grana overlay.
   Antonio: "il blu/rosso con sfondo nero è bellissimo".
