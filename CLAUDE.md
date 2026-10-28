@@ -465,6 +465,23 @@ Da fare, in ordine:
    le regole dentro PDF non vengono citate (non si leggono i PDF).
 6. PR #81 resta bozza di prova: non va mai mergiata.
 
+## Full report riorganizzato (2026-10-28, approvato da Antonio, pubblicato)
+
+Antonio: "troppo incasinato". Ora: SOLO le 5 aree con voto, poi "Your plan"
+(fasi in ordine, `buildPlanSection`) come sezione fissa, non come sesta area.
+Le liste stanno nell'area a cui appartengono: Festival calendar e Awards in
+Festival, Sales agents/mercati/ricavi in Distribution, Legal in Creative.
+Dentro ogni area: giudizio (prima frase + "Read more"), "What to do" (prima
+frase di ogni consiglio + "More"), poi tutto chiuso in righe con la STESSA
+freccia (anche "Red flags and strengths", How to read, Glossary). Business
+plan e lista rischi solo nel PDF (erano doppioni). Tolto il PDF "One-page
+summary" ("non mi rappresenta nulla"): un solo bottone "Download the full
+report". Aree aperte 26-38% più corte. Non rimettere la sesta/settima area.
+Controllo completo del sito lo stesso giorno (script in scratchpad `audit/`,
+si perde): 0 errori JS, 0 scorrimenti orizzontali, contrasto sui pixel tutto
+sopra soglia (attenzione: per nascondere il testo serve `:is(#zz,html) *`,
+altrimenti le regole `!important` del sito vincono e danno falsi 1.0:1).
+
 ## Giro Impeccable del 2026-10-26 (pubblicato)
 
 Critica 26/40 (`.impeccable/critique/`). Fatto: le 5 aree non si ripetono più
