@@ -16,6 +16,21 @@ const FACTS = [
       checked: '2026-10-22'
     },
     prompt: 'VERIFIED FACT (checked by hand on the official decree; use it and never contradict it): the Italian production tax credit for independent producers is 30% of the eligible production cost for both feature films and short films, capped at 4,000,000 euro per cinema work, under the interministerial decree MiC-MEF of 6 July 2026, n. 281; it is claimed by an Italian independent production company, not by an individual. For a fiction feature over 52 minutes it also requires at least 40% of the financing proven and a binding theatrical distribution deal, or else a DGCA selective grant or Council of Europe or EU support plus a minimum cinema release (or, under 1.5 million euro, an eligible international festival plus a broadcaster or platform deal): a festival-only release does not qualify. Pages that still say 25% to 40% are out of date.'
+  },
+  {
+    // Who can apply to the MiC selective grants, read on the 2026 call
+    // (decreto direttoriale 15 May 2026 n. 1238, arts. 7, 14 and 22) on
+    // 2026-10-28: writing is open to authors as individuals, development
+    // and production only to Italian independent production companies.
+    countries: /\b(italy|italia|italian)\b/i,
+    selective: {
+      source: 'https://cinema.cultura.gov.it/wp-content/uploads/dlm_uploads/2026/05/Anno-2026-Bando-per-la-concessione-di-contributi-selettivi-per-la-scrittura-lo-sviluppo-e-la-produzione-di-opere-cinematograf.pdf',
+      checked: '2026-10-28',
+      writing: 'Possono presentare richiesta di contributo, anche congiuntamente, a pena di inammissibilità, i cittadini maggiorenni',
+      development: 'Le richieste di contributo possono essere presentate da: imprese indipendenti cinematografiche e audiovisive italiane, anche in forma associata',
+      production: 'Le richieste di contributo possono essere presentate, a pena di inammissibilità, da: imprese indipendenti cinematografiche e audiovisive italiane, anche in forma associata'
+    },
+    prompt: 'VERIFIED FACT (checked by hand on the 2026 call of the Italian Ministry of Culture for selective grants, decreto direttoriale 15 May 2026 n. 1238): screenplay writing grants are requested by authors as individuals (adult EEA citizens, tax resident in Italy when paid, holding the rights), only for works longer than 52 minutes and written in Italian, and screenplays written with AI systems are excluded; development and production grants, including those for first and second works, are requested only by Italian independent production companies registered with ATECO code 59.1 that have produced at least one eligible work in the last five years (newly founded companies excepted). An individual without a company cannot apply for development or production.'
   }
 ];
 
@@ -33,6 +48,7 @@ function promptFacts(project) {
 // any funding-source row about the same incentive.
 function applyFacts(report, project) {
   factsFor(project).forEach(f => {
+    if (f.selective) applySelective(report, f.selective);
     if (!f.tax_incentive) return;
     report.tax_incentive = Object.assign({}, f.tax_incentive);
     (report.financial_sources || []).forEach(item => {
@@ -42,6 +58,31 @@ function applyFacts(report, project) {
         item.checked = f.tax_incentive.checked;
       }
     });
+  });
+}
+
+// A MiC/DGCA selective grant row gets who can apply, with the call's own
+// sentence as the quote and the call as its source.
+function applySelective(report, sel) {
+  (report.financial_sources || []).forEach(item => {
+    const text = String(item.name || '') + ' ' + String(item.eligibility || '');
+    if (!/selettiv|selective/i.test(text) || !/\b(MiC|DGCA|Ministry of Culture|Ministero della Cultura|Direzione generale Cinema)\b/i.test(text)) return;
+    // The call's own title names writing, development and production
+    // together, so the line is read from what the row is about; when that
+    // is not clear the row is left as the model wrote it.
+    const name = String(item.name || '');
+    const about = name + ' ' + String(item.eligibility || '') + ' ' + String(item.amount || '');
+    const writing = /scrittura|writing|screenplay|sceneggiat/i, dev = /sviluppo|development/i, prod = /produzione|production/i;
+    let kind = null;
+    if (/opere prime|first and second|first works|giovani autori|young authors/i.test(about)) kind = 'production';
+    else if (writing.test(name) && !dev.test(name) && !prod.test(name)) kind = 'writing';
+    else if (dev.test(name) && !writing.test(name) && !prod.test(name)) kind = 'development';
+    else if (prod.test(name) && !writing.test(name) && !dev.test(name)) kind = 'production';
+    if (!kind) return;
+    item.applicant = kind === 'writing' ? 'Individual' : 'Company';
+    item.rule_quote = sel[kind];
+    item.source = item.url = sel.source;
+    item.checked = sel.checked;
   });
 }
 

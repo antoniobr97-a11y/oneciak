@@ -173,6 +173,7 @@ conversazione aspettando.
   **Self-hosted in `/fonts`** (niente Google Fonts, per il GDPR). Il CSP in
   `netlify.toml` ha `font-src 'self'`: se si aggiunge un font esterno va
   cambiato anche lì, altrimenti viene bloccato.
+- **2026-10-27: anche i dati piccoli in Carlito** (Antonio): `--mono` ora punta a Carlito in index.html e guides.css; IBM Plex Mono non è più usato (i file restano in /fonts).
 - **Tutto il testo in Carlito** (scelto da Antonio il 2026-10-23, voleva Calibri;
   i titoli restano Geist, le etichette IBM Plex Mono): Calibri è di Microsoft,
   non scaricabile e serve licenza web, e non c'è su iPhone/Mac/Android; Carlito
@@ -231,8 +232,20 @@ Regole che restano valide:
 
 ## Strumenti di design installati (2026-10-08)
 
-- **Emil Kowalski design-eng** (`.claude/skills/emil-design-eng`, committato):
-  skill di filosofia su animazioni/craft. Letta per intero, sicura.
+- **Emil Kowalski design-eng**: CLAUDE.md diceva "committato" ma il
+  2026-10-27 NON era nel repo (`git ls-files` vuoto, mai committato). Se serve,
+  chiedere la fonte ad Antonio e committarla davvero.
+- **Playwright CLI** (`.claude/skills/playwright-cli`, aggiunto 2026-10-27):
+  skill ufficiale Microsoft, pacchetto npm `@playwright/cli` 0.1.22 (Apache-2.0,
+  maintainer Microsoft verificati su npm). Letto: unica chiamata di rete è il
+  controllo aggiornamenti su registry.npmjs.org (spegnerlo con
+  `NO_UPDATE_NOTIFIER=1`). Il comando NON persiste tra sessioni: ogni volta
+  `npm install -g @playwright/cli@0.1.22`. Config in `.playwright/cli.config.json`
+  (usa `/opt/pw-browsers/chromium`). Provato: apre oneciak.com e legge il titolo.
+- **SICUREZZA 2026-10-27**: Netlify pubblica la cartella intera (`publish = "."`):
+  CLAUDE.md, `netlify/functions/*.js` e `package.json` erano leggibili su
+  oneciak.com. Chiusi con redirect 404 in `netlify.toml`. Ogni nuovo file non
+  del sito messo alla radice va aggiunto lì.
 - **Impeccable** (`.claude/skills/impeccable`, committato, ~20MB con binario):
   scanner automatico di anti-pattern di design. Gira **in locale, zero
   chiamate di rete** (verificato con `strace`). Hook configurati in
@@ -241,11 +254,12 @@ Regole che restano valide:
   Falsi positivi già documentati con motivazione in `.impeccable/config.json`
   (`ignores add-value <rule> "*" --file index.html --reason "..."`) — non
   cancellarli senza motivo, c'è scritto perché sono stati ignorati.
-- **Taste**: era installata in `~/.claude/skills/taste`, ma **NON persiste**.
-  Il container cloud è nuovo a ogni sessione e `~/.claude` viene azzerata
-  (verificato il 2026-10-08: sparita insieme alla config MCP utente). Per
-  averla stabile va messa nel repo in `.claude/skills/taste` e committata.
-  Fonte originale da chiedere ad Antonio se serve reinstallarla.
+- **Taste: TOLTA il 2026-10-27** su richiesta di Antonio ("è una merda,
+  leva Taste"). Il rifacimento della home che proponeva (sito vestito da
+  carte di produzione, ciak nell'intestazione, tabellone delle aree, foto
+  d'archivio di set/Cinecittà/Moviola, footer con logo gigante) è stato
+  BOCCIATO e mai pubblicato: non riproporlo. Scartata anche
+  `awesome-claude-design`.
 - **Playwright MCP**: configurato a livello di progetto in `.mcp.json`
   (committato, così sopravvive al reset del container) con
   `--executable-path /opt/pw-browsers/chromium --headless`, perché il canale
@@ -404,6 +418,130 @@ anteprime 88% corrette, 0 inventati; report completi 64% corretti, 0 inventati.
 - Debug solo per la preview: il ramo `test-sourced-reports` (PR #81) ha in
   più un commit "TEST ONLY" (motivo dell'errore in get-report e limite 12
   report con `CONTEXT=deploy-preview`). MAI portarlo su main.
+
+## Report su iPhone (2026-10-24, PUBBLICATO il 2026-10-26, main e98d964)
+
+Antonio: "il full report da iPhone è troppo pesante da leggere e pieno di
+finestre a destra e a sinistra, l'esperienza deve essere unica e piacevole".
+Fatto SOLO sul branch e sulla preview (`deploy-preview-81`), commit 92f75f0
+e 6e1d632, NON su main. Pubblicare solo quando Antonio dice "pubblica"
+(procedura solita, cherry-pick di quei due commit, MAI il commit "TEST ONLY").
+- Voto subito sotto il titolo; riassunto hero tagliato a 4 righe con
+  "Read more" (`setHeroSummary`, solo telefono).
+- `parasFold()`: prima frase visibile, il resto sotto "Read the full
+  analysis" / "Read the full summary" (`details.more`).
+- Ordine di ogni area: giudizio, una frase, "What to do", rischi/punti di
+  forza (pallino colorato invece della riga verticale), poi tendine (anche
+  "Next 90 days"). Fasi del piano d'azione: prima frase + "More".
+- ~~Pulsante "Next" in fondo a ogni area~~ TOLTO il 2026-10-27 (Antonio:
+  "troppi su e giù"): ora UNA sola area aperta alla volta e la riga toccata
+  resta ferma sullo schermo (`toggleAccordion` compensa lo scorrimento). Su telefono l'intestazione sparisce scorrendo in giù
+  (`body.rh-hidden`), resta solo la barra delle aree.
+- Misure (Chromium come iPhone 13, NON Safari vero): voto da 678 a 184 px
+  dall'alto; "What to do" da 1.184-1.806 a 340-477 px dal titolo dell'area;
+  report tutto aperto da 17.676 a 13.505 px.
+- Dubbio aperto: non è certo cosa intendesse con "finestre a destra e a
+  sinistra". Gli è stato chiesto uno screenshot dal suo iPhone.
+
+## Stato al 2026-10-26 e cosa manca
+
+Online su oneciak.com (vedi sezioni sopra per il 2026-10-26): motore report con fonti, regole citate
+alla lettera, percorso del film `/roadmap/`, guide, Carlito ovunque (PDF
+compreso), niente etichette sopra i titoli, niente trattini lunghi.
+Da fare, in ordine:
+1. Fatto il 2026-10-26: report iPhone, giro Impeccable, chiaro/scuro.
+2. Eventuali altri giri Impeccable 4.7.0 per migliorare ancora il sito
+   (`/impeccable critique`, `audit`, `polish`, `layout`, `typeset`, `adapt`
+   per i telefoni). Il controllo automatico gira già dopo ogni modifica (hook
+   in `.claude/settings.local.json`, committato). Regole: mostrare prima e
+   dopo con misure, aspettare l'ok per i cambi visivi grossi, non riaprire
+   satinato/grana, palette e font già scelti.
+3. Avvocato: privacy (titolare, basi giuridiche, trasferimenti USA, tempi di
+   conservazione), strada A o B, nome di Antonio sul sito. Dopo: riscrivere
+   privacy/termini (lì restano trattini lunghi).
+4. Lancio (Product Hunt, Reddit, scuole): dopo l'avvocato; serve la frase di
+   Antonio sul "perché" e una data. Ogni testo lo approva lui.
+5. Report: nei corti spesso nessun film di confronto (regola severa, voluto);
+   le regole dentro PDF non vengono citate (non si leggono i PDF).
+6. PR #81 resta bozza di prova: non va mai mergiata.
+
+## Full report riorganizzato (2026-10-28, approvato da Antonio, pubblicato)
+
+Antonio: "troppo incasinato". Ora: SOLO le 5 aree con voto, poi "Your plan"
+(fasi in ordine, `buildPlanSection`) come sezione fissa, non come sesta area.
+Le liste stanno nell'area a cui appartengono: Festival calendar e Awards in
+Festival, Sales agents/mercati/ricavi in Distribution, Legal in Creative.
+Dentro ogni area: giudizio (prima frase + "Read more"), "What to do" (prima
+frase di ogni consiglio + "More"), poi tutto chiuso in righe con la STESSA
+freccia (anche "Red flags and strengths", How to read, Glossary). Business
+plan e lista rischi solo nel PDF (erano doppioni). Tolto il PDF "One-page
+summary" ("non mi rappresenta nulla"): un solo bottone "Download the full
+report". Aree aperte 26-38% più corte. Non rimettere la sesta/settima area.
+Controllo completo del sito lo stesso giorno (script in scratchpad `audit/`,
+si perde): 0 errori JS, 0 scorrimenti orizzontali, contrasto sui pixel tutto
+sopra soglia (attenzione: per nascondere il testo serve `:is(#zz,html) *`,
+altrimenti le regole `!important` del sito vincono e danno falsi 1.0:1).
+
+## Giro Impeccable del 2026-10-26 (pubblicato)
+
+Critica 26/40 (`.impeccable/critique/`). Fatto: le 5 aree non si ripetono più
+(domande dentro la scheda della home, nel report una sola lista con barra in
+ogni riga, niente `areaOverview`), niente etichette mono maiuscole come
+etichette (restano solo su numeri, date, conteggi: le etichette sono parole in
+Carlito grassetto), rischio/opportunità come inizio di frase, errori nella
+pagina invece di `alert()` (`unlockFail`, `pdfFail`), caricamento allineato a
+sinistra con il titolo del film, bottone sempre "Analyze your film", icone
+disegnate (chevron, spunta) invece dei simboli ▾ ✓, "How to read" e glossario
+sotto le aree, l'anteprima non ripete più il riassunto due volte.
+
+## CHIARO E SCURO (deciso da Antonio il 2026-10-26, pubblicato)
+
+Il sito segue l'impostazione del dispositivo (`prefers-color-scheme`), niente
+pulsante, niente orario. Blocchi CSS in fondo agli stili di index.html
+("LIGHT AND DARK") e in fondo a `guides/guides.css`; anche privacy, termini,
+404.
+- **Chiaro**: BIANCO VERO `#ffffff` ovunque, home compresa ("quando è bianco
+  deve essere bianco, non quel grigino"): niente satinato, niente grana, niente
+  crema. Bagliori leggeri solo ai bordi: pesca/rosso in alto a destra, azzurro
+  `rgba(88,146,196,…)` a sinistra (il petrolio su bianco sembrava una macchia
+  grigia sporca). Scheda Northbound in vetro chiaro.
+- **Chiaro, AGGIORNATO il 2026-10-26 sera**: fondo bianco, e al posto dei
+  bagliori una "luce parassita" da pellicola (light leak) che entra dal bordo
+  destro: nucleo chiaro caldo in alto, arancio/rosso, un filo azzurro a
+  sinistra, grana solo sulla luce. Su header home, report, My Reports,
+  caricamento, menu, guide, 404. Scelta da Claude dopo che Antonio ha
+  bocciato ("non mi piace per niente") le fasce grigio-azzurre/rosa prese dal
+  suo riferimento di vetro smerigliato: NON riproporle. Il testo piccolo in
+  chiaro è un po' più scuro (#4a4a4a ecc.) per restare sopra 4.5:1.
+- **Chiaro, VERSIONE SCELTA (2026-10-26 notte, variante "B" scelta da
+  Antonio fra tre)**: luce calda che entra in diagonale dal bordo destro
+  (`linear-gradient(100deg, …)` + nucleo chiaro negli angoli a destra), FISSA
+  allo schermo (`body::before`), presente sempre in alto e in basso e sfumata
+  molto morbidamente verso il centro con una `mask-image` a 12 tappe. Grana
+  solo sulla luce. Menu pieno bianco con la stessa luce. Testo grigio in
+  chiaro #3a3a3a per restare sopra 4.5:1 sulla fascia calda.
+- **Chiaro, DEFINITIVO 2026-10-27 (scelto da Antonio: "stessa armonia
+  scuro")**: bianco, con la STESSA composizione dello scuro fissa allo
+  schermo: petrolio a sinistra + rosso morbido in basso a destra. Il petrolio
+  è la stessa tinta dello scuro (192°) resa luminosa, #407381 a bassa
+  opacità, perché #182b30 su bianco sembra grigio sporco. Niente grana, niente
+  luce da destra (la B è sostituita).
+- **Scuro, AGGIORNATO 2026-10-27 (Antonio dal suo iPhone: "qui è stupendo il
+  nostro colore, facciamolo uguale ovunque")**: UNA sola luce su tutto il
+  sito, fissa allo schermo: petrolio a sinistra + rosso in basso a destra
+  (`body::before`). Tolta l'ambra in alto a destra e tolte le macchie rosse
+  forti delle intestazioni (home, report, My Reports, caricamento, menu,
+  guide, 404): "quella macchia di rosso in alto a destra non mi significa
+  nulla". Bocciata anche l'"ora d'oro" (cielo azzurro-sabbia-arancio) in chiaro.
+- **Scuro**: nero prugna ovunque, anche analisi, modulo, My Reports, guide,
+  roadmap; bagliori blu/rosso fissi ai bordi (`body::before`), grana overlay.
+  Antonio: "il blu/rosso con sfondo nero è bellissimo".
+- Senza preferenza vale il vecchio stile (hero scuro, resto chiaro).
+- Contrasto misurato sui pixel in entrambe le modalità, 320-1440px, ogni
+  schermata: tutto sopra soglia. 140 stati controllati: nessun errore JS,
+  nessuno scorrimento orizzontale. Verifica in Chromium, NON Safari vero.
+- Il satinato/grana delle parti chiare descritto sopra NON si usa più in
+  modalità chiara (resta solo come stile senza preferenza).
 
 ## Principio di onestà (esplicito, non derogabile)
 

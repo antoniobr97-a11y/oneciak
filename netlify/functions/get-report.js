@@ -4,9 +4,9 @@ const { verify: verifyReportToken } = require('./_util/reportToken');
 
 const ALLOWED_ORIGIN = process.env.SITE_URL || 'https://oneciak.com';
 
-// Lets the client recover a report the stripe-webhook already generated
-// server-side, instead of paying for a brand-new AI generation on every
-// retry or return visit. Gated by the same paid-session token as analyze.js.
+// Lets the client recover a full report that generate-report-background
+// already wrote, instead of paying for a brand-new AI generation on every
+// retry or return visit. Gated by the signed report token (reportToken.js).
 exports.handler = async (event) => {
   const headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Vary': 'Origin' };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: { ...headers, 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' }, body: '' };
@@ -35,9 +35,7 @@ exports.handler = async (event) => {
     // repeating "almost there" forever for a generation that already died
     // server-side (e.g. the recipient email was undeliverable).
     if (record && record.status === 'failed') {
-      // TEST BRANCH ONLY (deploy preview): show why a generation failed.
-      const dbg = process.env.CONTEXT === 'deploy-preview' ? { error: record.error } : {};
-      return { statusCode: 200, headers, body: JSON.stringify(Object.assign({ ready: false, failed: true }, dbg)) };
+      return { statusCode: 200, headers, body: JSON.stringify({ ready: false, failed: true }) };
     }
     return { statusCode: 200, headers, body: JSON.stringify({ ready: false }) };
   } catch (err) {

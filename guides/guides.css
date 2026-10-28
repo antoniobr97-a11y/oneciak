@@ -7,11 +7,11 @@
   --ember-text: #a8471f;
   --display: 'Geist', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
   --body: 'Carlito', Calibri, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --mono: 'Carlito', Calibri, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; /* small data in Carlito too (Antonio, 2026-10-27) */
   --ease: cubic-bezier(0.23, 1, 0.32, 1);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { color-scheme: only light; }
+html { color-scheme: light; }
 body { font-family: var(--body); background: var(--paper); color: var(--text); -webkit-font-smoothing: antialiased; letter-spacing: -0.011em; position: relative; min-height: 100vh; }
 body::before {
   content: ''; position: fixed; inset: 0; z-index: -2; pointer-events: none;
@@ -51,8 +51,11 @@ a { color: inherit; }
 }.g-hero::before, .g-hero::after {
   -webkit-mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 200px), transparent 100%);
   mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 200px), transparent 100%); }
+/* index of guides: two entries do not need a tall header (same dissolve as the others) */
+.g-hero.is-compact .g-head { padding-top: 56px; }
 .g-nav { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; height: 68px; border-bottom: 1px solid rgba(255,255,255,0.10); }
 .g-logo { display: flex; align-items: center; gap: 9px; font-family: var(--display); font-weight: 600; font-size: 16px; text-decoration: none; }
+@media (pointer: coarse) { .g-logo { padding: 11px 0; margin: -11px 0; } }
 .g-nav-r { display: flex; align-items: center; gap: 24px; font-size: 14px; }
 .g-nav-r a:not(.g-cta) { color: var(--on-night-2); text-decoration: none; padding: 8px 0; }
 .g-cta { background: var(--on-night); color: var(--night); text-decoration: none; font-weight: 500; font-size: 14px; padding: 10px 16px; border-radius: 10px; transition: transform .16s var(--ease); display: inline-block; }
@@ -179,4 +182,52 @@ a { color: inherit; }
   .rm-stage h2 { font-size: 25px; }
   .rm-jobs label { font-size: 16.5px; }
   .rm-ev { margin-left: 0; }
+}
+
+/* Light and dark (2026-10-26), same rules as index.html: light mode is light
+   everywhere with soft glows, dark mode is the night everywhere. */
+@media (prefers-color-scheme: light) {
+  :root { --paper: #ffffff; --border: #e2e0dd; }
+  body { background: #ffffff; }
+  .g-hero { background: transparent; }
+  :root { --muted: #3a3a3a; --ember-text: #8f3a17; }
+  .rm-side a.is-complete .rm-nav-c { color: #0a5c2d; }
+  .g-hero::before, .g-hero::after { display: none !important; }
+  /* Same harmony as dark mode (Antonio, 2026-10-27): petrol on the left,
+     red low on the right, fixed to the screen, soft on white. The petrol is
+     the dark mode's own hue (192 deg, same saturation) made lighter, since
+     the near-black #182b30 reads as a grey smudge on white. */
+  body::before { display: block; background:
+      radial-gradient(46% 40% at -10% 62%, rgba(64,115,129,0.30) 0%, rgba(64,115,129,0.13) 45%, rgba(64,115,129,0) 75%),
+      radial-gradient(30% 20% at 106% 102%, rgba(225,36,31,0.14) 0%, rgba(139,25,33,0.05) 45%, rgba(255,255,255,0) 75%); -webkit-mask-image: none; mask-image: none; }
+  body::after { display: none; }
+  .g-hero { --night: #ffffff; --on-night: #161616; --on-night-2: #3a3532; padding-bottom: 72px; }
+  .g-nav { border-bottom-color: rgba(20,18,16,0.07); }
+  .g-head .mono, .g-meta { color: var(--muted); }
+  .g-crumb a { text-decoration-color: rgba(22,22,22,0.35); }
+  @media (hover: hover) and (pointer: fine) { .g-cta:hover { background: #000; } }
+}
+@media (prefers-color-scheme: dark) {
+  :root { --on-night-2: #d6cec3; --paper: #140d10; --text: #f2ede6; --muted: #b3aca4; --border: rgba(255,255,255,0.13); --field: rgba(255,255,255,0.06); --ember-text: #f0a07c; }
+  html { color-scheme: dark; }
+  body { background: var(--night); }
+  body::before {
+    background:
+      radial-gradient(46% 40% at -10% 62%, rgba(24,43,48,0.9) 0%, rgba(24,43,48,0.45) 45%, rgba(24,43,48,0) 75%),
+      radial-gradient(40% 30% at 104% 96%, rgba(225,36,31,0.34) 0%, rgba(139,25,33,0.18) 45%, rgba(20,13,16,0) 75%);
+  }
+  body::after { mix-blend-mode: overlay; }
+  /* one light everywhere, as on the app: no extra red patch in the header */
+  .g-hero { background: transparent; }
+  .g-hero::before, .g-hero::after { display: none; }
+  .g-hero { padding-bottom: 72px; }
+  .g-article a { text-decoration-color: rgba(242,237,230,0.4); }
+  .g-note, .rm-ev { border-left-color: rgba(240,160,124,0.6); }
+  .g-btn { background: var(--on-night); color: var(--night); }
+  @media (hover: hover) and (pointer: fine) { .g-btn:hover { background: #fff; } }
+  .rm-side a.is-complete .rm-nav-c { color: #74d6a0; }
+  .rm-here { background: rgba(240,160,124,0.16); color: #f6b89a; }
+  .rm-jobs input { border-color: rgba(242,237,230,0.55); background: rgba(255,255,255,0.05); }
+  .rm-jobs input:checked { background-color: var(--text); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 10.5l3.2 3.2L15 7' fill='none' stroke='%23140d10' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+  ::selection { background: var(--on-night); color: var(--night); }
 }

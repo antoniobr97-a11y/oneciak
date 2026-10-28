@@ -51,7 +51,7 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: 'Not Allowed' };
   try {
     connectLambda(event);
-    const rl = await checkRateLimit(event, { name: process.env.CONTEXT === 'deploy-preview' ? 'start-full-report-preview' : 'start-full-report', limit: process.env.CONTEXT === 'deploy-preview' ? 12 : 3, windowMinutes: 180 }); // TEST BRANCH ONLY
+    const rl = await checkRateLimit(event, { name: 'start-full-report', limit: 3, windowMinutes: 180 });
     if (!rl.allowed) return { statusCode: 429, headers, body: JSON.stringify({ error: 'Too many full reports requested from this connection recently. Please try again later.' }) };
 
     let parsedBody;
