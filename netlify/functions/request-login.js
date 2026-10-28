@@ -45,7 +45,7 @@ exports.handler = async (event) => {
     const loginUrl = siteBase + '/?login_token=' + encodeURIComponent(loginToken) + '&login_email=' + encodeURIComponent(email);
 
     // Same look as the report email and the site: night header, warm paper body.
-    const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
+    const FONT = "Calibri,Carlito,-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
     const html = '<!doctype html><html><head><meta name="color-scheme" content="light only"></head><body style="margin:0;padding:0;background:#f4f1ec;font-family:' + FONT + '">' +
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1ec;padding:28px 0"><tr><td align="center">' +
       '<table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%;border-radius:14px;overflow:hidden;background:#fbf9f6">' +

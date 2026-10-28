@@ -117,7 +117,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 /* Scroll reveal: only hides content once JS confirms it can reveal it again (progressive enhancement — no JS/no observer support means everything just stays visible). */
 .js-ready .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
 .js-ready .reveal.in-view { opacity: 1; transform: translateY(0); }
-.card, .overall-card, .exec-card, .extra-card, .locked-card, .pdf-card, .accordion-wrap {
+.card, .overall-card, .exec-card, .pdf-card, .accordion-wrap {
   box-shadow: var(--shadow-md);
   border: 1px solid rgba(0,0,0,0.06);
 }
@@ -211,8 +211,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   animation: riseIn 0.7s 0.05s var(--ease) both;
 }
 .l-headline b { font-weight: 700; }
-/* #8a8279 on the night: 5.2:1, and at this size AA only needs 3:1 */
-.l-headline .dim { color: #8c8a86; }
 .l-desc { margin-top: 28px; max-width: 40ch; font-size: 18px; line-height: 1.55; color: var(--on-night-2); animation: riseIn 0.7s 0.1s var(--ease) both; }
 .l-actions { display: flex; flex-wrap: wrap; gap: 14px 26px; align-items: center; margin-top: 28px; animation: riseIn 0.7s 0.15s var(--ease) both; }
 .l-terms { display: flex; align-items: flex-start; gap: 11px; margin-top: 32px; max-width: 470px; text-align: left; animation: riseIn 0.7s 0.12s var(--ease) both; }
@@ -234,9 +232,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   font-size: 15px; font-weight: 500; cursor: pointer; width: fit-content; letter-spacing: -0.01em;
 }
 .l-btn:focus-visible { outline: 2px solid var(--on-night); outline-offset: 3px; }
-.l-sample-link { font-size: 15px; color: var(--on-night); font-weight: 400; text-decoration: underline; text-decoration-color: rgba(255,255,255,0.35); text-underline-offset: 4px; cursor: pointer; background: none; border: none; padding: 0; font-family: var(--sf); transition: text-decoration-color 0.2s; }
-@media (hover: hover) and (pointer: fine) { .l-sample-link:hover { text-decoration-color: var(--on-night); } }
-.l-sample-link:active { transform: scale(0.98); }
 .l-specs { margin-top: 16px; font-size: 14px; color: var(--on-night-2); }
 .sample-banner { background: var(--night); color: var(--on-night); text-align: left; font-size: 12.5px; line-height: 1.4; font-weight: 400; padding: 7px 20px; }
 .sample-banner a { color: inherit; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
@@ -259,7 +254,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-sheet:focus-visible { outline: 2px solid var(--on-night); outline-offset: 4px; }
 .l-sheet-h { display: flex; justify-content: space-between; gap: 12px; color: var(--on-night-2); }
 .l-sheet-title { display: block; font-family: var(--display); font-weight: 500; font-size: 26px; letter-spacing: -0.02em; margin-top: 18px; }
-.l-sheet-log { display: block; font-size: 13.5px; line-height: 1.5; color: var(--on-night-2); margin-top: 8px; }
 .l-sheet-score { display: flex; align-items: baseline; gap: 12px; margin-top: 22px; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.09); }
 .l-sheet-score .n { font-family: var(--display); font-size: 56px; font-weight: 300; letter-spacing: -0.04em; line-height: 1; }
 .l-sheet-score .n small { font-size: 20px; color: var(--on-night-2); }
@@ -315,7 +309,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .menu-sec-title { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-night-2); margin-bottom: 14px; }
 .menu-steps { list-style: none; border-top: 1px solid rgba(255,255,255,0.14); }
 .menu-steps li { display: flex; gap: 16px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
-.menu-step-n { font-family: var(--mono); font-size: 11px; color: var(--on-night-2); min-width: 22px; }
 .menu-step-title { font-family: var(--display); font-size: 20px; font-weight: 400; letter-spacing: -0.015em; color: var(--on-night); }
 .menu-faq-item { border-bottom: 1px solid rgba(255,255,255,0.08); }
 .menu-faq-item:first-of-type { border-top: 1px solid rgba(255,255,255,0.14); }
@@ -439,8 +432,8 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .guide-box { border: 1px solid var(--border-light); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
 .guide-box summary { list-style: none; cursor: pointer; padding: 14px 17px; font-size: 13.5px; font-weight: 600; color: var(--text); display: flex; align-items: center; justify-content: space-between; background: var(--cream); }
 .guide-box summary::-webkit-details-marker { display: none; }
-.guide-box summary::after { content: '+'; font-size: 18px; font-weight: 400; color: var(--muted); transition: transform 0.2s var(--ease); }
-.guide-box[open] summary::after { transform: rotate(45deg); }
+.guide-box summary::after { content: ''; width: 6px; height: 6px; margin: 0 3px 4px 12px; flex-shrink: 0; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg); transition: transform 0.25s var(--ease); }
+.guide-box[open] summary::after { transform: translateY(4px) rotate(225deg); }
 .guide-box-body { padding: 16px 17px; font-size: 13.5px; color: var(--text); line-height: 1.7; }
 .guide-box-body p { margin-bottom: 10px; }
 .guide-box-body p:last-child { margin-bottom: 0; }
@@ -518,7 +511,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
    pinned to the top of an otherwise-empty viewport; the logged-in report
    list stays full-width below since it's a list, not a single action. */
 
-
 /* OVERALL SCORE */
 .overall-card {
   background: var(--ink); border: none; border-radius: var(--radius-lg);
@@ -526,7 +518,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   color: #fff;
 }
-.overall-label { font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; color: rgba(255,255,255,0.5); margin-bottom: 6px; }
 .overall-sublabel { font-size: 15px; color: #fff; font-weight: 600; letter-spacing: -0.01em; }
 .overall-num { font-family: var(--sf); font-size: 40px; font-weight: 700; line-height: 1; color: #fff; letter-spacing: -0.02em; white-space: nowrap; }
 .overall-num .denom { font-size: 17px; color: rgba(255,255,255,0.4); font-family: var(--sf); font-weight: 500; }
@@ -537,24 +528,14 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   border-radius: var(--radius-lg); padding: 26px 24px; margin-bottom: 16px;
   border-left: none;
 }
-.exec-label { font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--accent); margin-bottom: 16px; }
-.exec-text {
-  font-family: var(--sf);
-  font-size: 15.5px; font-style: normal; font-weight: 400;
-  color: var(--text); line-height: 1.6; margin-bottom: 20px;
-}
 .exec-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .exec-box { padding: 16px 18px; border-radius: var(--radius); border: none; background: var(--white); }
 .exec-box.risk { background: var(--danger-wash); }
 .exec-box.opp  { background: var(--success-wash); }
-.exec-box-label { font-size: 11px; font-weight: 600; letter-spacing: 0.02em; text-transform: none; margin-bottom: 8px; }
-.exec-box.risk .exec-box-label { color: var(--danger); }
-.exec-box.opp  .exec-box-label { color: var(--success); }
 .exec-lead { font-weight: 700; }
 .exec-box.risk .exec-lead { color: #9c2a1f; }
 .exec-box.opp .exec-lead { color: #0c6b35; }
 .exec-box-text { font-size: 13px; color: var(--text); line-height: 1.55; font-weight: 400; }
-
 
 /* Dynamic colors */
 .score-high { color: var(--success); }
@@ -564,16 +545,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .bar-mid  { background: #d98c00; }
 .bar-low  { background: var(--danger); }
 
-.score-bar-bg { height: 5px; background: var(--border-light); border-radius: 999px; margin-bottom: 18px; overflow: hidden; }
-.score-bar-fill { height: 100%; border-radius: 999px; background: var(--accent); transition: width 1.1s var(--ease); }
-.score-verdict { font-size: 15px; font-weight: 600; margin-bottom: 9px; line-height: 1.4; color: var(--text); letter-spacing: -0.01em; }
-.score-detail { font-size: 14px; color: var(--muted); line-height: 1.65; font-weight: 400; }
-
-/* FLAGS */
-.flags-block { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border-light); }
-.flags-label { font-size: 11px; font-weight: 600; letter-spacing: 0.02em; text-transform: none; margin-bottom: 9px; }
-.flags-label.red { color: var(--danger); }
-.flags-label.green { color: var(--success); }
 .flag-item { font-size: 14px; line-height: 1.55; padding: 11px 14px; border-radius: var(--radius); margin-bottom: 7px; border-left: none; }
 .flag-item.red { background: var(--danger-wash); color: #7a2318; }
 .flag-item.green { background: var(--success-wash); color: #17432f; }
@@ -581,8 +552,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 /* TIPS */
 .tips-block { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border-light); }
 .tips-label { font-size: 11px; font-weight: 600; letter-spacing: 0.02em; text-transform: none; color: var(--accent); margin-bottom: 13px; display: block; }
-.tip-item { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-light); }
-.tip-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
 .tip-text { font-size: 14px; color: var(--text); line-height: 1.6; padding-left: 18px; position: relative; margin-bottom: 7px; }
 .tip-text::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-weight: 600; }
 .tip-links { padding-left: 18px; display: flex; flex-wrap: wrap; gap: 7px; margin-top: 7px; }
@@ -598,35 +567,10 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .action-tag { font-size: 10.5px; font-weight: 600; color: var(--white); background: var(--text); padding: 4px 10px; border-radius: 999px; white-space: nowrap; letter-spacing: 0; flex-shrink: 0; margin-top: 2px; }
 .action-text { font-size: 14px; color: var(--text); line-height: 1.6; font-weight: 400; }
 
-/* EXTRA CARDS */
-.extra-card { background: var(--cream); border: none; border-radius: var(--radius-lg); padding: 26px 24px; margin-bottom: 16px; }
-.extra-title { font-family: var(--sf); font-size: 18px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light); color: var(--text); }
-.comp-item { padding: 13px 0; border-bottom: 1px solid var(--border-light); }
-.comp-item:last-child { border-bottom: none; padding-bottom: 0; }
-.comp-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
-.comp-detail { font-size: 13px; color: var(--muted); line-height: 1.5; font-weight: 400; }
-.comp-lesson { font-size: 13px; color: var(--text); font-weight: 400; margin-top: 6px; font-style: normal; padding-left: 13px; border-left: 2px solid var(--accent); }
 /* Where a fund, festival, film or company in the report was found, and when. */
 .src-line { display: inline-block; margin-top: 6px; padding: 4px 0; font-size: 13px; letter-spacing: 0; color: var(--muted); text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 3px; transition: color 0.15s, transform 0.15s ease-out; }
 .src-line:active { transform: scale(0.98); }
 @media (hover: hover) and (pointer: fine) { .src-line:hover { color: var(--text); text-decoration-color: currentColor; } }
-.market-item { padding: 12px 0; border-bottom: 1px solid var(--border-light); }
-.market-item:last-child { border-bottom: none; padding-bottom: 0; }
-.market-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
-.market-reason { font-size: 14px; color: var(--muted); line-height: 1.55; font-weight: 400; }
-.roadmap-step { display: flex; gap: 17px; padding: 15px 0; border-bottom: 1px solid var(--border-light); }
-.roadmap-step:last-child { border-bottom: none; }
-.roadmap-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-.roadmap-phase { font-size: 11px; font-weight: 600; letter-spacing: 0.02em; text-transform: none; color: var(--accent); margin-bottom: 4px; }
-.roadmap-action { font-size: 14px; color: var(--text); line-height: 1.65; font-weight: 400; }
-
-/* LOCKED */
-.locked-card { background: var(--cream); border: none; border-radius: var(--radius-lg); padding: 34px 26px; text-align: center; margin-bottom: 16px; margin-top: 12px; }
-.locked-title { font-family: var(--sf); font-size: 23px; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.02em; color: var(--text); }
-.locked-desc { font-size: 14px; color: var(--muted); margin-bottom: 22px; line-height: 1.6; font-weight: 400; }
-.locked-features { list-style: none; margin-bottom: 22px; text-align: left; display: inline-block; }
-.locked-features li { font-size: 14px; padding: 5px 0; color: var(--text); }
-.locked-features li::before { content: '— '; color: var(--accent); font-weight: 400; }
 
 /* ACCORDION */
 .accordion-wrap { margin-top: 22px; border: none; border-radius: var(--radius-lg); overflow: hidden; background: var(--cream); }
@@ -642,8 +586,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .accordion-trigger:active { transform: scale(0.99); }
 .accordion-trigger.open { background: var(--white); }
 .accordion-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
-.accordion-icon { width: 30px; height: 30px; border-radius: 50%; border: none; background: var(--white); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: var(--sf); font-size: 12px; font-weight: 600; color: var(--muted); transition: background 0.2s, color 0.2s; }
-.accordion-trigger.open .accordion-icon { background: var(--accent); color: #fff; }
 .accordion-label { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
 .accordion-sublabel { font-size: 12.5px; color: var(--muted); font-weight: 400; margin-top: 2px; }
 .accordion-score-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
@@ -655,15 +597,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .accordion-body { display: none; padding: 0 20px 22px; background: var(--white); }
 .accordion-body.open { display: block; animation: riseIn 0.3s var(--ease) both; }
 .accordion-divider { height: 1px; background: var(--border-light); margin-bottom: 18px; }
-.strategy-header {
-  margin: 36px 0 22px;
-  padding-top: 32px;
-  border-top: 1px solid var(--border-light);
-}
-.strategy-eyebrow { font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--accent); margin-bottom: 8px; }
-.strategy-title { font-family: var(--sf); font-size: 25px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
-.strategy-subtitle { font-size: 14px; color: var(--muted); margin-top: 8px; font-weight: 400; line-height: 1.6; }
-
 /* BLURRED PREVIEW */
 .preview-blur-wrap { position: relative; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-light); overflow: hidden; }
 .preview-blur-content { filter: blur(3px); user-select: none; pointer-events: none; opacity: 0.5; }
@@ -673,11 +606,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 /* TRANSLATE BANNER */
 .translate-banner { display: none; background: #fff7e6; border: none; border-radius: var(--radius); padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #92400e; font-weight: 500; align-items: center; justify-content: space-between; gap: 10px; }
 .translate-banner button { background: none; border: none; font-size: 14px; color: #92400e; cursor: pointer; flex-shrink: 0; padding: 0; }
-
-/* UPGRADE DIVIDER */
-.upgrade-divider { display: flex; align-items: center; gap: 14px; margin: 32px 0 22px; }
-.upgrade-divider::before, .upgrade-divider::after { content: ''; flex: 1; height: 1px; background: var(--border-light); }
-.upgrade-divider span { font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--accent); white-space: nowrap; }
 
 /* PDF */
 .pdf-card { background: var(--cream); border: none; border-radius: var(--radius-lg); padding: 24px 22px; margin-bottom: 16px; margin-top: 28px; }
@@ -717,7 +645,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.08) !important; border-radius: 16px; padding: 24px 26px; margin-bottom: 0;
   -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
 }
-.overall-label { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-night-2); margin-bottom: 8px; }
 .overall-sublabel { font-size: 17px; font-weight: 500; color: var(--on-night); }
 .overall-num { font-family: var(--display); font-size: 64px; font-weight: 300; letter-spacing: -0.04em; color: var(--on-night) !important; }
 .overall-num .denom { font-family: var(--display); font-size: 22px; font-weight: 300; color: var(--on-night-2); }
@@ -727,11 +654,9 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
    the same side padding as .r-hero (24px, 20px on phones) */
 #sec-results .r-main { padding: 0 24px 90px; max-width: 928px; }
 #sec-myreports .r-main { padding: 0 24px 90px; max-width: 688px; }
-.exec-card, .extra-card, .accordion-wrap, .pdf-card { background: transparent; box-shadow: none !important; border: 0 !important; border-radius: 0; padding-left: 0; padding-right: 0; }
+.exec-card, .accordion-wrap, .pdf-card { background: transparent; box-shadow: none !important; border: 0 !important; border-radius: 0; padding-left: 0; padding-right: 0; }
 .exec-card { padding-top: 0; padding-bottom: 8px; margin-bottom: 28px; }
-.exec-label, .tips-label, .action-label, .flags-label, .exec-box-label, .roadmap-phase { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; }
-.exec-label { color: var(--muted); }
-.exec-text { font-size: 18px; line-height: 1.6; }
+.tips-label, .action-label { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; }
 .exec-box { border-radius: 10px; }
 .exec-box.risk { background: rgba(177,50,37,0.07); }
 .exec-box.opp { background: rgba(15,122,61,0.07); }
@@ -745,8 +670,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .accordion-trigger { padding: 20px 4px; border-radius: 0; }
 .accordion-trigger.open { background: transparent; }
 @media (hover: hover) and (pointer: fine) { .accordion-trigger:hover { background: transparent; } .accordion-trigger:hover .accordion-label { color: #000; } }
-.accordion-icon { width: auto; height: auto; background: none !important; color: var(--muted) !important; font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; min-width: 28px; justify-content: flex-start; }
-.accordion-trigger.open .accordion-icon { color: #b4552b !important; }
 .accordion-label { font-family: var(--display); font-size: 21px; font-weight: 500; letter-spacing: -0.015em; }
 .accordion-score { font-family: var(--display); font-size: 24px; font-weight: 400; letter-spacing: -0.02em; }
 .accordion-score-label { font-family: var(--sf); font-size: 13px; font-weight: 400; letter-spacing: 0; text-transform: none; }
@@ -754,9 +677,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .acc-bar i { display: block; height: 100%; border-radius: 2px; }
 #accordionMenu .accordion-score-wrap { min-width: 76px; }
 @media (max-width: 640px) { .acc-bar { flex-basis: 56px; margin: 0 2px; } #accordionMenu .accordion-score-wrap { min-width: 62px; } }
-.extra-title, .locked-title { font-family: var(--display); font-weight: 500; letter-spacing: -0.02em; }
-.extra-title { font-size: 22px; }
-.locked-card { background: var(--field); box-shadow: none !important; border: 0 !important; }
 .pdf-card { border-top: 1px solid var(--border) !important; padding-top: 24px; margin-top: 36px; }
 .pdf-row button { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; white-space: normal; padding: 14px 16px; background: var(--field); color: var(--text); font-weight: 500; }
 .pdf-row button small { font-size: 12.5px; font-weight: 400; color: var(--muted); }
@@ -766,7 +686,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 /* Full report request: no card, a hairline and a mono label like every
    other section, text on the left, field in the same tint as the form. */
 .unlock { border-top: 1px solid var(--border); margin-top: 36px; padding-top: 24px; }
-.unlock-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #b4552b; }
 .unlock-title { margin-top: 0; font-family: var(--display); font-size: 28px; line-height: 1.12; font-weight: 700; letter-spacing: -0.025em; color: var(--text); }
 .unlock-desc { margin-top: 12px; max-width: 58ch; font-size: 15px; line-height: 1.6; color: var(--muted); }
 .unlock-field { margin: 24px 0 16px; max-width: 460px; }
@@ -781,7 +700,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #sec-results .disclaimer-box, #sec-myreports .disclaimer-box { background: none; padding: 0; }
 #sec-results .footer-note { text-align: left; }
 .tip-link { background: var(--field); }
-.roadmap-num, .action-tag { background: var(--text); }
+.action-tag { background: var(--text); }
 /* MY REPORTS: same header as results; sign-in is a plain field on the
    paper, the list is hairline rows (date, title, arrow), not boxes. */
 #sec-myreports .r-hero-inner { max-width: 640px; }
@@ -818,7 +737,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .exec-box.risk { border-left: 1px solid rgba(177,50,37,0.75); }
 .exec-box.opp { border-left: 1px solid rgba(15,122,61,0.75); }
 .exec-row { gap: 24px; }
-.flags-block, .tips-block, .action-block { border-top-color: var(--border); }
+.tips-block, .action-block { border-top-color: var(--border); }
 @media (max-width: 640px) { .accordion-body { padding-left: 4px; } }
 
 /* REPORT READING LAYOUT (2026-10-23): short paragraphs at a readable
@@ -830,11 +749,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .prose p.lead { color: var(--text); }
 .prose p:last-child { margin-bottom: 0; }
 .prose.is-small p { font-size: 14px; }
-.exec-text .prose { max-width: 62ch; }
-.exec-text .prose p { font-size: inherit; line-height: 1.6; }
-.exec-text .prose p:not(.lead) { color: var(--text); opacity: 0.86; }
-.score-verdict { font-size: 17px; line-height: 1.45; margin-bottom: 14px; max-width: 60ch; }
-
 .fs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); }
 .fs-col ul { list-style: none; margin: 0; padding: 0; }
 .fs-col li { font-size: 14.5px; line-height: 1.55; color: var(--text); padding: 2px 0 2px 14px; margin-bottom: 12px; }
@@ -862,10 +776,12 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .rblock summary:active { transform: scale(0.995); }
 .rblock-label { font-family: var(--display); font-size: 17px; font-weight: 500; letter-spacing: -0.01em; color: var(--text); }
 .rblock-count { font-family: var(--mono); font-size: 11px; color: var(--muted); }
-.rblock-icon { margin-left: auto; width: 12px; height: 12px; position: relative; flex-shrink: 0; align-self: center; }
-.rblock-icon::before, .rblock-icon::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1.5px; margin-top: -0.75px; background: var(--muted); transition: transform 0.2s var(--ease); }
-.rblock-icon::after { transform: rotate(90deg); }
-.rblock[open] .rblock-icon::after { transform: rotate(0deg); }
+.rblock-icon { margin-left: auto; display: inline-flex; flex-shrink: 0; align-self: center; color: var(--muted); transition: transform 0.25s var(--ease); }
+.rblock[open] .rblock-icon { transform: rotate(180deg); }
+/* Your plan: the steps in order, after the five areas, not a sixth area. */
+.r-plan { margin-top: 44px; }
+.r-plan-h { font-family: var(--display); font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); margin: 0 0 14px; }
+.r-plan .r-road { margin-top: 28px; }
 @media (hover: hover) and (pointer: fine) { .rblock summary:hover .rblock-label { color: #000; } }
 .rblock-body { padding: 0 2px 22px; }
 
@@ -885,8 +801,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .entry-quote { margin: 12px 0 0; }
 .entry-quote blockquote { margin-top: 4px; font-size: 15px; line-height: 1.55; font-style: italic; color: var(--text); }
 .the-ask { margin: 24px 0 8px; display: flex; flex-direction: column; gap: 6px; font-size: 17px; font-weight: 700; line-height: 1.45; color: var(--text); max-width: 62ch; }
-.bp-row { margin-top: 24px; }
-.bp-row .sub-k { margin-top: 0; }
 .action-item .action-tag:empty { display: none; }
 .entry .src-line { margin-top: 10px; }
 
@@ -914,7 +828,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 @media (max-width: 1359px) { .area-nav:not(.has-cur) { opacity: 0; pointer-events: none; } }
 .an-col { display: none; }
 .an-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.an-num { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-right: 10px; }
 .an-score { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-left: auto; padding-left: 10px; }
 .an-item, .an-top { border: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
 .an-item:active, .an-top:active { transform: scale(0.97); }
@@ -1025,7 +938,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   .menu-header { padding: 0 20px; }
 }
 
-
 /* ── Report reading, phones first (2026-10-24) ──
    Antonio on iPhone: too heavy, lines and windows on both sides. The point
    of each block comes first and the long argument is one tap away; lists
@@ -1056,15 +968,14 @@ details.more > summary:active { transform: scale(0.98); }
   #resultSubtitle.is-open { display: block; }
   .r-more { margin-top: 6px; padding: 6px 0; border: 0; background: none; font: inherit; font-size: 14.5px; color: var(--on-night); text-decoration: underline; text-decoration-color: rgba(242,237,230,0.4); text-underline-offset: 3px; cursor: pointer; }
   .r-more:active { transform: scale(0.98); }
-  .exec-text { font-size: 17px; }
-  .accordion-icon { display: none; }
-  .accordion-score-label { display: none; }
+
+.accordion-score-label { display: none; }
 }
 @media (min-width: 641px) { .r-more:not(.has-extra) { display: none; } }
 /* Labels are words, so they are set as words (2026-10-26): sentence case in
    the body face, small and bold. Mono caps stay only for numbers, dates and
    counts, where the fixed width helps reading. */
-.menu-sec-title, .exec-label, .tips-label, .action-label, .flags-label, .exec-box-label, .unlock-label, .fs-label, .fact-k, .sub-k, .an-top, .mr-email {
+.menu-sec-title, .tips-label, .action-label, .fs-label, .fact-k, .sub-k, .an-top, .mr-email {
   font-family: var(--sf); font-size: 14px; font-weight: 700; letter-spacing: 0; text-transform: none;
 }
 
@@ -1105,7 +1016,7 @@ details.more > summary:active { transform: scale(0.98); }
   /* Small text slightly darker in light mode (kept from the measured pass of 2026-10-26). */
   :root { --muted: #3a3a3a; --muted-light: #3a3a3a; --success: #0a5c2d; --danger: #8a2419; }
   .score-mid { color: #6e3f00; }
-  .tips-label, .action-label, .unlock-label, .an-top, .accordion-trigger.open .accordion-icon, #sec-loading .loading-dim.is-active .loading-dim-num { color: #93391a !important; }
+  .tips-label, .action-label, .an-top, #sec-loading .loading-dim.is-active .loading-dim-num { color: #93391a !important; }
   .exec-box.risk .exec-lead { color: var(--danger); }
   .exec-box.opp .exec-lead { color: var(--success); }
   .fs-col.red li::before { background: var(--danger); }
@@ -1139,8 +1050,8 @@ details.more > summary:active { transform: scale(0.98); }
   .l-terms input[type="checkbox"] { border-color: rgba(20,18,16,0.3); background: rgba(255,255,255,0.5); }
   .l-terms label { color: #3a3a3a; } /* stays over 4.5:1 where the warm glow reaches the text on phones */
   .l-terms-error { color: var(--danger); }
-  .l-sample-link { text-decoration-color: rgba(20,18,16,0.3); }
-  .l-sheet { background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.42)); border-color: rgba(20,18,16,0.08); box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 18px 40px -24px rgba(90,40,20,0.25); }
+
+.l-sheet { background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.42)); border-color: rgba(20,18,16,0.08); box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 18px 40px -24px rgba(90,40,20,0.25); }
   @media (hover: hover) and (pointer: fine) { .l-sheet:hover { border-color: rgba(20,18,16,0.16); } }
   .l-sheet-score, .l-sheet-row { border-bottom-color: rgba(20,18,16,0.08); }
   .l-bar { background: rgba(20,18,16,0.1); }
@@ -1157,6 +1068,9 @@ details.more > summary:active { transform: scale(0.98); }
   #sec-loading .loading-timer { border-color: rgba(20,18,16,0.14); }
 }
 
+@media (prefers-color-scheme: dark) and (hover: hover) and (pointer: fine) {
+  .accordion-trigger:hover .accordion-label, .rblock summary:hover .rblock-label { color: #fff; }
+}
 @media (prefers-color-scheme: dark) {
   :root {
     --paper: #140d10; --text: #f2ede6; --ink: #f2ede6;
@@ -1200,8 +1114,8 @@ details.more > summary:active { transform: scale(0.98); }
   @media (max-width: 1359px) { .area-nav { background: rgba(20,13,16,0.92); } }
   /* rust labels lighten on the night */
   .f-steps li.on, .an-item.on { box-shadow: inset 2px 0 0 #f0a07c; }
-  .accordion-trigger.open .accordion-icon { color: #f0a07c !important; }
-  .unlock-label, .tips-label, .action-label, .an-top, .loading-dim.is-active .loading-dim-num { color: #f0a07c; }
+
+.tips-label, .action-label, .an-top, .loading-dim.is-active .loading-dim-num { color: #f0a07c; }
   #sec-loading .loading-dim.is-active .loading-dim-num { color: #ffe0cf; }
   .l-hero, .menu-overlay, #sec-results, #sec-myreports, #sec-loading, .l-nav { --on-night-2: #b8b2ab; }
   .action-item:first-child::after { background: #f0a07c; }
@@ -1214,7 +1128,7 @@ details.more > summary:active { transform: scale(0.98); }
   .exec-box.opp { border-left-color: rgba(116,214,160,0.7); }
   .flag-item { color: var(--text); }
   .action-item .action-tag { color: var(--muted); }
-  .action-tag, .roadmap-num { background: var(--on-night); color: var(--night); }
+  .action-tag { background: var(--on-night); color: var(--night); }
   .btn-primary, .btn-unlock, #sec-form .btn-primary, .unlock .btn-unlock { background: var(--on-night); color: var(--night); }
   @media (hover: hover) and (pointer: fine) { .btn-primary:hover, .btn-unlock:hover { background: #fff; } }
   .tip-link { color: var(--text); }
@@ -1225,7 +1139,6 @@ details.more > summary:active { transform: scale(0.98); }
   .translate-banner { background: rgba(255,200,120,0.12); color: #f2c98a; }
   .translate-banner button { color: #f2c98a; }
 }
-
 </style>
 </head>
 <body>
@@ -1552,9 +1465,8 @@ details.more > summary:active { transform: scale(0.98); }
       <summary>New to this? How to read your report</summary>
       <div class="guide-box-body">
         <p>The <strong>OneCiak Score</strong> is a rough overall signal, not a verdict: a high score doesn't guarantee success, and a low one doesn't mean give up. It's a starting point for asking better questions.</p>
-        <p>Each of the 5 areas above has its own score, a one-line <strong>verdict</strong>, <strong>red flags</strong> (real risks worth addressing), and <strong>strengths</strong> (what's already working). Read the flags first: they're the most actionable part.</p>
-        <p><strong>Tips</strong> are concrete next actions, often with real links to funds, festivals, or companies to actually contact.</p>
-        <p>First film ever? Under the areas, <strong>Your stage</strong> links to the <a href="/roadmap/">film roadmap</a>: every job from script to release, stage by stage. In the full report, the <strong>Roadmap</strong> in the action plan turns it into steps for your project.</p>
+        <p>Each of the 5 areas above has its own score, a one-line <strong>verdict</strong> and <strong>what to do</strong>: concrete next actions. Under them, one tap away, the <strong>red flags</strong> and <strong>strengths</strong> behind that advice, and the funds, festivals or companies to contact, each with its source.</p>
+        <p>In the full report, <strong>Your plan</strong> puts the steps in order. First film ever? <strong>Your stage</strong> links to the <a href="/roadmap/">film roadmap</a>: every job from script to release, stage by stage.</p>
         <p>Don't recognize a term like "sales agent" or "tax incentive"? Check the glossary below.</p>
       </div>
     </details>
@@ -1598,7 +1510,7 @@ details.more > summary:active { transform: scale(0.98); }
 
     <div class="pdf-card reveal">
       <div class="pdf-row">
-        <button onclick="savePDF()"><span id="pdfMainLabel">This preview</span><small>PDF, all sections</small></button>
+        <button onclick="savePDF()"><span id="pdfMainLabel">This preview</span><small id="pdfMainSub">PDF, all sections</small></button>
         <button onclick="saveOneSheet()"><span>One-page summary</span><small>PDF, to print or share</small></button>
       </div>
       <p class="pdf-note" id="pdfNote">The full report is not included here, it arrives by email.</p>
@@ -2295,6 +2207,7 @@ function retryLastAction() {
 // The main PDF holds whatever is on screen: the preview, or the full report.
 function setPdfLabels() {
   document.getElementById('pdfMainLabel').textContent = isFullReport ? 'Full report' : 'This preview';
+  document.getElementById('pdfMainSub').textContent = isFullReport ? 'PDF, with the business plan page' : 'PDF, all sections';
   document.getElementById('pdfNote').style.display = isFullReport ? 'none' : 'block';
 }
 function scoreColor(s) { return s >= 7 ? 'high' : s >= 5 ? 'mid' : 'low'; }
@@ -2426,47 +2339,41 @@ function renderFull(r, title) {
       score: r.creative_score, verdict: r.creative_verdict,
       body: buildAccordionBody(r.creative_score, r.creative_verdict, r.creative_detail,
         r.creative_flags, r.creative_strengths, r.creative_tips, null,
-        buildPitchAssessment(r.pitch_assessment) + buildLabeledText('Attachment Strategy', r.attachment_strategy) + buildKeyCrew(r.key_crew_recommendations))
+        buildPitchAssessment(r.pitch_assessment) + buildLabeledText('Attachment strategy', r.attachment_strategy) + buildKeyCrew(r.key_crew_recommendations) + buildLabeledText('Legal and rights', r.legal_and_rights_considerations))
     },
     {
       num:'02', label:'Financial plan', sublabel:'Budget · Funding · Financing',
       score: r.financial_score, verdict: r.financial_verdict,
       body: buildAccordionBody(r.financial_score, r.financial_verdict, r.financial_detail,
         r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan,
-        buildFundingSources(r.financial_sources) + buildTalentAndTax(r.talent_leverage, r.tax_incentive) + buildLabeledText('Budget Breakdown Guidance', r.budget_breakdown_guidance))
+        buildFundingSources(r.financial_sources) + buildTalentAndTax(r.talent_leverage, r.tax_incentive) + buildLabeledText('Budget breakdown', r.budget_breakdown_guidance))
     },
     {
       num:'03', label:'Market and audience', sublabel:'Demand · Trends · Comparables',
       score: r.market_score, verdict: r.market_verdict,
       body: buildAccordionBody(r.market_score, r.market_verdict, r.market_detail,
         r.market_flags, r.market_strengths, r.market_tips, null,
-        buildComparables(r.market_comps) + buildMarketingStrategy(r.marketing_strategy) + buildLabeledText('Target Audience Profile', r.target_audience_profile) + buildCautionaryComps(r.cautionary_comps))
+        buildComparables(r.market_comps) + buildMarketingStrategy(r.marketing_strategy) + buildLabeledText('Target audience', r.target_audience_profile) + buildCautionaryComps(r.cautionary_comps))
     },
     {
       num:'04', label:'Festival strategy', sublabel:'Circuit · Festivals · Timing',
       score: r.festival_score, verdict: r.festival_verdict,
       body: buildAccordionBody(r.festival_score, r.festival_verdict, r.festival_detail,
         r.festival_flags, r.festival_strengths, r.festival_tips, r.festival_action_plan,
-        buildLabOpportunities(r.lab_and_market_opportunities))
+        buildFestivalCalendar(r.festival_calendar) + buildLabOpportunities(r.lab_and_market_opportunities) + buildLabeledText('Awards', r.awards_qualification_strategy))
     },
     {
       num:'05', label:'Distribution and revenue', sublabel:'Platforms · Pricing · Sales',
       score: r.distribution_score, verdict: r.distribution_verdict,
       body: buildAccordionBody(r.distribution_score, r.distribution_verdict, r.distribution_detail,
         r.distribution_flags, r.distribution_strengths, r.distribution_tips, r.distribution_action_plan,
-        buildPlatforms(r.distribution_platforms) + buildLabeledText('Self-Distribution Playbook', r.self_distribution_playbook))
-    },
-    {
-      num:'06', label:'Your plan', sublabel:'What to do, in order, and who to contact',
-      score: null,
-      body: buildActionPlanBody(r)
-    },
-    {
-      num:'07', label:'Business plan summary', sublabel:'One page to show a financier',
-      score: null,
-      body: buildBusinessPlanBody(r.business_plan_summary)
+        buildSalesAgents(r.sales_agents) + buildPlatforms(r.distribution_platforms) + buildMarkets(r.international_markets) + buildRevenue(r) + buildLabeledText('Self-distribution', r.self_distribution_playbook))
     }
   ];
+  /* Five areas and then one plan (2026-10-28, Antonio: "troppo
+     incasinato"). The lists that used to sit in a sixth "Your plan" area
+     now live in the area they belong to; the risk list and the business
+     plan page repeated the areas on screen, so they stay in the PDF only. */
 
   var html = '<div class="accordion-wrap">';
   sections.forEach(function(sec, idx) {
@@ -2490,7 +2397,7 @@ function renderFull(r, title) {
   });
   html += '</div>';
 
-  document.getElementById('accordionMenu').innerHTML = html + roadmapBlock(lastProject);
+  document.getElementById('accordionMenu').innerHTML = html + buildPlanSection(r, lastProject);
   document.getElementById('accordionMenu').style.display = 'block';
   mountAreaNav(sections);
   document.getElementById('upgradeSection').innerHTML = '';
@@ -2502,7 +2409,7 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
 
   // Verdict and the point of the analysis; the full argument is one tap
   // away, so on a phone "what to do" arrives on the first screen.
-  out += parasFold(detail, 'Read the full analysis');
+  out += parasFold(detail);
 
   // Recommendations, numbered
   if ((tips||[]).length) {
@@ -2510,7 +2417,10 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
     tips.forEach(function(t){
       if (!t) return;
       var txt = typeof t==='string' ? t : (t.advice||'');
-      out += '<li><div class="tip-text">'+esc(txt)+'</div>';
+      // First sentence visible, the rest one tap away, like the plan steps.
+      var ss = sentencesOf(txt), tip = esc(ss[0] || txt);
+      if (ss.length > 1) tip += '<details class="more more-inline"><summary>More</summary><span class="action-rest">'+esc(ss.slice(1).join(' '))+'</span></details>';
+      out += '<li><div class="tip-text">'+tip+'</div>';
       if (typeof t==='object' && t.links && t.links.length) {
         out += '<div class="tip-links">';
         t.links.forEach(function(l){ if (l && l.url) out += '<a class="tip-link" href="'+esc(l.url)+'" target="_blank" rel="noopener">'+esc(l.label)+'</a>'; else if (l && l.label) out += '<span class="tip-link" style="cursor:default">'+esc(l.label)+'</span>'; });
@@ -2521,12 +2431,9 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
     out += '</ol></div>';
   }
 
-  // Risks and strengths side by side on wide screens
-  out += riskGrid(flags, strengths, 'Red flags', 'Strengths');
-
-  // 30 / 60 / 90 day plan, then sourced lists and deeper material, all as
-  // collapsible rows
-  var more = '';
+  // Everything else folded: risks and strengths, the 90-day plan, the
+  // sourced lists. They mostly back up "what to do", so they wait a tap.
+  var more = rblock('Red flags and strengths', null, riskGrid(flags, strengths, 'Red flags', 'Strengths'));
   if ((plan||[]).length) {
     var tags = ['30 days','60 days','90 days'];
     more += rblock('Next 90 days', null, timeline('', plan.map(function(a, i){ return { tag: tags[i] || '', text: String(a||'').replace(/^(30|60|90)\s*days?:?\s*/i,'') }; })));
@@ -2537,58 +2444,47 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
   return out;
 }
 
-/* ── ACTION PLAN BODY ── */
-function buildActionPlanBody(r) {
-  var out = '';
-  // The roadmap leads, on the same timeline as the 90-day plans.
-  if (r.roadmap && r.roadmap.length) {
-    out += timeline('', r.roadmap.map(function(s){ return s ? { tag: s.phase, text: s.action } : null; }));
+/* ── YOUR PLAN: the roadmap in order, after the five areas ── */
+function buildPlanSection(r, project) {
+  var steps = (r.roadmap || []).filter(Boolean).map(function(s){ return { tag: s.phase, text: s.action }; });
+  var out = timeline('', steps);
+  return '<section class="r-plan">'+(out ? '<h2 class="r-plan-h">Your plan</h2>'+out : '')+roadmapBlock(project)+'</section>';
+}
+function buildFestivalCalendar(list) {
+  var fc = '';
+  (list || []).forEach(function(f){
+    if (!f) return;
+    var dl = f.source ? notStated(f.deadline, 'Not published on the source, check before planning') : f.deadline;
+    fc += entry(f.festival, f.tier ? 'Tier '+f.tier : null, fact('Deadline', dl, isClosed(dl) || !f.deadline), f.fit, f);
+  });
+  return rblock('Festival calendar', howMany(list, 'festival', 'festivals'), fc);
+}
+function buildSalesAgents(list) {
+  var sa = '';
+  (list || []).forEach(function(a){ if (a) sa += entry(a.name, null, '', a.why, a, null, a.focus); });
+  return rblock('Sales agents', howMany(list, 'company', 'companies'), sa);
+}
+function buildMarkets(list) {
+  var im = '';
+  (list || []).forEach(function(m){ if (m) im += entry(m.country, null, '', m.reason, null); });
+  return rblock('International markets', howMany(list, 'country', 'countries'), im);
+}
+function buildRevenue(r) {
+  var rp = r.revenue_projection, rv = '';
+  if (!rp) return '';
+  var streams = [{l:'Theatrical',v:rp.theatrical},{l:'Streaming (SVOD)',v:rp.streaming_svod},{l:'VOD / AVOD',v:rp.vod_avod},{l:'TV rights',v:rp.tv_rights},{l:'International',v:rp.international}];
+  if (r.sources_checked) {
+    // Newer reports: scenarios in words (no data backs a currency forecast).
+    rv += paras(rp.total_realistic);
+    streams.forEach(function(w){ if (w.v) rv += entry(w.l, null, '', w.v, null); });
+    if (rp.breakeven_note) rv += '<div class="sub-k">Breakeven</div>' + paras(rp.breakeven_note, 'is-small');
+    return rblock('Revenue scenarios', null, rv);
   }
-  var blocks = '';
-  if (r.festival_calendar && r.festival_calendar.length) {
-    var fc = '';
-    r.festival_calendar.forEach(function(f){
-      if (!f) return;
-      var dl = f.source ? notStated(f.deadline, 'Not published on the source, check before planning') : f.deadline;
-      fc += entry(f.festival, f.tier ? 'Tier '+f.tier : null, fact('Deadline', dl, isClosed(dl) || !f.deadline), f.fit, f);
-    });
-    blocks += rblock('Festival calendar', howMany(r.festival_calendar, 'festival', 'festivals'), fc);
-  }
-  if (r.sales_agents && r.sales_agents.length) {
-    var sa = '';
-    r.sales_agents.forEach(function(a){ if (a) sa += entry(a.name, null, '', a.why, a, null, a.focus); });
-    blocks += rblock('Sales agents', howMany(r.sales_agents, 'company', 'companies'), sa);
-  }
-  if (r.international_markets && r.international_markets.length) {
-    var im = '';
-    r.international_markets.forEach(function(m){ if (m) im += entry(m.country, null, '', m.reason, null); });
-    blocks += rblock('International markets', howMany(r.international_markets, 'country', 'countries'), im);
-  }
-  var ra = r.risk_assessment;
-  if (ra && ((ra.top_risks && ra.top_risks.length) || (ra.mitigation && ra.mitigation.length))) {
-    blocks += rblock('Risks and how to reduce them', null, riskGrid(ra.top_risks, ra.mitigation, 'Top risks', 'How to reduce them'));
-  }
-  if (r.awards_qualification_strategy) blocks += buildLabeledText('Awards', r.awards_qualification_strategy);
-  if (r.legal_and_rights_considerations) blocks += buildLabeledText('Legal and rights', r.legal_and_rights_considerations);
-  if (r.revenue_projection) {
-    var rp = r.revenue_projection, rv = '';
-    var streams = [{l:'Theatrical',v:rp.theatrical},{l:'Streaming (SVOD)',v:rp.streaming_svod},{l:'VOD / AVOD',v:rp.vod_avod},{l:'TV rights',v:rp.tv_rights},{l:'International',v:rp.international}];
-    if (r.sources_checked) {
-      // Newer reports: scenarios in words (no data backs a currency forecast).
-      rv += paras(rp.total_realistic);
-      streams.forEach(function(w){ if (w.v) rv += entry(w.l, null, '', w.v, null); });
-      if (rp.breakeven_note) rv += '<div class="sub-k">Breakeven</div>' + paras(rp.breakeven_note, 'is-small');
-      blocks += rblock('Revenue scenarios', null, rv);
-    } else {
-      // Older stored reports keep their figures.
-      streams.forEach(function(w){ if (w.v) rv += entry(w.l, null, fact('Estimate', w.v, true), '', null); });
-      if (rp.total_realistic) rv += entry('Total', null, fact('Estimate', rp.total_realistic), '', null);
-      if (rp.breakeven_note) rv += paras(rp.breakeven_note, 'is-small');
-      blocks += rblock('Revenue projection', null, rv);
-    }
-  }
-  if (blocks) out += '<div class="rblocks">'+blocks+'</div>';
-  return out || '<div class="prose"><p>No action plan data available.</p></div>';
+  // Older stored reports keep their figures.
+  streams.forEach(function(w){ if (w.v) rv += entry(w.l, null, fact('Estimate', w.v, true), '', null); });
+  if (rp.total_realistic) rv += entry('Total', null, fact('Estimate', rp.total_realistic), '', null);
+  if (rp.breakeven_note) rv += paras(rp.breakeven_note, 'is-small');
+  return rblock('Revenue projection', null, rv);
 }
 
 // A short sequence of steps on a vertical line: the 90-day plans, the
@@ -2614,30 +2510,6 @@ function riskGrid(left, right, leftLabel, rightLabel) {
     (l ? '<div class="fs-col red"><div class="fs-label">'+leftLabel+'</div><ul>'+l+'</ul></div>' : '')+
     (g ? '<div class="fs-col green"><div class="fs-label">'+rightLabel+'</div><ul>'+g+'</ul></div>' : '')+
     '</div>';
-}
-
-/* ── BUSINESS PLAN SUMMARY — a condensed, presentation-ready synthesis
-   closing out the full report, so there's a single section a filmmaker can
-   screenshot or read aloud when pitching a financier. It reads straight
-   through, so nothing in it is collapsed. ── */
-function buildBusinessPlanBody(bp) {
-  if (!bp) return '<div class="prose"><p>No business plan summary available.</p></div>';
-  var out = '';
-  if (bp.executive_summary) out += paras(bp.executive_summary);
-  if (bp.the_ask) out += '<div class="the-ask"><span class="fact-k">The ask</span>'+esc(bp.the_ask)+'</div>';
-  [
-    { label:'Market opportunity', v:bp.market_opportunity },
-    { label:'Competitive advantage', v:bp.competitive_advantage },
-    { label:'Use of funds', v:bp.use_of_funds },
-    { label:'Team and experience', v:bp.team_and_experience }
-  ].forEach(function(row){
-    if (row.v) out += '<div class="bp-row"><div class="sub-k">'+row.label+'</div>'+paras(row.v, 'is-small')+'</div>';
-  });
-  if (bp.key_milestones && bp.key_milestones.length) {
-    out += timeline('Key milestones', bp.key_milestones.map(function(m){ return { text: m }; }));
-  }
-  if (bp.risk_summary) out += riskGrid([bp.risk_summary], null, 'Biggest risk', '');
-  return out || '<div class="prose"><p>No business plan summary available.</p></div>';
 }
 
 /* ── TOGGLE ACCORDION ── */
@@ -2818,7 +2690,7 @@ function howMany(list, one, many) {
 }
 function rblock(label, count, inner, open) {
   if (!inner) return '';
-  return '<details class="rblock"'+(open ? ' open' : '')+'><summary><span class="rblock-label">'+label+'</span>'+(count ? '<span class="rblock-count">'+esc(count)+'</span>' : '')+'<span class="rblock-icon" aria-hidden="true"></span></summary><div class="rblock-body">'+inner+'</div></details>';
+  return '<details class="rblock"'+(open ? ' open' : '')+'><summary><span class="rblock-label">'+label+'</span>'+(count ? '<span class="rblock-count">'+esc(count)+'</span>' : '')+'<span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="rblock-body">'+inner+'</div></details>';
 }
 function linkOrSource(item, label) {
   if (item && item.source) return sourceLine(item);
