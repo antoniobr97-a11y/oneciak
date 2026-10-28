@@ -1087,6 +1087,16 @@ details.more > summary:active { transform: scale(0.98); }
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea { font-size: 16px !important; }
 }
 
+/* Bigger touch areas on phones, same look: padding out, negative margin
+   back, so a thumb finds the logo, Back and the menu buttons (44px). */
+@media (pointer: coarse) {
+  .hamburger, .menu-close { width: 44px; height: 44px; margin-right: -11px; margin-left: -5px; }
+  .menu-close::before, .menu-close::after { left: 12px; top: 21px; }
+  .l-logo, .f-logo, .r-logo, .menu-logo { padding: 11px 0; margin: -11px 0; }
+  #sec-form .back-btn { padding: 12px 0; margin: -12px 0; }
+  .sample-banner a { display: inline-block; padding: 12px 0; margin: -12px 0; }
+}
+
 /* ══════════════════════
    LIGHT AND DARK (Antonio, 2026-10-26): the site follows the device.
    Light mode is light everywhere, the home hero included, with the same
@@ -1135,7 +1145,7 @@ details.more > summary:active { transform: scale(0.98); }
   #sec-results .r-hero, #sec-myreports .r-hero { padding-bottom: 56px; }
   .l-nav { border-bottom-color: rgba(20,18,16,0.07); }
   .l-nav-reports { border-color: rgba(20,18,16,0.18); }
-  @media (hover: hover) and (pointer: fine) { .l-btn:hover { background: #000; } }
+  @media (hover: hover) and (pointer: fine) { .l-btn:hover, .menu-cta:hover { background: #000; } }
   .l-terms input[type="checkbox"] { border-color: rgba(20,18,16,0.3); background: rgba(255,255,255,0.5); }
   .l-terms label { color: #3a3a3a; } /* stays over 4.5:1 where the warm glow reaches the text on phones */
   .l-terms-error { color: var(--danger); }
