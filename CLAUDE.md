@@ -433,8 +433,9 @@ e 6e1d632, NON su main. Pubblicare solo quando Antonio dice "pubblica"
 - Ordine di ogni area: giudizio, una frase, "What to do", rischi/punti di
   forza (pallino colorato invece della riga verticale), poi tendine (anche
   "Next 90 days"). Fasi del piano d'azione: prima frase + "More".
-- Pulsante "Next" in fondo a ogni area (`nextArea()`): chiude e apre la
-  successiva. Su telefono l'intestazione sparisce scorrendo in giù
+- ~~Pulsante "Next" in fondo a ogni area~~ TOLTO il 2026-10-27 (Antonio:
+  "troppi su e giù"): ora UNA sola area aperta alla volta e la riga toccata
+  resta ferma sullo schermo (`toggleAccordion` compensa lo scorrimento). Su telefono l'intestazione sparisce scorrendo in giù
   (`body.rh-hidden`), resta solo la barra delle aree.
 - Misure (Chromium come iPhone 13, NON Safari vero): voto da 678 a 184 px
   dall'alto; "What to do" da 1.184-1.806 a 340-477 px dal titolo dell'area;
@@ -463,6 +464,23 @@ Da fare, in ordine:
 5. Report: nei corti spesso nessun film di confronto (regola severa, voluto);
    le regole dentro PDF non vengono citate (non si leggono i PDF).
 6. PR #81 resta bozza di prova: non va mai mergiata.
+
+## Full report riorganizzato (2026-10-28, approvato da Antonio, pubblicato)
+
+Antonio: "troppo incasinato". Ora: SOLO le 5 aree con voto, poi "Your plan"
+(fasi in ordine, `buildPlanSection`) come sezione fissa, non come sesta area.
+Le liste stanno nell'area a cui appartengono: Festival calendar e Awards in
+Festival, Sales agents/mercati/ricavi in Distribution, Legal in Creative.
+Dentro ogni area: giudizio (prima frase + "Read more"), "What to do" (prima
+frase di ogni consiglio + "More"), poi tutto chiuso in righe con la STESSA
+freccia (anche "Red flags and strengths", How to read, Glossary). Business
+plan e lista rischi solo nel PDF (erano doppioni). Tolto il PDF "One-page
+summary" ("non mi rappresenta nulla"): un solo bottone "Download the full
+report". Aree aperte 26-38% più corte. Non rimettere la sesta/settima area.
+Controllo completo del sito lo stesso giorno (script in scratchpad `audit/`,
+si perde): 0 errori JS, 0 scorrimenti orizzontali, contrasto sui pixel tutto
+sopra soglia (attenzione: per nascondere il testo serve `:is(#zz,html) *`,
+altrimenti le regole `!important` del sito vincono e danno falsi 1.0:1).
 
 ## Giro Impeccable del 2026-10-26 (pubblicato)
 
