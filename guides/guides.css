@@ -55,6 +55,7 @@ a { color: inherit; }
 .g-hero.is-compact .g-head { padding-top: 56px; }
 .g-nav { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; height: 68px; border-bottom: 1px solid rgba(255,255,255,0.10); }
 .g-logo { display: flex; align-items: center; gap: 9px; font-family: var(--display); font-weight: 600; font-size: 16px; text-decoration: none; }
+@media (pointer: coarse) { .g-logo { padding: 11px 0; margin: -11px 0; } }
 .g-nav-r { display: flex; align-items: center; gap: 24px; font-size: 14px; }
 .g-nav-r a:not(.g-cta) { color: var(--on-night-2); text-decoration: none; padding: 8px 0; }
 .g-cta { background: var(--on-night); color: var(--night); text-decoration: none; font-weight: 500; font-size: 14px; padding: 10px 16px; border-radius: 10px; transition: transform .16s var(--ease); display: inline-block; }
