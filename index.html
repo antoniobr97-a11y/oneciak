@@ -610,6 +610,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 /* PDF */
 .pdf-card { background: var(--cream); border: none; border-radius: var(--radius-lg); padding: 24px 22px; margin-bottom: 16px; margin-top: 28px; }
 .pdf-row { display: flex; gap: 9px; }
+@media (min-width: 641px) { .pdf-row button { width: auto; min-width: 280px; } }
 .pdf-row button { width: 100%; padding: 13px 20px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--sf); font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background 0.2s, transform 0.15s ease-out; }
 @media (hover: hover) and (pointer: fine) { .pdf-row button:hover { background: var(--accent-hover); } }
 .pdf-row button:active { transform: scale(0.97); }
@@ -1521,13 +1522,11 @@ details.more > summary:active { transform: scale(0.98); }
 
     <div class="pdf-card reveal">
       <div class="pdf-row">
-        <button onclick="savePDF()"><span id="pdfMainLabel">This preview</span><small id="pdfMainSub">PDF, all sections</small></button>
-        <button onclick="saveOneSheet()"><span>One-page summary</span><small>PDF, to print or share</small></button>
+        <button onclick="savePDF()"><span id="pdfMainLabel">Download this preview</span><small id="pdfMainSub">PDF, all sections</small></button>
       </div>
       <p class="pdf-note" id="pdfNote">The full report is not included here, it arrives by email.</p>
       <div class="success-msg" id="pdfSuccess">PDF saved. Check your downloads.</div>
       <div class="inline-error" id="pdfError" role="alert" style="margin-top:12px"></div>
-      <div class="success-msg" id="oneSheetSuccess">One-page summary saved. Check your downloads.</div>
     </div>
     <button class="btn-secondary" id="againBtn" onclick="goLanding()">Analyze another project</button>
     <div class="disclaimer-box" style="margin-top:14px">
@@ -2217,8 +2216,8 @@ function retryLastAction() {
 
 // The main PDF holds whatever is on screen: the preview, or the full report.
 function setPdfLabels() {
-  document.getElementById('pdfMainLabel').textContent = isFullReport ? 'Full report' : 'This preview';
-  document.getElementById('pdfMainSub').textContent = isFullReport ? 'PDF, with the business plan page' : 'PDF, all sections';
+  document.getElementById('pdfMainLabel').textContent = isFullReport ? 'Download the full report' : 'Download this preview';
+  document.getElementById('pdfMainSub').textContent = isFullReport ? 'PDF, every area and the business plan page' : 'PDF, all sections';
   document.getElementById('pdfNote').style.display = isFullReport ? 'none' : 'block';
 }
 function scoreColor(s) { return s >= 7 ? 'high' : s >= 5 ? 'mid' : 'low'; }
@@ -3286,66 +3285,6 @@ async function savePDF() {
     document.getElementById('pdfSuccess').style.display = 'block';
     setTimeout(function(){ document.getElementById('pdfSuccess').style.display='none'; }, 4000);
   } catch(e) { pdfFail('The PDF could not be created. Try again, and check that your browser allows downloads.'); }
-}
-
-/* ── ONE-SHEET PDF — a condensed single-page summary suitable for printing
-   or sharing with a financier, built from whatever data the current
-   report has (works for both the free preview and the full report). ── */
-async function saveOneSheet() {
-  document.getElementById('pdfError').style.display = 'none';
-  if (!lastResult||!lastProject) { pdfFail('There is no report on this page to save yet.'); return; }
-  try {
-    await loadJsPDF();
-    var doc = await newPdfDoc();
-    var y=24, margin=24, maxW=doc.internal.pageSize.getWidth()-margin*2;
-    function ln(txt,sz,bold,r,g,b) {
-      doc.setFontSize(sz||11); doc.setFont(doc.pdfFont,bold?'bold':'normal');
-      doc.setTextColor(r!==undefined?r:26, g!==undefined?g:25, b!==undefined?b:22);
-      doc.splitTextToSize(String(txt||''),maxW).forEach(function(l){ if(y>272){doc.addPage();y=24;} doc.text(l,margin,y); y+=(sz||11)*0.5; }); y+=2;
-    }
-    function hr() { y+=2; doc.setDrawColor(226,224,219); doc.line(margin,y,doc.internal.pageSize.getWidth()-margin,y); y+=6; }
-
-    ln('OneCiak · One-sheet summary',9,true,122,118,112);
-    ln('"'+lastProject.title+'"',19,true);
-    ln('OneCiak Score: '+Number(lastResult.overall_score||0).toFixed(1)+'/10 · '+(lastResult.overall_label||''),12,true);
-    hr();
-
-    ln((isFullReport && lastResult.executive_summary) ? lastResult.executive_summary : (lastResult.overall_summary||''),10,false,70,68,64);
-    if (lastResult.biggest_risk) ln('Main Risk: '+lastResult.biggest_risk,9,true,185,28,28);
-    if (lastResult.biggest_opportunity) ln('Main Opportunity: '+lastResult.biggest_opportunity,9,true,22,101,52);
-    hr();
-
-    ln('SCORECARD',9,true,122,118,112);
-    [
-      {k:'creative',l:'Creative Package'}, {k:'financial',l:'Financial Plan'}, {k:'market',l:'Market & Audience'},
-      {k:'festival',l:'Festival Strategy'}, {k:'distribution',l:'Distribution & Revenue'}
-    ].forEach(function(d){
-      var score = lastResult[d.k+'_score'];
-      if (score === undefined || score === null) return;
-      ln(Number(score).toFixed(1)+'/10 · '+d.l+': '+(lastResult[d.k+'_verdict']||''),10,false,50,50,50);
-    });
-    hr();
-
-    if (isFullReport) {
-      if (lastResult.business_plan_summary && lastResult.business_plan_summary.the_ask) {
-        ln('The Ask: '+lastResult.business_plan_summary.the_ask,10,true,26,25,22);
-      }
-      if (lastResult.revenue_projection && lastResult.revenue_projection.total_realistic) {
-        ln((lastResult.sources_checked ? 'Revenue outlook: ' : 'Realistic Revenue Potential: ')+lastResult.revenue_projection.total_realistic,10,true,22,101,52);
-      }
-      if (lastResult.roadmap && lastResult.roadmap[0] && lastResult.roadmap[0].action) {
-        ln('Next Step: '+lastResult.roadmap[0].action,9,false,70,68,64);
-      }
-      hr();
-    }
-
-    ln('This is a condensed summary. The complete report, with red flags, strengths, funding sources, festival calendar and full roadmap, is available at oneciak.com.',8,false,150,148,145);
-    ln('Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. Results are estimates and do not guarantee any outcome.',8,false,150,148,145);
-
-    doc.save('OneCiak-OneSheet-'+lastProject.title.replace(/\s+/g,'-')+'.pdf');
-    document.getElementById('oneSheetSuccess').style.display = 'block';
-    setTimeout(function(){ document.getElementById('oneSheetSuccess').style.display='none'; }, 4000);
-  } catch(e) { pdfFail('The one-page summary could not be created. Try again, and check that your browser allows downloads.'); }
 }
 
 function showError(msg) { var b=document.getElementById('errorBox'); b.textContent=msg; b.style.display='block'; }
