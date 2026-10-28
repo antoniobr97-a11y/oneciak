@@ -62,25 +62,22 @@ function applyFacts(report, project) {
 }
 
 // A MiC/DGCA selective grant row gets who can apply, with the call's own
-// sentence as the quote and the call as its source.
+// sentence as the quote and the call as its source. The call's own title
+// names writing, development and production together, so that title is
+// taken out first and the row is read from what is left: a row about the
+// whole call says both rules.
+const SELECTIVE_ID = /\b(MiC|DGCA|Ministry of Culture|Ministero della Cultura|Direzione generale Cinema|legge n\.? ?220|law 220|articolo 26|art\.? 26)\b/i;
+const CALL_TITLE = /contributi selettivi per la scrittura,? lo sviluppo e la produzione di opere cinematografiche e audiovisive/ig;
 function applySelective(report, sel) {
   (report.financial_sources || []).forEach(item => {
-    const text = String(item.name || '') + ' ' + String(item.eligibility || '');
-    if (!/selettiv|selective/i.test(text) || !/\b(MiC|DGCA|Ministry of Culture|Ministero della Cultura|Direzione generale Cinema)\b/i.test(text)) return;
-    // The call's own title names writing, development and production
-    // together, so the line is read from what the row is about; when that
-    // is not clear the row is left as the model wrote it.
-    const name = String(item.name || '');
-    const about = name + ' ' + String(item.eligibility || '') + ' ' + String(item.amount || '');
-    const writing = /scrittura|writing|screenplay|sceneggiat/i, dev = /sviluppo|development/i, prod = /produzione|production/i;
-    let kind = null;
-    if (/opere prime|first and second|first works|giovani autori|young authors/i.test(about)) kind = 'production';
-    else if (writing.test(name) && !dev.test(name) && !prod.test(name)) kind = 'writing';
-    else if (dev.test(name) && !writing.test(name) && !prod.test(name)) kind = 'development';
-    else if (prod.test(name) && !writing.test(name) && !dev.test(name)) kind = 'production';
-    if (!kind) return;
-    item.applicant = kind === 'writing' ? 'Individual' : 'Company';
-    item.rule_quote = sel[kind];
+    const raw = String(item.name || '') + ' ' + String(item.eligibility || '') + ' ' + String(item.amount || '');
+    if (!/selettiv|selective/i.test(raw) || !SELECTIVE_ID.test(raw)) return;
+    const about = raw.replace(CALL_TITLE, ' ');
+    const writing = /scrittura|writing|screenplay|sceneggiat/i.test(about);
+    const company = /sviluppo|development|produzione|production|opere prime|first and second|first works|giovani autori|young authors/i.test(about);
+    if (writing && !company) { item.applicant = 'Individual'; item.rule_quote = sel.writing; }
+    else if (company && !writing) { item.applicant = 'Company'; item.rule_quote = /sviluppo|development/i.test(about) && !/produzione|production|opere prime|first and second/i.test(about) ? sel.development : sel.production; }
+    else { item.applicant = 'Split'; item.rule_quote = sel.production; }
     item.source = item.url = sel.source;
     item.checked = sel.checked;
   });
