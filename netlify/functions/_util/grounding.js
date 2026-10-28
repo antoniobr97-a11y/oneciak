@@ -172,7 +172,12 @@ function lastDateIn(text) {
 }
 function markIfClosed(item, field, today) {
   const last = lastDateIn(item[field]);
-  if (last !== null && last < Date.parse(today + 'T00:00:00Z')) { item.closed = true; item[field] = 'Closed (' + item[field] + ')'; }
+  if (last !== null && last < Date.parse(today + 'T00:00:00Z')) {
+    item.closed = true;
+    // The model sometimes already wrote "closed": say it once.
+    const v = String(item[field]).replace(/^\s*closed\b[\s:,-]*/i, '').replace(/\s*\((?:round |call |now )?closed\)\s*$/i, '').replace(/[\s,;]+(?:round |call )?closed\.?\s*$/i, '').trim();
+    item[field] = /^\(.*\)$/.test(v) ? 'Closed ' + v : 'Closed (' + v + ')';
+  }
 }
 
 // A rule quoted to the reader (premiere requirement, who can apply) is

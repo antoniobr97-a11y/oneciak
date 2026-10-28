@@ -82,7 +82,7 @@ function stated(v, item) {
 }
 
 // Same wording as the site (index.html, APPLICANT).
-const APPLICANT = { Individual: 'Individuals', Company: 'Production companies only', Either: 'Individuals or companies' };
+const APPLICANT = { Individual: 'Individuals', Company: 'Production companies only', Either: 'Individuals or companies', Split: 'Writing: individuals. Development and production: companies only' };
 
 // What the filmmaker lacks before the funds are open to them, and how to get it.
 function beforeApplyHtml(b) {
