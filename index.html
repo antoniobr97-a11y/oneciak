@@ -379,6 +379,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 #sec-form .disclaimer-box { background: none; padding: 0; margin: 0 0 24px; }
 #sec-form .btn-primary { width: auto; padding: 15px 24px; background: var(--text); }
 #sec-form .error-box { margin-top: 16px; }
+/* Missing required fields are marked on the field itself (2026-10-29,
+   Antonio: show which box is empty, not only a message under the button). */
+#sec-form input.is-invalid, #sec-form select.is-invalid, #sec-form textarea.is-invalid { box-shadow: inset 0 0 0 1.5px var(--danger); }
+.field-err { font-size: 14px; line-height: 1.4; color: var(--danger); margin: 6px 0 0; }
 .f-submit { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 24px; }
 .f-submit p { font-size: 13px; color: var(--muted); }
 
@@ -1090,6 +1094,8 @@ details.more > summary:active { transform: scale(0.98); }
   .accordion-trigger:hover .accordion-label, .rblock summary:hover .rblock-label { color: #fff; }
 }
 @media (prefers-color-scheme: dark) {
+  .field-err { color: #ff9a87; }
+  #sec-form input.is-invalid, #sec-form select.is-invalid, #sec-form textarea.is-invalid { box-shadow: inset 0 0 0 1.5px #ff9a87; }
   :root {
     --paper: #140d10; --text: #f2ede6; --ink: #f2ede6;
     --accent: #f2ede6; --accent-hover: #ffffff; --accent-press: #f2ede6; --accent-wash: rgba(255,255,255,0.08);
@@ -1425,7 +1431,7 @@ details.more > summary:active { transform: scale(0.98); }
       </div>
       <div class="field">
         <label for="extra">Anything else? <span class="hint">(optional)</span></label>
-        <textarea id="extra" maxlength="1500" placeholder="Co-production? Attached talent? Funding secured? Based on a true story? Using existing music or archive footage?" style="min-height:66px"></textarea>
+        <textarea id="extra" maxlength="1500" placeholder="Co-production? Attached talent? Funding secured? Based on a true story? Using existing music or archive footage?" rows="3"></textarea>
       </div>
     </div>
     <div class="disclaimer-box">
@@ -1677,6 +1683,7 @@ function showOnly(id) {
   if (t) t.style.display = (id === 'sec-loading') ? 'flex' : 'block';
   window.scrollTo(0,0);
   updateLandingNav();
+  if (id === 'sec-form') fitPlaceholders();
 }
 function goLanding() {
   fullReportGenerationId++;
@@ -2858,10 +2865,57 @@ function buildPlatforms(platforms) {
 }
 
 /* ── RUN ANALYSIS (free quick preview — the full report always goes through start-full-report.js) ── */
+var REQUIRED = [['title', 'Add a title, even a working one'], ['logline', 'Add a logline'], ['genre1', 'Choose at least one genre'], ['format', 'Choose a format'], ['audience', 'Choose a target audience'], ['distrib', 'Choose a distribution goal'], ['stage', 'Choose the project stage']];
+function markMissing() {
+  var first = null, n = 0;
+  REQUIRED.forEach(function(r){
+    var el = document.getElementById(r[0]), field = el.closest('.field');
+    var empty = !String(el.value || '').trim() || (r[0] === 'genre1' && !getGenre());
+    el.classList.toggle('is-invalid', empty);
+    el.setAttribute('aria-invalid', empty ? 'true' : 'false');
+    var msg = field.querySelector('.field-err');
+    if (empty && !msg) { msg = document.createElement('p'); msg.className = 'field-err'; msg.id = r[0]+'-err'; msg.textContent = r[1]; el.insertAdjacentElement('afterend', msg); el.setAttribute('aria-describedby', msg.id); }
+    if (!empty && msg) { msg.remove(); el.removeAttribute('aria-describedby'); }
+    if (empty) { n++; if (!first) first = el; }
+  });
+  return { first: first, count: n };
+}
+// An empty text box is at least as tall as its example text, measured on
+// the device itself (its own font and width), so the example is never cut
+// off (2026-10-29: "Anything else?" was cut on iPhone).
+function fitPlaceholders() {
+  ['logline', 'extra'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (!el || el.value || !el.offsetWidth) return;
+    el.style.minHeight = '';
+    el.value = el.placeholder;
+    var h = el.scrollHeight + (el.offsetHeight - el.clientHeight);
+    el.value = '';
+    if (h > el.offsetHeight) el.style.minHeight = h + 'px';
+  });
+}
+window.addEventListener('resize', fitPlaceholders);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitPlaceholders);
+
+// A marked field is cleared as soon as it is filled in.
+document.addEventListener('DOMContentLoaded', function(){
+  REQUIRED.forEach(function(r){
+    var el = document.getElementById(r[0]);
+    ['input', 'change'].forEach(function(ev){ el.addEventListener(ev, function(){ if (el.classList.contains('is-invalid')) markMissing(); }); });
+  });
+});
+
 async function runAnalysis() {
   var p = getProject();
-  if (!p.title||!p.logline||!p.genre||!p.format||!p.budget||!p.audience||!p.distrib||!p.stage) {
-    showError("Please fill in all required fields (including the project stage) and select at least one genre.");
+  var miss = markMissing();
+  if (miss.count || !p.budget) {
+    showError(!miss.count ? 'Please set a budget, or tick "I\'m not sure yet".' : miss.count === 1 ? 'One field is missing, marked in red above.' : miss.count+' fields are missing, marked in red above.');
+    if (miss.first) {
+      var y = miss.first.closest('.field').getBoundingClientRect().top + window.scrollY - 90;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      // Text fields get the cursor; a select would open its picker, so it doesn't.
+      if (miss.first.tagName !== 'SELECT') setTimeout(function(){ miss.first.focus({ preventScroll: true }); }, 450);
+    }
     return;
   }
   hideError();
