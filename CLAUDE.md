@@ -482,7 +482,7 @@ si perde): 0 errori JS, 0 scorrimenti orizzontali, contrasto sui pixel tutto
 sopra soglia (attenzione: per nascondere il testo serve `:is(#zz,html) *`,
 altrimenti le regole `!important` del sito vincono e danno falsi 1.0:1).
 
-## Ricerca "come si fa davvero un film" e report più utile (2026-10-28, IN PROVA)
+## Ricerca "come si fa davvero un film" e report più utile (2026-10-28, PUBBLICATO il 2026-10-29)
 
 Ricerca fatta su richiesta di Antonio (doc privato "Come si fa davvero un
 film: ricerca per OneCiak", claude.ai/artifact/JrLNDdn3koDmXdo6Lv3MuH).
@@ -491,7 +491,7 @@ un autore da solo chiede solo la SCRITTURA (oltre 52 min, in italiano, no
 IA); sviluppo e produzione solo imprese indipendenti italiane Ateco 59.1 con
 un'opera negli ultimi 5 anni (salvo società nuove). Solo il 25,3% degli
 esordienti fa un secondo film in 5 anni (Follows 2026). Fatto, sulla preview
-(deploy-preview-81) e NON ancora su main, aspetta l'ok di Antonio:
+(deploy-preview-81), pubblicato su main il 2026-10-29 con l'ok di Antonio:
 - `applicant` per ogni fondo (Individual/Company/Either), tenuto SOLO se c'è
   la `rule_quote` verificata (`applicantOf` in grounding.js); righe del bando
   MiC sistemate a mano (`applySelective` in verifiedFacts.js, anche 'Split').
