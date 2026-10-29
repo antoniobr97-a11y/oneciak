@@ -23,6 +23,10 @@ con typo quando è frustrato: non vuol dire che vuole un tono più formale.
 
 ## Regole di Antonio (non derogabili)
 
+0. **Come parlargli** (2026-10-29): sempre in italiano, anche i messaggi brevi
+   e quelli di avanzamento ("sto facendo..."); parole semplici, niente gergo
+   tecnico; risposte corte, non allungarsi. Restano in inglese solo i testi
+   del sito, che è in inglese.
 1. **Tutto verificato alla fonte** (2026-10-19 e 2026-10-20: "fonti
    verificate e mai cazzate, pensarci 100 volte"). Prima di affermare un fatto
    verificarlo davvero (comando, pagina ufficiale aperta, misura sui pixel) e
