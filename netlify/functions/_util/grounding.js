@@ -172,7 +172,12 @@ function lastDateIn(text) {
 }
 function markIfClosed(item, field, today) {
   const last = lastDateIn(item[field]);
-  if (last !== null && last < Date.parse(today + 'T00:00:00Z')) { item.closed = true; item[field] = 'Closed (' + item[field] + ')'; }
+  if (last !== null && last < Date.parse(today + 'T00:00:00Z')) {
+    item.closed = true;
+    // The model sometimes already wrote "closed": say it once.
+    const v = String(item[field]).replace(/^\s*closed\b[\s:,-]*/i, '').replace(/\s*\((?:round |call |now )?closed\)\s*$/i, '').replace(/[\s,;]+(?:round |call )?closed\.?\s*$/i, '').trim();
+    item[field] = /^\(.*\)$/.test(v) ? 'Closed ' + v : 'Closed (' + v + ')';
+  }
 }
 
 // A rule quoted to the reader (premiere requirement, who can apply) is
@@ -247,6 +252,13 @@ function checkProse(value, pageText) {
 
 // Mutates `report` in place. `searchUrlsByField` maps each field to the URLs
 // returned by the search of the section that produced it.
+function applicantOf(item) {
+  if (!item.rule_quote) return null;
+  const a = String(item.applicant || '').trim().toLowerCase();
+  if (a === 'individual' || a === 'company' || a === 'either') return a[0].toUpperCase() + a.slice(1);
+  return null;
+}
+
 async function groundReport(report, searchUrlsByField, today, fetcher) {
   stripMarkup(report);
   const cache = new Map();
@@ -299,6 +311,10 @@ async function groundReport(report, searchUrlsByField, today, fetcher) {
   }
 
   await Promise.all(checks);
+
+  // "Who can apply" is shown only next to the source's own sentence
+  // (rule_quote, checked word for word above); without it, it goes.
+  (report.financial_sources || []).forEach(item => { item.applicant = applicantOf(item); });
 
   ['financial_sources', 'festival_calendar'].forEach(field => {
     (report[field] || []).forEach(item => markIfClosed(item, 'deadline', today));

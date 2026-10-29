@@ -81,10 +81,23 @@ function stated(v, item) {
   return (v == null || v === '') ? (item && item.source ? 'not published on the source, check before planning' : '') : v;
 }
 
+// Same wording as the site (index.html, APPLICANT).
+const APPLICANT = { Individual: 'Individuals', Company: 'Production companies only', Either: 'Individuals or companies', Split: 'Writing: individuals. Development and production: companies only' };
+
+// What the filmmaker lacks before the funds are open to them, and how to get it.
+function beforeApplyHtml(b) {
+  const miss = ((b && b.missing) || []).filter(Boolean), steps = ((b && b.steps) || []).filter(Boolean);
+  if (!miss.length) return '';
+  let h = '<div style="margin-top:16px">' + monoLabel('Before you can apply', '#b4552b');
+  miss.forEach((m, i) => { h += '<p style="margin:0 0 10px;padding:2px 0 2px 12px;border-left:2px solid #b4552b;font-size:13px;line-height:1.55;color:#161616"><b>' + esc(m) + '</b>' + (steps[i] ? '<br>' + esc(steps[i]) : '') + '</p>'; });
+  steps.slice(miss.length).forEach(x => { h += '<p style="margin:0 0 10px;padding:2px 0 2px 12px;border-left:2px solid #b4552b;font-size:13px;line-height:1.55;color:#161616">' + esc(x) + '</p>'; });
+  return h + '</div>';
+}
+
 function fundingSourcesHtml(sources) {
   if (!sources || !sources.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Funding Sources</span>';
-  sources.forEach(f => { if (!f) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.name) + '</b> (' + esc(f.type) + ')' + (f.amount ? ' · ' + esc(f.amount) : '') + '<br><span style="font-size:12px;color:#5c5852">Deadline: ' + esc(stated(f.deadline, f)) + ' · ' + esc(f.eligibility) + '</span>' + sourceHtml(f) + '</p>'; });
+  sources.forEach(f => { if (!f) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.name) + '</b> (' + esc(f.type) + ')' + (f.amount ? ' · ' + esc(f.amount) : '') + '<br><span style="font-size:12px;color:#5c5852">' + (APPLICANT[f.applicant] ? 'Who can apply: ' + esc(APPLICANT[f.applicant]) + ' · ' : '') + 'Deadline: ' + esc(stated(f.deadline, f)) + ' · ' + esc(f.eligibility) + '</span>' + sourceHtml(f) + '</p>'; });
   h += '</div>';
   return h;
 }
@@ -190,7 +203,7 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
   const score = Number(r.overall_score || 5).toFixed(1);
   const viewUrl = viewUrlOverride || (sessionId ? 'https://oneciak.com/?session_id=' + encodeURIComponent(sessionId) : 'https://oneciak.com');
 
-  const financialExtra = fundingSourcesHtml(r.financial_sources) + talentAndTaxHtml(r.talent_leverage, r.tax_incentive) + labeledTextHtml('Budget Breakdown Guidance', r.budget_breakdown_guidance);
+  const financialExtra = beforeApplyHtml(r.before_you_apply) + fundingSourcesHtml(r.financial_sources) + talentAndTaxHtml(r.talent_leverage, r.tax_incentive) + labeledTextHtml('Budget Breakdown Guidance', r.budget_breakdown_guidance);
   let body = '';
   body += section('Creative Package', r.creative_score, r.creative_verdict, r.creative_detail, r.creative_flags, r.creative_strengths, r.creative_tips, null, pitchAssessmentHtml(r.pitch_assessment) + labeledTextHtml('Attachment Strategy', r.attachment_strategy) + keyCrewHtml(r.key_crew_recommendations));
   body += section('Financial Plan', r.financial_score, r.financial_verdict, r.financial_detail, r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan, financialExtra);

@@ -482,6 +482,29 @@ si perde): 0 errori JS, 0 scorrimenti orizzontali, contrasto sui pixel tutto
 sopra soglia (attenzione: per nascondere il testo serve `:is(#zz,html) *`,
 altrimenti le regole `!important` del sito vincono e danno falsi 1.0:1).
 
+## Ricerca "come si fa davvero un film" e report più utile (2026-10-28, PUBBLICATO il 2026-10-29)
+
+Ricerca fatta su richiesta di Antonio (doc privato "Come si fa davvero un
+film: ricerca per OneCiak", claude.ai/artifact/JrLNDdn3koDmXdo6Lv3MuH).
+Risultato chiave, verificato sul bando MiC 2026 (d.d. 15/5/2026 n. 1238):
+un autore da solo chiede solo la SCRITTURA (oltre 52 min, in italiano, no
+IA); sviluppo e produzione solo imprese indipendenti italiane Ateco 59.1 con
+un'opera negli ultimi 5 anni (salvo società nuove). Solo il 25,3% degli
+esordienti fa un secondo film in 5 anni (Follows 2026). Fatto, sulla preview
+(deploy-preview-81), pubblicato su main il 2026-10-29 con l'ok di Antonio:
+- `applicant` per ogni fondo (Individual/Company/Either), tenuto SOLO se c'è
+  la `rule_quote` verificata (`applicantOf` in grounding.js); righe del bando
+  MiC sistemate a mano (`applySelective` in verifiedFacts.js, anche 'Split').
+- `before_you_apply` {missing, steps}: blocco "Before you can apply" visibile
+  sotto "What to do" nell'area Financial, anche in mail e PDF.
+- Serie: `formatRules(p)` in tutti i prompt (confronti con serie, festival e
+  mercati per serie, bibbia e pilota). La /roadmap/ resta per i film.
+- Calendario: bottone "Add the deadlines to your calendar" (.ics creato nel
+  browser, promemoria 7 giorni prima, niente dati salvati); nascosto se non ci
+  sono date future. Promemoria via email NO finché l'avvocato non decide.
+- Prova con 3 report veri sulla preview: corto doc UK, lungo italiano senza
+  società, serie italiana (la prima volta fallita senza motivo, rilanciata ok).
+
 ## Giro Impeccable del 2026-10-26 (pubblicato)
 
 Critica 26/40 (`.impeccable/critique/`). Fatto: le 5 aree non si ripetono più
