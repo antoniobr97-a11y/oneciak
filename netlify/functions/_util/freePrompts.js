@@ -2,7 +2,7 @@
 // fields, never accepted from the browser: otherwise /analyze would forward
 // any text to the model on our key.
 
-const { SCORING, stageLines, stageRules, formatRules } = require('./reportPrompts');
+const { SCORING, stageLines, stageRules } = require('./reportPrompts');
 
 const FREE_PREAMBLE = 'You are a film market consultant. Write in clear English, no markdown. Be honest and specific: a filmmaker needs real information, not generic advice. Every sentence must add new, specific information: never restate a verdict field inside its paired detail field, and never pad with generic filler ("this is important", "it is worth noting").\n\nHONESTY RULES (strict): never invent a film, festival, fund, company, statistic, date, deadline, amount or percentage. In this quick preview do not state any deadline, budget, box-office figure, fund amount, rebate percentage or statistic at all: the full report researches those with sources. Name real organisations only when you are certain they exist.\n\n'+SCORING+'\n\nRespond ONLY with valid JSON, no text outside the JSON.';
 
@@ -12,7 +12,7 @@ function freeCurrentDateLine() {
 }
 
 function freeProjectContext(p) {
-  var ctx = freeCurrentDateLine()+'\n\n'+formatRules(p)+stageRules()+'\n\nProject: Title="'+p.title+'", Logline="'+p.logline+'", Genre="'+p.genre+'", Format="'+p.format+'", Budget="'+p.budget+'", Audience="'+p.audience+'", Distribution="'+p.distrib+'", Country="'+p.country+'", Language="'+p.language+'", Experience="'+p.experience+'", '+stageLines(p)+', Notes="'+(p.extra||'None')+'"';
+  var ctx = freeCurrentDateLine()+'\n\n'+stageRules()+'\n\nProject: Title="'+p.title+'", Logline="'+p.logline+'", Genre="'+p.genre+'", Format="'+p.format+'", Budget="'+p.budget+'", Audience="'+p.audience+'", Distribution="'+p.distrib+'", Country="'+p.country+'", Language="'+p.language+'", Experience="'+p.experience+'", '+stageLines(p)+', Notes="'+(p.extra||'None')+'"';
   if (p.budget === 'Not sure yet') {
     ctx += '\n\nThe filmmaker has not set a budget yet. Before giving any financial assessment, recommend a realistic budget range for a project with this genre, format and scope, and use that range as the basis for every other budget-dependent field in your response.';
   }

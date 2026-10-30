@@ -72,9 +72,12 @@ function applySelective(report, sel) {
   (report.financial_sources || []).forEach(item => {
     const raw = String(item.name || '') + ' ' + String(item.eligibility || '') + ' ' + String(item.amount || '');
     if (!/selettiv|selective/i.test(raw) || !SELECTIVE_ID.test(raw)) return;
-    const about = raw.replace(CALL_TITLE, ' ');
-    const writing = /scrittura|writing|screenplay|sceneggiat/i.test(about);
-    const company = /sviluppo|development|produzione|production|opere prime|first and second|first works|giovani autori|young authors/i.test(about);
+    // The row's own name says which line it is; its other text only when
+    // the name (once the call title is out) does not.
+    const WRITING = /scrittura|writing|screenplay|sceneggiat/i, COMPANY = /sviluppo|development|produzione|production|opere prime|first and second|first works|giovani autori|young authors/i;
+    const name = String(item.name || '').replace(CALL_TITLE, ' ');
+    const about = WRITING.test(name) || COMPANY.test(name) ? name : raw.replace(CALL_TITLE, ' ');
+    const writing = WRITING.test(about), company = COMPANY.test(about);
     if (writing && !company) { item.applicant = 'Individual'; item.rule_quote = sel.writing; }
     else if (company && !writing) { item.applicant = 'Company'; item.rule_quote = /sviluppo|development/i.test(about) && !/produzione|production|opere prime|first and second/i.test(about) ? sel.development : sel.production; }
     else { item.applicant = 'Split'; item.rule_quote = sel.production; }

@@ -379,6 +379,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 #sec-form .disclaimer-box { background: none; padding: 0; margin: 0 0 24px; }
 #sec-form .btn-primary { width: auto; padding: 15px 24px; background: var(--text); }
 #sec-form .error-box { margin-top: 16px; }
+/* Missing required fields are marked on the field itself (2026-10-29,
+   Antonio: show which box is empty, not only a message under the button). */
+#sec-form input.is-invalid, #sec-form select.is-invalid, #sec-form textarea.is-invalid,
+#sec-form input.is-invalid:focus, #sec-form select.is-invalid:focus, #sec-form textarea.is-invalid:focus { box-shadow: inset 0 0 0 1.5px var(--danger); }
 .f-submit { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 24px; }
 .f-submit p { font-size: 13px; color: var(--muted); }
 
@@ -610,6 +614,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 /* PDF */
 .pdf-card { background: var(--cream); border: none; border-radius: var(--radius-lg); padding: 24px 22px; margin-bottom: 16px; margin-top: 28px; }
 .pdf-row { display: flex; gap: 9px; }
+.pdf-row button[hidden] { display: none; }
 @media (min-width: 641px) { .pdf-card .pdf-row button { width: auto; min-width: 280px; } }
 .pdf-row button { width: 100%; padding: 13px 20px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--sf); font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background 0.2s, transform 0.15s ease-out; }
 @media (hover: hover) and (pointer: fine) { .pdf-row button:hover { background: var(--accent-hover); } }
@@ -772,6 +777,13 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .ready-list li::before { content: ''; position: absolute; left: 1px; top: 0.5em; width: 8px; height: 8px; border: 1.5px solid #b4552b; border-radius: 2px; }
 .ready-miss { display: block; font-weight: 700; color: var(--text); }
 .ready-how { display: block; color: var(--text); }
+.next-step { margin: 36px 0 8px; }
+.next-action { font-size: 18px; line-height: 1.5; color: var(--text); max-width: 62ch; margin: 0 0 8px; }
+.next-why { font-size: 15px; line-height: 1.55; color: var(--muted); max-width: 62ch; margin: 0 0 14px; }
+.next-ready .sub-k { display: block; margin-bottom: 8px; }
+.email-draft { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
+.email-text { white-space: pre-wrap; font-size: 15px; line-height: 1.6; color: var(--text); max-width: 64ch; margin: 8px 0 12px; }
+.copy-btn { width: auto; }
 .action-item { margin-bottom: 14px; }
 .action-text { font-size: 15px; line-height: 1.6; max-width: 66ch; }
 
@@ -1089,6 +1101,8 @@ details.more > summary:active { transform: scale(0.98); }
   .accordion-trigger:hover .accordion-label, .rblock summary:hover .rblock-label { color: #fff; }
 }
 @media (prefers-color-scheme: dark) {
+  #sec-form input.is-invalid, #sec-form select.is-invalid, #sec-form textarea.is-invalid,
+  #sec-form input.is-invalid:focus, #sec-form select.is-invalid:focus, #sec-form textarea.is-invalid:focus { box-shadow: inset 0 0 0 1.5px #ff9a87; }
   :root {
     --paper: #140d10; --text: #f2ede6; --ink: #f2ede6;
     --accent: #f2ede6; --accent-hover: #ffffff; --accent-press: #f2ede6; --accent-wash: rgba(255,255,255,0.08);
@@ -1306,7 +1320,7 @@ details.more > summary:active { transform: scale(0.98); }
           <select id="format">
             <option value="">Select format…</option>
             <option>Feature Film</option><option>Short Film</option>
-            <option>Series / Mini-series</option><option>Documentary Feature</option><option>Documentary Short</option>
+            <option>Documentary Feature</option><option>Documentary Short</option>
           </select>
         </div>
       </div>
@@ -1424,7 +1438,7 @@ details.more > summary:active { transform: scale(0.98); }
       </div>
       <div class="field">
         <label for="extra">Anything else? <span class="hint">(optional)</span></label>
-        <textarea id="extra" maxlength="1500" placeholder="Co-production? Attached talent? Funding secured? Based on a true story? Using existing music or archive footage?" style="min-height:66px"></textarea>
+        <textarea id="extra" maxlength="1500" placeholder="Co-production? Attached talent? Funding secured? Based on a true story? Using existing music or archive footage?" rows="3"></textarea>
       </div>
     </div>
     <div class="disclaimer-box">
@@ -1676,6 +1690,7 @@ function showOnly(id) {
   if (t) t.style.display = (id === 'sec-loading') ? 'flex' : 'block';
   window.scrollTo(0,0);
   updateLandingNav();
+  if (id === 'sec-form') fitPlaceholders();
 }
 function goLanding() {
   fullReportGenerationId++;
@@ -2348,7 +2363,7 @@ function renderFull(r, title) {
     '<div class="exec-row">'+
     '<div class="exec-box risk"><p class="exec-box-text"><b class="exec-lead">Biggest risk.</b> '+esc(r.biggest_risk)+'</p></div>'+
     '<div class="exec-box opp"><p class="exec-box-text"><b class="exec-lead">Biggest opportunity.</b> '+esc(r.biggest_opportunity)+'</p></div>'+
-    '</div></div>';
+    '</div></div>' + buildNextStep(r.next_step);
 
   // Build accordion
   var sections = [
@@ -2364,7 +2379,7 @@ function renderFull(r, title) {
       score: r.financial_score, verdict: r.financial_verdict,
       body: buildAccordionBody(r.financial_score, r.financial_verdict, r.financial_detail,
         r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan,
-        buildFundingSources(r.financial_sources) + buildTalentAndTax(r.talent_leverage, r.tax_incentive) + buildLabeledText('Budget breakdown', r.budget_breakdown_guidance),
+        buildProducers(r.producers, r.producer_email) + buildFundingSources(r.financial_sources) + buildTalentAndTax(r.talent_leverage, r.tax_incentive) + buildLabeledText('Budget breakdown', r.budget_breakdown_guidance),
         buildBeforeApply(r.before_you_apply))
     },
     {
@@ -2757,6 +2772,36 @@ function buildFundingSources(sources) {
   });
   return rblock('Funding sources', howMany(sources, 'fund', 'funds'), h);
 }
+/* YOUR NEXT STEP and PRODUCERS (2026-10-30, Antonio: the site must help
+   people actually make the film). The next step is one concrete action for
+   this week; the producers are real companies, each confirmed by a page
+   that names it with a film it produced (grounding.js, checkNamed). */
+function buildNextStep(n) {
+  if (!n || !n.action) return '';
+  var ready = (n.ready || []).filter(Boolean);
+  return '<section class="next-step"><h2 class="r-plan-h">Your next step</h2>'+
+    '<p class="next-action">'+esc(n.action)+'</p>'+
+    (n.why ? '<p class="next-why">'+esc(n.why)+'</p>' : '')+
+    (ready.length ? '<div class="next-ready"><span class="sub-k">Have ready</span><ul class="ready-list">'+ready.map(function(x){ return '<li><span class="ready-how">'+esc(x)+'</span></li>'; }).join('')+'</ul></div>' : '')+
+    '</section>';
+}
+function buildProducers(list, email) {
+  var items = (list || []).filter(Boolean);
+  if (!items.length) return '';
+  var h = '';
+  items.forEach(function(p){
+    h += entry(p.name, p.country || null, fact('Produced', p.film + (p.year ? ' ('+p.year+')' : '')), p.why, p, p.approach ? 'How they take projects: '+p.approach : null);
+  });
+  if (email) h += '<div class="email-draft"><span class="sub-k">A first email you can adapt</span><p class="email-text">'+esc(email)+'</p><button type="button" class="btn-secondary copy-btn" onclick="copyEmail(this)">Copy the email</button></div>';
+  return rblock('Producers to contact', howMany(items, 'company', 'companies'), h, true);
+}
+function copyEmail(btn) {
+  var t = btn.parentNode.querySelector('.email-text').textContent;
+  var done = function(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy the email'; }, 2000); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, function(){ btn.textContent = 'Select the text and copy it'; });
+  else btn.textContent = 'Select the text and copy it';
+}
+
 /* Who can apply, shown only when the source's own sentence backs it
    (grounding.js keeps it only with a rule_quote checked on the page). */
 var APPLICANT = { Individual: 'Individuals', Company: 'Production companies only', Either: 'Individuals or companies', Split: 'Writing: individuals. Development and production: companies only' };
@@ -2857,10 +2902,54 @@ function buildPlatforms(platforms) {
 }
 
 /* ── RUN ANALYSIS (free quick preview — the full report always goes through start-full-report.js) ── */
+// Only the red outline marks a missing field (Antonio, 2026-10-29: no red
+// text repeating what each label already says).
+var REQUIRED = ['title', 'logline', 'genre1', 'format', 'audience', 'distrib', 'stage'];
+function markMissing() {
+  var first = null, n = 0;
+  REQUIRED.forEach(function(id){
+    var el = document.getElementById(id);
+    var empty = !String(el.value || '').trim() || (id === 'genre1' && !getGenre());
+    el.classList.toggle('is-invalid', empty);
+    el.setAttribute('aria-invalid', empty ? 'true' : 'false');
+    if (empty) { n++; if (!first) first = el; }
+  });
+  return { first: first, count: n };
+}
+// An empty text box is at least as tall as its example text, measured on
+// the device itself (its own font and width), so the example is never cut
+// off (2026-10-29: "Anything else?" was cut on iPhone).
+function fitPlaceholders() {
+  ['logline', 'extra'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (!el || el.value || !el.offsetWidth) return;
+    el.style.minHeight = '';
+    el.value = el.placeholder;
+    var h = el.scrollHeight + (el.offsetHeight - el.clientHeight);
+    el.value = '';
+    if (h > el.offsetHeight) el.style.minHeight = h + 'px';
+  });
+}
+window.addEventListener('resize', fitPlaceholders);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitPlaceholders);
+
+// A marked field is cleared as soon as it is filled in.
+document.addEventListener('DOMContentLoaded', function(){
+  REQUIRED.forEach(function(id){
+    var el = document.getElementById(id);
+    ['input', 'change'].forEach(function(ev){ el.addEventListener(ev, function(){ if (el.classList.contains('is-invalid')) markMissing(); }); });
+  });
+});
+
 async function runAnalysis() {
   var p = getProject();
-  if (!p.title||!p.logline||!p.genre||!p.format||!p.budget||!p.audience||!p.distrib||!p.stage) {
-    showError("Please fill in all required fields (including the project stage) and select at least one genre.");
+  var miss = markMissing();
+  if (miss.count || !p.budget) {
+    showError(!miss.count ? 'Please set a budget, or tick "I\'m not sure yet".' : miss.count === 1 ? 'One field is missing, marked in red above.' : miss.count+' fields are missing, marked in red above.');
+    if (miss.first) {
+      var y = miss.first.closest('.field').getBoundingClientRect().top + window.scrollY - 90;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    }
     return;
   }
   hideError();
@@ -3052,6 +3141,13 @@ async function savePDF() {
       y+=2;
       if(lastResult.biggest_risk) ln('Biggest Risk: '+lastResult.biggest_risk,10,true,185,28,28);
       if(lastResult.biggest_opportunity) ln('Biggest Opportunity: '+lastResult.biggest_opportunity,10,true,22,101,52);
+      var ns = lastResult.next_step;
+      if (isFullReport && ns && ns.action) {
+        y+=2; ln('YOUR NEXT STEP',10,true); ln(ns.action,10,false,26,25,22);
+        if (ns.why) ln(ns.why,9,false,122,118,112);
+        var nsReady = (ns.ready||[]).filter(Boolean);
+        if (nsReady.length) ln('Have ready: '+nsReady.join(' · '),9,false,70,68,64);
+      }
       hr();
     }
 
@@ -3093,6 +3189,19 @@ async function savePDF() {
       ln('BEFORE YOU CAN APPLY',10,true);
       byaMiss.forEach(function(m, i){ ln('• '+m,10,true); if (byaSteps[i]) ln(byaSteps[i],9,false,70,68,64); });
       byaSteps.slice(byaMiss.length).forEach(function(x){ ln('• '+x,9,false,70,68,64); });
+      hr();
+    }
+    var prods = (lastResult.producers || []).filter(Boolean);
+    if (isFullReport && prods.length) {
+      ln('PRODUCERS TO CONTACT',10,true);
+      prods.forEach(function(p){
+        ln(p.name+(p.country ? ' ('+p.country+')' : ''),10,true);
+        ln('Produced: '+p.film+(p.year ? ' ('+p.year+')' : '')+(p.why ? ' · '+p.why : ''),9,false,122,118,112);
+        if (p.approach) ln('How they take projects: '+p.approach,9,false,70,68,64);
+        if (p.source) ln(pdfSource(p),8,false,150,148,145);
+        y+=1;
+      });
+      if (lastResult.producer_email) { ln('A first email you can adapt',9,true); ln(lastResult.producer_email,9,false,26,25,22); }
       hr();
     }
     if (isFullReport && lastResult.financial_sources && lastResult.financial_sources.length) {
