@@ -94,6 +94,27 @@ function beforeApplyHtml(b) {
   return h + '</div>';
 }
 
+// The one thing to do this week, as on the site.
+function nextStepHtml(n) {
+  if (!n || !n.action) return '';
+  const ready = (n.ready || []).filter(Boolean);
+  return '<tr><td style="padding:24px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Your next step</span>' +
+    '<p style="margin:10px 0 0;font-size:15px;line-height:1.55;color:#161616">' + esc(n.action) + '</p>' +
+    (n.why ? '<p style="margin:8px 0 0;font-size:13px;line-height:1.55;color:#5c5852">' + esc(n.why) + '</p>' : '') +
+    (ready.length ? '<p style="margin:10px 0 0;font-size:13px;line-height:1.6;color:#161616"><b>Have ready:</b> ' + ready.map(esc).join(' · ') + '</p>' : '') +
+    '</td></tr>';
+}
+
+// Producers confirmed on a page that names them with a film they produced.
+function producersHtml(list, email) {
+  const items = (list || []).filter(Boolean);
+  if (!items.length) return '';
+  let h = '<div style="margin-top:16px">' + monoLabel('Producers to contact', '#5c5852');
+  items.forEach(p => { h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(p.name) + '</b>' + (p.country ? ' (' + esc(p.country) + ')' : '') + '<br><span style="font-size:12px;color:#5c5852">Produced: ' + esc(p.film) + (p.year ? ' (' + esc(p.year) + ')' : '') + (p.why ? ' · ' + esc(p.why) : '') + (p.approach ? ' · How they take projects: ' + esc(p.approach) : '') + '</span>' + sourceHtml(p) + '</p>'; });
+  if (email) h += '<p style="margin:14px 0 0;font-size:12px;font-weight:700;color:#5c5852">A first email you can adapt</p><p style="margin:6px 0 0;padding:10px 12px;background:#f4f1ec;border-radius:8px;font-size:13px;line-height:1.6;color:#161616;white-space:pre-wrap">' + esc(email) + '</p>';
+  return h + '</div>';
+}
+
 function fundingSourcesHtml(sources) {
   if (!sources || !sources.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Funding Sources</span>';
@@ -203,8 +224,8 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
   const score = Number(r.overall_score || 5).toFixed(1);
   const viewUrl = viewUrlOverride || (sessionId ? 'https://oneciak.com/?session_id=' + encodeURIComponent(sessionId) : 'https://oneciak.com');
 
-  const financialExtra = beforeApplyHtml(r.before_you_apply) + fundingSourcesHtml(r.financial_sources) + talentAndTaxHtml(r.talent_leverage, r.tax_incentive) + labeledTextHtml('Budget Breakdown Guidance', r.budget_breakdown_guidance);
-  let body = '';
+  const financialExtra = beforeApplyHtml(r.before_you_apply) + producersHtml(r.producers, r.producer_email) + fundingSourcesHtml(r.financial_sources) + talentAndTaxHtml(r.talent_leverage, r.tax_incentive) + labeledTextHtml('Budget Breakdown Guidance', r.budget_breakdown_guidance);
+  let body = nextStepHtml(r.next_step);
   body += section('Creative Package', r.creative_score, r.creative_verdict, r.creative_detail, r.creative_flags, r.creative_strengths, r.creative_tips, null, pitchAssessmentHtml(r.pitch_assessment) + labeledTextHtml('Attachment Strategy', r.attachment_strategy) + keyCrewHtml(r.key_crew_recommendations));
   body += section('Financial Plan', r.financial_score, r.financial_verdict, r.financial_detail, r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan, financialExtra);
   body += section('Market & Audience', r.market_score, r.market_verdict, r.market_detail, r.market_flags, r.market_strengths, r.market_tips, null, comparablesHtml(r.market_comps) + marketingStrategyHtml(r.marketing_strategy) + labeledTextHtml('Target Audience Profile', r.target_audience_profile) + cautionaryCompsHtml(r.cautionary_comps));
