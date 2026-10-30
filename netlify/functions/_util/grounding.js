@@ -229,7 +229,8 @@ function textCore(html) {
 async function checkNamed(item, pages) {
   const html = item.source ? await pages(item.source) : null;
   const name = nameCore(item.name), film = nameCore(item.film);
-  if (!html || name.length < 3 || film.length < 2) { item.unconfirmed = true; return; }
+  // A film "title" that is just the company name proves nothing.
+  if (!html || name.length < 3 || film.length < 2 || name.includes(film) || film.includes(name)) { item.unconfirmed = true; return; }
   const text = textCore(html);
   if (!text.includes(' ' + name + ' ') || !text.includes(' ' + film + ' ')) item.unconfirmed = true;
 }
