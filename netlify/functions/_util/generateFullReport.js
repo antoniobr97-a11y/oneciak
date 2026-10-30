@@ -9,7 +9,7 @@ const { recordAndBenchmark } = require('./benchmarkStats');
 const { recordReportForEmail } = require('./userReports');
 
 const FULL_MODEL = 'claude-haiku-5-5';
-const FULL_MAX_TOKENS = 16000; // room for adaptive thinking plus the JSON (thinking counts toward max_tokens, and Haiku 5.5's tokenizer counts ~30% more tokens than Haiku 4.5's)
+const FULL_MAX_TOKENS = 32000; // 16000 was not always enough: on 2026-10-28 and -30 a section stopped mid-JSON ("Unexpected end of JSON input") and the whole report failed; Haiku 5.5 allows up to 128K and only the tokens used are billed // room for adaptive thinking plus the JSON (thinking counts toward max_tokens, and Haiku 5.5's tokenizer counts ~30% more tokens than Haiku 4.5's)
 const PROCESSING_STALE_MS = 8 * 60 * 1000; // generation can legitimately take a few minutes; give it plenty of room before a retry is treated as abandoned
 const PROMPT_ATTEMPTS = 3; // each of the 6 parallel prompts gets its own retries — an occasional malformed-JSON response from the model shouldn't fail the whole report
 const RETRY_DELAY_MS = 6000;
@@ -34,7 +34,8 @@ async function callAndParseWithRetry(apiKey, section) {
     try {
       return { data: extractJSON(result.text), searchUrls: Array.from(result.searchUrls), searches: result.searches, usage: result.usage };
     } catch (e) {
-      lastErr = e;
+      lastErr = new Error(e.message + ' (section ' + section.key + ', stop ' + result.stopReason + ')');
+      console.error('generateFullReport: section', section.key, 'unparsable, stop_reason', result.stopReason, 'chars', (result.text || '').length);
     }
   }
   throw lastErr;
