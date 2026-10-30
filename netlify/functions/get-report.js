@@ -36,7 +36,7 @@ exports.handler = async (event) => {
     // server-side (e.g. the recipient email was undeliverable).
     if (record && record.status === 'failed') {
       // TEST BRANCH ONLY (deploy preview): show why a generation failed.
-      const dbg = process.env.CONTEXT === 'deploy-preview' ? { error: record.error } : {};
+      const dbg = { error: record.error || 'no error stored' };
       return { statusCode: 200, headers, body: JSON.stringify(Object.assign({ ready: false, failed: true }, dbg)) };
     }
     return { statusCode: 200, headers, body: JSON.stringify({ ready: false }) };
