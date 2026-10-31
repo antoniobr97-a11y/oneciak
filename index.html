@@ -777,6 +777,13 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .ready-list li::before { content: ''; position: absolute; left: 1px; top: 0.5em; width: 8px; height: 8px; border: 1.5px solid #b4552b; border-radius: 2px; }
 .ready-miss { display: block; font-weight: 700; color: var(--text); }
 .ready-how { display: block; color: var(--text); }
+.next-step { margin: 36px 0 8px; }
+.next-action { font-size: 18px; line-height: 1.5; color: var(--text); max-width: 62ch; margin: 0 0 8px; }
+.next-why { font-size: 15px; line-height: 1.55; color: var(--muted); max-width: 62ch; margin: 0 0 14px; }
+.next-ready .sub-k { display: block; margin-bottom: 8px; }
+.email-draft { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
+.email-text { white-space: pre-wrap; font-size: 15px; line-height: 1.6; color: var(--text); max-width: 64ch; margin: 8px 0 12px; }
+.email-draft .copy-btn { width: auto; padding: 10px 16px; border: 1px solid currentColor; color: var(--text); }
 .action-item { margin-bottom: 14px; }
 .action-text { font-size: 15px; line-height: 1.6; max-width: 66ch; }
 
@@ -1313,7 +1320,7 @@ details.more > summary:active { transform: scale(0.98); }
           <select id="format">
             <option value="">Select format…</option>
             <option>Feature Film</option><option>Short Film</option>
-            <option>Series / Mini-series</option><option>Documentary Feature</option><option>Documentary Short</option>
+            <option>Documentary Feature</option><option>Documentary Short</option>
           </select>
         </div>
       </div>
@@ -2356,7 +2363,7 @@ function renderFull(r, title) {
     '<div class="exec-row">'+
     '<div class="exec-box risk"><p class="exec-box-text"><b class="exec-lead">Biggest risk.</b> '+esc(r.biggest_risk)+'</p></div>'+
     '<div class="exec-box opp"><p class="exec-box-text"><b class="exec-lead">Biggest opportunity.</b> '+esc(r.biggest_opportunity)+'</p></div>'+
-    '</div></div>';
+    '</div></div>' + buildNextStep(r.next_step);
 
   // Build accordion
   var sections = [
@@ -2372,7 +2379,7 @@ function renderFull(r, title) {
       score: r.financial_score, verdict: r.financial_verdict,
       body: buildAccordionBody(r.financial_score, r.financial_verdict, r.financial_detail,
         r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan,
-        buildFundingSources(r.financial_sources) + buildTalentAndTax(r.talent_leverage, r.tax_incentive) + buildLabeledText('Budget breakdown', r.budget_breakdown_guidance),
+        buildProducers(r.producers, r.producer_email) + buildFundingSources(r.financial_sources) + buildTalentAndTax(r.talent_leverage, r.tax_incentive) + buildLabeledText('Budget breakdown', r.budget_breakdown_guidance),
         buildBeforeApply(r.before_you_apply))
     },
     {
@@ -2765,6 +2772,36 @@ function buildFundingSources(sources) {
   });
   return rblock('Funding sources', howMany(sources, 'fund', 'funds'), h);
 }
+/* YOUR NEXT STEP and PRODUCERS (2026-10-30, Antonio: the site must help
+   people actually make the film). The next step is one concrete action for
+   this week; the producers are real companies, each confirmed by a page
+   that names it with a film it produced (grounding.js, checkNamed). */
+function buildNextStep(n) {
+  if (!n || !n.action) return '';
+  var ready = (n.ready || []).filter(Boolean);
+  return '<section class="next-step"><h2 class="r-plan-h">Your next step</h2>'+
+    '<p class="next-action">'+esc(n.action)+'</p>'+
+    (n.why ? '<p class="next-why">'+esc(n.why)+'</p>' : '')+
+    (ready.length ? '<div class="next-ready"><span class="sub-k">Have ready</span><ul class="ready-list">'+ready.map(function(x){ return '<li><span class="ready-how">'+esc(x)+'</span></li>'; }).join('')+'</ul></div>' : '')+
+    '</section>';
+}
+function buildProducers(list, email) {
+  var items = (list || []).filter(Boolean);
+  if (!items.length) return '';
+  var h = '';
+  items.forEach(function(p){
+    h += entry(p.name, p.country || null, fact('Produced', p.film + (p.year ? ' ('+p.year+')' : '')), p.why, p, p.approach ? 'How they take projects: '+p.approach : null);
+  });
+  if (email) h += '<div class="email-draft"><span class="sub-k">A first email you can adapt</span><p class="email-text">'+esc(email)+'</p><button type="button" class="btn-secondary copy-btn" onclick="copyEmail(this)">Copy the email</button></div>';
+  return rblock('Producers to contact', howMany(items, 'company', 'companies'), h, true);
+}
+function copyEmail(btn) {
+  var t = btn.parentNode.querySelector('.email-text').textContent;
+  var done = function(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy the email'; }, 2000); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, function(){ btn.textContent = 'Select the text and copy it'; });
+  else btn.textContent = 'Select the text and copy it';
+}
+
 /* Who can apply, shown only when the source's own sentence backs it
    (grounding.js keeps it only with a rule_quote checked on the page). */
 var APPLICANT = { Individual: 'Individuals', Company: 'Production companies only', Either: 'Individuals or companies', Split: 'Writing: individuals. Development and production: companies only' };
@@ -3104,6 +3141,13 @@ async function savePDF() {
       y+=2;
       if(lastResult.biggest_risk) ln('Biggest Risk: '+lastResult.biggest_risk,10,true,185,28,28);
       if(lastResult.biggest_opportunity) ln('Biggest Opportunity: '+lastResult.biggest_opportunity,10,true,22,101,52);
+      var ns = lastResult.next_step;
+      if (isFullReport && ns && ns.action) {
+        y+=2; ln('YOUR NEXT STEP',10,true); ln(ns.action,10,false,26,25,22);
+        if (ns.why) ln(ns.why,9,false,122,118,112);
+        var nsReady = (ns.ready||[]).filter(Boolean);
+        if (nsReady.length) ln('Have ready: '+nsReady.join(' · '),9,false,70,68,64);
+      }
       hr();
     }
 
@@ -3145,6 +3189,19 @@ async function savePDF() {
       ln('BEFORE YOU CAN APPLY',10,true);
       byaMiss.forEach(function(m, i){ ln('• '+m,10,true); if (byaSteps[i]) ln(byaSteps[i],9,false,70,68,64); });
       byaSteps.slice(byaMiss.length).forEach(function(x){ ln('• '+x,9,false,70,68,64); });
+      hr();
+    }
+    var prods = (lastResult.producers || []).filter(Boolean);
+    if (isFullReport && prods.length) {
+      ln('PRODUCERS TO CONTACT',10,true);
+      prods.forEach(function(p){
+        ln(p.name+(p.country ? ' ('+p.country+')' : ''),10,true);
+        ln('Produced: '+p.film+(p.year ? ' ('+p.year+')' : '')+(p.why ? ' · '+p.why : ''),9,false,122,118,112);
+        if (p.approach) ln('How they take projects: '+p.approach,9,false,70,68,64);
+        if (p.source) ln(pdfSource(p),8,false,150,148,145);
+        y+=1;
+      });
+      if (lastResult.producer_email) { ln('A first email you can adapt',9,true); ln(lastResult.producer_email,9,false,26,25,22); }
       hr();
     }
     if (isFullReport && lastResult.financial_sources && lastResult.financial_sources.length) {

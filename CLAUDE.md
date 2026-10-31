@@ -138,13 +138,17 @@ scritte rosse sotto ogni casella del modulo.
   film, allineato a sinistra.
 - **Report completo** (riorganizzato il 2026-10-28, "troppo incasinato"):
   titolo, voto nella scheda di vetro, riassunto (4 righe + "Read more" su
-  telefono), rischio e opportunità; SOLO le 5 aree con voto; poi "Your plan"
+  telefono), rischio e opportunità; "Your next step" (`buildNextStep`: una
+  sola azione per questa settimana, perché, cosa avere pronto); SOLO le 5
+  aree con voto; poi "Your plan"
   (`buildPlanSection`, fasi in ordine) e il link alla roadmap. Una sola area
   aperta alla volta, la riga toccata resta ferma (`toggleAccordion`). Indice
   delle aree che segue lo scorrimento (`mountAreaNav`: colonna da 1360px,
   barra sotto). Dentro un'area: giudizio (prima frase + "Read more"),
   "What to do" (prima frase di ogni consiglio + "More"), nell'area Financial
-  il blocco "Before you can apply", poi tutto chiuso in righe con la STESSA
+  il blocco "Before you can apply" e "Producers to contact" aperto
+  (`buildProducers`: produttori veri con film, come accettano progetti,
+  fonte, e una bozza di email con tasto "Copy the email"), poi tutto chiuso in righe con la STESSA
   freccia (Red flags and strengths, Next 90 days, liste con fonti). Le liste
   stanno nella loro area: Festival calendar e Awards in Festival; Sales
   agents, mercati, ricavi in Distribution; Legal in Creative. Business plan e
@@ -184,21 +188,31 @@ scritte rosse sotto ogni casella del modulo.
   52 min, in italiano, no IA; sviluppo e produzione = solo imprese
   indipendenti italiane Ateco 59.1 con un'opera negli ultimi 5 anni (salvo
   società nuove). `applySelective` sistema queste righe (anche 'Split').
-- Prompt: `stageRules` (fase del progetto), `formatRules` (le serie trattate
-  da serie: confronti con serie, festival e mercati per serie, bibbia e
-  pilota), rubrica `SCORING` (voto = media delle 5 aree), niente previsioni di
+- SOLO FILM (Antonio, 2026-10-30): lungometraggi e cortometraggi, documentari
+  compresi. Niente serie (tolte da modulo e prompt; i vecchi report di serie
+  si vedono ancora).
+- Produttori in ogni paese (2026-10-30, "stessa qualità per chi usa OneCiak
+  dalla Svezia o dalla Cina"): sezione G di `reportPrompts.js` (5 ricerche) +
+  `checkNamed` in grounding.js: un produttore resta SOLO se la pagina della
+  fonte contiene il suo nome (senza Srl/Ltd/AB...) E il titolo del film; un
+  "film" uguale al nome dell'azienda viene scartato. Prova del 2026-10-30:
+  Svezia 2, Cina 4, Italia 4 produttori veri. `next_step` nella sezione A.
+- Prompt: `stageRules` (fase del progetto), rubrica `SCORING` (voto = media delle 5 aree), niente previsioni di
   incasso in euro né prezzi E&O. Ogni voce: "Source: dominio · checked data"
   su sito, PDF e mail.
 - Fact-check sul sito live del 2026-10-22: anteprime 90% corrette, report
-  completi 78%, 0 enti inventati (vecchio motore: 23%). Problemi noti: regole
+  completi 78%, 0 enti inventati (vecchio motore: 23%). Dal 2026-10-30
+  `FULL_MAX_TOKENS` = 32000 (a 16000 una sezione si interrompeva a metà JSON e
+  il report falliva: "Unexpected end of JSON input"). Problemi noti: regole
   di prima visione a volte parafrasate male, fondi senza scadenza scritta,
   qualche film di confronto poco pertinente, a volte fonti da aggregatori
   (es. asianfilmfestivals.com per Locarno), nei corti spesso nessun film di
-  confronto (regola severa, voluto). Ogni tanto una generazione fallisce
-  senza motivo registrato e rilanciata va (24 e 28 ottobre).
+  confronto (regola severa, voluto). Costo del report con i produttori: da
+  misurare sui primi report veri.
 - **Prove**: PR bozza #81 (`test-sourced-reports`) = anteprima
   `deploy-preview-81--oneciak.netlify.app`, genera i report sulla preview.
-  Ha un commit "TEST ONLY" (motivo dell'errore, limite 12): MAI su main, la
+  Ha commit "TEST ONLY" (mostra sempre il motivo dell'errore, limite 12;
+  `CONTEXT` NON esiste mentre girano le funzioni): MAI su main, la
   PR non va mai mergiata. Per aggiornarla: checkout dei file dal branch di
   lavoro sopra `origin/test-sourced-reports`. Mail di prova a
   `delivered+X@resend.dev` (non arrivano a nessuno).
@@ -211,7 +225,8 @@ Doc privato "Come si fa davvero un film: ricerca per OneCiak"
 Italia senza società di produzione niente fondi per sviluppo e produzione;
 le serie passano da bibbia, pilota e mercati di coproduzione (servono
 società). Da qui "Who can apply", "Before you can apply", regole per le serie
-e calendario. Ancora scoperto: roadmap per le serie, promemoria via email
+e calendario; poi (2026-10-30) solo film, prossimo passo e produttori. Ancora
+scoperto: promemoria via email
 (serve conservare gli indirizzi: decide l'avvocato).
 
 ## Sicurezza
@@ -263,7 +278,8 @@ si riscrivono dopo l'avvocato.
    iPhone vero).
 3. Lancio (Product Hunt, Reddit, scuole): dopo l'avvocato, con la frase di
    Antonio sul "perché" e una data; ogni testo lo approva lui.
-4. Roadmap per le serie; Northbound da aggiornare dopo il 5 novembre 2026.
+4. Northbound da aggiornare dopo il 5 novembre 2026 (TorinoFilmLab); il
+   report di esempio non ha ancora "Your next step" né produttori.
 
 ## Strumenti
 

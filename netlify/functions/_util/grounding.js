@@ -44,7 +44,8 @@ const LISTS = {
   festival_calendar: { figures: ['deadline'], prose: ['fit'] },
   lab_and_market_opportunities: { figures: [], prose: ['fit'] },
   distribution_platforms: { figures: [], prose: ['reason'] },
-  sales_agents: { figures: [], prose: ['focus', 'why'] }
+  sales_agents: { figures: [], prose: ['focus', 'why'] },
+  producers: { figures: ['year'], prose: ['why', 'approach'] }
 };
 
 // Lists whose items may carry a `rule_quote` (checked by checkQuote).
@@ -214,6 +215,26 @@ function quoteOnPage(quote, html) {
   if (q.length < 15 || q.length > 400) return false;
   return quoteKey(html).includes(q);
 }
+// The core of a company name or film title, as it would appear in running
+// text: legal suffixes, quotes and punctuation do not count.
+const LEGAL = /\b(s\.?r\.?l\.?s?|s\.?p\.?a\.?|s\.?a\.?s?|ltd\.?|limited|llc|inc\.?|gmbh|ug|ag|ab|oy|as|aps|a\/s|bv|b\.v\.|nv|sarl|sl|s\.l\.|co\.?|corp\.?|pty|plc|kft|sp\. z o\.o\.|s\.r\.o\.)$/i;
+function nameCore(s) {
+  let n = quoteKey(s).replace(/[,;]+\s*$/, '');
+  for (let i = 0; i < 2; i++) n = n.replace(LEGAL, '').replace(/[\s,]+$/, '');
+  return n.replace(/["'.,:;!?()\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function textCore(html) {
+  return ' ' + quoteKey(html).replace(/["'.,:;!?()\[\]]/g, ' ').replace(/\s+/g, ' ') + ' ';
+}
+async function checkNamed(item, pages) {
+  const html = item.source ? await pages(item.source) : null;
+  const name = nameCore(item.name), film = nameCore(item.film);
+  // A film "title" that is just the company name proves nothing.
+  if (!html || name.length < 3 || film.length < 2 || name.includes(film) || film.includes(name)) { item.unconfirmed = true; return; }
+  const text = textCore(html);
+  if (!text.includes(' ' + name + ' ') || !text.includes(' ' + film + ' ')) item.unconfirmed = true;
+}
+
 async function checkQuote(item, pages) {
   if (item.rule_quote == null) return;
   const html = isAggregator(item.source) ? null : await pages(item.source);
@@ -287,6 +308,7 @@ async function groundReport(report, searchUrlsByField, today, fetcher) {
       }));
       if (QUOTED.includes(field)) checks.push(checkQuote(out, pages));
       else delete out.rule_quote;
+      if (field === 'producers') checks.push(checkNamed(out, pages));
     });
     report[field] = kept;
     stats.kept += kept.length;
@@ -311,6 +333,14 @@ async function groundReport(report, searchUrlsByField, today, fetcher) {
   }
 
   await Promise.all(checks);
+
+  // A producer stays only if its page names it and the film it produced.
+  if (Array.isArray(report.producers)) {
+    const before = report.producers.length;
+    report.producers = report.producers.filter(p => !p.unconfirmed);
+    stats.dropped += before - report.producers.length;
+    stats.kept -= before - report.producers.length;
+  }
 
   // "Who can apply" is shown only next to the source's own sentence
   // (rule_quote, checked word for word above); without it, it goes.
@@ -344,4 +374,4 @@ async function groundOne(obj, set, prose, today, fetcher) {
   return out;
 }
 
-module.exports = { groundReport, groundOne, quoteOnPage, quoteKey, keepSupportedSentences, keepFactualSentences, factualNumbers, lastDateIn, isAggregator, stripMarkup, normalizeUrl, isSourced, sourcedSet, numbersOnPage, pageNumbers, numbersIn, LISTS };
+module.exports = { nameCore, textCore, groundReport, groundOne, quoteOnPage, quoteKey, keepSupportedSentences, keepFactualSentences, factualNumbers, lastDateIn, isAggregator, stripMarkup, normalizeUrl, isSourced, sourcedSet, numbersOnPage, pageNumbers, numbersIn, LISTS };
