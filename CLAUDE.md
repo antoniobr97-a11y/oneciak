@@ -257,9 +257,10 @@ D.Lgs. 70/2003 art. 7. Privacy e termini contengono ancora trattini lunghi:
 si riscrivono dopo l'avvocato.
 Scheda per l'avvocato (2026-11-01, ricavata dal codice): doc privato "Scheda
 dati OneCiak per l'avvocato" (claude.ai/artifact/Y776k28X7HyxzMxcQgNXDX).
-La privacy pubblicata non corrisponde al sito in 4 punti: report ed email
-tenuti senza scadenza (lei dice "temporarily"), mancano i campi del 23
-ottobre, manca Cloudflare (cdnjs, PDF), manca il modulo segnalazioni.
+I 4 punti in cui la privacy non corrispondeva al sito (conservazione senza
+scadenza, campi del 23 ottobre, Cloudflare per il PDF, modulo segnalazioni)
+sono stati corretti nella privacy il 2026-11-01. Restano per l'avvocato le
+parti legali (titolare, basi giuridiche, trasferimenti, reclamo).
 
 ## Marketing
 
