@@ -12,6 +12,19 @@ email. Target: registi al primo film, sceneggiatori, produttori indipendenti,
 neolaureati. Prendono decisioni vere di tempo e soldi: deve essere credibile e
 utile davvero, non "carino".
 
+**Spiegato semplice** (versione approvata da usare con Antonio e nel punto
+del lunedì, 2026-11-02): chi ha un'idea per un film, lungo o corto, scrive su
+OneCiak di cosa parla, quanto costa e a che punto è. Riceve subito
+un'anteprima gratis e, lasciando l'email, il report completo, sempre gratis.
+Il report risponde a tre domande: 1) Il mio film sta in piedi? (un voto su
+cinque cose: storia, soldi, pubblico, festival, distribuzione, e per ognuna
+cosa non va e cosa fare); 2) Cosa faccio adesso? (una sola azione per questa
+settimana e cosa preparare prima); 3) A chi mi rivolgo? (nomi veri:
+produttori a cui scrivere con l'email già pronta, fondi a cui chiedere soldi
+con chi può fare domanda, festival con le scadenze da mettere nel
+calendario). Ogni nome e ogni data viene da una pagina ufficiale controllata:
+se la fonte non c'è, la voce non compare.
+
 Founder: **Antonio Brasile** (ragazzo). Scrive in italiano, informale, spesso
 con typo quando è frustrato: non vuol dire che vuole un tono più formale.
 
