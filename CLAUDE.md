@@ -267,7 +267,10 @@ parti legali (titolare, basi giuridiche, trasferimenti, reclamo).
 - Google indicizza già il sito (confermato da Antonio). WebSearch non è Google.
 - Agente del lunedì (Routine `trig_01LhjUc5ZkrXiqCkiqh5hiKo`, lunedì 8:52 ora
   italiana): controlla il sito, prepara 3 post e una bozza di guida come
-  Artifact privato. Non può fare push e non pubblica. Quando Antonio dice
+  Artifact privato. Dal 2026-11-02 apre il messaggio con il "punto della
+  situazione" che Antonio vuole ogni lunedì: il sito in breve, cosa è
+  cambiato in settimana (git log di main), le 3 cose da fare (da "Cosa
+  manca" qui sotto: tenerla aggiornata). Non può fare push e non pubblica. Quando Antonio dice
   "pubblica la bozza guida": leggere l'Artifact, riverificare fonti e link,
   CSS come `<link href="/guides/guides.css">`, salvare in
   `guides/<slug>/index.html`, aggiornare indice guide e sitemap, anteprima,
