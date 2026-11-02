@@ -300,8 +300,9 @@ parti legali (titolare, basi giuridiche, trasferimenti, reclamo).
    iPhone vero).
 3. Lancio (Product Hunt, Reddit, scuole): dopo l'avvocato, con la frase di
    Antonio sul "perché" e una data; ogni testo lo approva lui.
-4. Northbound da aggiornare dopo il 5 novembre 2026 (TorinoFilmLab); il
-   report di esempio non ha ancora "Your next step" né produttori.
+4. Fatto il 2026-11-02: Northbound ha "Your next step", 3 produttori
+   verificati a mano (Vivo Film, Leone Film Group, Lava Films) e la voce
+   TorinoFilmLab scritta in modo che resti vera dopo il 5 novembre.
 
 ## Strumenti
 
