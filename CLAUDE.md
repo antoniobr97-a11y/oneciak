@@ -130,6 +130,7 @@ satinato/grana ("va bene così basta"); palette "intensa" e "Warm Neutrals";
 il redesign proposto da Taste (sito vestito da carte di produzione, ciak
 nell'intestazione, foto d'archivio, logo gigante nel footer); la sesta/settima
 area del report; il PDF "One-page summary"; il pulsante "Next" tra le aree;
+contatti sparsi dentro le aree (ora tutti in "Who to contact");
 scritte rosse sotto ogni casella del modulo.
 
 ## Pagine e flusso
@@ -149,25 +150,20 @@ scritte rosse sotto ogni casella del modulo.
 - **Caricamento**: 5 dimensioni che avanzano invece di uno spinner
   (`startLoadingDims` / `finishLoadingDims` / `resetLoadingDims`), titolo del
   film, allineato a sinistra.
-- **Report completo** (riorganizzato il 2026-10-28, "troppo incasinato"):
-  titolo, voto nella scheda di vetro, riassunto (4 righe + "Read more" su
-  telefono), rischio e opportunità; "Your next step" (`buildNextStep`: una
-  sola azione per questa settimana, perché, cosa avere pronto); SOLO le 5
-  aree con voto; poi "Your plan"
-  (`buildPlanSection`, fasi in ordine) e il link alla roadmap. Una sola area
-  aperta alla volta, la riga toccata resta ferma (`toggleAccordion`). Indice
-  delle aree che segue lo scorrimento (`mountAreaNav`: colonna da 1360px,
-  barra sotto). Dentro un'area: giudizio (prima frase + "Read more"),
-  "What to do" (prima frase di ogni consiglio + "More"), nell'area Financial
-  il blocco "Before you can apply" e "Producers to contact" aperto
-  (`buildProducers`: produttori veri con film, come accettano progetti,
-  fonte, e una bozza di email con tasto "Copy the email"), poi tutto chiuso in righe con la STESSA
-  freccia (Red flags and strengths, Next 90 days, liste con fonti). Le liste
-  stanno nella loro area: Festival calendar e Awards in Festival; Sales
-  agents, mercati, ricavi in Distribution; Legal in Creative. Business plan e
-  lista rischi solo nel PDF. In fondo: How to read, Glossary, un solo bottone
-  "Download the full report", "Add the deadlines to your calendar" (.ics fatto
-  nel browser, promemoria 7 giorni prima, nascosto senza date future).
+- **Report completo** (riordinato il 2026-11-04, Antonio: "troppe cose,
+  tutte disordinate"): segue le tre domande. Dall'alto: titolo, voto nella
+  scheda di vetro, riassunto (4 righe + "Read more" su telefono); "Your next
+  step" (`buildNextStep`); "Who to contact" (`buildContacts`: Before you can
+  apply, Producers to contact con email da copiare, Funding sources,
+  Festival calendar, Labs and markets, Sales agents, tutte righe chiuse con
+  la stessa freccia); "Your film, area by area" (5 aree con voto, una aperta
+  alla volta, `toggleAccordion`; dentro solo giudizio, "What to do", "Red
+  flags and strengths", e Comparable films nel mercato); "Your plan"
+  (`buildPlanSection`) + link alla roadmap; in fondo Glossary, "Download the
+  full report", calendario (.ics, nascosto senza date future). Solo nel PDF:
+  rischio/opportunità, marketing, budget, legale, piano a 90 giorni e gli
+  altri testi lunghi. Tolto "How to read". Indice delle aree che segue lo
+  scorrimento (`mountAreaNav`).
 - **Report di esempio Northbound**: report VERO del motore (voto 5.0), fonti
   controllate il 23 ottobre 2026. TorinoFilmLab chiude il 5 novembre 2026:
   dopo quella data la voce va aggiornata.

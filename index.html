@@ -801,6 +801,9 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .r-plan { margin-top: 44px; }
 .r-plan-h { font-family: var(--display); font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); margin: 0 0 14px; }
 .r-plan .r-road { margin-top: 28px; }
+.r-contacts { margin: 44px 0 0; }
+.r-contacts .ready-block { margin-top: 0; padding-top: 0; border-top: 0; }
+.r-areas-h { margin-top: 44px; }
 @media (hover: hover) and (pointer: fine) { .rblock summary:hover .rblock-label { color: #000; } }
 .rblock-body { padding: 0 2px 22px; }
 
@@ -1492,16 +1495,6 @@ details.more > summary:active { transform: scale(0.98); }
 
     <div id="accordionMenu" class="reveal" style="display:none"></div>
     <div id="upgradeSection"></div>
-    <details class="guide-box reveal">
-      <summary>New to this? How to read your report</summary>
-      <div class="guide-box-body">
-        <p>The <strong>OneCiak Score</strong> is a rough overall signal, not a verdict: a high score doesn't guarantee success, and a low one doesn't mean give up. It's a starting point for asking better questions.</p>
-        <p>Each of the 5 areas above has its own score, a one-line <strong>verdict</strong> and <strong>what to do</strong>: concrete next actions. Under them, one tap away, the <strong>red flags</strong> and <strong>strengths</strong> behind that advice, and the funds, festivals or companies to contact, each with its source.</p>
-        <p>In the full report, <strong>Your plan</strong> puts the steps in order. First film ever? <strong>Your stage</strong> links to the <a href="/roadmap/">film roadmap</a>: every job from script to release, stage by stage.</p>
-        <p>Don't recognize a term like "sales agent" or "tax incentive"? Check the glossary below.</p>
-      </div>
-    </details>
-
     <details class="guide-box reveal">
       <summary>Glossary: key terms explained</summary>
       <div class="guide-box-body">
@@ -2357,59 +2350,25 @@ function renderFull(r, title) {
     '</div></div>'+
     (r.score_benchmark ? '<div style="font-size:12.5px;color:var(--muted);line-height:1.5;font-weight:300;margin-top:10px;padding:0 4px">'+esc(r.score_benchmark)+'</div>' : '');
 
-  // Exec summary — synthesis always visible
-  document.getElementById('execSummary').innerHTML =
-    '<div class="exec-card">'+
-    '<div class="exec-row">'+
-    '<div class="exec-box risk"><p class="exec-box-text"><b class="exec-lead">Biggest risk.</b> '+esc(r.biggest_risk)+'</p></div>'+
-    '<div class="exec-box opp"><p class="exec-box-text"><b class="exec-lead">Biggest opportunity.</b> '+esc(r.biggest_opportunity)+'</p></div>'+
-    '</div></div>' + buildNextStep(r.next_step);
+  /* The report in the order of the three questions it answers (2026-11-02,
+     Antonio: "troppe cose, tutte disordinate"): what to do now, who to
+     contact (every name in one place, not scattered across the areas),
+     then the film area by area and the plan. Biggest risk / opportunity,
+     marketing, budget, legal and the other long texts stay in the PDF. */
+  document.getElementById('execSummary').innerHTML = buildNextStep(r.next_step) + buildContacts(r);
 
-  // Build accordion
+  // The film, area by area: verdict, what to do, red flags and strengths.
+  // Comparable films stay with the market, the only list that is not a contact.
+  function areaBody(k, extra) { return buildAccordionBody(r[k+'_score'], r[k+'_verdict'], r[k+'_detail'], r[k+'_flags'], r[k+'_strengths'], r[k+'_tips'], null, extra || ''); }
   var sections = [
-    {
-      num:'01', label:'Creative package', sublabel:'Narrative · Logline · Pitch',
-      score: r.creative_score, verdict: r.creative_verdict,
-      body: buildAccordionBody(r.creative_score, r.creative_verdict, r.creative_detail,
-        r.creative_flags, r.creative_strengths, r.creative_tips, null,
-        buildPitchAssessment(r.pitch_assessment) + buildLabeledText('Attachment strategy', r.attachment_strategy) + buildKeyCrew(r.key_crew_recommendations) + buildLabeledText('Legal and rights', r.legal_and_rights_considerations))
-    },
-    {
-      num:'02', label:'Financial plan', sublabel:'Budget · Funding · Financing',
-      score: r.financial_score, verdict: r.financial_verdict,
-      body: buildAccordionBody(r.financial_score, r.financial_verdict, r.financial_detail,
-        r.financial_flags, r.financial_strengths, r.financial_tips, r.financial_action_plan,
-        buildProducers(r.producers, r.producer_email) + buildFundingSources(r.financial_sources) + buildTalentAndTax(r.talent_leverage, r.tax_incentive) + buildLabeledText('Budget breakdown', r.budget_breakdown_guidance),
-        buildBeforeApply(r.before_you_apply))
-    },
-    {
-      num:'03', label:'Market and audience', sublabel:'Demand · Trends · Comparables',
-      score: r.market_score, verdict: r.market_verdict,
-      body: buildAccordionBody(r.market_score, r.market_verdict, r.market_detail,
-        r.market_flags, r.market_strengths, r.market_tips, null,
-        buildComparables(r.market_comps) + buildMarketingStrategy(r.marketing_strategy) + buildLabeledText('Target audience', r.target_audience_profile) + buildCautionaryComps(r.cautionary_comps))
-    },
-    {
-      num:'04', label:'Festival strategy', sublabel:'Circuit · Festivals · Timing',
-      score: r.festival_score, verdict: r.festival_verdict,
-      body: buildAccordionBody(r.festival_score, r.festival_verdict, r.festival_detail,
-        r.festival_flags, r.festival_strengths, r.festival_tips, r.festival_action_plan,
-        buildFestivalCalendar(r.festival_calendar) + buildLabOpportunities(r.lab_and_market_opportunities) + buildLabeledText('Awards', r.awards_qualification_strategy))
-    },
-    {
-      num:'05', label:'Distribution and revenue', sublabel:'Platforms · Pricing · Sales',
-      score: r.distribution_score, verdict: r.distribution_verdict,
-      body: buildAccordionBody(r.distribution_score, r.distribution_verdict, r.distribution_detail,
-        r.distribution_flags, r.distribution_strengths, r.distribution_tips, r.distribution_action_plan,
-        buildSalesAgents(r.sales_agents) + buildPlatforms(r.distribution_platforms) + buildMarkets(r.international_markets) + buildRevenue(r) + buildLabeledText('Self-distribution', r.self_distribution_playbook))
-    }
+    { label:'Creative package', score: r.creative_score, verdict: r.creative_verdict, body: areaBody('creative') },
+    { label:'Financial plan', score: r.financial_score, verdict: r.financial_verdict, body: areaBody('financial') },
+    { label:'Market and audience', score: r.market_score, verdict: r.market_verdict, body: areaBody('market', buildComparables(r.market_comps)) },
+    { label:'Festival strategy', score: r.festival_score, verdict: r.festival_verdict, body: areaBody('festival') },
+    { label:'Distribution and revenue', score: r.distribution_score, verdict: r.distribution_verdict, body: areaBody('distribution') }
   ];
-  /* Five areas and then one plan (2026-10-28, Antonio: "troppo
-     incasinato"). The lists that used to sit in a sixth "Your plan" area
-     now live in the area they belong to; the risk list and the business
-     plan page repeated the areas on screen, so they stay in the PDF only. */
 
-  var html = '<div class="accordion-wrap">';
+  var html = '<h2 class="r-plan-h r-areas-h">Your film, area by area</h2><div class="accordion-wrap">';
   sections.forEach(function(sec, idx) {
     var c = sec.score !== null ? scoreColor(sec.score) : null;
     var scoreHtml = sec.score !== null ? accScore(sec.score) : '';
@@ -2785,6 +2744,13 @@ function buildNextStep(n) {
     (ready.length ? '<div class="next-ready"><span class="sub-k">Have ready</span><ul class="ready-list">'+ready.map(function(x){ return '<li><span class="ready-how">'+esc(x)+'</span></li>'; }).join('')+'</ul></div>' : '')+
     '</section>';
 }
+// Every name to contact, in one place: what you need first, then producers,
+// funds, festivals and labs, sales agents.
+function buildContacts(r) {
+  var h = buildBeforeApply(r.before_you_apply) + buildProducers(r.producers, r.producer_email) + buildFundingSources(r.financial_sources) +
+    buildFestivalCalendar(r.festival_calendar) + buildLabOpportunities(r.lab_and_market_opportunities) + buildSalesAgents(r.sales_agents);
+  return h ? '<section class="r-contacts"><h2 class="r-plan-h">Who to contact</h2><div class="rblocks">'+h+'</div></section>' : '';
+}
 function buildProducers(list, email) {
   var items = (list || []).filter(Boolean);
   if (!items.length) return '';
@@ -2793,7 +2759,7 @@ function buildProducers(list, email) {
     h += entry(p.name, p.country || null, fact('Produced', p.film + (p.year ? ' ('+p.year+')' : '')), p.why, p, p.approach ? 'How they take projects: '+p.approach : null);
   });
   if (email) h += '<div class="email-draft"><span class="sub-k">A first email you can adapt</span><p class="email-text">'+esc(email)+'</p><button type="button" class="btn-secondary copy-btn" onclick="copyEmail(this)">Copy the email</button></div>';
-  return rblock('Producers to contact', howMany(items, 'company', 'companies'), h, true);
+  return rblock('Producers to contact', howMany(items, 'company', 'companies'), h);
 }
 function copyEmail(btn) {
   var t = btn.parentNode.querySelector('.email-text').textContent;
