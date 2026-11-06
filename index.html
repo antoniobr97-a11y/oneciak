@@ -769,12 +769,11 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .fs-col.red li { border-left: 1px solid rgba(177,50,37,0.75); }
 .fs-col.green li { border-left: 1px solid rgba(15,122,61,0.75); }
 .fs-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
-.fs-col.red .fs-label { color: var(--danger); }
-.fs-col.green .fs-label { color: var(--success); }
 @media (max-width: 760px) { .fs-grid { grid-template-columns: 1fr; gap: 8px; } }
 
 .tips-block, .action-block { margin-top: 28px; padding-top: 24px; }
 .tips-label, .action-label { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: #b4552b; margin-bottom: 14px; }
+.fs-col .fs-label { color: #b4552b; }
 .tips-list { list-style: none; margin: 0; padding: 0; counter-reset: tip; max-width: 70ch; }
 .tips-list li { position: relative; padding: 0 0 0 26px; margin-bottom: 16px; }
 .tips-list li::before { content: ''; position: absolute; left: 0; top: 0.8em; width: 12px; height: 1.5px; background: #b4552b; }
@@ -1062,7 +1061,7 @@ details.more > summary:active { transform: scale(0.98); }
   /* Small text slightly darker in light mode (kept from the measured pass of 2026-10-26). */
   :root { --muted: #3a3a3a; --muted-light: #3a3a3a; --success: #0a5c2d; --danger: #8a2419; }
   .score-mid { color: #6e3f00; }
-  .tips-label, .action-label, .an-top, #sec-loading .loading-dim.is-active .loading-dim-num { color: #93391a !important; }
+  .tips-label, .action-label, .an-top, .fs-col .fs-label, #sec-loading .loading-dim.is-active .loading-dim-num { color: #93391a !important; }
   .exec-box.risk .exec-lead { color: var(--danger); }
   .exec-box.opp .exec-lead { color: var(--success); }
   .fs-col.red li::before { background: var(--danger); }
@@ -1163,7 +1162,7 @@ details.more > summary:active { transform: scale(0.98); }
   /* rust labels lighten on the night */
   .f-steps li.on, .an-item.on { box-shadow: inset 2px 0 0 #f0a07c; }
 
-.tips-label, .action-label, .an-top, .loading-dim.is-active .loading-dim-num { color: #f0a07c; }
+.tips-label, .action-label, .an-top, .fs-col .fs-label, .loading-dim.is-active .loading-dim-num { color: #f0a07c; }
   #sec-loading .loading-dim.is-active .loading-dim-num { color: #ffe0cf; }
   .l-hero, .menu-overlay, #sec-results, #sec-myreports, #sec-loading, .l-nav { --on-night-2: #b8b2ab; }
   .action-item:first-child::after { background: #f0a07c; }
@@ -1187,6 +1186,19 @@ details.more > summary:active { transform: scale(0.98); }
   .translate-banner { background: rgba(255,200,120,0.12); color: #f2c98a; }
   .translate-banner button { color: #f2c98a; }
 }
+/* ONE MARKER, ONE SCORE STYLE (2026-11-06, Antonio: "troppi pallini, riquadri
+   e punteggi diversi"). Every list in the report uses the same small dot in the
+   muted text colour; the plan keeps its order but loses the orange rings and the
+   line. Area scores are written like the overall score (same colour as the text,
+   always X.X/10); the colour of the bar alone says weak, moderate or strong. */
+.tips-list li::before, .ready-list li::before, .fs-col li::before, .fs-col.red li::before, .fs-col.green li::before {
+  content: ''; position: absolute; left: 2px; top: 0.66em; width: 5px; height: 5px; border: 0; border-radius: 50%; background: currentColor; opacity: 0.45;
+}
+.tips-list li, .ready-list li, .fs-col li, .fs-col.red li, .fs-col.green li { padding-left: 20px; }
+.action-item { padding-left: 20px; }
+.action-item::before { display: none; }
+.action-item::after, .action-item:first-child::after { left: 2px; top: 0.66em; width: 5px; height: 5px; background: currentColor; box-shadow: none; opacity: 0.45; }
+#accordionMenu .accordion-score { color: inherit; }
 </style>
 </head>
 <body>
@@ -2564,7 +2576,7 @@ function shortLabel(label) {
 function accScore(score) {
   var v = Number(score) || 0, c = scoreColor(v);
   return '<span class="acc-bar" aria-hidden="true"><i class="bar-'+c+'" style="width:'+Math.round(v*10)+'%"></i></span>'+
-    '<span class="accordion-score-wrap"><span class="accordion-score score-'+c+'">'+v+'<span class="denom">/10</span></span><span class="accordion-score-label score-'+c+'">'+(c==='high'?'Strong':c==='mid'?'Moderate':'Weak')+'</span></span>';
+    '<span class="accordion-score-wrap"><span class="accordion-score score-'+c+'">'+v.toFixed(1)+'<span class="denom">/10</span></span><span class="accordion-score-label score-'+c+'">'+(c==='high'?'Strong':c==='mid'?'Moderate':'Weak')+'</span></span>';
 }
 /* Link to the film roadmap (/roadmap/) at the stage the project is at, so
    the report connects to the full list of jobs for that stage. */
@@ -2597,7 +2609,7 @@ function mountAreaNav(sections) {
   if (!nav) { nav = document.createElement('nav'); nav.id = 'areaNav'; nav.className = 'area-nav'; nav.setAttribute('aria-label', 'Report areas'); host.appendChild(nav); }
   var items = '';
   sections.forEach(function(sec, i) {
-    items += '<button type="button" class="an-item" data-i="'+i+'" onclick="goToArea('+i+')"><span class="an-label">'+esc(shortLabel(sec.label))+'</span>'+(sec.score != null ? '<span class="an-score">'+sec.score+'</span>' : '')+'</button>';
+    items += '<button type="button" class="an-item" data-i="'+i+'" onclick="goToArea('+i+')"><span class="an-label">'+esc(shortLabel(sec.label))+'</span>'+(sec.score != null ? '<span class="an-score">'+Number(sec.score).toFixed(1)+'/10</span>' : '')+'</button>';
   });
   nav.innerHTML = '<div class="an-col">'+items+'</div>'+
     '<div class="an-bar"><span class="an-cur" id="areaNavCur"></span><button type="button" class="an-top" onclick="goToOverview()">All areas</button></div>';
@@ -2614,7 +2626,7 @@ function mountAreaNav(sections) {
       var i = Array.prototype.indexOf.call(list, e.target);
       nav.querySelectorAll('.an-item').forEach(function(b) { b.classList.toggle('on', Number(b.getAttribute('data-i')) === i); });
       nav.classList.add('has-cur');
-      if (cur && sections[i]) cur.innerHTML = esc(sections[i].label)+(sections[i].score != null ? '<span class="an-score">'+sections[i].score+'</span>' : '');
+      if (cur && sections[i]) cur.innerHTML = esc(sections[i].label)+(sections[i].score != null ? '<span class="an-score">'+Number(sections[i].score).toFixed(1)+'/10</span>' : '');
     });
   }, { rootMargin: '-30% 0px -60% 0px' });
   list.forEach(function(el) { areaNavObserver.observe(el); });
