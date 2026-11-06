@@ -319,8 +319,13 @@ parti legali (titolare, basi giuridiche, trasferimenti, reclamo).
   /home/user/oneciak > log 2>&1 < /dev/null & disown` (con `&` semplice
   muore quando cambia la cartella). Test e script stanno nello scratchpad e
   si perdono a fine sessione.
-- Tolti o scartati: Taste (2026-10-27, "è una merda"), awesome-claude-design,
-  Emil Kowalski design-eng (mai stato nel repo). Valutati il 2026-10-29 e
+- **Emil Kowalski design-eng** (`.claude/skills/emil-design-eng`, da
+  github.com/emilkowalski/skills commit c8a7962, MIT, solo testo): regole per
+  animazioni e reazioni al tocco. Applicate il 2026-11-06: curva `--ease`
+  = `cubic-bezier(0.23, 1, 0.32, 1)` (come guides.css), aperture di aree e
+  righe 220 ms con `openIn`, bottoni 160 ms, niente `transition: all` né
+  `scale(0)`.
+- Tolti o scartati: Taste (2026-10-27, "è una merda"), awesome-claude-design. Valutati il 2026-10-29 e
   non installati: Context7, Graphify, 21st MCP (componenti "da AI"), Agent
   Skills (già le usiamo); Strix (test di sicurezza AI) rimandato, servirebbe
   una chiave e un tetto di spesa decisi da Antonio, solo sulla preview.
