@@ -206,6 +206,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 .l-wrap { max-width: 1240px; margin: 0 auto; padding: 0 40px; width: 100%; }
 .l-hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 72px; align-items: center; padding-top: 148px; }
+/* Grid items may shrink below their longest word: with Safari text zoom (aA 150%) the phone is ~260px wide and the hero was cut on the right. */
+.l-hero-grid > * { min-width: 0; }
+.l-headline { overflow-wrap: break-word; }
 .l-mono { font-family: var(--mono); font-size: 12px; font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; }
 .l-headline {
   font-family: var(--display); font-size: clamp(44px, 6.2vw, 86px);
@@ -525,6 +528,9 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   color: #fff;
 }
 .overall-sublabel { font-size: 15px; color: #fff; font-weight: 600; letter-spacing: -0.01em; }
+/* Very narrow screens (Safari text zoom): the score drops under the label instead of leaving the card. */
+.overall-card { flex-wrap: wrap; }
+.overall-card > div:first-child { min-width: 0; flex: 1 1 140px; }
 .overall-num { font-family: var(--sf); font-size: 40px; font-weight: 700; line-height: 1; color: #fff; letter-spacing: -0.02em; white-space: nowrap; }
 .overall-num .denom { font-size: 17px; color: rgba(255,255,255,0.4); font-family: var(--sf); font-weight: 500; }
 
@@ -874,6 +880,11 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   .an-top { flex-shrink: 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #b4552b; padding: 6px 0 6px 8px; }
 }
 @media (max-width: 600px) { .an-bar { padding: 10px 20px; } }
+@media (max-width: 1359px) { .area-nav { overflow: hidden; } } /* otherwise on very narrow screens its content widens the whole page */
+/* Very narrow screens (Safari text zoom, ~260px): long words and labels wrap instead of widening the page. */
+.r-title, .accordion-left, .action-item .action-tag { overflow-wrap: break-word; }
+.action-item .action-tag { white-space: normal; }
+@media (max-width: 300px) { .r-title { font-size: 32px; } }
 
 /* 30 / 60 / 90 day plan as a timeline. */
 .action-block { position: relative; }
