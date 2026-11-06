@@ -50,7 +50,7 @@ con typo quando è frustrato: non vuol dire che vuole un tono più formale.
    registri ufficiali, e dire che esistere non vuol dire essere bravi. Meglio
    corto e sicuro. Se sbaglio, dirlo subito e correggere.
 2. **Ogni contenuto promozionale lo vede prima lui** (post, Product Hunt,
-   Reddit, email a scuole/riviste, nuove guide): testo esatto e anteprima, poi
+   Reddit, email a scuole/riviste): testo esatto e anteprima, poi
    il suo ok esplicito. Né Claude né l'agente del lunedì postano o inviano.
 3. **Mai trattini lunghi (—)** nei testi che gli scrivo e nel prodotto: usare
    virgole o punti.
@@ -89,7 +89,7 @@ finché la trova: la CDN può servire la versione vecchia con status 200.
 
 **Chiaro e scuro seguono il dispositivo** (`prefers-color-scheme`), niente
 pulsante. Blocchi CSS "LIGHT AND DARK" in fondo agli stili di index.html e in
-fondo a `guides/guides.css`; anche privacy, termini, 404.
+fondo a `roadmap/roadmap.css`; anche privacy, termini, 404.
 - **Scuro**: nero prugna `--night:#140d10` ovunque. UNA sola luce fissa allo
   schermo (`body::before`): petrolio a sinistra + rosso in basso a destra, con
   grana. Antonio: "qui è stupendo il nostro colore, facciamolo uguale ovunque".
@@ -171,9 +171,16 @@ scritte rosse sotto ogni casella del modulo.
   `oneciak-roadmap-v1`), 27 citazioni verificate parola per parola il
   2026-10-24. Pensata per i film, non per le serie. Il report collega la fase
   del progetto (`STAGE_TO_ROADMAP`). Se cambia una regola citata, ricontrollare.
-- **Guide** in `/guides/` (CSS `guides/guides.css`, da tenere allineato al
-  sito). Nuove guide: aggiungere a `guides/index.html` e `sitemap.xml`, dati e
-  link verificati.
+  Si raggiunge SOLO dal report ("Your plan"), non dal fondo della home
+  (2026-11-06). CSS `roadmap/roadmap.css` (era guides.css), da tenere
+  allineato al sito.
+- **Guide TOLTE** (2026-11-06, Antonio: "leva proprio guide che non capisco il
+  senso"): cartella cancellata, `/guides/*` rimanda alla home (301 in
+  `netlify.toml`), tolte dalla sitemap. Non riproporle.
+- **Report, segni e voti** (2026-11-06, "troppi pallini, riquadri e punteggi
+  diversi"): un solo pallino grigio per tutte le liste, voti sempre "X.X/10"
+  nel colore del testo (il colore solo sulla barretta), titoletti tutti dello
+  stesso colore. Blocco CSS "ONE MARKER, ONE SCORE STYLE" in fondo agli stili.
 
 ## Motore dei report
 
@@ -275,15 +282,11 @@ parti legali (titolare, basi giuridiche, trasferimenti, reclamo).
 
 - Google indicizza già il sito (confermato da Antonio). WebSearch non è Google.
 - Agente del lunedì (Routine `trig_01LhjUc5ZkrXiqCkiqh5hiKo`, lunedì 8:52 ora
-  italiana): controlla il sito, prepara 3 post e una bozza di guida come
-  Artifact privato. Dal 2026-11-02 apre il messaggio con il "punto della
+  italiana): controlla il sito, prepara 3 post come Artifact privato (niente
+  più bozze di guide). Dal 2026-11-02 apre il messaggio con il "punto della
   situazione" che Antonio vuole ogni lunedì: il sito in breve, cosa è
   cambiato in settimana (git log di main), le 3 cose da fare (da "Cosa
-  manca" qui sotto: tenerla aggiornata). Non può fare push e non pubblica. Quando Antonio dice
-  "pubblica la bozza guida": leggere l'Artifact, riverificare fonti e link,
-  CSS come `<link href="/guides/guides.css">`, salvare in
-  `guides/<slug>/index.html`, aggiornare indice guide e sitemap, anteprima,
-  procedura di pubblicazione.
+  manca" qui sotto: tenerla aggiornata). Non può fare push e non pubblica.
 - Canali verificati consegnati il 2026-10-19 (r/Screenwriting vieta contenuti
   AI, r/Filmmakers vieta i post solo-link).
 
@@ -322,7 +325,7 @@ parti legali (titolare, basi giuridiche, trasferimenti, reclamo).
 - **Emil Kowalski design-eng** (`.claude/skills/emil-design-eng`, da
   github.com/emilkowalski/skills commit c8a7962, MIT, solo testo): regole per
   animazioni e reazioni al tocco. Applicate il 2026-11-06: curva `--ease`
-  = `cubic-bezier(0.23, 1, 0.32, 1)` (come guides.css), aperture di aree e
+  = `cubic-bezier(0.23, 1, 0.32, 1)` (come roadmap.css), aperture di aree e
   righe 220 ms con `openIn`, bottoni 160 ms, niente `transition: all` né
   `scale(0)`.
 - Tolti o scartati: Taste (2026-10-27, "è una merda"), awesome-claude-design. Valutati il 2026-10-29 e

@@ -29,6 +29,19 @@
 # CLAUDE.md holds internal notes (founder's name, legal status), and the
 # function sources and package files are code, not pages. Found public on
 # 2026-10-27 and closed here. Netlify applies these before serving files.
+# Guides removed on 2026-11-06 (Antonio): old links and Google results go to the home.
+[[redirects]]
+  from = "/guides"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/guides/*"
+  to = "/"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/CLAUDE.md"
   to = "/404.html"
