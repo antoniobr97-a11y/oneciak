@@ -1198,7 +1198,7 @@ details.more > summary:active { transform: scale(0.98); }
 .action-item { padding-left: 20px; }
 .action-item::before { display: none; }
 .action-item::after, .action-item:first-child::after { left: 2px; top: 0.66em; width: 5px; height: 5px; background: currentColor; box-shadow: none; opacity: 0.45; }
-#accordionMenu .accordion-score { color: inherit; }
+#accordionMenu .accordion-score { color: var(--text); } /* not inherit: on iPhone Safari a button is blue by default */
 </style>
 </head>
 <body>
