@@ -159,7 +159,7 @@ scritte rosse sotto ogni casella del modulo.
   la stessa freccia); "Your film, area by area" (5 aree con voto, una aperta
   alla volta, `toggleAccordion`; dentro solo giudizio, "What to do", "Red
   flags and strengths", e Comparable films nel mercato); "Your plan"
-  (`buildPlanSection`) + link alla roadmap; in fondo Glossary, "Download the
+  (`buildPlanSection`) + link alla roadmap; in fondo "Download the
   full report", calendario (.ics, nascosto senza date future). Solo nel PDF:
   rischio/opportunità, marketing, budget, legale, piano a 90 giorni e gli
   altri testi lunghi. Tolto "How to read". Indice delle aree che segue lo
@@ -181,6 +181,18 @@ scritte rosse sotto ogni casella del modulo.
   diversi"): un solo pallino grigio per tutte le liste, voti sempre "X.X/10"
   nel colore del testo (il colore solo sulla barretta), titoletti tutti dello
   stesso colore. Blocco CSS "ONE MARKER, ONE SCORE STYLE" in fondo agli stili.
+  Colori mai `inherit` dentro un `<button>`: su iPhone Safari i bottoni sono
+  azzurri di base (i voti sono usciti azzurri il 2026-11-07). Per provarlo in
+  Chromium: `:where(button){color:rgb(0,122,255)}` e cercare testo azzurro.
+- **Glossario sulla parola** (2026-11-07, Antonio): tolto il riquadro
+  "Glossary"; `glossify()` sottolinea a puntini la prima volta di ogni termine
+  (`GLOSSARY`) in ogni parte del report, il tocco apre la spiegazione sotto la
+  riga. Mai dentro link, bottoni, titoli, fonti, email, etichette che non
+  vanno a capo (il chip "Tier A" allargava la pagina a 1400px).
+- **Domande del menu** come le righe del report: stessa freccia disegnata,
+  apertura `openIn` 220 ms, pressione `scale(0.99)` con transizione.
+- **Trattini lunghi**: `noDash()` li trasforma in virgole in tutto il testo
+  del sito (anche quello scritto dall'AI), nel PDF e nelle email.
 
 ## Motore dei report
 
@@ -269,8 +281,8 @@ il nome di Antonio sul sito finché non decide. Oggi si conservano senza
 scadenza report + email e l'indice My Reports; proposte in attesa:
 cancellazione dopo 30 giorni e niente My Reports ("strada A") oppure report
 solo a schermo ("strada B"). Da valutare: AI Act art. 50(2), domicilio ex
-D.Lgs. 70/2003 art. 7. Privacy e termini contengono ancora trattini lunghi:
-si riscrivono dopo l'avvocato.
+D.Lgs. 70/2003 art. 7. Privacy e termini si riscrivono dopo l'avvocato (i
+trattini lunghi sono già stati tolti il 2026-11-07, solo punteggiatura).
 Scheda per l'avvocato (2026-11-01, ricavata dal codice): doc privato "Scheda
 dati OneCiak per l'avvocato" (claude.ai/artifact/Y776k28X7HyxzMxcQgNXDX).
 I 4 punti in cui la privacy non corrispondeva al sito (conservazione senza
@@ -322,6 +334,13 @@ parti legali (titolare, basi giuridiche, trasferimenti, reclamo).
   /home/user/oneciak > log 2>&1 < /dev/null & disown` (con `&` semplice
   muore quando cambia la cartella). Test e script stanno nello scratchpad e
   si perdono a fine sessione.
+- **Controllo completo** (2026-11-07, "ricontrolla tutto per filo e per
+  segno"): 162 viste (9 pagine, 6 larghezze da 262 a 1600, chiaro/scuro/senza
+  preferenza) su oneciak.com: errori JS, richieste fallite, pagina più larga
+  dello schermo, testo azzurro Safari, trattini lunghi, allineamenti; più
+  modulo vuoto, glossario, copia email, PDF, una analisi vera, 37 link
+  esterni (Locarno rules: 403 Cloudflare anti-robot, non verificabile da qui).
+  Prima di dire "funziona" ad Antonio: misurarlo, mai dedurlo.
 - **Emil Kowalski design-eng** (`.claude/skills/emil-design-eng`, da
   github.com/emilkowalski/skills commit c8a7962, MIT, solo testo): regole per
   animazioni e reazioni al tocco. Applicate il 2026-11-06: curva `--ease`
