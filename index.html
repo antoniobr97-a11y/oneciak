@@ -1197,7 +1197,7 @@ details.more > summary:active { transform: scale(0.98); }
 .gl-term::after { content: ''; position: absolute; inset: -10px -2px; } /* bigger touch area, same look */
 .gl-term:active { opacity: 0.6; }
 .gl-term[aria-expanded="true"] { text-decoration-style: solid; }
-.gl-def { display: block; margin: 8px 0 4px; font-size: 14px; line-height: 1.55; color: var(--muted); animation: openIn 0.22s var(--ease) both; }
+.gl-def { display: block; white-space: normal; margin: 8px 0 4px; font-size: 14px; line-height: 1.55; color: var(--muted); animation: openIn 0.22s var(--ease) both; }
 .gl-def b { color: var(--text); font-weight: 700; }
 /* ONE MARKER, ONE SCORE STYLE (2026-11-06, Antonio: "troppi pallini, riquadri
    e punteggi diversi"). Every list in the report uses the same small dot in the
@@ -1618,8 +1618,9 @@ var translateBannerShown = false;
 // inject markup. Every dynamic value interpolated into a template string in
 // this file is wrapped in esc() before use; only the literal HTML Claude
 // wrote here itself is trusted.
+function noDash(s) { return String(s == null ? '' : s).replace(/^\s*\u2014\s*/, '').replace(/\s*\u2014\s*/g, ', '); } /* Antonio's rule: never an em dash in the product, also when the AI writes one */
 function esc(s) {
-  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return noDash(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // Guards against a rare but real failure mode: the AI call returns 200 with
@@ -2368,7 +2369,10 @@ function glossify(root) {
     var used = {};
     var walker = document.createTreeWalker(part, NodeFilter.SHOW_TEXT, { acceptNode: function(n) {
       if (!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
-      return n.parentElement.closest('a, button, summary, h1, h2, h3, h4, label, .email-draft, .src-line, .rblock-count, .fact-k, .sub-k, .tips-label, .fs-label, .gl-def') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      var el = n.parentElement;
+      if (el.closest('a, button, summary, h1, h2, h3, h4, label, .email-draft, .src-line, .rblock-count, .fact-k, .sub-k, .tips-label, .fs-label, .gl-def, .entry-head, [class*="chip"], [class*="tag"]')) return NodeFilter.FILTER_REJECT;
+      /* labels that never wrap (chips, tags) would push the meaning off screen */
+      return getComputedStyle(el).whiteSpace === 'nowrap' ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
     }});
     var nodes = [], n;
     while ((n = walker.nextNode())) nodes.push(n);
@@ -2735,7 +2739,7 @@ function paras(t, cls) {
    read it all; the button only appears when the text is actually cut. */
 function setHeroSummary(text, extra) {
   var el = document.getElementById('resultSubtitle');
-  el.textContent = text;
+  el.textContent = noDash(text);
   el.classList.remove('is-open');
   // The longer summary, when there is one, opens under the short one with the
   // same button: one "Read more" for the whole summary, never two links.
@@ -3168,7 +3172,7 @@ async function savePDF() {
     function ln(txt,sz,bold,r,g,b) {
       doc.setFontSize(sz||11); doc.setFont(doc.pdfFont,bold?'bold':'normal');
       doc.setTextColor(r!==undefined?r:26, g!==undefined?g:25, b!==undefined?b:22);
-      doc.splitTextToSize(String(txt||''),maxW).forEach(function(l){ if(y>272){doc.addPage();y=22;} doc.text(l,margin,y); y+=(sz||11)*0.52; }); y+=2;
+      doc.splitTextToSize(noDash(txt||''),maxW).forEach(function(l){ if(y>272){doc.addPage();y=22;} doc.text(l,margin,y); y+=(sz||11)*0.52; }); y+=2;
     }
     function hr() { y+=3; doc.setDrawColor(226,224,219); doc.line(margin,y,doc.internal.pageSize.getWidth()-margin,y); y+=7; }
 

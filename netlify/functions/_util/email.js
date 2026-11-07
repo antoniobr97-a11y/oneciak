@@ -1,7 +1,8 @@
 const https = require('https');
 
+function noDash(s) { return String(s == null ? '' : s).replace(/^\s*\u2014\s*/, '').replace(/\s*\u2014\s*/g, ', '); } /* Antonio's rule: never an em dash in the product, also when the AI writes one */
 function esc(s) {
-  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return noDash(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function scoreLabel(s) {
@@ -198,7 +199,7 @@ function keyCrewHtml(crew) {
 function cautionaryCompsHtml(comps) {
   if (!comps || !comps.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Cautionary Comparables</span>';
-  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b>' + (c.year ? ' (' + esc(c.year) + ')' : '') + (c.budget ? ' — Budget: ' + esc(c.budget) : '') + (c.what_went_wrong ? '<br><span style="font-size:12px;color:#b13225">' + esc(c.what_went_wrong) + '</span>' : '') + '<br><span style="font-size:12px;color:#5c5852">' + esc(c.lesson) + '</span>' + sourceHtml(c) + '</p>'; });
+  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b>' + (c.year ? ' (' + esc(c.year) + ')' : '') + (c.budget ? ' · Budget: ' + esc(c.budget) : '') + (c.what_went_wrong ? '<br><span style="font-size:12px;color:#b13225">' + esc(c.what_went_wrong) + '</span>' : '') + '<br><span style="font-size:12px;color:#5c5852">' + esc(c.lesson) + '</span>' + sourceHtml(c) + '</p>'; });
   h += '</div>';
   return h;
 }
