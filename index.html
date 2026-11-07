@@ -850,34 +850,42 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .r-road-d { grid-column: 2; font-size: 14.5px; line-height: 1.5; color: var(--muted); text-decoration: underline; text-decoration-color: rgba(22,22,22,0.3); text-underline-offset: 3px; }
 @media (hover: hover) and (pointer: fine) { .r-road:hover .r-road-d { color: var(--text); text-decoration-color: currentColor; } }
 
-/* Area index that follows the scroll. */
+/* REPORT INDEX: the three questions the report answers plus the plan, with the
+   five areas and their scores under "Does my film stand up?". Wide screens: a
+   column on the left of the text, always in view once the title is passed.
+   Phones and tablets: a slim bar under the header with where you are and a
+   "Sections" list. */
 .area-nav { position: fixed; z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.25s var(--ease), transform 0.25s var(--ease); }
 .area-nav.is-on { opacity: 1; pointer-events: auto; }
-@media (max-width: 1359px) { .area-nav:not(.has-cur) { opacity: 0; pointer-events: none; } }
+.an-sec, .an-item, .an-top { border: 0; background: none; font: inherit; color: inherit; cursor: pointer; text-align: left; }
+.an-sec:active, .an-item:active, .an-top:active { transform: scale(0.97); }
+.an-sec { display: block; width: 100%; padding: 9px 0; font-size: 14.5px; font-weight: 700; color: var(--muted); transition: color 0.2s; }
+.an-sec.on { color: var(--text); }
+.an-areas { margin: 0 0 6px; }
+.an-item { display: flex; align-items: baseline; width: 100%; padding: 6px 0 6px 12px; font-size: 14px; color: var(--muted); box-shadow: inset 1px 0 0 var(--border); transition: color 0.2s, box-shadow 0.2s; }
+.an-item.on { color: var(--text); box-shadow: inset 2px 0 0 #b4552b; }
+.an-score { font-size: 12.5px; color: var(--muted); margin-left: auto; padding-left: 10px; font-variant-numeric: tabular-nums; }
 .an-col { display: none; }
-.an-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.an-score { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-left: auto; padding-left: 10px; }
-.an-item, .an-top { border: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
-.an-item:active, .an-top:active { transform: scale(0.97); }
-@media (min-width: 1360px) {
-  .area-nav { top: 120px; left: calc(50% - 464px - 190px); width: 168px; transform: translateY(6px); }
-  .area-nav.is-on { transform: none; }
-  .an-col { display: block; border-top: 1px solid var(--border); }
+@media (min-width: 1100px) {
+  #sec-results .r-main { padding-left: 264px; }
+  .area-nav { top: 112px; left: max(24px, calc(50% - 440px)); width: 200px; }
+  .an-col { display: block; }
   .an-bar { display: none; }
-  .an-item { display: flex; align-items: baseline; width: 100%; text-align: left; padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); transition: color 0.2s, padding-left 0.25s var(--ease), box-shadow 0.25s var(--ease); }
-  .an-item.on { color: var(--text); box-shadow: inset 2px 0 0 #b4552b; padding-left: 12px; }
-  @media (hover: hover) and (pointer: fine) { .an-item:hover { color: var(--text); } }
+  @media (hover: hover) and (pointer: fine) { .an-sec:hover, .an-item:hover { color: var(--text); } }
 }
-@media (max-width: 1359px) {
-  .area-nav { top: 64px; left: 0; right: 0; transform: translateY(-6px); background: rgba(244,241,236,0.94); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+@media (max-width: 1099px) {
+  .area-nav { top: 64px; left: 0; right: 0; transform: translateY(-6px); background: rgba(244,241,236,0.94); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); overflow: hidden; } /* hidden: its content never widens the page */
   .area-nav.is-on { transform: none; }
-  .an-bar { max-width: 928px; margin: 0 auto; padding: 10px 24px; font-size: 14px; color: var(--text); }
+  .area-nav.is-open { overflow: visible; }
+  .an-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 928px; margin: 0 auto; padding: 10px 24px; font-size: 14px; color: var(--text); }
   .an-cur { display: flex; align-items: baseline; min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .an-cur .an-score { margin-left: 10px; padding-left: 0; }
-  .an-top { flex-shrink: 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #b4552b; padding: 6px 0 6px 8px; }
+  .an-top { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; font-size: 14px; font-weight: 700; color: #b4552b; padding: 6px 0 6px 8px; }
+  .an-top svg { transition: transform 0.2s var(--ease); }
+  .area-nav.is-open .an-top svg { transform: rotate(180deg); }
+  .area-nav.is-open .an-col { display: block; position: absolute; top: 100%; left: 0; right: 0; max-height: 70vh; overflow-y: auto; padding: 6px 24px 14px; background: var(--paper); border-bottom: 1px solid var(--border); animation: openIn 0.22s var(--ease) both; }
 }
-@media (max-width: 600px) { .an-bar { padding: 10px 20px; } }
-@media (max-width: 1359px) { .area-nav { overflow: hidden; } } /* otherwise on very narrow screens its content widens the whole page */
+@media (max-width: 600px) { .an-bar { padding: 10px 20px; } .area-nav.is-open .an-col { padding-left: 20px; padding-right: 20px; } }
 /* Very narrow screens (Safari text zoom, ~260px): long words and labels wrap instead of widening the page. */
 .r-title, .accordion-left, .action-item .action-tag { overflow-wrap: break-word; }
 .action-item .action-tag { white-space: normal; }
@@ -1082,7 +1090,7 @@ details.more > summary:active { transform: scale(0.98); }
   #sec-form::before { display: none; }
   .l-nav.is-light, .l-nav.is-scrolled, #sec-results .r-header.is-light, #sec-myreports .r-header.is-light, #sec-results .r-header.is-scrolled, #sec-myreports .r-header.is-scrolled, .f-header, .r-header { background: rgba(255,255,255,0.86); }
   .menu-header { background: rgba(255,255,255,0.9); }
-  @media (max-width: 1359px) { .area-nav { background: rgba(255,255,255,0.94); } }
+  @media (max-width: 1099px) { .area-nav { background: rgba(255,255,255,0.97); } .area-nav.is-open .an-col { background: #ffffff; } }
   #sec-loading .loading-dim.is-active { background: #f5f5f4; }
   .sample-banner { background: #f5f5f4; border-bottom: 1px solid var(--border-light); }
   .l-hero { padding-bottom: 120px; }
@@ -1156,7 +1164,7 @@ details.more > summary:active { transform: scale(0.98); }
   #sec-results .r-header.is-light .back-btn, #sec-myreports .r-header.is-light .back-btn { background: rgba(20,13,16,0.62); border-color: rgba(255,255,255,0.22); }
   .f-header { background: rgba(20,13,16,0.82); border-bottom-color: rgba(255,255,255,0.08); }
   #sec-form::before { background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0)); }
-  @media (max-width: 1359px) { .area-nav { background: rgba(20,13,16,0.92); } }
+  @media (max-width: 1099px) { .area-nav { background: rgba(20,13,16,0.96); } .area-nav.is-open .an-col { background: #140d10; } }
   /* rust labels lighten on the night */
   .f-steps li.on, .an-item.on { box-shadow: inset 2px 0 0 #f0a07c; }
 
@@ -2331,7 +2339,7 @@ function renderFree(r, title) {
 
   document.getElementById('accordionMenu').innerHTML = html + roadmapBlock(lastProject);
   document.getElementById('accordionMenu').style.display = 'block';
-  mountAreaNav(freeSections);
+  mountReportNav(freeSections);
   setCalendarButton(null);
 
   document.getElementById('upgradeSection').innerHTML =
@@ -2495,7 +2503,7 @@ function renderFull(r, title) {
   document.getElementById('accordionMenu').innerHTML = html + buildPlanSection(r, lastProject);
   setCalendarButton(r);
   document.getElementById('accordionMenu').style.display = 'block';
-  mountAreaNav(sections);
+  mountReportNav(sections);
   document.getElementById('upgradeSection').innerHTML = '';
   glossify(document.getElementById('sec-results'));
 }
@@ -2642,47 +2650,94 @@ function goToArea(i) {
   if (!trigger) return;
   if (body && !body.classList.contains('open')) toggleAccordion(i);
   // On phones the header hides while scrolling down, leaving only the area bar.
-  var y = trigger.getBoundingClientRect().top + window.scrollY - (window.innerWidth < 1360 ? 60 : 76);
+  var y = trigger.getBoundingClientRect().top + window.scrollY - (window.innerWidth < 1100 ? 112 : 76);
   window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
 }
-function goToOverview() {
-  var el = document.querySelector('#accordionMenu .accordion-wrap');
-  if (!el) return;
-  window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.scrollY - 80), behavior: 'smooth' });
+var REPORT_PARTS = [
+  { q: 'What do I do now?', sel: ['.next-step'] },
+  { q: 'Who do I contact?', sel: ['.r-contacts'] },
+  { q: 'Does my film stand up?', sel: ['#accordionMenu .r-areas-h', '#accordionMenu .accordion-wrap'], areas: true },
+  { q: 'Your plan', sel: ['#accordionMenu .r-plan'] }
+];
+function partEl(host, p) {
+  for (var i = 0; i < p.sel.length; i++) { var el = host.querySelector(p.sel[i]); if (el) return el; }
+  return null;
 }
+function goToPart(k) {
+  closeReportNav();
+  var el = partEl(document.getElementById('sec-results'), REPORT_PARTS[k]);
+  if (!el) return;
+  var y = el.getBoundingClientRect().top + window.scrollY - (window.innerWidth < 1100 ? 112 : 76);
+  window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+}
+function closeReportNav() {
+  var nav = document.getElementById('areaNav');
+  if (!nav || !nav.classList.contains('is-open')) return;
+  nav.classList.remove('is-open');
+  var b = nav.querySelector('.an-top'); if (b) b.setAttribute('aria-expanded', 'false');
+}
+function toggleReportNav() {
+  var nav = document.getElementById('areaNav');
+  var open = !nav.classList.contains('is-open');
+  nav.classList.toggle('is-open', open);
+  nav.querySelector('.an-top').setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+document.addEventListener('click', function(e) {
+  if (!(e.target.closest && e.target.closest('#areaNav'))) closeReportNav();
+});
 var areaNavObserver = null, areaVisObserver = null;
-function mountAreaNav(sections) {
+function mountReportNav(sections) {
   var host = document.getElementById('sec-results');
   var nav = document.getElementById('areaNav');
-  if (!nav) { nav = document.createElement('nav'); nav.id = 'areaNav'; nav.className = 'area-nav'; nav.setAttribute('aria-label', 'Report areas'); host.appendChild(nav); }
-  var items = '';
-  sections.forEach(function(sec, i) {
-    items += '<button type="button" class="an-item" data-i="'+i+'" onclick="goToArea('+i+')"><span class="an-label">'+esc(shortLabel(sec.label))+'</span>'+(sec.score != null ? '<span class="an-score">'+Number(sec.score).toFixed(1)+'/10</span>' : '')+'</button>';
+  if (!nav) { nav = document.createElement('nav'); nav.id = 'areaNav'; nav.className = 'area-nav'; nav.setAttribute('aria-label', 'Report sections'); host.appendChild(nav); }
+  var parts = [], col = '';
+  REPORT_PARTS.forEach(function(p, k) {
+    var el = partEl(host, p);
+    if (!el) return;
+    parts.push({ k: k, el: el, p: p });
+    col += '<button type="button" class="an-sec" data-k="'+k+'" onclick="goToPart('+k+')">'+esc(p.q)+'</button>';
+    if (p.areas) {
+      col += '<div class="an-areas">';
+      sections.forEach(function(sec, i) {
+        col += '<button type="button" class="an-item" data-i="'+i+'" onclick="closeReportNav();goToArea('+i+')"><span class="an-label">'+esc(shortLabel(sec.label))+'</span>'+(sec.score != null ? '<span class="an-score">'+Number(sec.score).toFixed(1)+'</span>' : '')+'</button>';
+      });
+      col += '</div>';
+    }
   });
-  nav.innerHTML = '<div class="an-col">'+items+'</div>'+
-    '<div class="an-bar"><span class="an-cur" id="areaNavCur"></span><button type="button" class="an-top" onclick="goToOverview()">All areas</button></div>';
-  nav.classList.remove('is-on', 'has-cur');
+  nav.innerHTML = '<div class="an-col">'+col+'</div>'+
+    '<div class="an-bar"><span class="an-cur" id="areaNavCur"></span><button type="button" class="an-top" aria-expanded="false" onclick="toggleReportNav()">Sections<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
+  nav.classList.remove('is-on', 'is-open');
   if (areaNavObserver) areaNavObserver.disconnect();
   if (areaVisObserver) areaVisObserver.disconnect();
   if (!('IntersectionObserver' in window)) return;
-  var wrap = document.querySelector('#accordionMenu .accordion-wrap');
-  var list = document.querySelectorAll('#accordionMenu .accordion-item');
+  var areaEls = Array.prototype.slice.call(host.querySelectorAll('#accordionMenu .accordion-item'));
   var cur = document.getElementById('areaNavCur');
+  var show = function(k, i) {
+    nav.querySelectorAll('.an-sec').forEach(function(b) { b.classList.toggle('on', Number(b.getAttribute('data-k')) === k); });
+    nav.querySelectorAll('.an-item').forEach(function(b) { b.classList.toggle('on', i != null && Number(b.getAttribute('data-i')) === i); });
+    if (!cur) return;
+    if (i != null && sections[i]) cur.innerHTML = esc(sections[i].label)+(sections[i].score != null ? '<span class="an-score">'+Number(sections[i].score).toFixed(1)+'/10</span>' : '');
+    else cur.textContent = REPORT_PARTS[k].q;
+  };
+  var areasK = 2;
   areaNavObserver = new IntersectionObserver(function(entries) {
     entries.forEach(function(e) {
       if (!e.isIntersecting) return;
-      var i = Array.prototype.indexOf.call(list, e.target);
-      nav.querySelectorAll('.an-item').forEach(function(b) { b.classList.toggle('on', Number(b.getAttribute('data-i')) === i); });
-      nav.classList.add('has-cur');
-      if (cur && sections[i]) cur.innerHTML = esc(sections[i].label)+(sections[i].score != null ? '<span class="an-score">'+Number(sections[i].score).toFixed(1)+'/10</span>' : '');
+      var i = areaEls.indexOf(e.target);
+      if (i >= 0) { show(areasK, i); return; }
+      var part = parts.filter(function(x) { return x.el === e.target; })[0];
+      if (part) show(part.k, null);
     });
   }, { rootMargin: '-30% 0px -60% 0px' });
-  list.forEach(function(el) { areaNavObserver.observe(el); });
-  // Only shown while the areas themselves are on screen.
+  parts.forEach(function(x) { areaNavObserver.observe(x.el); });
+  areaEls.forEach(function(el) { areaNavObserver.observe(el); });
+  // Shown once the title and score at the top have scrolled away.
+  var hero = host.querySelector('.r-hero');
   areaVisObserver = new IntersectionObserver(function(entries) {
-    entries.forEach(function(e) { nav.classList.toggle('is-on', e.isIntersecting); });
-  }, { rootMargin: '-80px 0px -40% 0px' });
-  if (wrap) areaVisObserver.observe(wrap);
+    entries.forEach(function(e) { nav.classList.toggle('is-on', !e.isIntersecting); if (e.isIntersecting) closeReportNav(); });
+  }, { rootMargin: '-64px 0px 0px 0px' });
+  if (hero) areaVisObserver.observe(hero);
+  if (parts.length) show(parts[0].k, null);
 }
 
 
