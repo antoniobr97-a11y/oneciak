@@ -39,4 +39,4 @@ function sanitizeProject(raw) {
   return p;
 }
 
-module.exports = { sanitizeProject, LIMITS };
+module.exports = { sanitizeProject };

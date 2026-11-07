@@ -9,7 +9,7 @@ const { recordAndBenchmark } = require('./benchmarkStats');
 const { recordReportForEmail } = require('./userReports');
 
 const FULL_MODEL = 'claude-haiku-5-5';
-const FULL_MAX_TOKENS = 32000; // 16000 was not always enough: on 2026-10-28 and -30 a section stopped mid-JSON ("Unexpected end of JSON input") and the whole report failed; Haiku 5.5 allows up to 128K and only the tokens used are billed // room for adaptive thinking plus the JSON (thinking counts toward max_tokens, and Haiku 5.5's tokenizer counts ~30% more tokens than Haiku 4.5's)
+const FULL_MAX_TOKENS = 32000; // room for adaptive thinking plus the JSON (thinking counts toward max_tokens); with less, a long section can stop mid-JSON ("Unexpected end of JSON input") and the whole report fails. Haiku 5.5 allows up to 128K and only the tokens used are billed
 const PROCESSING_STALE_MS = 8 * 60 * 1000; // generation can legitimately take a few minutes; give it plenty of room before a retry is treated as abandoned
 const PROMPT_ATTEMPTS = 3; // each of the 6 parallel prompts gets its own retries — an occasional malformed-JSON response from the model shouldn't fail the whole report
 const RETRY_DELAY_MS = 6000;
@@ -42,7 +42,7 @@ async function callAndParseWithRetry(apiKey, section) {
 }
 
 // The overall score is the average of the five area scores, so it can never
-// contradict them (it used to be a separate guess from a different prompt).
+// contradict them.
 function overallFromAreas(r) {
   const keys = ['creative_score', 'financial_score', 'market_score', 'festival_score', 'distribution_score'];
   const vals = keys.map(k => Number(r[k])).filter(v => isFinite(v) && v >= 1 && v <= 10);

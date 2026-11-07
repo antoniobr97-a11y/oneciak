@@ -38,13 +38,9 @@ function triggerBackground(payload, base) {
   });
 }
 
-// The free-tier equivalent of create-checkout.js + the Stripe webhook: no
-// payment involved, this just starts the same server-side generation
-// directly. Full reports used to be gated behind a €29 Stripe charge, which
-// also acted as a natural throttle — since that's gone, this is the only
+// Starts the server-side generation of a free full report. This is the only
 // thing standing between the site and someone scripting unlimited paid-model
-// generations, so the rate limit here is intentionally tighter than the old
-// create-checkout limit.
+// generations, so its rate limit is intentionally tight.
 exports.handler = async (event) => {
   const headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Vary': 'Origin' };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: { ...headers, 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' }, body: '' };

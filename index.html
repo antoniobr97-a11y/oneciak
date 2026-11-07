@@ -55,17 +55,17 @@
   /* form fields: a tint of the ground, not a white box on top of it */
   --field: rgba(20,18,16,0.045);
   --field-hover: rgba(20,18,16,0.07);
-  --display: 'Geist', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-  --mono: 'Carlito', Calibri, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; /* small data in Carlito too (Antonio, 2026-10-27) */
+  --display: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: 'Carlito', Calibri, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; /* small data in Carlito too (Antonio) */
   --text: #161616;
   --ink: #000000;
-  --muted: #5c5c5c; /* darkened from #6f6f6f — against the hero's ambient orange wash at its most saturated point, #6f6f6f dropped to ~3.8:1, below WCAG AA's 4.5:1; #5c5c5c clears it with margin there and everywhere lighter */
-  --muted-light: #606060; /* darkened from #707070 for the same reason — see --muted comment */
+  --muted: #5c5c5c; /* at least 4.5:1 even on the most saturated point of the hero's orange wash */
+  --muted-light: #606060; /* same contrast reason as --muted */
   --accent: #000000;
   --accent-hover: #2e2e2e;
   --accent-press: #000000;
   --accent-wash: #ececec;
-  --danger: #b13225; /* darkened from #c5382a for the same WCAG-vs-hero-wash reason as --muted above */
+  --danger: #b13225; /* same contrast reason as --muted */
   --danger-wash: #fdf1ef;
   --success: #0f7a3d;
   --success-wash: #eef8f1;
@@ -88,7 +88,7 @@ body { font-family: var(--sf); background: var(--paper); color: var(--text); min
    below, nothing else references them. */
 body::before {
   content: ''; position: fixed; inset: 0; z-index: -2; pointer-events: none;
-  /* Satin, not paper (chosen by Antonio 2026-10-10 from his reference):
+  /* Satin, not paper (chosen by Antonio from his reference):
      broad soft sheen, light top right, warm shade low left, a darker fold
      bottom right. Lopsided on purpose. */
   background:
@@ -98,8 +98,7 @@ body::before {
 }
 body::after {
   content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.22;
-  /* Fine, even film grain (one octave), same family as the hero's grain.
-     Replaced the old two-octave "paper fibre" texture. */
+  /* Fine, even film grain (one octave), same family as the hero's grain. */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='1' stitchTiles='stitch' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 1.1 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 220px;
 }
@@ -173,7 +172,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-hero {
   position: relative; overflow: hidden; color: var(--on-night);
   background: linear-gradient(180deg, var(--night) 0, var(--night) calc(100% - 300px), #201e1c calc(100% - 230px), #4a4643 calc(100% - 165px), #908c86 calc(100% - 100px), #d5d0ca calc(100% - 45px), var(--paper) 100%);
-  /* Chosen 2026-10-08 (variant B): the same long dissolve, interpolated in
+  /* Chosen by Antonio: the same long dissolve, interpolated in
      oklab so the midpoint stays warm instead of passing through muddy grey.
      Browsers without 'in oklab' keep the stepped gradient above. */
   background: linear-gradient(in oklab 180deg, var(--night) 0, var(--night) calc(100% - 280px), rgb(244 241 236 / 0) 100%);
@@ -188,7 +187,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     radial-gradient(60% 38% at -12% 58%, rgba(24,43,48,0.95) 0%, rgba(24,43,48,0.6) 40%, rgba(24,43,48,0) 72%),
     radial-gradient(55% 30% at 112% 78%, rgba(225,36,31,0.55) 0%, rgba(139,25,33,0.3) 40%, rgba(36,18,24,0) 70%);
 }
-/* Palette from Antonio's reference (2026-10-08, variant "C"): amber #eb893f,
+/* Palette from Antonio's reference: amber #eb893f,
    orange #ec5828, red #e1241f, wine #8b1921, petrol #182b30 on a plum-black
    night. Glows sit at the edges so the text column stays on dark ground. */
 .l-hero::after, #sec-results .r-hero::after, #sec-myreports .r-hero::after, #sec-loading::after {
@@ -196,7 +195,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 1.1 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 220px;
 }
-/* No seam where the night meets the paper (2026-10-10): the dissolve ends
+/* No seam where the night meets the paper: the dissolve ends
    transparent, so the page's own paper grain shows through instead of a
    flat cream band, and the glows and the film grain fade out before the
    bottom edge instead of being cut by it. */
@@ -206,7 +205,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 .l-wrap { max-width: 1240px; margin: 0 auto; padding: 0 40px; width: 100%; }
 .l-hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 72px; align-items: center; padding-top: 148px; }
-/* Grid items may shrink below their longest word: with Safari text zoom (aA 150%) the phone is ~260px wide and the hero was cut on the right. */
+/* Grid items may shrink below their longest word: with Safari text zoom (aA 150%) the phone is ~260px wide. */
 .l-hero-grid > * { min-width: 0; }
 .l-headline { overflow-wrap: break-word; }
 .l-mono { font-family: var(--mono); font-size: 12px; font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; }
@@ -386,8 +385,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 #sec-form .disclaimer-box { background: none; padding: 0; margin: 0 0 24px; }
 #sec-form .btn-primary { width: auto; padding: 15px 24px; background: var(--text); }
 #sec-form .error-box { margin-top: 16px; }
-/* Missing required fields are marked on the field itself (2026-10-29,
-   Antonio: show which box is empty, not only a message under the button). */
+/* Missing required fields are marked on the field itself
+   (Antonio: show which box is empty, not only a message under the button). */
 #sec-form input.is-invalid, #sec-form select.is-invalid, #sec-form textarea.is-invalid,
 #sec-form input.is-invalid:focus, #sec-form select.is-invalid:focus, #sec-form textarea.is-invalid:focus { box-shadow: inset 0 0 0 1.5px var(--danger); }
 .f-submit { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 24px; }
@@ -553,7 +552,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 
 /* Dynamic colors */
 .score-high { color: var(--success); }
-.score-mid  { color: #965800; } /* 5.05:1 on --paper; #b26a00 was 3.76:1 */
+.score-mid  { color: #965800; } /* 5.05:1 on --paper */
 .score-low  { color: var(--danger); }
 .bar-high { background: var(--success); }
 .bar-mid  { background: #d98c00; }
@@ -633,7 +632,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .footer-note { text-align: center; font-size: 12px; color: var(--muted-light); padding-top: 24px; line-height: 1.7; font-weight: 400; }
 
 /* ══════════════════════
-   RESULTS / LOADING, 2026-10-08 redesign
+   RESULTS / LOADING
    Same language as the landing: night header dissolving into paper, light
    display type, mono labels, and no boxed cards sitting on the ground.
 ══════════════════════ */
@@ -756,7 +755,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .tips-block, .action-block { border-top-color: var(--border); }
 @media (max-width: 640px) { .accordion-body { padding-left: 4px; } }
 
-/* REPORT READING LAYOUT (2026-10-23): short paragraphs at a readable
+/* REPORT READING LAYOUT: short paragraphs at a readable
    measure, risks and strengths side by side, numbered steps, and every
    secondary block as a collapsible row so an open area is not a wall of
    text. Sourced items are entries with their facts pulled out. */
@@ -764,7 +763,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .prose p { font-size: 15px; line-height: 1.7; color: var(--muted); margin: 0 0 12px; }
 .prose p.lead { color: var(--text); }
 .prose p:last-child { margin-bottom: 0; }
-.prose.is-small p { font-size: 14px; }
 .fs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); }
 .fs-col ul { list-style: none; margin: 0; padding: 0; }
 .fs-col li { font-size: 14.5px; line-height: 1.55; color: var(--text); padding: 2px 0 2px 14px; margin-bottom: 12px; }
@@ -839,10 +837,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .sub-k { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
 .sub-k:first-child { margin-top: 0; }
 .pitch { margin: 0; padding-left: 14px; border-left: 1px solid var(--muted); font-size: 15px; line-height: 1.65; font-style: italic; color: var(--text); max-width: 66ch; }
-.improved { margin-top: 12px; display: flex; flex-direction: column; gap: 4px; font-size: 15px; font-weight: 700; line-height: 1.5; color: var(--success); max-width: 66ch; }
-.checklist { list-style: none; margin: 0; padding: 0; max-width: 68ch; }
-.checklist li { position: relative; padding-left: 22px; margin-bottom: 8px; font-size: 14.5px; line-height: 1.55; color: var(--text); }
-.checklist li::before { content: ''; position: absolute; left: 0; top: 4px; width: 11px; height: 11px; border: 1.5px solid var(--muted); border-radius: 3px; }
 
 /* Score overview at the top of the areas: the sample card's rows, on paper. */
 .r-road { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: baseline; margin: 0 0 36px; padding: 14px 2px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); color: var(--text); text-decoration: none; transition: transform 0.15s ease-out; }
@@ -975,7 +969,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   .menu-header { padding: 0 20px; }
 }
 
-/* ── Report reading, phones first (2026-10-24) ──
+/* ── Report reading, phones first ──
    Antonio on iPhone: too heavy, lines and windows on both sides. The point
    of each block comes first and the long argument is one tap away; lists
    use a small coloured dot instead of a vertical rule; one bar at the top. */
@@ -1009,14 +1003,14 @@ details.more > summary:active { transform: scale(0.98); }
 .accordion-score-label { display: none; }
 }
 @media (min-width: 641px) { .r-more:not(.has-extra) { display: none; } }
-/* Labels are words, so they are set as words (2026-10-26): sentence case in
+/* Labels are words, so they are set as words: sentence case in
    the body face, small and bold. Mono caps stay only for numbers, dates and
    counts, where the fixed width helps reading. */
 .menu-sec-title, .tips-label, .action-label, .fs-label, .fact-k, .sub-k, .an-top, .mr-email {
   font-family: var(--sf); font-size: 14px; font-weight: 700; letter-spacing: 0; text-transform: none;
 }
 
-/* Report reorganised (2026-10-26): counts in words, phases in plain bold,
+/* Report reorganised: counts in words, phases in plain bold,
    the verdict on the area row in readable size. */
 .rblock-count { font-family: var(--sf); font-size: 14px; color: var(--muted); margin-left: 10px; }
 .action-item .action-tag { font-family: var(--sf) !important; font-size: 15px !important; font-weight: 700 !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--text) !important; }
@@ -1030,7 +1024,7 @@ details.more > summary:active { transform: scale(0.98); }
 
 /* iPhone Safari zooms the whole page in when a field's text is under 16px
    and does not zoom back out, which left the site cut off at both sides on
-   Antonio's phone (2026-10-26). Fields are 16px on touch screens. */
+   Antonio's phone. Fields are 16px on touch screens. */
 @media (hover: none), (max-width: 1024px) {
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea { font-size: 16px !important; }
 }
@@ -1046,7 +1040,7 @@ details.more > summary:active { transform: scale(0.98); }
 }
 
 /* ══════════════════════
-   LIGHT AND DARK (Antonio, 2026-10-26): the site follows the device.
+   LIGHT AND DARK (Antonio): the site follows the device.
    Light mode is light everywhere, the home hero included, with the same
    amber/red/petrol glows made soft and kept to the edges. Dark mode is the
    night everywhere, the analysis included, with the glows fixed at the
@@ -1055,12 +1049,12 @@ details.more > summary:active { transform: scale(0.98); }
 @media (prefers-color-scheme: light) {
   /* the "night" surfaces become the paper: same components, inverted tokens */
   .l-hero, .l-nav, .menu-overlay, #sec-results, #sec-myreports, #sec-loading { --night: #ffffff; --on-night: #161616; --on-night-2: #47423e; }
-  /* white means white (Antonio, 2026-10-26): no satin sheen, no grain, no cream */
+  /* white means white (Antonio): no satin sheen, no grain, no cream */
   /* fields are solid, so the colour at the edges never shows through them */
   #sec-form input[type="text"]:focus, #sec-form select:focus, #sec-form textarea:focus, .unlock-field input:focus, #sec-myreports input[type="email"]:focus { background-color: #ffffff; }
   :root { --paper: #ffffff; --cream: #f5f5f4; --border: #e2e0dd; --border-light: #ecebe9; --field: #f4f4f3; --field-hover: #ededec; }
   body { background: #ffffff; }
-  /* Small text slightly darker in light mode (kept from the measured pass of 2026-10-26). */
+  /* Small text slightly darker in light mode . */
   :root { --muted: #3a3a3a; --muted-light: #3a3a3a; --success: #0a5c2d; --danger: #8a2419; }
   .score-mid { color: #6e3f00; }
   .tips-label, .action-label, .an-top, .fs-col .fs-label, #sec-loading .loading-dim.is-active .loading-dim-num { color: #93391a !important; }
@@ -1075,7 +1069,7 @@ details.more > summary:active { transform: scale(0.98); }
   .menu-overlay::before { display: block; position: fixed; inset: 0; background:
       radial-gradient(46% 40% at -10% 62%, rgba(64,115,129,0.30) 0%, rgba(64,115,129,0.13) 45%, rgba(64,115,129,0) 75%),
       radial-gradient(30% 20% at 106% 102%, rgba(225,36,31,0.14) 0%, rgba(139,25,33,0.05) 45%, rgba(255,255,255,0) 75%); }
-  /* Same harmony as dark mode (Antonio, 2026-10-27): petrol on the left,
+  /* Same harmony as dark mode (Antonio): petrol on the left,
      red low on the right, fixed to the screen, soft on white. The petrol is
      the dark mode's own hue (192 deg, same saturation) made lighter, since
      the near-black #182b30 reads as a grey smudge on white. */
@@ -1140,10 +1134,10 @@ details.more > summary:active { transform: scale(0.98); }
       radial-gradient(40% 30% at 104% 96%, rgba(225,36,31,0.34) 0%, rgba(139,25,33,0.18) 45%, rgba(20,13,16,0) 75%);
   }
   body::after { mix-blend-mode: overlay; }
-  /* One light everywhere (Antonio, 2026-10-27, from his phone: "qui è
+  /* One light everywhere (Antonio, from his phone: "qui è
      stupendo il nostro colore"): petrol on the left, red low on the right,
-     fixed to the screen. The headers no longer add their own red patch at
-     the top right; they are clear so the same light shows through. */
+     fixed to the screen. The headers are clear so the same light shows
+     through. */
   .l-hero, #sec-results .r-hero, #sec-myreports .r-hero, #sec-loading { background: transparent; }
   .l-hero::before, #sec-results .r-hero::before, #sec-myreports .r-hero::before, #sec-loading::before,
   .l-hero::after, #sec-results .r-hero::after, #sec-myreports .r-hero::after, #sec-loading::after { display: none; }
@@ -1188,8 +1182,7 @@ details.more > summary:active { transform: scale(0.98); }
   .translate-banner { background: rgba(255,200,120,0.12); color: #f2c98a; }
   .translate-banner button { color: #f2c98a; }
 }
-/* GLOSSARY ON THE WORD (2026-11-06, Antonio): the glossary box at the end is
-   gone; the first time a term appears in each part of the report it is
+/* GLOSSARY ON THE WORD: the first time a term appears in each part of the report it is
    underlined with dots, a tap opens its meaning under the line, a second tap
    closes it. Same 220ms opening as every other row. */
 .gl-term { position: relative; display: inline; font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: help; text-align: inherit;
@@ -1199,7 +1192,7 @@ details.more > summary:active { transform: scale(0.98); }
 .gl-term[aria-expanded="true"] { text-decoration-style: solid; }
 .gl-def { display: block; white-space: normal; margin: 8px 0 4px; font-size: 14px; line-height: 1.55; color: var(--muted); animation: openIn 0.22s var(--ease) both; }
 .gl-def b { color: var(--text); font-weight: 700; }
-/* ONE MARKER, ONE SCORE STYLE (2026-11-06, Antonio: "troppi pallini, riquadri
+/* ONE MARKER, ONE SCORE STYLE (Antonio: "troppi pallini, riquadri
    e punteggi diversi"). Every list in the report uses the same small dot in the
    muted text colour; the plan keeps its order but loses the orange rings and the
    line. Area scores are written like the overall score (same colour as the text,
@@ -1598,7 +1591,6 @@ details.more > summary:active { transform: scale(0.98); }
 
 <script>
 
-var API_KEY = "";
 var lastResult = null;
 var lastProject = null;
 var isFullReport = false;
@@ -2078,9 +2070,8 @@ var pendingFullReportAuth = null; // { project, token, session_id } — kept so 
 var fullReportGenerationId = 0; // bumped whenever the user navigates away or starts a new report, so a stale poll loop from a previous attempt can't overwrite what's on screen now
 
 /* ── HANDLE RETURN FROM THE "VIEW ON ONECIAK.COM" EMAIL LINK (free full report) ──
-   The link already carries a token signed when the report was started, so
-   unlike the Stripe path there's nothing to verify server-side first —
-   get-report.js (called from inside generateFullReport) checks the token. */
+   The link carries a token signed when the report was started;
+   get-report.js (called from inside generateFullReport) checks it. */
 async function handleFreeReportReturn() {
   var params = new URLSearchParams(window.location.search);
   var reportId = params.get('report_id');
@@ -2345,8 +2336,7 @@ function renderFree(r, title) {
 }
 
 /* ── RENDER FULL ── */
-/* GLOSSARY ON THE WORD (2026-11-06). Same terms and meanings as the old
-   glossary box. glossify() marks the first match of each term in each part of
+/* GLOSSARY ON THE WORD. glossify() marks the first match of each term in each part of
    the report (next step, each "Who to contact" row, each area, each plan step),
    never inside links, buttons, row titles, sources or the email draft. */
 var GLOSSARY = [
@@ -2431,8 +2421,8 @@ function renderFull(r, title) {
     '</div></div>'+
     (r.score_benchmark ? '<div style="font-size:12.5px;color:var(--muted);line-height:1.5;font-weight:300;margin-top:10px;padding:0 4px">'+esc(r.score_benchmark)+'</div>' : '');
 
-  /* The report in the order of the three questions it answers (2026-11-02,
-     Antonio: "troppe cose, tutte disordinate"): what to do now, who to
+  /* The report in the order of the three questions it answers
+     (Antonio: "troppe cose, tutte disordinate"): what to do now, who to
      contact (every name in one place, not scattered across the areas),
      then the film area by area and the plan. Biggest risk / opportunity,
      marketing, budget, legal and the other long texts stay in the PDF. */
@@ -2547,28 +2537,6 @@ function buildSalesAgents(list) {
   (list || []).forEach(function(a){ if (a) sa += entry(a.name, null, '', a.why, a, null, a.focus); });
   return rblock('Sales agents', howMany(list, 'company', 'companies'), sa);
 }
-function buildMarkets(list) {
-  var im = '';
-  (list || []).forEach(function(m){ if (m) im += entry(m.country, null, '', m.reason, null); });
-  return rblock('International markets', howMany(list, 'country', 'countries'), im);
-}
-function buildRevenue(r) {
-  var rp = r.revenue_projection, rv = '';
-  if (!rp) return '';
-  var streams = [{l:'Theatrical',v:rp.theatrical},{l:'Streaming (SVOD)',v:rp.streaming_svod},{l:'VOD / AVOD',v:rp.vod_avod},{l:'TV rights',v:rp.tv_rights},{l:'International',v:rp.international}];
-  if (r.sources_checked) {
-    // Newer reports: scenarios in words (no data backs a currency forecast).
-    rv += paras(rp.total_realistic);
-    streams.forEach(function(w){ if (w.v) rv += entry(w.l, null, '', w.v, null); });
-    if (rp.breakeven_note) rv += '<div class="sub-k">Breakeven</div>' + paras(rp.breakeven_note, 'is-small');
-    return rblock('Revenue scenarios', null, rv);
-  }
-  // Older stored reports keep their figures.
-  streams.forEach(function(w){ if (w.v) rv += entry(w.l, null, fact('Estimate', w.v, true), '', null); });
-  if (rp.total_realistic) rv += entry('Total', null, fact('Estimate', rp.total_realistic), '', null);
-  if (rp.breakeven_note) rv += paras(rp.breakeven_note, 'is-small');
-  return rblock('Revenue projection', null, rv);
-}
 
 // A short sequence of steps on a vertical line: the 90-day plans, the
 // roadmap and the business plan milestones all use it.
@@ -2596,7 +2564,7 @@ function riskGrid(left, right, leftLabel, rightLabel) {
 }
 
 /* ── TOGGLE ACCORDION ── */
-/* One area open at a time, and no jumps (Antonio, 2026-10-27: "troppi su e
+/* One area open at a time, and no jumps (Antonio: "troppi su e
    giù"): opening an area closes the one that was open, and the row that was
    tapped stays exactly where it was on screen, even when a long area above
    it closes. */
@@ -2620,7 +2588,7 @@ function toggleAccordion(idx) {
   if (Math.abs(shift) > 1) window.scrollTo({ top: window.scrollY + shift, behavior: 'instant' });
 }
 
-/* AREA NAVIGATION (2026-10-23). A report is long, so it gets:
+/* AREA NAVIGATION. A report is long, so it gets:
    - an overview of the five scores at the top (same bars as the sample card
      on the home), each row jumping to its area;
    - an index of all areas that follows the scroll: a column in the left
@@ -2813,7 +2781,7 @@ function buildFundingSources(sources) {
   });
   return rblock('Funding sources', howMany(sources, 'fund', 'funds'), h);
 }
-/* YOUR NEXT STEP and PRODUCERS (2026-10-30, Antonio: the site must help
+/* YOUR NEXT STEP and PRODUCERS (Antonio: the site must help
    people actually make the film). The next step is one concrete action for
    this week; the producers are real companies, each confirmed by a page
    that names it with a film it produced (grounding.js, checkNamed). */
@@ -2853,7 +2821,7 @@ function copyEmail(btn) {
 /* Who can apply, shown only when the source's own sentence backs it
    (grounding.js keeps it only with a rule_quote checked on the page). */
 var APPLICANT = { Individual: 'Individuals', Company: 'Production companies only', Either: 'Individuals or companies', Split: 'Writing: individuals. Development and production: companies only' };
-/* Before you can apply (2026-10-28): most public funds take applications
+/* Before you can apply: most public funds take applications
    from production companies only, and a first-time director often has
    none. The report says what is missing and how to get it. */
 function buildBeforeApply(b) {
@@ -2865,41 +2833,8 @@ function buildBeforeApply(b) {
   return h + '</ul></div>';
 }
 
-function buildPitchAssessment(pa) {
-  if (!pa) return '';
-  var h = '';
-  if (pa.thirty_second_pitch) h += '<div class="sub-k">30-second pitch</div><blockquote class="pitch">'+esc(pa.thirty_second_pitch)+'</blockquote>';
-  if (pa.logline_improved) {
-    h += '<div class="sub-k">Logline'+(pa.logline_score ? ', '+esc(pa.logline_score)+'/10' : '')+'</div>';
-    if (pa.logline_issues) h += paras(pa.logline_issues, 'is-small');
-    h += '<div class="improved"><span class="fact-k">Stronger version</span>'+esc(pa.logline_improved)+'</div>';
-  }
-  if (pa.pitch_deck_checklist && pa.pitch_deck_checklist.length) {
-    h += '<div class="sub-k">Pitch deck checklist</div><ul class="checklist">';
-    pa.pitch_deck_checklist.forEach(function(item){ if (item) h += '<li>'+esc(item)+'</li>'; });
-    h += '</ul>';
-  }
-  return rblock('Pitch and logline', null, h, false);
-}
 
-function buildMarketingStrategy(ms) {
-  if (!ms) return '';
-  var h = ms.overview ? paras(ms.overview) : '';
-  if (ms.pre_release && ms.pre_release.length) {
-    h += '<div class="sub-k">Before release</div><ul class="checklist">';
-    ms.pre_release.forEach(function(a){ if (a) h += '<li>'+esc(a)+'</li>'; });
-    h += '</ul>';
-  }
-  [['Social', ms.social_strategy], ['Community', ms.community], ['Press', ms.press]].forEach(function(row){
-    if (row[1]) h += '<div class="sub-k">'+row[0]+'</div>'+paras(row[1], 'is-small');
-  });
-  return rblock('Marketing strategy', null, h, false);
-}
 
-function buildLabeledText(label, text) {
-  if (!text) return '';
-  return rblock(label, null, paras(text), false);
-}
 
 function buildLabOpportunities(labs) {
   if (!labs || !labs.length) return '';
@@ -2908,14 +2843,6 @@ function buildLabOpportunities(labs) {
   return rblock('Labs and markets', howMany(labs, 'programme', 'programmes'), h);
 }
 
-function buildTalentAndTax(talentLeverage, taxIncentive) {
-  var out = '';
-  if (taxIncentive && (taxIncentive.estimate || taxIncentive.note)) {
-    out += rblock('Tax incentive', null, entry(taxIncentive.region || 'Tax incentive', null, fact('Rate', taxIncentive.estimate), taxIncentive.note, taxIncentive));
-  }
-  if (talentLeverage) out += buildLabeledText('Talent leverage', talentLeverage);
-  return out;
-}
 
 function buildComparables(comps) {
   if (!comps || !comps.length) return '';
@@ -2926,31 +2853,11 @@ function buildComparables(comps) {
   return rblock('Comparable films', howMany(comps, 'film', 'films'), h);
 }
 
-function buildKeyCrew(crew) {
-  if (!crew || !crew.length) return '';
-  var h = '';
-  crew.forEach(function(c){ if (c) h += entry(c.role, null, '', c.profile, null, c.why); });
-  return rblock('Key crew', howMany(crew, 'role', 'roles'), h, false);
-}
 
-function buildCautionaryComps(comps) {
-  if (!comps || !comps.length) return '';
-  var h = '';
-  comps.forEach(function(c){
-    if (c) h += entry(c.title + (c.year ? ' ('+c.year+')' : ''), null, fact('Budget', c.budget), c.what_went_wrong, c, c.lesson, c.match ? 'In common: '+c.match : null);
-  });
-  return rblock('Films that struggled', howMany(comps, 'film', 'films'), h, false);
-}
 
-function buildPlatforms(platforms) {
-  if (!platforms || !platforms.length) return '';
-  var h = '';
-  platforms.forEach(function(pl){ if (pl) h += entry(pl.name, pl.priority, '', pl.reason, pl); });
-  return rblock('Platforms', howMany(platforms, 'platform', 'platforms'), h);
-}
 
 /* ── RUN ANALYSIS (free quick preview — the full report always goes through start-full-report.js) ── */
-// Only the red outline marks a missing field (Antonio, 2026-10-29: no red
+// Only the red outline marks a missing field (Antonio: no red
 // text repeating what each label already says).
 var REQUIRED = ['title', 'logline', 'genre1', 'format', 'audience', 'distrib', 'stage'];
 function markMissing() {
@@ -2966,7 +2873,7 @@ function markMissing() {
 }
 // An empty text box is at least as tall as its example text, measured on
 // the device itself (its own font and width), so the example is never cut
-// off (2026-10-29: "Anything else?" was cut on iPhone).
+// off ("Anything else?" was cut on iPhone).
 function fitPlaceholders() {
   ['logline', 'extra'].forEach(function(id){
     var el = document.getElementById(id);
@@ -3029,7 +2936,7 @@ async function runAnalysis() {
 
 /* ── SAMPLE REPORT (fictional project, clearly labeled — not a real analysis) ── */
 function showSampleReport() {
-  /* A real report from the live engine (generated 2026-10-23 for this illustrative
+  /* A real report from the live engine (generated for this illustrative
      project), with every item and claim then checked against its sources and
      corrected where a page did not support it (35 fixes, 5 items removed). */
   var sampleProject = {"title": "Northbound", "logline": "A recently widowed lighthouse keeper and her estranged teenage son spend one final summer together before the automated station replaces them both.", "genre": "Drama", "format": "Feature Film", "budget": "€250,000", "audience": "Art house / Cinephiles", "distrib": "Festival circuit only", "country": "Italy", "language": "Italian", "experience": "1–2 short films"};
@@ -3479,7 +3386,7 @@ async function savePDF() {
   } catch(e) { pdfFail('The PDF could not be created. Try again, and check that your browser allows downloads.'); }
 }
 
-/* DEADLINES TO THE CALENDAR (2026-10-28). The report is read once, the
+/* DEADLINES TO THE CALENDAR. The report is read once, the
    deadlines come later: the future fund and festival dates go into an .ics
    file the filmmaker's own calendar opens, with a reminder a week before.
    Built in the browser, nothing is sent or stored anywhere. */

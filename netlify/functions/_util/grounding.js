@@ -374,4 +374,4 @@ async function groundOne(obj, set, prose, today, fetcher) {
   return out;
 }
 
-module.exports = { nameCore, textCore, groundReport, groundOne, quoteOnPage, quoteKey, keepSupportedSentences, keepFactualSentences, factualNumbers, lastDateIn, isAggregator, stripMarkup, normalizeUrl, isSourced, sourcedSet, numbersOnPage, pageNumbers, numbersIn, LISTS };
+module.exports = { groundReport, groundOne, sourcedSet };

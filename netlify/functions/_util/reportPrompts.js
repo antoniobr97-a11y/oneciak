@@ -77,7 +77,7 @@ function fullPromptF(p) {
 // (each search is billed separately, see generateFullReport.js).
 const SEARCH_BUDGET = { B: 6, C: 5, D: 6, E: 5, G: 5 };
 
-// Producers (2026-10-30, Antonio: "the AI must find producers in every
+// Producers (Antonio: "the AI must find producers in every
 // country, same quality for someone in Sweden or China as in Italy"). A
 // first film rarely gets made without a production company, and most public
 // funds take applications only from one. grounding.js keeps a company only
@@ -99,4 +99,4 @@ function allFullPrompts(p) {
   ];
 }
 
-module.exports = { stageLines, stageRules, fullPromptA, fullPromptB, fullPromptC, fullPromptD, fullPromptE, fullPromptF, fullPromptG, allFullPrompts, PREAMBLE, SCORING };
+module.exports = { stageLines, stageRules, allFullPrompts, SCORING };
