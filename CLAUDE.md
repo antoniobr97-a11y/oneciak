@@ -179,8 +179,14 @@ diversi per pallini e voti; le serie TV.
   strengths", Comparable films nel mercato); "Your plan" (`buildPlanSection`)
   + link alla roadmap; in fondo "Download the full report" e calendario
   (.ics, nascosto senza date future). Solo nel PDF: rischio/opportunità,
-  marketing, budget, legale, piano a 90 giorni e i testi lunghi. Indice delle
-  aree che segue lo scorrimento (`mountAreaNav`).
+  marketing, budget, legale, piano a 90 giorni e i testi lunghi.
+- **Indice del report** (`mountReportNav`, `REPORT_PARTS`): le tre domande
+  ("What do I do now?", "Who do I contact?", "Does my film stand up?" con
+  sotto le 5 aree e il voto) più "Your plan". Dai 1100px in su è una colonna
+  fissa a sinistra del testo (il testo si sposta a destra, colonna di 640px);
+  sotto i 1100px è una barra sotto l'intestazione con la sezione attuale e il
+  pulsante "Sections" che apre l'elenco. Compare quando titolo e voto in alto
+  sono usciti dallo schermo. Nell'anteprima gratuita mostra solo le aree.
 - **Glossario sulla parola**: `glossify()` sottolinea a puntini la prima
   volta di ogni termine di `GLOSSARY` in ogni parte del report. La parola è
   testo normale (si può selezionare), il tocco apre una nuvoletta vicino alla
