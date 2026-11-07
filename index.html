@@ -319,9 +319,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .menu-faq-item:first-of-type { border-top: 1px solid rgba(255,255,255,0.14); }
 .menu-faq-item summary { list-style: none; cursor: pointer; padding: 16px 0; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .menu-faq-item summary::-webkit-details-marker { display: none; }
-.menu-faq-item summary::after { content: '+'; font-size: 20px; font-weight: 300; color: var(--on-night-2); flex-shrink: 0; transition: transform 0.2s var(--ease); }
-.menu-faq-item[open] summary::after { transform: rotate(45deg); }
+.menu-faq-item summary { transition: transform 0.15s ease-out; }
 .menu-faq-item summary:active { transform: scale(0.99); }
+.menu-faq-item .rblock-icon { color: var(--on-night-2); }
+.menu-faq-item[open] .rblock-icon { transform: rotate(180deg); }
+.menu-faq-item[open] > .menu-faq-a { animation: openIn 0.22s var(--ease) both; }
 .menu-faq-q { font-size: 16px; font-weight: 500; color: var(--on-night); letter-spacing: -0.01em; }
 .menu-faq-a { font-size: 14.5px; color: var(--on-night-2); line-height: 1.6; padding: 0 28px 18px 0; }
 .menu-cta { padding: 15px 24px; background: var(--on-night); color: var(--night); border: none; border-radius: 10px; font-family: var(--sf); font-size: 15px; font-weight: 500; cursor: pointer; letter-spacing: -0.01em; }
@@ -798,7 +800,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .rblock { border-top: 1px solid var(--border); }
 .rblock summary { list-style: none; display: flex; align-items: baseline; gap: 10px; padding: 16px 2px; cursor: pointer; transition: transform 0.15s ease-out; }
 .rblock summary::-webkit-details-marker { display: none; }
-.rblock summary:active { transform: scale(0.995); }
+.rblock summary:active { transform: scale(0.99); }
 .rblock-label { font-family: var(--display); font-size: 17px; font-weight: 500; letter-spacing: -0.01em; color: var(--text); }
 .rblock-count { font-family: var(--mono); font-size: 11px; color: var(--muted); }
 .rblock-icon { margin-left: auto; display: inline-flex; flex-shrink: 0; align-self: center; color: var(--muted); transition: transform 0.2s var(--ease); }
@@ -807,7 +809,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .entry-note { font-size: 14.5px; line-height: 1.5; color: var(--muted); margin: 0 0 6px; }
 .r-plan { margin-top: 44px; }
 .r-plan-h { font-family: var(--display); font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); margin: 0 0 14px; }
-.r-plan .r-road { margin-top: 28px; }
+.r-plan .r-road { margin-top: 28px; margin-bottom: 0; border-bottom: 0; } /* the download card below already opens with a line: no double line with an empty band */
 .r-contacts { margin: 44px 0 0; }
 .r-contacts .ready-block { margin-top: 0; padding-top: 0; border-top: 0; }
 .r-areas-h { margin-top: 44px; }
@@ -1186,6 +1188,17 @@ details.more > summary:active { transform: scale(0.98); }
   .translate-banner { background: rgba(255,200,120,0.12); color: #f2c98a; }
   .translate-banner button { color: #f2c98a; }
 }
+/* GLOSSARY ON THE WORD (2026-11-06, Antonio): the glossary box at the end is
+   gone; the first time a term appears in each part of the report it is
+   underlined with dots, a tap opens its meaning under the line, a second tap
+   closes it. Same 220ms opening as every other row. */
+.gl-term { position: relative; display: inline; font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: help; text-align: inherit;
+  text-decoration: underline dotted; text-decoration-thickness: 1.5px; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, currentColor 55%, transparent); }
+.gl-term::after { content: ''; position: absolute; inset: -10px -2px; } /* bigger touch area, same look */
+.gl-term:active { opacity: 0.6; }
+.gl-term[aria-expanded="true"] { text-decoration-style: solid; }
+.gl-def { display: block; margin: 8px 0 4px; font-size: 14px; line-height: 1.55; color: var(--muted); animation: openIn 0.22s var(--ease) both; }
+.gl-def b { color: var(--text); font-weight: 700; }
 /* ONE MARKER, ONE SCORE STYLE (2026-11-06, Antonio: "troppi pallini, riquadri
    e punteggi diversi"). Every list in the report uses the same small dot in the
    muted text colour; the plan keeps its order but loses the orange rings and the
@@ -1233,12 +1246,12 @@ details.more > summary:active { transform: scale(0.98); }
       </div>
       <div class="menu-sec">
         <div class="menu-sec-title">Questions</div>
-        <details class="menu-faq-item"><summary class="menu-faq-q">Is this a real consultant?</summary><div class="menu-faq-a">No. It's an AI analysis of what you describe, meant as a structured second opinion before you talk to people in the industry. It is not professional advice.</div></details>
-        <details class="menu-faq-item"><summary class="menu-faq-q">Preview or full report?</summary><div class="menu-faq-a">The preview gives each of the five areas a score and one recommendation. The full report adds red flags, strengths, comparable films, funding sources, action plans and a roadmap. Both are free.</div></details>
-        <details class="menu-faq-item"><summary class="menu-faq-q">Why do you ask for my email?</summary><div class="menu-faq-a">The full report takes a few minutes to generate, so we send it when it's ready. You don't need to keep the page open.</div></details>
-        <details class="menu-faq-item"><summary class="menu-faq-q">Is my project data private?</summary><div class="menu-faq-a">Your project is shared only with the services needed to generate and deliver your report, listed in our Privacy Policy. It is never sold.</div></details>
-        <details class="menu-faq-item"><summary class="menu-faq-q">I've never made a film. Is it still useful?</summary><div class="menu-faq-a">Yes, that's who it's built for. Pick "First film" in the Experience field and the advice adjusts.</div></details>
-        <details class="menu-faq-item"><summary class="menu-faq-q">Where do I start after my report?</summary><div class="menu-faq-a">Your report shows which of the nine stages your project is at. The <a href="/roadmap/">film roadmap</a> lists every job in each stage, from script to release, with the rules that apply quoted from official sources.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">Is this a real consultant?<span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="menu-faq-a">No. It's an AI analysis of what you describe, meant as a structured second opinion before you talk to people in the industry. It is not professional advice.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">Preview or full report?<span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="menu-faq-a">The preview gives each of the five areas a score and one recommendation. The full report adds red flags, strengths, comparable films, funding sources, action plans and a roadmap. Both are free.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">Why do you ask for my email?<span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="menu-faq-a">The full report takes a few minutes to generate, so we send it when it's ready. You don't need to keep the page open.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">Is my project data private?<span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="menu-faq-a">Your project is shared only with the services needed to generate and deliver your report, listed in our Privacy Policy. It is never sold.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">I've never made a film. Is it still useful?<span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="menu-faq-a">Yes, that's who it's built for. Pick "First film" in the Experience field and the advice adjusts.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">Where do I start after my report?<span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="menu-faq-a">Your report shows which of the nine stages your project is at. The <a href="/roadmap/">film roadmap</a> lists every job in each stage, from script to release, with the rules that apply quoted from official sources.</div></details>
       </div>
       <button class="menu-cta" onclick="closeMenuGoLanding()">Analyze your project</button>
       <p class="menu-legal"><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></p>
@@ -1521,26 +1534,6 @@ details.more > summary:active { transform: scale(0.98); }
 
     <div id="accordionMenu" class="reveal" style="display:none"></div>
     <div id="upgradeSection"></div>
-    <details class="guide-box reveal">
-      <summary>Glossary: key terms explained</summary>
-      <div class="guide-box-body">
-        <dl>
-          <dt>Sales agent</dt><dd>A company that sells your finished film to distributors and streaming platforms in different countries, usually for a percentage of the deal.</dd>
-          <dt>Tax incentive / rebate</dt><dd>Money a government or region gives back to productions that film there, usually a percentage of what you spent locally.</dd>
-          <dt>E&amp;O insurance</dt><dd>Insurance that protects you from lawsuits over your film's content (rights, defamation, etc.). Most distributors require it before buying a film.</dd>
-          <dt>Attachment</dt><dd>A known director, actor, or crew member who has committed to your project. Attachments make financing and festival acceptance easier.</dd>
-          <dt>Comp / comparable film</dt><dd>A similar existing film used to judge whether yours has a realistic market, based on its budget and how it performed.</dd>
-          <dt>Festival tier (A/B/C)</dt><dd>A rough ranking of prestige. Tier A (Cannes, Sundance, Berlinale) opens the most doors; Tier B and C still help, reaching smaller audiences.</dd>
-          <dt>Lab / market</dt><dd>A program where you pitch your project to industry professionals and potential financiers before it's fully made.</dd>
-          <dt>SVOD / AVOD / VOD</dt><dd>SVOD = subscription streaming (e.g. Netflix). AVOD = free, ad-supported streaming. VOD = pay-per-view rental or purchase.</dd>
-          <dt>Self-distribution</dt><dd>Releasing and marketing your film yourself instead of selling it to a distributor: more work, but you keep all the revenue.</dd>
-          <dt>Qualifying run</dt><dd>A festival screening or theatrical release that satisfies the eligibility rules for major awards like the Oscars.</dd>
-          <dt>Breakeven</dt><dd>The point where your film's revenue equals what it cost to make. After that, it's actually making money.</dd>
-          <dt>Pitch deck</dt><dd>A short visual document, like a slideshow, used to present your film to investors or financiers.</dd>
-        </dl>
-      </div>
-    </details>
-
     <div class="guide-box reveal" id="reportIssueBox" style="display:none">
       <details>
         <summary>Found an outdated link or a mistake in this report? Let us know</summary>
@@ -2351,6 +2344,64 @@ function renderFree(r, title) {
 }
 
 /* ── RENDER FULL ── */
+/* GLOSSARY ON THE WORD (2026-11-06). Same terms and meanings as the old
+   glossary box. glossify() marks the first match of each term in each part of
+   the report (next step, each "Who to contact" row, each area, each plan step),
+   never inside links, buttons, row titles, sources or the email draft. */
+var GLOSSARY = [
+  { t: "Sales agent", d: "A company that sells your finished film to distributors and streaming platforms in different countries, usually for a percentage of the deal.", re: /\bsales agents?\b/i },
+  { t: "Tax incentive / rebate", d: "Money a government or region gives back to productions that film there, usually a percentage of what you spent locally.", re: /\btax (?:incentives?|rebates?|credits?)\b/i },
+  { t: "E&O insurance", d: "Insurance that protects you from lawsuits over your film's content (rights, defamation, etc.). Most distributors require it before buying a film.", re: /\bE&O(?: insurance)?\b|\berrors and omissions\b/i },
+  { t: "Attachment", d: "A known director, actor, or crew member who has committed to your project. Attachments make financing and festival acceptance easier.", re: /\battachments?\b/i },
+  { t: "Comp / comparable film", d: "A similar existing film used to judge whether yours has a realistic market, based on its budget and how it performed.", re: /\bcomparable (?:films?|titles?)\b|\bcomps\b/i },
+  { t: "Festival tier (A/B/C)", d: "A rough ranking of prestige. Tier A (Cannes, Sundance, Berlinale) opens the most doors; Tier B and C still help, reaching smaller audiences.", re: /\btier[- ]?[ABC]\b/i },
+  { t: "Lab / market", d: "A program where you pitch your project to industry professionals and potential financiers before it's fully made.", re: /\b(?:labs?|co-?production markets?|film markets?)\b/i },
+  { t: "SVOD / AVOD / VOD", d: "SVOD = subscription streaming (e.g. Netflix). AVOD = free, ad-supported streaming. VOD = pay-per-view rental or purchase.", re: /\b[SAT]?VOD\b/i },
+  { t: "Self-distribution", d: "Releasing and marketing your film yourself instead of selling it to a distributor: more work, but you keep all the revenue.", re: /\bself-distribut\w*/i },
+  { t: "Qualifying run", d: "A festival screening or theatrical release that satisfies the eligibility rules for major awards like the Oscars.", re: /\bqualifying runs?\b/i },
+  { t: "Breakeven", d: "The point where your film's revenue equals what it cost to make. After that, it's actually making money.", re: /\bbreak-?even\b/i },
+  { t: "Pitch deck", d: "A short visual document, like a slideshow, used to present your film to investors or financiers.", re: /\bpitch decks?\b/i }
+];
+function glossify(root) {
+  var parts = root.querySelectorAll('.next-step, .r-contacts .rblock, .accordion-body, .r-plan .action-item');
+  Array.prototype.forEach.call(parts, function(part) {
+    var used = {};
+    var walker = document.createTreeWalker(part, NodeFilter.SHOW_TEXT, { acceptNode: function(n) {
+      if (!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      return n.parentElement.closest('a, button, summary, h1, h2, h3, h4, label, .email-draft, .src-line, .rblock-count, .fact-k, .sub-k, .tips-label, .fs-label, .gl-def') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+    }});
+    var nodes = [], n;
+    while ((n = walker.nextNode())) nodes.push(n);
+    nodes.forEach(function(node) {
+      GLOSSARY.forEach(function(g, gi) {
+        if (used[gi] || !node.parentNode) return;
+        var m = g.re.exec(node.nodeValue);
+        if (!m) return;
+        used[gi] = true;
+        var after = node.splitText(m.index);
+        var rest = after.splitText(m[0].length);
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'gl-term'; b.setAttribute('aria-expanded', 'false');
+        b.setAttribute('data-gl', gi); b.textContent = after.nodeValue;
+        after.parentNode.replaceChild(b, after);
+        node = rest;
+      });
+    });
+  });
+}
+document.addEventListener('click', function(e) {
+  var t = e.target.closest && e.target.closest('.gl-term');
+  if (!t) return;
+  var block = t.closest('li, p, .tip-text, .action-text, dd') || t.parentElement;
+  var open = block.querySelector('.gl-def[data-gl="'+t.getAttribute('data-gl')+'"]');
+  if (open) { open.remove(); t.setAttribute('aria-expanded', 'false'); return; }
+  var g = GLOSSARY[+t.getAttribute('data-gl')];
+  var d = document.createElement('span');
+  d.className = 'gl-def'; d.setAttribute('role', 'note'); d.setAttribute('data-gl', t.getAttribute('data-gl'));
+  d.innerHTML = '<b>'+esc(g.t)+':</b> '+esc(g.d);
+  block.appendChild(d);
+  t.setAttribute('aria-expanded', 'true');
+});
 function renderFull(r, title) {
   isFullReport = true;
   setPdfLabels();
@@ -2421,6 +2472,7 @@ function renderFull(r, title) {
   document.getElementById('accordionMenu').style.display = 'block';
   mountAreaNav(sections);
   document.getElementById('upgradeSection').innerHTML = '';
+  glossify(document.getElementById('sec-results'));
 }
 
 /* ── ACCORDION BODY BUILDER ── */
