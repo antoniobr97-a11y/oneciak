@@ -1,8 +1,7 @@
 # OneCiak: contesto per Claude
 
 Letto a ogni nuova sessione. Le sessioni non condividono memoria: qui c'è
-quello che vale OGGI. Riordinato il 2026-10-29 (tolte le versioni superate;
-la storia completa è nella cronologia git di questo file).
+SOLO come stanno le cose oggi. La storia sta nella cronologia git.
 
 ## Il progetto
 
@@ -12,18 +11,18 @@ email. Target: registi al primo film, sceneggiatori, produttori indipendenti,
 neolaureati. Prendono decisioni vere di tempo e soldi: deve essere credibile e
 utile davvero, non "carino".
 
-**Spiegato semplice** (versione approvata da usare con Antonio e nel punto
-del lunedì, 2026-11-02): chi ha un'idea per un film, lungo o corto, scrive su
-OneCiak di cosa parla, quanto costa e a che punto è. Riceve subito
-un'anteprima gratis e, lasciando l'email, il report completo, sempre gratis.
-Il report risponde a tre domande: 1) Il mio film sta in piedi? (un voto su
-cinque cose: storia, soldi, pubblico, festival, distribuzione, e per ognuna
-cosa non va e cosa fare); 2) Cosa faccio adesso? (una sola azione per questa
-settimana e cosa preparare prima); 3) A chi mi rivolgo? (nomi veri:
-produttori a cui scrivere con l'email già pronta, fondi a cui chiedere soldi
-con chi può fare domanda, festival con le scadenze da mettere nel
-calendario). Ogni nome e ogni data viene da una pagina ufficiale controllata:
-se la fonte non c'è, la voce non compare.
+**Spiegato semplice** (versione approvata, da usare con Antonio e nel punto
+del lunedì): chi ha un'idea per un film, lungo o corto, scrive su OneCiak di
+cosa parla, quanto costa e a che punto è. Riceve subito un'anteprima gratis
+e, lasciando l'email, il report completo, sempre gratis. Il report risponde a
+tre domande: 1) Il mio film sta in piedi? (un voto su cinque cose: storia,
+soldi, pubblico, festival, distribuzione, e per ognuna cosa non va e cosa
+fare); 2) Cosa faccio adesso? (una sola azione per questa settimana e cosa
+preparare prima); 3) A chi mi rivolgo? (nomi veri: produttori a cui scrivere
+con l'email già pronta, fondi a cui chiedere soldi con chi può fare domanda,
+festival con le scadenze da mettere nel calendario). Ogni nome e ogni data
+viene da una pagina ufficiale controllata: se la fonte non c'è, la voce non
+compare.
 
 Founder: **Antonio Brasile** (ragazzo). Scrive in italiano, informale, spesso
 con typo quando è frustrato: non vuol dire che vuole un tono più formale.
@@ -36,42 +35,48 @@ con typo quando è frustrato: non vuol dire che vuole un tono più formale.
 
 ## Regole di Antonio (non derogabili)
 
-0. **Come parlargli** (2026-10-29): sempre in italiano, anche i messaggi brevi
-   e quelli di avanzamento ("sto facendo..."); parole semplici, niente gergo
-   tecnico; risposte corte, non allungarsi. Restano in inglese solo i testi
-   del sito, che è in inglese.
-1. **Tutto verificato alla fonte** (2026-10-19 e 2026-10-20: "fonti
-   verificate e mai cazzate, pensarci 100 volte"). Prima di affermare un fatto
+0. **Come parlargli**: sempre in italiano, anche i messaggi brevi e quelli di
+   avanzamento; parole semplici, niente gergo tecnico; risposte corte. Restano
+   in inglese solo i testi del sito, che è in inglese.
+1. **Tutto verificato alla fonte** ("fonti verificate e mai cazzate,
+   pensarci 100 volte"; "basta a dirmi bugie"). Prima di affermare un fatto
    verificarlo davvero (comando, pagina ufficiale aperta, misura sui pixel) e
    dire da dove viene. Mai dedurre da uno strumento che non misura quella cosa
    (WebSearch non è Google, Chromium non è Safari, locale non è live): se non
    posso verificare, dirlo. Niente numeri a memoria. Se due fonti non
    concordano, dirlo. Persone/studi da consigliare: solo se verificati su
-   registri ufficiali, e dire che esistere non vuol dire essere bravi. Meglio
-   corto e sicuro. Se sbaglio, dirlo subito e correggere.
+   registri ufficiali, e dire che esistere non vuol dire essere bravi. Se
+   sbaglio, dirlo subito e correggere.
 2. **Ogni contenuto promozionale lo vede prima lui** (post, Product Hunt,
-   Reddit, email a scuole/riviste): testo esatto e anteprima, poi
-   il suo ok esplicito. Né Claude né l'agente del lunedì postano o inviano.
+   Reddit, email a scuole/riviste): testo esatto e anteprima, poi il suo ok
+   esplicito. Né Claude né l'agente del lunedì postano o inviano.
 3. **Mai trattini lunghi (—)** nei testi che gli scrivo e nel prodotto: usare
-   virgole o punti.
-4. **Dimostrare le modifiche**: screenshot prima/dopo, misure sui pixel, numeri.
+   virgole o punti. `noDash()` li toglie anche dal testo scritto dall'AI (sito,
+   PDF, email).
+4. **Dimostrare le modifiche**: foto prima/dopo, misure sui pixel, numeri.
    "Non vedo differenze" vuol dire che devo mostrarlo meglio.
 5. **Cambi visivi grossi**: anteprima e attendere l'ok. Fix piccoli o tecnici
    (bug, contrasto, accessibilità, cose che ha chiesto lui puntualmente) si
    pubblicano subito. "Fai", "procedi", "vai", "pubblica" = via libera.
 6. Domande esplorative ("che altro si può fare?"): risposta breve con una
    raccomandazione, non elenchi infiniti.
-7. **Onestà**: mai inventare o gonfiare numeri mostrati agli utenti (il
-   contatore "report generati" è stato tolto invece di falsificarlo). Link
+7. **Onestà**: mai inventare o gonfiare numeri mostrati agli utenti. Link
    sempre verificati (`_util/linkCheck.js` per i report).
 8. Vuole un sito da designer vero, non "da AI": niente tutto centrato, card
    identiche, bottoni a pillola, gradienti speculari, spinner generici,
    etichette sopra i titoli.
+9. **Sempre pulito** (vale per ogni modifica, per sempre): quando qualcosa
+   cambia o si toglie, nello stesso commit si toglie anche tutto quello che
+   resta indietro: codice e funzioni non più chiamate, stili CSS senza
+   elementi, file e font non usati, commenti che parlano di cose che non ci
+   sono più, voci superate in questo file. Questo file descrive solo il
+   presente, senza "prima era così". Dopo la pulizia: confronto pixel per
+   pixel prima/dopo e prove delle funzioni (vedi "Controlli").
 
 ## Pubblicare su main (procedura obbligatoria)
 
-Il 2026-10-04 un merge via API GitHub è risultato VUOTO (sito vecchio per 25
-minuti). Quindi mai merge di PR, sempre:
+Mai merge di PR (un merge via API è risultato vuoto e il sito è rimasto
+vecchio). Sempre:
 ```bash
 git fetch origin main
 git checkout -B main-fixN origin/main
@@ -81,39 +86,53 @@ git push origin main-fixN:main
 git checkout claude/website-completion-aesthetics-6wknns
 ```
 Poi `mcp__github__get_commit` sul commit: deve avere additions/deletions
-reali. Poi, in background, ciclo su `curl https://oneciak.com/?x=$i` che
-cerca una stringa NUOVA del codice (su UNA riga sola, non spezzata da un a capo)
-finché la trova: la CDN può servire la versione vecchia con status 200.
+reali. Poi ciclo su `curl https://oneciak.com/?x=$i` che cerca una stringa
+NUOVA del codice (su UNA riga sola) finché la trova: la CDN può servire la
+versione vecchia con status 200.
 
-## Design attuale (deciso da Antonio, pubblicato)
+## Design (deciso da Antonio)
 
 **Chiaro e scuro seguono il dispositivo** (`prefers-color-scheme`), niente
 pulsante. Blocchi CSS "LIGHT AND DARK" in fondo agli stili di index.html e in
 fondo a `roadmap/roadmap.css`; anche privacy, termini, 404.
 - **Scuro**: nero prugna `--night:#140d10` ovunque. UNA sola luce fissa allo
   schermo (`body::before`): petrolio a sinistra + rosso in basso a destra, con
-  grana. Antonio: "qui è stupendo il nostro colore, facciamolo uguale ovunque".
-- **Chiaro**: bianco vero `#ffffff` ("quando è bianco deve essere bianco, non
-  quel grigino"), stessa composizione dello scuro fissa allo schermo: petrolio
-  reso luminoso `#407381` a bassa opacità a sinistra + rosso morbido in basso a
-  destra. Niente grana. Testo grigio piccolo `#3a3a3a`, rosso errori `#8a2419`.
-- **Senza preferenza**: vecchio stile (hero scuro con bagliori ambra/arancio/
-  rosso/vino e petrolio, sfumatura `in oklab` verso la carta `--paper:#f4f1ec`,
-  satinato con grana nelle parti chiare).
+  grana.
+- **Chiaro**: bianco vero `#ffffff`, stessa composizione dello scuro fissa
+  allo schermo: petrolio luminoso `#407381` a bassa opacità a sinistra + rosso
+  morbido in basso a destra. Niente grana. Testo grigio piccolo `#3a3a3a`,
+  rosso errori `#8a2419`.
+- **Senza preferenza**: hero scuro con bagliori ambra/arancio/rosso/vino e
+  petrolio, sfumatura `in oklab` verso la carta `--paper:#f4f1ec`, satinato
+  con grana nelle parti chiare.
 - **Font** self-hosted in `/fonts` (niente Google Fonts, GDPR; CSP
-  `font-src 'self'` in `netlify.toml`): titoli **Geist**; testo e anche dati
-  piccoli **Carlito** (al posto di Calibri, che serve licenza; `size-adjust:
-  112%`). Inter, Inter Tight, IBM Plex Mono non si usano più (file ancora in
-  /fonts). Mail: Calibri, Carlito, Arial. PDF: `fonts/carlito-*-pdf.ttf`
-  caricati al clic, Helvetica di riserva. Raptor Text gli piaceva ma è a
-  pagamento: non usarlo senza licenza.
-- Regole: bottoni `border-radius: 10px`; testo allineato a sinistra; colori
+  `font-src 'self'`): titoli **Geist**, tutto il resto **Carlito**
+  (`size-adjust: 112%`). PDF: `fonts/carlito-*-pdf.ttf` caricati al clic,
+  Helvetica di riserva. Mail: Calibri, Carlito, Arial. Raptor Text gli piaceva
+  ma è a pagamento: non usarlo senza licenza.
+- Bottoni `border-radius: 10px`; testo allineato a sinistra; colori
   ambientali asimmetrici; hover solo dentro `@media (hover: hover) and
   (pointer: fine)`; ogni cliccabile ha `:active` con `scale(...)`; su touch
   le aree cliccabili piccole sono allargate a ~44px senza cambiare l'aspetto.
-- Niente etichette sopra i titoli (eyebrow) né numeri decorativi (01-07,
-  01-05): tolti ovunque. Le etichette sono parole in Carlito grassetto. Icone
-  disegnate (chevron, spunta), non simboli di testo.
+- Niente etichette sopra i titoli né numeri decorativi. Le etichette sono
+  parole in Carlito grassetto. Icone disegnate (freccia, spunta), mai simboli
+  di testo come "+".
+- **Un solo segno, un solo stile di voto**: tutte le liste del report hanno
+  lo stesso pallino grigio; i voti sono sempre "X.X/10" nel colore del testo,
+  il colore (debole/medio/forte) solo sulla barretta; titoletti tutti dello
+  stesso colore (blocco CSS "ONE MARKER, ONE SCORE STYLE").
+- **Movimento** (regole di Emil Kowalski, `.claude/skills/emil-design-eng`):
+  curva `--ease: cubic-bezier(0.23, 1, 0.32, 1)` anche in roadmap, privacy e
+  termini; aperture di aree, righe e domande del menu 220 ms con `openIn`,
+  freccia che gira, pressione `scale(0.99)`; bottoni 160 ms; niente
+  `transition: all` né `scale(0)`.
+- **Colori mai `inherit` dentro un `<button>`**: su iPhone Safari i bottoni
+  sono azzurri di base. Prova in Chromium: `:where(button){color:rgb(0,122,255)}`
+  e cercare testo azzurro.
+- **Schermi stretti**: con il testo di Safari ingrandito il telefono è largo
+  ~260px; elementi di griglia e flex hanno `min-width: 0` e i testi lunghi
+  vanno a capo. Nessuna pagina deve essere più larga dello schermo da 240 a
+  1600px.
 - Banner cookie: NON serve (nessun cookie né tracker, statistiche anonime
   self-hosted; localStorage solo per il login My Reports scelto dall'utente).
   Il disclaimer con casella sulla landing resta obbligatorio (`termsCheck`).
@@ -124,91 +143,79 @@ fondo a `roadmap/roadmap.css`; anche privacy, termini, 404.
   gradienti dà falsi positivi.
 
 **Bocciato da Antonio, NON riproporre**: fasce grigio-azzurre/rosa da vetro
-smerigliato; "ora d'oro"; luce parassita da destra (varianti A/B/C del chiaro);
-macchia rossa/ambra in alto a destra nelle intestazioni; altre varianti di
-satinato/grana ("va bene così basta"); palette "intensa" e "Warm Neutrals";
-il redesign proposto da Taste (sito vestito da carte di produzione, ciak
-nell'intestazione, foto d'archivio, logo gigante nel footer); la sesta/settima
-area del report; il PDF "One-page summary"; il pulsante "Next" tra le aree;
-contatti sparsi dentro le aree (ora tutti in "Who to contact");
-scritte rosse sotto ogni casella del modulo.
+smerigliato; "ora d'oro"; luce parassita da destra; macchia rossa/ambra in
+alto a destra nelle intestazioni; altre varianti di satinato/grana; palette
+"intensa" e "Warm Neutrals"; sito vestito da carte di produzione, ciak
+nell'intestazione, foto d'archivio, logo gigante nel footer; più di 5 aree nel
+report; il PDF di una pagina; il pulsante "Next" tra le aree; contatti sparsi
+dentro le aree; scritte rosse sotto le caselle del modulo; le guide; la
+roadmap o le guide nel fondo della home; un riquadro glossario; i colori
+diversi per pallini e voti; le serie TV.
 
 ## Pagine e flusso
 
-- **Home**: compatta ("troppo piena, niente ripetizioni"): niente CTA finale
-  ripetuta, niente link doppi al report di esempio. Navbar trasparente, poi
-  vetro, poi chiara (`updateLandingNav()`). Scheda del report di esempio in
-  vetro con i voti veri di Northbound.
+- **Home**: compatta, niente ripetizioni. Navbar trasparente, poi vetro, poi
+  chiara (`updateLandingNav()`). Scheda del report di esempio in vetro con i
+  voti veri di Northbound. In fondo solo Privacy Policy e Terms of Service
+  (anche nel menu). Menu con domande frequenti che si aprono come le righe
+  del report.
 - **Modulo**: niente card, sezioni separate da una linea. "Where you are":
   fase (obbligatoria), chi produce, durata, già mostrato. Campi a 16px su
-  touch (iOS non zooma). Campi obbligatori vuoti: SOLO bordo rosso sulla
-  casella (`markMissing`, `REQUIRED`), anche quando è selezionata, nessuna
-  scritta sotto, la pagina sale al primo vuoto senza mettere il cursore; sotto
-  il bottone "N fields are missing, marked in red above.". Le caselle di testo
-  sono alte quanto il loro testo di esempio, misurato sul dispositivo
-  (`fitPlaceholders`).
+  touch (iOS non zooma). Campi obbligatori vuoti (`REQUIRED`, 7 campi): SOLO
+  bordo rosso sulla casella (`markMissing`), anche quando è selezionata,
+  nessuna scritta sotto, la pagina sale al primo vuoto senza mettere il
+  cursore; sotto il bottone "N fields are missing, marked in red above.".
+  Le caselle di testo sono alte quanto il loro testo di esempio
+  (`fitPlaceholders`). Solo film (lunghi e corti, documentari compresi).
 - **Caricamento**: 5 dimensioni che avanzano invece di uno spinner
-  (`startLoadingDims` / `finishLoadingDims` / `resetLoadingDims`), titolo del
-  film, allineato a sinistra.
-- **Report completo** (riordinato il 2026-11-04, Antonio: "troppe cose,
-  tutte disordinate"): segue le tre domande. Dall'alto: titolo, voto nella
+  (`startLoadingDims` / `finishLoadingDims` / `resetLoadingDims`).
+- **Report completo**, segue le tre domande. Dall'alto: titolo, voto nella
   scheda di vetro, riassunto (4 righe + "Read more" su telefono); "Your next
   step" (`buildNextStep`); "Who to contact" (`buildContacts`: Before you can
   apply, Producers to contact con email da copiare, Funding sources,
-  Festival calendar, Labs and markets, Sales agents, tutte righe chiuse con
-  la stessa freccia); "Your film, area by area" (5 aree con voto, una aperta
-  alla volta, `toggleAccordion`; dentro solo giudizio, "What to do", "Red
-  flags and strengths", e Comparable films nel mercato); "Your plan"
-  (`buildPlanSection`) + link alla roadmap; in fondo "Download the
-  full report", calendario (.ics, nascosto senza date future). Solo nel PDF:
-  rischio/opportunità, marketing, budget, legale, piano a 90 giorni e gli
-  altri testi lunghi. Tolto "How to read". Indice delle aree che segue lo
-  scorrimento (`mountAreaNav`).
-- **Report di esempio Northbound**: report VERO del motore (voto 5.0), fonti
-  controllate il 23 ottobre 2026. TorinoFilmLab chiude il 5 novembre 2026:
-  dopo quella data la voce va aggiornata.
+  Festival calendar, Labs and markets, Sales agents, righe chiuse con la
+  stessa freccia); "Your film, area by area" (5 aree, una aperta alla volta,
+  `toggleAccordion`; dentro giudizio, "What to do", "Red flags and
+  strengths", Comparable films nel mercato); "Your plan" (`buildPlanSection`)
+  + link alla roadmap; in fondo "Download the full report" e calendario
+  (.ics, nascosto senza date future). Solo nel PDF: rischio/opportunità,
+  marketing, budget, legale, piano a 90 giorni e i testi lunghi. Indice delle
+  aree che segue lo scorrimento (`mountAreaNav`).
+- **Glossario sulla parola**: `glossify()` sottolinea a puntini la prima
+  volta di ogni termine di `GLOSSARY` in ogni parte del report; il tocco apre
+  la spiegazione sotto la riga, il secondo tocco la chiude. Mai dentro link,
+  bottoni, titoli, fonti, email, etichette che non vanno a capo.
+- **Report di esempio Northbound**: report vero del motore (voto 5.0), fonti
+  controllate il 23 ottobre e il 2 novembre 2026; 3 produttori verificati a
+  mano (Vivo Film, Leone Film Group, Lava Films); la voce TorinoFilmLab è
+  scritta in modo da restare vera dopo la scadenza.
 - **`/roadmap/`**: 9 fasi, 49 lavori con spunta (solo nel browser,
   `oneciak-roadmap-v1`), 27 citazioni verificate parola per parola il
-  2026-10-24. Pensata per i film, non per le serie. Il report collega la fase
-  del progetto (`STAGE_TO_ROADMAP`). Se cambia una regola citata, ricontrollare.
-  Si raggiunge SOLO dal report ("Your plan"), non dal fondo della home
-  (2026-11-06). CSS `roadmap/roadmap.css` (era guides.css), da tenere
-  allineato al sito.
-- **Guide TOLTE** (2026-11-06, Antonio: "leva proprio guide che non capisco il
-  senso"): cartella cancellata, `/guides/*` rimanda alla home (301 in
-  `netlify.toml`), tolte dalla sitemap. Non riproporle.
-- **Report, segni e voti** (2026-11-06, "troppi pallini, riquadri e punteggi
-  diversi"): un solo pallino grigio per tutte le liste, voti sempre "X.X/10"
-  nel colore del testo (il colore solo sulla barretta), titoletti tutti dello
-  stesso colore. Blocco CSS "ONE MARKER, ONE SCORE STYLE" in fondo agli stili.
-  Colori mai `inherit` dentro un `<button>`: su iPhone Safari i bottoni sono
-  azzurri di base (i voti sono usciti azzurri il 2026-11-07). Per provarlo in
-  Chromium: `:where(button){color:rgb(0,122,255)}` e cercare testo azzurro.
-- **Glossario sulla parola** (2026-11-07, Antonio): tolto il riquadro
-  "Glossary"; `glossify()` sottolinea a puntini la prima volta di ogni termine
-  (`GLOSSARY`) in ogni parte del report, il tocco apre la spiegazione sotto la
-  riga. Mai dentro link, bottoni, titoli, fonti, email, etichette che non
-  vanno a capo (il chip "Tier A" allargava la pagina a 1400px).
-- **Domande del menu** come le righe del report: stessa freccia disegnata,
-  apertura `openIn` 220 ms, pressione `scale(0.99)` con transizione.
-- **Trattini lunghi**: `noDash()` li trasforma in virgole in tutto il testo
-  del sito (anche quello scritto dall'AI), nel PDF e nelle email.
+  2026-10-24. Si raggiunge solo dal report ("Your plan", collegato alla fase
+  del progetto con `STAGE_TO_ROADMAP`). CSS `roadmap/roadmap.css`, da tenere
+  allineato al sito. Se cambia una regola citata, ricontrollare.
+- `/guides/*` rimanda alla home (301 in `netlify.toml`).
 
 ## Motore dei report
 
 - Modello `claude-haiku-5-5` (anteprima effort `low`), ricerca web Anthropic:
-  anteprima 2 ricerche, report completo fino a 22 (sezioni B-E di
-  `reportPrompts.js`). Costi misurati il 2026-10-22: anteprima ~0,025 $,
-  report completo ~0,22-0,24 $. Limite di spesa Anthropic: 50 al mese (con la
-  pubblicità circa 200 report completi; poi le analisi falliscono fino al mese
-  dopo: da decidere con Antonio prima del lancio).
-- `grounding.js`: una voce (fondo, festival, film, agente, piattaforma) resta
-  solo se la sua fonte è tra i risultati della ricerca di quella richiesta;
+  anteprima 2 ricerche; report completo sezioni A-G di `reportPrompts.js`
+  con ricerche B 6, C 5, D 6, E 5, G 5. `FULL_MAX_TOKENS` 32000 (con meno una
+  sezione si interrompe a metà JSON). Costi misurati: anteprima ~0,025 $,
+  report completo ~0,22-0,24 $ senza la sezione produttori (con produttori:
+  da misurare sui primi report veri). Limite di spesa Anthropic: 50 al mese
+  (circa 200 report completi; poi le analisi falliscono fino al mese dopo: da
+  decidere con Antonio prima del lancio).
+- `grounding.js`: una voce (fondo, festival, film, agente, piattaforma,
+  produttore) resta solo se la sua fonte è tra i risultati della ricerca;
   date e cifre solo se sono sulla pagina; niente cifre da aggregatori;
   scadenze passate "Closed (...)" una volta sola; `rule_quote` resta solo se è
-  sulla pagina parola per parola (i PDF non si leggono: le citazioni da PDF
-  cadono); `applicant` (chi può fare domanda) resta solo con la sua
-  `rule_quote`.
+  sulla pagina parola per parola (i PDF non si leggono); `applicant` resta
+  solo con la sua `rule_quote`. Produttori (`checkNamed`): restano solo se la
+  pagina contiene il nome (senza Srl/Ltd/AB...) E il titolo del film; un
+  "film" uguale al nome dell'azienda viene scartato. Funziona in ogni paese
+  (provato: Svezia, Cina, Italia). L'email per i produttori non nomina mai
+  un'azienda: usa [COMPANY NAME].
 - `verifiedFacts.js`: fatti controllati A MANO, da ricontrollare quando cambia
   la legge. Tax credit italiano 30% per produttori indipendenti, tetto 4 mln
   (D.I. MiC-MEF 6/7/2026 n. 281). Bando MiC contributi selettivi 2026
@@ -216,46 +223,30 @@ scritte rosse sotto ogni casella del modulo.
   52 min, in italiano, no IA; sviluppo e produzione = solo imprese
   indipendenti italiane Ateco 59.1 con un'opera negli ultimi 5 anni (salvo
   società nuove). `applySelective` sistema queste righe (anche 'Split').
-- SOLO FILM (Antonio, 2026-10-30): lungometraggi e cortometraggi, documentari
-  compresi. Niente serie (tolte da modulo e prompt; i vecchi report di serie
-  si vedono ancora).
-- Produttori in ogni paese (2026-10-30, "stessa qualità per chi usa OneCiak
-  dalla Svezia o dalla Cina"): sezione G di `reportPrompts.js` (5 ricerche) +
-  `checkNamed` in grounding.js: un produttore resta SOLO se la pagina della
-  fonte contiene il suo nome (senza Srl/Ltd/AB...) E il titolo del film; un
-  "film" uguale al nome dell'azienda viene scartato. Prova del 2026-10-30:
-  Svezia 2, Cina 4, Italia 4 produttori veri. `next_step` nella sezione A.
-- Prompt: `stageRules` (fase del progetto), rubrica `SCORING` (voto = media delle 5 aree), niente previsioni di
-  incasso in euro né prezzi E&O. Ogni voce: "Source: dominio · checked data"
-  su sito, PDF e mail.
-- Fact-check sul sito live del 2026-10-22: anteprime 90% corrette, report
-  completi 78%, 0 enti inventati (vecchio motore: 23%). Dal 2026-10-30
-  `FULL_MAX_TOKENS` = 32000 (a 16000 una sezione si interrompeva a metà JSON e
-  il report falliva: "Unexpected end of JSON input"). Problemi noti: regole
-  di prima visione a volte parafrasate male, fondi senza scadenza scritta,
-  qualche film di confronto poco pertinente, a volte fonti da aggregatori
-  (es. asianfilmfestivals.com per Locarno), nei corti spesso nessun film di
-  confronto (regola severa, voluto). Costo del report con i produttori: da
-  misurare sui primi report veri.
+- Prompt: `stageRules` (fase del progetto), rubrica `SCORING` (voto = media
+  delle 5 aree), niente previsioni di incasso in euro né prezzi E&O. Ogni
+  voce: "Source: dominio · checked data" su sito, PDF e mail.
+- Qualità misurata sul sito live (fact-check): anteprime 90% corrette, report
+  completi 78%, 0 enti inventati. Problemi noti: regole di prima visione a
+  volte parafrasate male, fondi senza scadenza scritta, qualche film di
+  confronto poco pertinente, a volte fonti da aggregatori, nei corti spesso
+  nessun film di confronto (regola severa, voluto).
 - **Prove**: PR bozza #81 (`test-sourced-reports`) = anteprima
   `deploy-preview-81--oneciak.netlify.app`, genera i report sulla preview.
   Ha commit "TEST ONLY" (mostra sempre il motivo dell'errore, limite 12;
-  `CONTEXT` NON esiste mentre girano le funzioni): MAI su main, la
-  PR non va mai mergiata. Per aggiornarla: checkout dei file dal branch di
-  lavoro sopra `origin/test-sourced-reports`. Mail di prova a
-  `delivered+X@resend.dev` (non arrivano a nessuno).
+  `CONTEXT` NON esiste mentre girano le funzioni): MAI su main, la PR non va
+  mai mergiata. Per aggiornarla: checkout dei file dal branch di lavoro sopra
+  `origin/test-sourced-reports`. Mail di prova a `delivered+X@resend.dev`.
 
-## Ricerca "come si fa davvero un film" (2026-10-28)
+## Ricerca "come si fa davvero un film"
 
 Doc privato "Come si fa davvero un film: ricerca per OneCiak"
 (claude.ai/artifact/JrLNDdn3koDmXdo6Lv3MuH). Punti chiave verificati: solo il
 25,3% degli esordienti fa un secondo film entro 5 anni (Follows 2026); in
-Italia senza società di produzione niente fondi per sviluppo e produzione;
-le serie passano da bibbia, pilota e mercati di coproduzione (servono
-società). Da qui "Who can apply", "Before you can apply", regole per le serie
-e calendario; poi (2026-10-30) solo film, prossimo passo e produttori. Ancora
-scoperto: promemoria via email
-(serve conservare gli indirizzi: decide l'avvocato).
+Italia senza società di produzione niente fondi per sviluppo e produzione. Da
+qui "Who can apply", "Before you can apply", prossimo passo, produttori e
+calendario. Ancora scoperto: promemoria via email (serve conservare gli
+indirizzi: decide l'avvocato).
 
 ## Sicurezza
 
@@ -265,42 +256,39 @@ scoperto: promemoria via email
   `maxlength` del modulo.
 - `start-full-report` firma id+email+progetto (`payloadSig.js`), la funzione
   in background rifiuta firme non valide; massimo 5 report al giorno per
-  email, 3 ogni 3 ore per IP. IP mai salvati in chiaro (HMAC).
+  email, 3 ogni 3 ore per IP, anteprime 10 l'ora per IP. IP mai salvati in
+  chiaro (HMAC).
 - Errori 500 generici al client, dettagli solo in `console.error`.
   `admin-stats.html` manda la chiave nell'header `X-Admin-Key`.
 - Netlify pubblica tutta la cartella (`publish = "."`): CLAUDE.md, funzioni,
-  package*.json, `.claude/`, `.playwright/` sono chiusi con 404 in
-  `netlify.toml`. Ogni nuovo file non del sito alla radice va aggiunto lì.
+  package*.json, `.claude/`, `.playwright/`, `.impeccable/` sono chiusi con
+  404 in `netlify.toml`. Ogni nuovo file non del sito alla radice va
+  aggiunto lì.
 
 ## Legale (in sospeso: Antonio sente un avvocato)
 
-Controllo su fonti ufficiali del 2026-10-19. Antonio NON ha partita IVA.
-Privacy incompleta rispetto al GDPR art. 13 (titolare, basi giuridiche,
-trasferimenti USA, tempi di conservazione, reclamo al Garante). NON scrivere
-il nome di Antonio sul sito finché non decide. Oggi si conservano senza
-scadenza report + email e l'indice My Reports; proposte in attesa:
-cancellazione dopo 30 giorni e niente My Reports ("strada A") oppure report
-solo a schermo ("strada B"). Da valutare: AI Act art. 50(2), domicilio ex
-D.Lgs. 70/2003 art. 7. Privacy e termini si riscrivono dopo l'avvocato (i
-trattini lunghi sono già stati tolti il 2026-11-07, solo punteggiatura).
-Scheda per l'avvocato (2026-11-01, ricavata dal codice): doc privato "Scheda
-dati OneCiak per l'avvocato" (claude.ai/artifact/Y776k28X7HyxzMxcQgNXDX).
-I 4 punti in cui la privacy non corrispondeva al sito (conservazione senza
-scadenza, campi del 23 ottobre, Cloudflare per il PDF, modulo segnalazioni)
-sono stati corretti nella privacy il 2026-11-01. Restano per l'avvocato le
-parti legali (titolare, basi giuridiche, trasferimenti, reclamo).
+Antonio NON ha partita IVA. Privacy incompleta rispetto al GDPR art. 13
+(titolare, basi giuridiche, trasferimenti USA, tempi di conservazione,
+reclamo al Garante). NON scrivere il nome di Antonio sul sito finché non
+decide. Oggi si conservano senza scadenza report + email e l'indice My
+Reports; proposte in attesa: cancellazione dopo 30 giorni e niente My
+Reports ("strada A") oppure report solo a schermo ("strada B"). Da valutare:
+AI Act art. 50(2), domicilio ex D.Lgs. 70/2003 art. 7. Privacy e termini si
+riscrivono dopo l'avvocato. Scheda per l'avvocato ricavata dal codice: doc
+privato "Scheda dati OneCiak per l'avvocato"
+(claude.ai/artifact/Y776k28X7HyxzMxcQgNXDX); i fatti nella privacy oggi
+corrispondono al sito, restano le parti legali.
 
 ## Marketing
 
 - Google indicizza già il sito (confermato da Antonio). WebSearch non è Google.
 - Agente del lunedì (Routine `trig_01LhjUc5ZkrXiqCkiqh5hiKo`, lunedì 8:52 ora
-  italiana): controlla il sito, prepara 3 post come Artifact privato (niente
-  più bozze di guide). Dal 2026-11-02 apre il messaggio con il "punto della
-  situazione" che Antonio vuole ogni lunedì: il sito in breve, cosa è
-  cambiato in settimana (git log di main), le 3 cose da fare (da "Cosa
-  manca" qui sotto: tenerla aggiornata). Non può fare push e non pubblica.
-- Canali verificati consegnati il 2026-10-19 (r/Screenwriting vieta contenuti
-  AI, r/Filmmakers vieta i post solo-link).
+  italiana): apre con il "punto della situazione" (il sito in breve, cosa è
+  cambiato in settimana dal git log di main, le 3 cose da fare prese da
+  "Cosa manca" qui sotto: tenerla aggiornata), controlla il sito, prepara 3
+  post come Artifact privato. Non può fare push e non pubblica.
+- Canali verificati: r/Screenwriting vieta contenuti AI, r/Filmmakers vieta
+  i post solo-link.
 
 ## Cosa manca, in ordine
 
@@ -311,43 +299,46 @@ parti legali (titolare, basi giuridiche, trasferimenti, reclamo).
    iPhone vero).
 3. Lancio (Product Hunt, Reddit, scuole): dopo l'avvocato, con la frase di
    Antonio sul "perché" e una data; ogni testo lo approva lui.
-4. Fatto il 2026-11-02: Northbound ha "Your next step", 3 produttori
-   verificati a mano (Vivo Film, Leone Film Group, Lava Films) e la voce
-   TorinoFilmLab scritta in modo che resti vera dopo il 5 novembre.
+
+## Controlli (da rifare dopo ogni modifica visibile o pulizia)
+
+- **Giro completo sul sito vero**: 9 viste (home, menu, modulo, report di
+  esempio con tutto aperto, My Reports, roadmap, privacy, termini, 404) × 6
+  larghezze (262, 320, 393, 430, 1280, 1600) × chiaro/scuro/senza
+  preferenza. Cercare: errori JS, richieste fallite, pagina più larga dello
+  schermo, testo azzurro Safari, trattini lunghi, testi affiancati non
+  allineati (quelli andati a capo uno sotto l'altro vanno bene, ma guardarli).
+- **Funzioni**: modulo vuoto (7 caselle rosse), glossario apre/chiude, copia
+  email produttori, PDF scaricato, calendario nascosto senza date, una
+  analisi vera su `/.netlify/functions/analyze` (NON start-full-report).
+- **Pulizia**: confronto pixel per pixel prima/dopo (server locale col codice
+  vecchio da `git archive HEAD` su un'altra porta) su 8 viste × telefono e
+  computer × 3 schemi: deve dare 0 differenze.
+- **Link esterni** del report di esempio e della roadmap: tutti 2xx/3xx. Il
+  regolamento di Locarno ha un controllo anti-robot Cloudflare (403): non
+  verificabile da qui, va aperto a mano.
 
 ## Strumenti
 
 - **Impeccable** (`.claude/skills/impeccable`): scanner di anti-pattern, gira
-  in locale senza rete (verificato con strace). Hook in
-  `.claude/settings.local.json` dopo ogni Edit/Write e su Stop. Comando:
+  in locale senza rete. Hook in `.claude/settings.local.json` dopo ogni
+  Edit/Write e su Stop. Comando:
   `.claude/skills/impeccable/scripts/impeccable detect index.html`. Falsi
-  positivi documentati con motivo in `.impeccable/config.json`: non toglierli.
-- **Playwright CLI** (`.claude/skills/playwright-cli`, `@playwright/cli`
-  0.1.22, Apache-2.0, Microsoft): reinstallare a ogni sessione con
-  `npm install -g @playwright/cli@0.1.22`, `NO_UPDATE_NOTIFIER=1`, config in
-  `.playwright/cli.config.json`.
-- **Playwright MCP** in `.mcp.json` con `--executable-path
-  /opt/pw-browsers/chromium --headless`. Se non c'è: script Playwright a mano
-  con `NODE_PATH=/opt/node22/lib/node_modules node script.js` (sempre
-  funzionante).
-- Server locale: `nohup setsid python3 -m http.server 8143 --directory
-  /home/user/oneciak > log 2>&1 < /dev/null & disown` (con `&` semplice
-  muore quando cambia la cartella). Test e script stanno nello scratchpad e
-  si perdono a fine sessione.
-- **Controllo completo** (2026-11-07, "ricontrolla tutto per filo e per
-  segno"): 162 viste (9 pagine, 6 larghezze da 262 a 1600, chiaro/scuro/senza
-  preferenza) su oneciak.com: errori JS, richieste fallite, pagina più larga
-  dello schermo, testo azzurro Safari, trattini lunghi, allineamenti; più
-  modulo vuoto, glossario, copia email, PDF, una analisi vera, 37 link
-  esterni (Locarno rules: 403 Cloudflare anti-robot, non verificabile da qui).
-  Prima di dire "funziona" ad Antonio: misurarlo, mai dedurlo.
+  positivi documentati con motivo in `.impeccable/config.json`.
 - **Emil Kowalski design-eng** (`.claude/skills/emil-design-eng`, da
   github.com/emilkowalski/skills commit c8a7962, MIT, solo testo): regole per
-  animazioni e reazioni al tocco. Applicate il 2026-11-06: curva `--ease`
-  = `cubic-bezier(0.23, 1, 0.32, 1)` (come roadmap.css), aperture di aree e
-  righe 220 ms con `openIn`, bottoni 160 ms, niente `transition: all` né
-  `scale(0)`.
-- Tolti o scartati: Taste (2026-10-27, "è una merda"), awesome-claude-design. Valutati il 2026-10-29 e
-  non installati: Context7, Graphify, 21st MCP (componenti "da AI"), Agent
-  Skills (già le usiamo); Strix (test di sicurezza AI) rimandato, servirebbe
-  una chiave e un tetto di spesa decisi da Antonio, solo sulla preview.
+  animazioni e reazioni al tocco.
+- **Playwright**: script a mano con `NODE_PATH=/opt/node22/lib/node_modules
+  node script.js` (sempre funzionante). Playwright CLI
+  (`.claude/skills/playwright-cli`, `@playwright/cli` 0.1.22): reinstallare a
+  ogni sessione con `npm install -g @playwright/cli@0.1.22`, config in
+  `.playwright/cli.config.json`. Playwright MCP in `.mcp.json`.
+- Server locale: `nohup setsid python3 -m http.server 8143 --directory
+  /home/user/oneciak > log 2>&1 < /dev/null & disown` (muore tra un messaggio
+  e l'altro: ricontrollare prima di usarlo). Test e script stanno nello
+  scratchpad e si perdono a fine sessione.
+- Per caricare le funzioni del server in locale serve `@netlify/blobs`:
+  installarlo in una cartella dello scratchpad e usare `NODE_PATH`.
+- Scartati: Taste, awesome-claude-design, Context7, Graphify, 21st MCP,
+  Agent Skills. Strix (test di sicurezza AI) rimandato: servirebbe una chiave
+  e un tetto di spesa decisi da Antonio, solo sulla preview.

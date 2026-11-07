@@ -78,4 +78,4 @@ function extractJSON(text) {
   return JSON.parse(raw);
 }
 
-module.exports = { callClaude, extractJSON, answerText, collectSearchUrls };
+module.exports = { callClaude, extractJSON };

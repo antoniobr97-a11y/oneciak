@@ -86,4 +86,4 @@ function applySelective(report, sel) {
   });
 }
 
-module.exports = { promptFacts, applyFacts, factsFor };
+module.exports = { promptFacts, applyFacts };
