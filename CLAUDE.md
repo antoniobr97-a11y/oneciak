@@ -182,9 +182,17 @@ diversi per pallini e voti; le serie TV.
   marketing, budget, legale, piano a 90 giorni e i testi lunghi. Indice delle
   aree che segue lo scorrimento (`mountAreaNav`).
 - **Glossario sulla parola**: `glossify()` sottolinea a puntini la prima
-  volta di ogni termine di `GLOSSARY` in ogni parte del report; il tocco apre
-  la spiegazione sotto la riga, il secondo tocco la chiude. Mai dentro link,
-  bottoni, titoli, fonti, email, etichette che non vanno a capo.
+  volta di ogni termine di `GLOSSARY` in ogni parte del report. La parola è
+  testo normale (si può selezionare), il tocco apre una nuvoletta vicino alla
+  parola (`openGloss`, sotto se c'è spazio, sopra se no, sempre dentro lo
+  schermo); un secondo tocco, un tocco fuori o Esc la chiude. Mai dentro
+  link, bottoni, titoli, fonti, email, etichette che non vanno a capo.
+- **"More" solo dove serve**: un testo fino a 90 parole (`FOLD_WORDS`) si
+  vede intero; solo i più lunghi mostrano la prima frase e "More"/"Read
+  more" (`foldShort`, `parasFold`).
+- **Righe chiuse di "Who to contact"**: sotto il titolo si vedono già i primi
+  3 nomi (`namesLine`, al massimo 2 righe); il dettaglio si apre col tocco.
+  Nel piano il nome della fase è scuro, il testo più chiaro.
 - **Report di esempio Northbound**: report vero del motore (voto 5.0), fonti
   controllate il 23 ottobre e il 2 novembre 2026; 3 produttori verificati a
   mano (Vivo Film, Leone Film Group, Lava Films); la voce TorinoFilmLab è
