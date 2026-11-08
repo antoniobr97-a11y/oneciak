@@ -201,8 +201,7 @@ diversi per pallini e voti; le serie TV.
   Nel piano il nome della fase è scuro, il testo più chiaro.
 - **Report di esempio Northbound**: report vero del motore (voto 5.0), fonti
   controllate il 23 ottobre e il 2 novembre 2026; 3 produttori verificati a
-  mano (Vivo Film, Leone Film Group, Lava Films); la voce TorinoFilmLab è
-  scritta in modo da restare vera dopo la scadenza.
+  mano (Vivo Film, Leone Film Group, Lava Films); TorinoFilmLab FeatureLab 2027 è segnato "Closed (5 November 2026)".
 - **`/roadmap/`**: 9 fasi, 49 lavori con spunta (solo nel browser,
   `oneciak-roadmap-v1`), 27 citazioni verificate parola per parola il
   2026-10-24. Si raggiunge solo dal report ("Your plan", collegato alla fase
