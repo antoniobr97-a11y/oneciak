@@ -7,13 +7,12 @@ const SITE_BASE = (process.env.URL || process.env.SITE_URL || 'https://oneciak.c
 
 // Netlify Background Function (note the -background suffix): acks the
 // triggering request with 202 immediately and keeps running for up to 15
-// minutes. Triggered directly by start-full-report.js (no payment involved)
-// instead of a Stripe webhook. Since this endpoint is a public URL like any
+// minutes. Triggered by start-full-report.js. Since this endpoint is a public URL like any
 // other Netlify function, anyone could otherwise POST arbitrary {id, project,
 // email} at it directly, bypassing start-full-report's rate limit entirely —
 // so a request is only honored if it carries a token that verifies against
 // the id, which only start-full-report.js (holding REPORT_TOKEN_SECRET) can
-// produce. This is the free-tier equivalent of Stripe's webhook signature.
+// produce.
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Not Allowed' };
 

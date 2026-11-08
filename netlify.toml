@@ -27,8 +27,20 @@
 
 # Repository files that are not part of the site must never be served:
 # CLAUDE.md holds internal notes (founder's name, legal status), and the
-# function sources and package files are code, not pages. Found public on
-# 2026-10-27 and closed here. Netlify applies these before serving files.
+# function sources and package files are code, not pages: closed here. Netlify applies these before serving files.
+# Old /guides/ links (pages no longer on the site) go to the home.
+[[redirects]]
+  from = "/guides"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/guides/*"
+  to = "/"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/CLAUDE.md"
   to = "/404.html"
