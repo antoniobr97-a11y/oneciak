@@ -312,9 +312,11 @@ corrispondono al sito, restano le parti legali.
 
 1. Avvocato: privacy, strada A o B, nome di Antonio. Poi riscrivere privacy e
    termini.
-2. Prima del lancio: decidere il tetto di spesa Anthropic; prova completa dal
-   vivo (modulo, report, mail, mittente vero e non "onboarding@resend.dev",
-   iPhone vero).
+2. Prima del lancio: decidere il tetto di spesa Anthropic e misurare il costo
+   di un report completo con i produttori (dalla console Anthropic, pagina
+   Usage: da qui non si vede). Prova dal vivo fatta da Antonio l'8 novembre
+   2026 su iPhone (The Salt Road): report arrivato, mittente vero
+   `reports@report.oneciak.com`.
 3. Lancio (Product Hunt, Reddit, scuole): dopo l'avvocato, con la frase di
    Antonio sul "perché" e una data; ogni testo lo approva lui.
 
