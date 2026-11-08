@@ -42,7 +42,7 @@ const LISTS = {
   market_comps: { figures: ['budget'], prose: ['result', 'match'] },
   cautionary_comps: { figures: ['budget'], prose: ['what_went_wrong', 'match'] },
   festival_calendar: { figures: ['deadline'], prose: ['fit'] },
-  lab_and_market_opportunities: { figures: [], prose: ['fit'] },
+  lab_and_market_opportunities: { figures: ['deadline'], prose: ['fit'] },
   distribution_platforms: { figures: [], prose: ['reason'] },
   sales_agents: { figures: [], prose: ['focus', 'why'] },
   producers: { figures: ['year'], prose: ['why', 'approach'] }
@@ -139,7 +139,7 @@ function keepFactualSentences(text, pageText) {
 // Sites that copy festival and fund listings from elsewhere and are often
 // out of date. They can show that something exists, but a deadline or
 // amount taken only from them is not shown.
-const AGGREGATORS = ['festagent.com', 'fundsforngos.org', 'vitrina.ai', 'scriptmatch.ai', 'asianfilmfestivals.com', 'indieshortsmag.com', 'mauxa.com', 'filmfreeway.com', 'festhome.com', 'withoutabox.com', 'shortfilmdepot.com', 'clickforfestivals.com', 'movibeta.com'];
+const AGGREGATORS = ['festagent.com', 'fundsforngos.org', 'vitrina.ai', 'scriptmatch.ai', 'asianfilmfestivals.com', 'indieshortsmag.com', 'mauxa.com', 'filmfreeway.com', 'festhome.com', 'withoutabox.com', 'shortfilmdepot.com', 'clickforfestivals.com', 'movibeta.com', 'caligari.com.ar', 'filmcane.com'];
 function isAggregator(url) {
   try {
     const host = new URL(url).hostname.toLowerCase();
@@ -235,6 +235,16 @@ async function checkNamed(item, pages) {
   if (!text.includes(' ' + name + ' ') || !text.includes(' ' + film + ' ')) item.unconfirmed = true;
 }
 
+// How a producer takes projects is advice the reader acts on: it stays only
+// next to the sentence of the source page that says it, word for word.
+async function checkApproach(item, pages) {
+  const q = item.approach_quote;
+  delete item.approach_quote;
+  if (!item.approach) return;
+  const html = q && !isAggregator(item.source) ? await pages(item.source) : null;
+  if (!quoteOnPage(q, html)) item.approach = null;
+}
+
 async function checkQuote(item, pages) {
   if (item.rule_quote == null) return;
   const html = isAggregator(item.source) ? null : await pages(item.source);
@@ -308,7 +318,7 @@ async function groundReport(report, searchUrlsByField, today, fetcher) {
       }));
       if (QUOTED.includes(field)) checks.push(checkQuote(out, pages));
       else delete out.rule_quote;
-      if (field === 'producers') checks.push(checkNamed(out, pages));
+      if (field === 'producers') { checks.push(checkNamed(out, pages)); checks.push(checkApproach(out, pages)); }
     });
     report[field] = kept;
     stats.kept += kept.length;
@@ -346,7 +356,7 @@ async function groundReport(report, searchUrlsByField, today, fetcher) {
   // (rule_quote, checked word for word above); without it, it goes.
   (report.financial_sources || []).forEach(item => { item.applicant = applicantOf(item); });
 
-  ['financial_sources', 'festival_calendar'].forEach(field => {
+  ['financial_sources', 'festival_calendar', 'lab_and_market_opportunities'].forEach(field => {
     (report[field] || []).forEach(item => markIfClosed(item, 'deadline', today));
   });
 

@@ -2907,7 +2907,11 @@ function buildBeforeApply(b) {
 function buildLabOpportunities(labs) {
   if (!labs || !labs.length) return '';
   var h = '';
-  labs.forEach(function(l){ if (l) h += entry(l.name, null, '', l.fit, l); });
+  labs.forEach(function(l){
+    if (!l) return;
+    var dl = l.source ? notStated(l.deadline, 'Not published on the source, check before planning') : l.deadline;
+    h += entry(l.name, null, fact('Deadline', dl, isClosed(dl) || !l.deadline), l.fit, l);
+  });
   return rblock('Labs and markets', howMany(labs, 'programme', 'programmes'), h, false, labs.map(function(l){ return l && l.name; }));
 }
 
@@ -3365,6 +3369,7 @@ async function savePDF() {
       lastResult.lab_and_market_opportunities.forEach(function(l){
         if (!l) return;
         ln(l.name||'',10,true);
+        if (l.source) ln('Deadline: '+notStated(l.deadline, 'not published on the source, check before planning'),9,false,26,25,22);
         ln(l.fit||'',9,false,122,118,112);
         if (l.source && l.rule_quote) ln('The rule, word for word: \u201C'+l.rule_quote+'\u201D',9,false,26,25,22);
         if (l.source) ln(pdfSource(l),8,false,150,148,145);
@@ -3468,6 +3473,7 @@ function deadlineEvents(r) {
   }
   add(r && r.financial_sources, 'name', 'Fund deadline');
   add(r && r.festival_calendar, 'festival', 'Festival deadline');
+  add(r && r.lab_and_market_opportunities, 'name', 'Lab deadline');
   return out.sort(function(a, b){ return a.date - b.date; });
 }
 function setCalendarButton(r) {

@@ -183,7 +183,7 @@ function labeledTextHtml(label, text) {
 function labOpportunitiesHtml(labs) {
   if (!labs || !labs.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#5c5852">Labs &amp; Market Opportunities</span>';
-  labs.forEach(l => { if (!l) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(l.name) + '</b><br><span style="font-size:12px;color:#5c5852">' + esc(l.fit) + '</span>' + sourceHtml(l) + '</p>'; });
+  labs.forEach(l => { if (!l) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(l.name) + '</b>' + (l.deadline ? ' · Deadline: ' + esc(l.deadline) : '') + '<br><span style="font-size:12px;color:#5c5852">' + esc(l.fit) + '</span>' + sourceHtml(l) + '</p>'; });
   h += '</div>';
   return h;
 }
