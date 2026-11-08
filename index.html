@@ -861,9 +861,12 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .an-sec:active, .an-item:active, .an-top:active { transform: scale(0.97); }
 .an-sec { display: block; width: 100%; padding: 9px 0; font-size: 14.5px; font-weight: 700; color: var(--muted); transition: color 0.2s; }
 .an-sec.on { color: var(--text); }
-.an-areas { margin: 0 0 6px; }
-.an-item { display: flex; align-items: baseline; width: 100%; padding: 6px 0 6px 12px; font-size: 14px; color: var(--muted); box-shadow: inset 1px 0 0 var(--border); transition: color 0.2s, box-shadow 0.2s; }
-.an-item.on { color: var(--text); box-shadow: inset 2px 0 0 #b4552b; }
+.an-areas { margin: 0 0 6px; border-left: 1px solid var(--border); }
+.an-item { position: relative; display: flex; align-items: baseline; width: 100%; padding: 6px 0 6px 12px; font-size: 14px; color: var(--muted); transition: color 0.2s; }
+.an-item.on { color: var(--text); }
+/* The marker is a real 2px line, not a box-shadow: Safari drew the shadow as
+   lines across the whole row. */
+.an-item.on::before { content: ''; position: absolute; left: -1px; top: 5px; bottom: 5px; width: 2px; border-radius: 1px; background: #b4552b; }
 .an-score { font-size: 12.5px; color: var(--muted); margin-left: auto; padding-left: 10px; font-variant-numeric: tabular-nums; }
 .an-col { display: none; }
 @media (min-width: 1100px) {
@@ -1166,7 +1169,8 @@ details.more > summary:active { transform: scale(0.98); }
   #sec-form::before { background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0)); }
   @media (max-width: 1099px) { .area-nav { background: rgba(20,13,16,0.96); } .area-nav.is-open .an-col { background: #140d10; } }
   /* rust labels lighten on the night */
-  .f-steps li.on, .an-item.on { box-shadow: inset 2px 0 0 #f0a07c; }
+  .f-steps li.on { box-shadow: inset 2px 0 0 #f0a07c; }
+  .an-item.on::before { background: #f0a07c; }
 
 .tips-label, .action-label, .an-top, .fs-col .fs-label, .loading-dim.is-active .loading-dim-num { color: #f0a07c; }
   #sec-loading .loading-dim.is-active .loading-dim-num { color: #ffe0cf; }
