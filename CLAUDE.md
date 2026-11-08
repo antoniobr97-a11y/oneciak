@@ -233,7 +233,15 @@ diversi per pallini e voti; le serie TV.
   pagina contiene il nome (senza Srl/Ltd/AB...) E il titolo del film; un
   "film" uguale al nome dell'azienda viene scartato. Funziona in ogni paese
   (provato: Svezia, Cina, Italia). L'email per i produttori non nomina mai
-  un'azienda: usa [COMPANY NAME].
+  un'azienda: usa [COMPANY NAME]. Come un produttore accetta progetti
+  (`approach`) resta solo se la sua frase (`approach_quote`) è sulla pagina
+  parola per parola (`checkApproach`).
+- Laboratori e mercati hanno la scadenza come fondi e festival: passata
+  diventa "Closed (...)", assente diventa "Not published on the source,
+  check before planning"; finisce anche nel calendario .ics. Siti di notizie
+  e raccolte (`AGGREGATORS`, compresi caligari.com.ar e filmcane.com): il
+  nome resta, scadenze, cifre e citazioni no. Il prompt chiede di citare la
+  pagina ufficiale e di lasciare fuori le chiamate con solo edizioni passate.
 - `verifiedFacts.js`: fatti controllati A MANO, da ricontrollare quando cambia
   la legge. Tax credit italiano 30% per produttori indipendenti, tetto 4 mln
   (D.I. MiC-MEF 6/7/2026 n. 281). Bando MiC contributi selettivi 2026
