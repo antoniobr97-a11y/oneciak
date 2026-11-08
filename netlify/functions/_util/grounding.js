@@ -171,14 +171,22 @@ function lastDateIn(text) {
   while ((m = dots.exec(s))) found.push(Date.UTC(+m[3], +m[2] - 1, +m[1]));
   return found.length ? Math.max.apply(null, found) : null;
 }
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+function dayMonthYear(t) { const d = new Date(t); return d.getUTCDate() + ' ' + MONTH_NAMES[d.getUTCMonth()] + ' ' + d.getUTCFullYear(); }
 function markIfClosed(item, field, today) {
-  const last = lastDateIn(item[field]);
-  if (last !== null && last < Date.parse(today + 'T00:00:00Z')) {
-    item.closed = true;
-    // The model sometimes already wrote "closed": say it once.
-    const v = String(item[field]).replace(/^\s*closed\b[\s:,-]*/i, '').replace(/\s*\((?:round |call |now )?closed\)\s*$/i, '').replace(/[\s,;]+(?:round |call )?closed\.?\s*$/i, '').trim();
-    item[field] = /^\(.*\)$/.test(v) ? 'Closed ' + v : 'Closed (' + v + ')';
-  }
+  const own = item[field] != null && String(item[field]).trim() !== '';
+  // No deadline of its own: the rule quoted from the official page may still
+  // date the call ("was open from 15 January to 13 April 2026").
+  const last = lastDateIn(own ? item[field] : item.rule_quote);
+  if (last === null || last >= Date.parse(today + 'T00:00:00Z')) return;
+  item.closed = true;
+  if (!own) { item[field] = 'Closed (' + dayMonthYear(last) + ')'; return; }
+  // The model sometimes already wrote "closed": say it once.
+  const v = String(item[field]).replace(/\bclosed\b/gi, ' ')
+    .replace(/\(\s*[;,:]?\s*\)/g, ' ').replace(/\(\s*[;,:]\s*/g, '(').replace(/\s*[;,:]\s*\)/g, ')')
+    .replace(/\s*[;,]\s*[;,]\s*/g, '; ').replace(/\s+([;,])/g, '$1').replace(/\s{2,}/g, ' ')
+    .replace(/^[\s,;:.-]+|[\s,;:-]+$/g, '').trim();
+  item[field] = /^\(.*\)$/.test(v) ? 'Closed ' + v : /[()]/.test(v) ? 'Closed: ' + v : 'Closed (' + v + ')';
 }
 
 // A rule quoted to the reader (premiere requirement, who can apply) is
