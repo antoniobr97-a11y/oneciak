@@ -209,6 +209,10 @@ diversi per pallini e voti; le serie TV.
   del progetto con `STAGE_TO_ROADMAP`). CSS `roadmap/roadmap.css`, da tenere
   allineato al sito. Se cambia una regola citata, ricontrollare.
 - `/guides/*` rimanda alla home (301 in `netlify.toml`).
+- **Traduttore del browser**: permesso (Chrome, Safari traducono il sito).
+  Solo i nomi propri (fondi, festival, aziende, film: `.entry-name`,
+  `.rblock-names`) hanno `translate="no"`, così restano quelli da cercare.
+  Nessuna riga "In English" sotto i nomi (Antonio: "i nomi non metterli").
 
 ## Motore dei report
 
