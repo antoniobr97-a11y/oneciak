@@ -218,11 +218,13 @@ diversi per pallini e voti; le serie TV.
 - Modello `claude-haiku-5-5` (anteprima effort `low`), ricerca web Anthropic:
   anteprima 2 ricerche; report completo sezioni A-G di `reportPrompts.js`
   con ricerche B 6, C 5, D 6, E 5, G 5. `FULL_MAX_TOKENS` 32000 (con meno una
-  sezione si interrompe a metà JSON). Costi misurati: anteprima ~0,025 $,
-  report completo ~0,22-0,24 $ senza la sezione produttori (con produttori:
-  da misurare sui primi report veri). Limite di spesa Anthropic: 50 al mese
-  (circa 200 report completi; poi le analisi falliscono fino al mese dopo: da
-  decidere con Antonio prima del lancio).
+  sezione si interrompe a metà JSON). Costi misurati: anteprima ~0,025 $;
+  report completo con produttori ~0,35-0,40 $ (misura del 9 novembre 2026:
+  il credito è sceso da 22,46 a 22,02 $ con 1 report completo e 2 anteprime;
+  la ricerca web è circa tre quarti della spesa). Credito prepagato rimasto
+  il 9 novembre: 22,02 $ (circa 55 report completi). Limite di spesa
+  Anthropic: 50 al mese (circa 120 report completi): da decidere con Antonio
+  prima del lancio, insieme alla ricarica del credito.
 - `grounding.js`: una voce (fondo, festival, film, agente, piattaforma,
   produttore) resta solo se la sua fonte è tra i risultati della ricerca;
   date e cifre solo se sono sulla pagina; niente cifre da aggregatori;
@@ -319,9 +321,8 @@ corrispondono al sito, restano le parti legali.
 
 1. Avvocato: privacy, strada A o B, nome di Antonio. Poi riscrivere privacy e
    termini.
-2. Prima del lancio: decidere il tetto di spesa Anthropic e misurare il costo
-   di un report completo con i produttori (dalla console Anthropic, pagina
-   Usage: da qui non si vede). Prova dal vivo fatta da Antonio l'8 novembre
+2. Prima del lancio: decidere il tetto di spesa Anthropic e ricaricare il
+   credito (22,02 $ il 9 novembre, circa 55 report completi). Prova dal vivo fatta da Antonio l'8 novembre
    2026 su iPhone (The Salt Road): report arrivato, mittente vero
    `reports@report.oneciak.com`.
 3. Lancio (Product Hunt, Reddit, scuole): dopo l'avvocato, con la frase di
