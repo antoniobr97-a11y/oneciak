@@ -2256,8 +2256,9 @@ function renderFree(r, title) {
     '<div class="overall-num score-'+col+'">'+Number(r.overall_score||5).toFixed(1)+'<span class="denom">/10</span></div>'+
     '</div>';
 
-  // Summary card
-  document.getElementById('execSummary').innerHTML =
+  // Summary card, shown after the five areas
+  document.getElementById('execSummary').innerHTML = '';
+  var execCard =
     '<div class="exec-card">'+
     ((r.biggest_risk||r.biggest_opportunity) ? '<div class="exec-row">'+
       '<div class="exec-box risk"><p class="exec-box-text"><b class="exec-lead">Biggest risk.</b> '+esc(r.biggest_risk)+'</p></div>'+
@@ -2312,7 +2313,7 @@ function renderFree(r, title) {
   });
   html += '</div>';
 
-  document.getElementById('accordionMenu').innerHTML = html + roadmapBlock(lastProject);
+  document.getElementById('accordionMenu').innerHTML = html + execCard + roadmapBlock(lastProject);
   document.getElementById('accordionMenu').style.display = 'block';
   mountReportNav(freeSections);
   setCalendarButton(null);
@@ -2440,7 +2441,7 @@ function renderFull(r, title) {
      contact (every name in one place, not scattered across the areas),
      then the film area by area and the plan. Biggest risk / opportunity,
      marketing, budget, legal and the other long texts stay in the PDF. */
-  document.getElementById('execSummary').innerHTML = buildNextStep(r.next_step) + buildContacts(r);
+  document.getElementById('execSummary').innerHTML = '';
 
   // The film, area by area: verdict, what to do, red flags and strengths.
   // Comparable films stay with the market, the only list that is not a contact.
@@ -2475,7 +2476,9 @@ function renderFull(r, title) {
   });
   html += '</div>';
 
-  document.getElementById('accordionMenu').innerHTML = html + buildPlanSection(r, lastProject);
+  // The order of the three questions: does my film stand up (the five areas),
+  // what do I do now, who do I contact; then the plan.
+  document.getElementById('accordionMenu').innerHTML = html + buildNextStep(r.next_step) + buildContacts(r) + buildPlanSection(r, lastProject);
   setCalendarButton(r);
   document.getElementById('accordionMenu').style.display = 'block';
   mountReportNav(sections);
@@ -2629,9 +2632,9 @@ function goToArea(i) {
   window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
 }
 var REPORT_PARTS = [
+  { q: 'Does my film stand up?', sel: ['#accordionMenu .r-areas-h', '#accordionMenu .accordion-wrap'], areas: true },
   { q: 'What do I do now?', sel: ['.next-step'] },
   { q: 'Who do I contact?', sel: ['.r-contacts'] },
-  { q: 'Does my film stand up?', sel: ['#accordionMenu .r-areas-h', '#accordionMenu .accordion-wrap'], areas: true },
   { q: 'Your plan', sel: ['#accordionMenu .r-plan'] }
 ];
 function partEl(host, p) {
@@ -2694,7 +2697,7 @@ function mountReportNav(sections) {
     if (i != null && sections[i]) cur.innerHTML = esc(sections[i].label)+(sections[i].score != null ? '<span class="an-score">'+Number(sections[i].score).toFixed(1)+'/10</span>' : '');
     else cur.textContent = REPORT_PARTS[k].q;
   };
-  var areasK = 2;
+  var areasK = 0;
   areaNavObserver = new IntersectionObserver(function(entries) {
     entries.forEach(function(e) {
       if (!e.isIntersecting) return;

@@ -75,6 +75,14 @@ con typo quando è frustrato: non vuol dire che vuole un tono più formale.
 
 ## Pubblicare su main (procedura obbligatoria)
 
+**Netlify ha un limite al mese** (il 9 novembre 2026 Antonio era al 75%):
+ogni pubblicazione su main e ogni aggiornamento della preview #81 consuma.
+Quindi: mai pubblicare solo CLAUDE.md o note (restano sul branch e partono
+con la pubblicazione vera successiva); raggruppare le modifiche approvate in
+una sola pubblicazione; provare tutto in locale prima; la preview solo per
+provare il motore dei report; i giri di controllo completi sul sito vero solo
+dopo una pubblicazione, non più volte di seguito.
+
 Mai merge di PR (un merge via API è risultato vuoto e il sito è rimasto
 vecchio). Sempre:
 ```bash
@@ -169,20 +177,23 @@ diversi per pallini e voti; le serie TV.
   (`fitPlaceholders`). Solo film (lunghi e corti, documentari compresi).
 - **Caricamento**: 5 dimensioni che avanzano invece di uno spinner
   (`startLoadingDims` / `finishLoadingDims` / `resetLoadingDims`).
-- **Report completo**, segue le tre domande. Dall'alto: titolo, voto nella
-  scheda di vetro, riassunto (4 righe + "Read more" su telefono); "Your next
-  step" (`buildNextStep`); "Who to contact" (`buildContacts`: Before you can
+- **Report completo**, segue le tre domande nell'ordine della spiegazione
+  semplice. Dall'alto: titolo, voto nella scheda di vetro, riassunto (4 righe
+  + "Read more" su telefono); "Your film, area by area" (5 aree chiuse, una
+  aperta alla volta, `toggleAccordion`; dentro giudizio, "What to do", "Red
+  flags and strengths", Comparable films nel mercato); "Your next step"
+  (`buildNextStep`); "Who to contact" (`buildContacts`: Before you can
   apply, Producers to contact con email da copiare, Funding sources,
   Festival calendar, Labs and markets, Sales agents, righe chiuse con la
-  stessa freccia); "Your film, area by area" (5 aree, una aperta alla volta,
-  `toggleAccordion`; dentro giudizio, "What to do", "Red flags and
-  strengths", Comparable films nel mercato); "Your plan" (`buildPlanSection`)
+  stessa freccia); "Your plan" (`buildPlanSection`)
   + link alla roadmap; in fondo "Download the full report" e calendario
   (.ics, nascosto senza date future). Solo nel PDF: rischio/opportunità,
   marketing, budget, legale, piano a 90 giorni e i testi lunghi.
+- **Anteprima**: titolo, voto, riassunto, poi le 5 aree, poi rischio,
+  opportunità e prossimo passo, poi la richiesta del report completo.
 - **Indice del report** (`mountReportNav`, `REPORT_PARTS`): le tre domande
-  ("What do I do now?", "Who do I contact?", "Does my film stand up?" con
-  sotto le 5 aree e il voto) più "Your plan". Dai 1100px in su è una colonna
+  ("Does my film stand up?" con sotto le 5 aree e il voto, "What do I do
+  now?", "Who do I contact?") più "Your plan". Dai 1100px in su è una colonna
   fissa a sinistra del testo (il testo si sposta a destra, colonna di 640px);
   sotto i 1100px è una barra sotto l'intestazione con la sezione attuale e il
   pulsante "Sections" che apre l'elenco. Compare quando titolo e voto in alto
