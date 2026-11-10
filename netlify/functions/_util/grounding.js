@@ -1,3 +1,4 @@
+const { countryOf, excludes } = require('./eligibility');
 const https = require('https');
 const http = require('http');
 
@@ -157,19 +158,31 @@ function monthIndex(word) {
   if (i === -1) i = MONTHS_IT.indexOf(w);
   return i;
 }
-function lastDateIn(text) {
+function datesIn(text) {
   const s = String(text || '');
   const found = [];
   let m;
   const dmy = /\b(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]{3,9})\.?,?\s+(20\d\d)\b/gi;
-  while ((m = dmy.exec(s))) { const mi = monthIndex(m[2]); if (mi >= 0) found.push(Date.UTC(+m[3], mi, +m[1])); }
+  while ((m = dmy.exec(s))) { const mi = monthIndex(m[2]); if (mi >= 0) found.push({ t: Date.UTC(+m[3], mi, +m[1]), at: m.index }); }
   const mdy = /\b([a-z]{3,9})\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(20\d\d)\b/gi;
-  while ((m = mdy.exec(s))) { const mi = monthIndex(m[1]); if (mi >= 0) found.push(Date.UTC(+m[3], mi, +m[2])); }
+  while ((m = mdy.exec(s))) { const mi = monthIndex(m[1]); if (mi >= 0) found.push({ t: Date.UTC(+m[3], mi, +m[2]), at: m.index }); }
   const iso = /\b(20\d\d)-(\d{2})-(\d{2})\b/g;
-  while ((m = iso.exec(s))) found.push(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  while ((m = iso.exec(s))) found.push({ t: Date.UTC(+m[1], +m[2] - 1, +m[3]), at: m.index });
   const dots = /\b(\d{1,2})[./](\d{1,2})[./](20\d\d)\b/g;
-  while ((m = dots.exec(s))) found.push(Date.UTC(+m[3], +m[2] - 1, +m[1]));
-  return found.length ? Math.max.apply(null, found) : null;
+  while ((m = dots.exec(s))) found.push({ t: Date.UTC(+m[3], +m[2] - 1, +m[1]), at: m.index });
+  return found;
+}
+// The date that closes a call. When the text says "open until", "deadline",
+// "by" or the like, that date counts, not the later dates of the programme
+// itself ("open until 30 September 2026 for the session of March to July
+// 2027" closed in September 2026).
+const CLOSE_WORDS = /\b(until|till|deadline|due|by|before|closes?|closing|ends?|entro|scadenza|jusqu'au|bis)\b[^.;]{0,25}$/i;
+function closingDateIn(text) {
+  const s = String(text || '');
+  const found = datesIn(s);
+  if (!found.length) return null;
+  const marked = found.filter(d => CLOSE_WORDS.test(s.slice(Math.max(0, d.at - 30), d.at)));
+  return Math.max.apply(null, (marked.length ? marked : found).map(d => d.t));
 }
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 function dayMonthYear(t) { const d = new Date(t); return d.getUTCDate() + ' ' + MONTH_NAMES[d.getUTCMonth()] + ' ' + d.getUTCFullYear(); }
@@ -177,7 +190,7 @@ function markIfClosed(item, field, today) {
   const own = item[field] != null && String(item[field]).trim() !== '';
   // No deadline of its own: the rule quoted from the official page may still
   // date the call ("was open from 15 January to 13 April 2026").
-  const last = lastDateIn(own ? item[field] : item.rule_quote);
+  const last = closingDateIn(own ? item[field] : item.rule_quote);
   if (last === null || last >= Date.parse(today + 'T00:00:00Z')) return;
   item.closed = true;
   if (!own) { item[field] = 'Closed (' + dayMonthYear(last) + ')'; return; }
@@ -234,13 +247,30 @@ function nameCore(s) {
 function textCore(html) {
   return ' ' + quoteKey(html).replace(/["'.,:;!?()\[\]]/g, ' ').replace(/\s+/g, ' ') + ' ';
 }
-async function checkNamed(item, pages) {
-  const html = item.source ? await pages(item.source) : null;
+function namesBoth(item, html) {
   const name = nameCore(item.name), film = nameCore(item.film);
   // A film "title" that is just the company name proves nothing.
-  if (!html || name.length < 3 || film.length < 2 || name.includes(film) || film.includes(name)) { item.unconfirmed = true; return; }
+  if (!html || name.length < 3 || film.length < 2 || name.includes(film) || film.includes(name)) return false;
   const text = textCore(html);
-  if (!text.includes(' ' + name + ' ') || !text.includes(' ' + film + ' ')) item.unconfirmed = true;
+  return text.includes(' ' + name + ' ') && text.includes(' ' + film + ' ');
+}
+async function checkNamed(item, pages) {
+  if (!namesBoth(item, item.source ? await pages(item.source) : null)) item.unconfirmed = true;
+}
+// The page the model cited often names the film but not the company (a
+// review, a festival entry). Another page from the same searches that names
+// both is the same proof; it becomes the source, and the approach, checked
+// on the first page, goes with it.
+async function findNamingPage(item, urls, pages) {
+  for (const url of urls) {
+    if (url === item.source) continue;
+    if (namesBoth(item, await pages(url))) {
+      item.source = item.url = url;
+      item.approach = null;
+      delete item.unconfirmed;
+      return;
+    }
+  }
 }
 
 // How a producer takes projects is advice the reader acts on: it stays only
@@ -258,6 +288,21 @@ async function checkQuote(item, pages) {
   const html = isAggregator(item.source) ? null : await pages(item.source);
   if (!quoteOnPage(item.rule_quote, html)) item.rule_quote = null;
   else item.rule_quote = String(item.rule_quote).trim().replace(/^["“]+|["”]+$/g, '');
+}
+
+// A comparable film is kept only if its own page says it is the project's
+// genre (and a short, for a short): a famous film that only shares a theme
+// is not a comparable. Pages that cannot be read are not judged.
+const GENRE_WORDS = { drama: /\bdrama/, thriller: /\bthriller/, comedy: /\bcomed/, horror: /\bhorror/,
+  'sci-fi': /\bsci-fi\b|\bscience[- ]fiction/, action: /\baction\b/, romance: /\bromanc|\bromantic/, animation: /\banimat/ };
+async function checkComp(item, pages, project) {
+  const wanted = String(project.genre || '').toLowerCase().split('/').map(g => GENRE_WORDS[g.trim()]).filter(Boolean);
+  const short = /short/i.test(project.format || '');
+  if (!wanted.length && !short) return;
+  const html = isAggregator(item.source) ? null : await pages(item.source);
+  if (!html) return;
+  const text = quoteKey(html);
+  if ((wanted.length && !wanted.some(re => re.test(text))) || (short && !/\bshort/.test(text))) item.offTopic = true;
 }
 
 // Model citation markup that sometimes leaks into JSON strings.
@@ -298,7 +343,7 @@ function applicantOf(item) {
   return null;
 }
 
-async function groundReport(report, searchUrlsByField, today, fetcher) {
+async function groundReport(report, searchUrlsByField, today, fetcher, project) {
   stripMarkup(report);
   const cache = new Map();
   const pages = (url) => {
@@ -307,6 +352,7 @@ async function groundReport(report, searchUrlsByField, today, fetcher) {
   };
   const stats = { kept: 0, dropped: 0, figuresCleared: 0 };
   const checks = [];
+  const quoted = new Map();
 
   Object.keys(LISTS).forEach(field => {
     if (!(field in report)) return;
@@ -324,8 +370,9 @@ async function groundReport(report, searchUrlsByField, today, fetcher) {
       checks.push(checkFigures(out, LISTS[field], pages).then(() => {
         stats.figuresCleared += before - figs.filter(f => out[f] != null).length;
       }));
-      if (QUOTED.includes(field)) checks.push(checkQuote(out, pages));
+      if (QUOTED.includes(field)) { quoted.set(out, out.rule_quote); checks.push(checkQuote(out, pages)); }
       else delete out.rule_quote;
+      if (project && (field === 'market_comps' || field === 'cautionary_comps')) checks.push(checkComp(out, pages, project));
       if (field === 'producers') { checks.push(checkNamed(out, pages)); checks.push(checkApproach(out, pages)); }
     });
     report[field] = kept;
@@ -352,13 +399,37 @@ async function groundReport(report, searchUrlsByField, today, fetcher) {
 
   await Promise.all(checks);
 
-  // A producer stays only if its page names it and the film it produced.
+  ['market_comps', 'cautionary_comps'].forEach(field => {
+    if (!Array.isArray(report[field])) return;
+    const before = report[field].length;
+    report[field] = report[field].filter(c => !c.offTopic);
+    stats.offTopic = (stats.offTopic || 0) + before - report[field].length;
+    stats.kept -= before - report[field].length;
+  });
+
+  // A producer stays only if a page from its searches names it and the film it produced.
   if (Array.isArray(report.producers)) {
+    const urls = Array.from(new Set((searchUrlsByField.producers || []).filter(u => /^https?:\/\//.test(u)))).slice(0, 25);
+    const unconfirmed = report.producers.filter(p => p.unconfirmed);
+    if (unconfirmed.length) await Promise.all(urls.map(pages)); // fetched once, in parallel
+    for (const p of unconfirmed) await findNamingPage(p, urls, pages);
     const before = report.producers.length;
     report.producers = report.producers.filter(p => !p.unconfirmed);
     stats.dropped += before - report.producers.length;
     stats.kept -= before - report.producers.length;
   }
+
+  // A fund, festival or lab whose words shut out this project's country goes
+  // (eligibility.js). The model's own quote counts even if it failed the
+  // word-for-word check: removing a call never puts a false claim on screen.
+  const country = countryOf(project && project.country);
+  if (country) ['financial_sources', 'festival_calendar', 'lab_and_market_opportunities'].forEach(field => {
+    if (!Array.isArray(report[field])) return;
+    const before = report[field].length;
+    report[field] = report[field].filter(item => ![quoted.get(item), item.rule_quote, item.eligibility, item.fit].some(t => excludes(t, country)));
+    stats.notEligible = (stats.notEligible || 0) + before - report[field].length;
+    stats.kept -= before - report[field].length;
+  });
 
   // "Who can apply" is shown only next to the source's own sentence
   // (rule_quote, checked word for word above); without it, it goes.

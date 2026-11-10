@@ -112,7 +112,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
 @keyframes riseIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-/* Opening a closed row (area or "Who to contact" block): short fade with a 4px drop, under 250ms, so the content does not just pop in. */
+/* Opening a closed row (area or step of the path): short fade with a 4px drop, under 250ms, so the content does not just pop in. */
 @keyframes openIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 /* Scroll reveal: only hides content once JS confirms it can reveal it again (progressive enhancement — no JS/no observer support means everything just stays visible). */
 .js-ready .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
@@ -437,7 +437,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .disclaimer-text { font-size: 12.5px; color: var(--muted); line-height: 1.7; }
 .disclaimer-text strong { color: var(--text); font-weight: 600; }
 
-/* ── GUIDE / GLOSSARY (collapsed by default — help for first-time filmmakers without adding visual weight for everyone else) ── */
+/* Closed box at the end of a real report: "Found an outdated link or a mistake?" */
 .guide-box { border: 1px solid var(--border-light); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
 .guide-box summary { list-style: none; cursor: pointer; padding: 14px 17px; font-size: 13.5px; font-weight: 600; color: var(--text); display: flex; align-items: center; justify-content: space-between; background: var(--cream); }
 .guide-box summary::-webkit-details-marker { display: none; }
@@ -787,7 +787,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .rblock-count { font-family: var(--mono); font-size: 11px; color: var(--muted); }
 .rblock-icon { margin-left: auto; display: inline-flex; flex-shrink: 0; align-self: center; color: var(--muted); transition: transform 0.2s var(--ease); }
 .rblock[open] .rblock-icon { transform: rotate(180deg); }
-/* Your plan: the steps in order, after the five areas, not a sixth area. */
+/* Section headings and the path, after the five areas. */
 .entry-note { font-size: 14.5px; line-height: 1.5; color: var(--muted); margin: 0 0 6px; }
 .r-plan-h { font-family: var(--display); font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); margin: 0 0 14px; }
 .path-step .ready-block { margin-top: 0; padding-top: 0; border-top: 0; }
@@ -883,8 +883,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 /* Very narrow screens (Safari text zoom, ~260px): long words and labels wrap instead of widening the page. */
 .r-title, .accordion-left { overflow-wrap: break-word; }
 @media (max-width: 300px) { .r-title { font-size: 32px; } }
-
-/* 30 / 60 / 90 day plan as a timeline. */
 
 /* LOADING on the same night as the home (it sits between the form and the
    results, both of which now open on the night). */
@@ -1225,7 +1223,7 @@ details.more > summary:active { transform: scale(0.98); }
       <div class="menu-sec">
         <div class="menu-sec-title">Questions</div>
         <details class="menu-faq-item"><summary class="menu-faq-q">Is this a real consultant?<span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="menu-faq-a">No. It's an AI analysis of what you describe, meant as a structured second opinion before you talk to people in the industry. It is not professional advice.</div></details>
-        <details class="menu-faq-item"><summary class="menu-faq-q">Preview or full report?<span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="menu-faq-a">The preview gives each of the five areas a score and one recommendation. The full report adds red flags, strengths, comparable films, funding sources, action plans and a roadmap. Both are free.</div></details>
+        <details class="menu-faq-item"><summary class="menu-faq-q">Preview or full report?<span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="menu-faq-a">The preview gives each of the five areas a score and one recommendation. The full report adds red flags and strengths for each area, then a step by step path with real producers, funds, festivals and sales agents, each with the page it came from. Both are free.</div></details>
         <details class="menu-faq-item"><summary class="menu-faq-q">Why do you ask for my email?<span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="menu-faq-a">The full report takes a few minutes to generate, so we send it when it's ready. You don't need to keep the page open.</div></details>
         <details class="menu-faq-item"><summary class="menu-faq-q">Is my project data private?<span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="menu-faq-a">Your project is shared only with the services needed to generate and deliver your report, listed in our Privacy Policy. It is never sold.</div></details>
         <details class="menu-faq-item"><summary class="menu-faq-q">I've never made a film. Is it still useful?<span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="menu-faq-a">Yes, that's who it's built for. Pick "First film" in the Experience field and the advice adjusts.</div></details>
@@ -2300,7 +2298,7 @@ function renderFree(r, title) {
   document.getElementById('upgradeSection').innerHTML =
     '<div class="unlock">'+
     '<h3 class="unlock-title">Get the full report by email, free.</h3>'+
-    '<p class="unlock-desc">Each of the five areas in depth: red flags, strengths, recommendations with working links, funding sources, festivals, sales agents and a step by step roadmap. It takes a few minutes to write, so we email it to you when it\'s ready.</p>'+
+    '<p class="unlock-desc">Each of the five areas in depth, then a step by step path: producers, funds, festivals and sales agents, each with the page it came from. It takes a few minutes to write, so we email it to you when it\'s ready.</p>'+
     '<div class="field unlock-field"><label for="fullReportEmail">Your email</label><input type="email" id="fullReportEmail" placeholder="you@example.com" autocomplete="email" inputmode="email"></div>'+
     '<div class="checkbox-row"><input type="checkbox" id="fullTerms"><label class="checkbox-label" for="fullTerms">I understand this is AI-generated analysis for informational purposes only. Not professional, legal or financial advice. OneCiak is not a licensed consulting firm.</label></div>'+
     '<div class="inline-error" id="unlockError">Please accept the terms to continue.</div>'+
@@ -2310,7 +2308,7 @@ function renderFree(r, title) {
 
 /* ── RENDER FULL ── */
 /* GLOSSARY ON THE WORD. glossify() marks the first match of each term in each part of
-   the report (next step, each "Who to contact" row, each area, each plan step),
+   the report (each area and each step of the path),
    never inside links, buttons, row titles, sources or the email draft. */
 var GLOSSARY = [
   { t: "Sales agent", d: "A company that sells your finished film to distributors and streaming platforms in different countries, usually for a percentage of the deal.", re: /\bsales agents?\b/i },
@@ -2423,7 +2421,7 @@ function renderFull(r, title) {
   document.getElementById('execSummary').innerHTML = '';
 
   // The film, area by area: verdict, what to do, red flags and strengths.
-  // Comparable films stay with the market, the only list that is not a contact.
+  // Comparable films stay inside the market area.
   function areaBody(k, extra) { return buildAccordionBody(r[k+'_score'], r[k+'_verdict'], r[k+'_detail'], r[k+'_flags'], r[k+'_strengths'], r[k+'_tips'], extra || ''); }
   var sections = [
     { label:'Creative package', score: r.creative_score, verdict: r.creative_verdict, body: areaBody('creative') },
@@ -2759,7 +2757,7 @@ function howMany(list, one, many) {
   var n = (list || []).filter(Boolean).length;
   return n ? n + ' ' + (n === 1 ? one : many) : '';
 }
-/* A closed row of "Who to contact": the label, how many, and the first names
+/* A closed row (a step of the path, comparable films): the first names
    already visible, so the reader sees who is inside without opening it. */
 function namesLine(names) {
   names = (names || []).filter(Boolean);
@@ -2806,7 +2804,7 @@ function fundsBody(sources) {
   sources.forEach(function(f){
     if (!f) return;
     var dl = f.source ? notStated(f.deadline, 'Not published on the source, check before planning') : f.deadline;
-    h += entry(f.name, f.type, fact('Who can apply', APPLICANT[f.applicant]) + fact('Amount', f.amount) + fact('Deadline', dl, isClosed(dl) || !f.deadline), f.eligibility, f);
+    h += entry(f.name, f.type, fact('Who can apply', f.source ? notStated(APPLICANT[f.applicant], CHECK_WHO) : APPLICANT[f.applicant], !APPLICANT[f.applicant]) + fact('Amount', f.amount) + fact('Deadline', dl, isClosed(dl) || !f.deadline), f.eligibility, f);
   });
   return h;
 }
@@ -2834,27 +2832,28 @@ function buildPath(r, project) {
   // A first feature with no short behind it: the short comes first.
   if (/feature/i.test(project.format || '') && project.experience === 'First film') {
     steps.push(['Make a short first', 'Show what you can do before you ask anyone to pay for a feature.', null,
-      '<div class="prose"><p>Most first features are paid for by people who already believe in you: family, friends, crowdfunding. A short you can show is how they, festivals and producers see what you can do.</p>'+
-      '<p>In a study of 146,603 first-time feature directors, experience in short films or TV went with a better chance of making a second film.</p></div>'+
+      '<div class="prose"><p>Film data analyst Stephen Follows puts it this way: \u201CYour first film will probably be funded\u201D, by people who believe in you, such as family, a friend or a crowdfunding campaign. A short gives them something to see.</p>'+
+      '<p>In his study of 146,603 first-time feature directors, the more experience they had in short films or TV, the better their chances of making a second feature. He adds that it is not clear whether the shorts cause this.</p></div>'+
       '<a class="src-line" href="https://stephenfollows.com/p/the-film-finance-numbers-nobody-shows-you" target="_blank" rel="noopener">Source: stephenfollows.com · checked 10 Nov 2026</a> '+
       '<a class="src-line" href="https://stephenfollows.com/p/what-gets-a-director-a-second-film" target="_blank" rel="noopener">Source: stephenfollows.com · checked 10 Nov 2026</a>']);
   }
   var producers = (r.producers || []).filter(Boolean);
   if (project.producer !== 'A producer or company is attached') {
-    steps.push(['Find a producer', 'Companies that make films like yours, and a first email you can copy.', producers.map(function(p){ return p.name; }),
+    var pLine = producers.length ? 'Production companies to approach, each with a film they made' + (r.producer_email ? ', and a first email you can copy.' : '.') : 'What you need before most funds and producers will take your project.';
+    steps.push(['Find a producer', pLine, producers.map(function(p){ return p.name; }),
       beforeApplyBody(r.before_you_apply) + (producers.length ? producersBody(producers, r.producer_email) : '')]);
   }
   var funds = (r.financial_sources || []).filter(Boolean);
   if (FUNDED_STAGES.indexOf(project.stage) < 0 && funds.length) {
-    steps.push(['Find the money', 'Funds and incentives that fit, with who can apply and the deadlines.', funds.map(function(f){ return f.name; }), fundsBody(funds)]);
+    steps.push(['Find the money', 'Funds and incentives to look at. Check each official page before you apply.', funds.map(function(f){ return f.name; }), fundsBody(funds)]);
   }
   var fests = (r.festival_calendar || []).filter(Boolean), labs = (r.lab_and_market_opportunities || []).filter(Boolean);
   if (fests.length || labs.length) {
-    steps.push(['Get seen', 'Festivals, labs and markets, with deadlines for your calendar.', fests.map(function(f){ return f.festival; }).concat(labs.map(function(l){ return l.name; })),
+    steps.push(['Get seen', 'Festivals, labs and markets to aim for.', fests.map(function(f){ return f.festival; }).concat(labs.map(function(l){ return l.name; })),
       (fests.length ? '<span class="sub-k">Festivals</span>'+festivalsBody(fests) : '') + (labs.length ? '<span class="sub-k">Labs and markets</span>'+labsBody(labs) : '')]);
   }
   var agents = (r.sales_agents || []).filter(Boolean);
-  if (agents.length) steps.push(['Find who sells it', 'Sales agents that handle films like yours.', agents.map(function(a){ return a.name; }), agentsBody(agents)]);
+  if (agents.length) steps.push(['Find who sells it', 'Sales agents to approach when the film is ready.', agents.map(function(a){ return a.name; }), agentsBody(agents)]);
   var h = '', n = 0;
   steps.forEach(function(st){ var row = pathStep(n + 1, st[0], st[1], st[2], st[3]); if (row) { n++; h += row; } });
   return h ? '<section class="r-path"><h2 class="r-plan-h">Your path</h2><div class="rblocks">'+h+'</div>'+roadmapBlock(project)+'</section>' : '';
@@ -2877,7 +2876,9 @@ function copyEmail(btn) {
 }
 
 /* Who can apply, shown only when the source's own sentence backs it
-   (grounding.js keeps it only with a rule_quote checked on the page). */
+   (grounding.js keeps it only with a rule_quote checked on the page);
+   without that sentence the reader is sent to the official page. */
+var CHECK_WHO = 'Not quoted from the source, check the official page';
 var APPLICANT = { Individual: 'Individuals', Company: 'Production companies only', Either: 'Individuals or companies', Split: 'Writing: individuals. Development and production: companies only' };
 /* Before you can apply: most public funds take applications
    from production companies only, and a first-time director often has
@@ -2897,7 +2898,7 @@ function labsBody(labs) {
   labs.forEach(function(l){
     if (!l) return;
     var dl = l.source ? notStated(l.deadline, 'Not published on the source, check before planning') : l.deadline;
-    h += entry(l.name, null, fact('Deadline', dl, isClosed(dl) || !l.deadline), l.fit, l);
+    h += entry(l.name, null, (l.source && !l.rule_quote ? fact('Who can apply', CHECK_WHO, true) : '') + fact('Deadline', dl, isClosed(dl) || !l.deadline), l.fit, l);
   });
   return h;
 }
@@ -3218,7 +3219,7 @@ async function savePDF() {
       lastResult.financial_sources.forEach(function(f){
         if (!f) return;
         ln((f.name||'')+' ('+(f.type||'')+')'+(f.amount?' · '+f.amount:''),10,true);
-        ln((APPLICANT[f.applicant] ? 'Who can apply: '+APPLICANT[f.applicant]+' · ' : '')+'Deadline: '+notStated(f.deadline, f.source ? 'not published on the source, check before planning' : '')+' · '+(f.eligibility||''),9,false,122,118,112);
+        ln((APPLICANT[f.applicant] || f.source ? 'Who can apply: '+notStated(APPLICANT[f.applicant], CHECK_WHO.toLowerCase())+' · ' : '')+'Deadline: '+notStated(f.deadline, f.source ? 'not published on the source, check before planning' : '')+' · '+(f.eligibility||''),9,false,122,118,112);
         if (f.source && f.rule_quote) ln('The rule, word for word: \u201C'+f.rule_quote+'\u201D',9,false,26,25,22);
         if (f.source) ln(pdfSource(f),8,false,150,148,145);
         y+=1;
