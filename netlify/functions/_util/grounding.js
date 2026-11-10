@@ -171,10 +171,6 @@ function datesIn(text) {
   while ((m = dots.exec(s))) found.push({ t: Date.UTC(+m[3], +m[2] - 1, +m[1]), at: m.index });
   return found;
 }
-function lastDateIn(text) {
-  const found = datesIn(text);
-  return found.length ? Math.max.apply(null, found.map(d => d.t)) : null;
-}
 // The date that closes a call. When the text says "open until", "deadline",
 // "by" or the like, that date counts, not the later dates of the programme
 // itself ("open until 30 September 2026 for the session of March to July
