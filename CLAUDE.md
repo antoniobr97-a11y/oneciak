@@ -20,9 +20,11 @@ soldi, pubblico, festival, distribuzione, e per ognuna cosa non va e cosa
 fare); 2) Cosa faccio adesso? (una sola azione per questa settimana e cosa
 preparare prima); 3) A chi mi rivolgo? (nomi veri: produttori a cui scrivere
 con l'email già pronta, fondi a cui chiedere soldi con chi può fare domanda,
-festival con le scadenze da mettere nel calendario). Ogni nome e ogni data
-viene da una pagina ufficiale controllata: se la fonte non c'è, la voce non
-compare.
+festival con le scadenze da mettere nel calendario). Sul sito: le 5 aree,
+poi una sola scaletta "Your path". Ogni nome viene da una pagina trovata
+dalla ricerca e controllata, di preferenza quella ufficiale; date, cifre e
+citazioni restano solo se sono scritte su quella pagina e non su un sito di
+notizie o raccolte. Se la fonte non c'è, la voce non compare.
 
 Founder: **Antonio Brasile** (ragazzo). Scrive in italiano, informale, spesso
 con typo quando è frustrato: non vuol dire che vuole un tono più formale.
@@ -55,9 +57,11 @@ con typo quando è frustrato: non vuol dire che vuole un tono più formale.
    PDF, email).
 4. **Dimostrare le modifiche**: foto prima/dopo, misure sui pixel, numeri.
    "Non vedo differenze" vuol dire che devo mostrarlo meglio.
-5. **Cambi visivi grossi**: anteprima e attendere l'ok. Fix piccoli o tecnici
-   (bug, contrasto, accessibilità, cose che ha chiesto lui puntualmente) si
-   pubblicano subito. "Fai", "procedi", "vai", "pubblica" = via libera.
+5. **Niente si pubblica senza il suo ok** (Antonio, 10 novembre 2026:
+   "aspetta a pubblicare, ti do io l'ok"): si prepara sul branch, si prova in
+   locale e sulla preview, si mostrano foto e numeri, e si pubblica su main
+   solo quando scrive "pubblica". "Vai" o "procedi" vogliono dire prepara e
+   prova, non pubblica.
 6. Domande esplorative ("che altro si può fare?"): risposta breve con una
    raccomandazione, non elenchi infiniti.
 7. **Onestà**: mai inventare o gonfiare numeri mostrati agli utenti. Link
@@ -159,7 +163,7 @@ report; il PDF di una pagina; il pulsante "Next" tra le aree; contatti sparsi
 dentro le aree; scritte rosse sotto le caselle del modulo; le guide; la
 roadmap o le guide nel fondo della home; un riquadro glossario; i colori
 diversi per pallini e voti; le serie TV; i documentari; le etichette "Tier
-  A/B/C" sui festival (giudizio dell'AI senza fonte).
+A/B/C" sui festival (giudizio dell'AI senza fonte).
 
 ## Pagine e flusso
 
@@ -197,11 +201,12 @@ diversi per pallini e voti; le serie TV; i documentari; le etichette "Tier
 - **Anteprima**: titolo, voto, riassunto, poi le 5 aree, poi rischio,
   opportunità e prossimo passo, poi la richiesta del report completo.
 - **Indice del report** (`mountReportNav`, `REPORT_PARTS`): "Does my film
-  stand up?" con sotto le 5 aree e il voto, poi "Your path". Dai 1100px in su è una colonna
-  fissa a sinistra del testo (il testo si sposta a destra, colonna di 640px);
-  sotto i 1100px è una barra sotto l'intestazione con la sezione attuale e il
-  pulsante "Sections" che apre l'elenco. Compare quando titolo e voto in alto
-  sono usciti dallo schermo. Nell'anteprima gratuita mostra solo le aree.
+  stand up?" con sotto le 5 aree e il voto, poi "Your path". Dai 1100px in
+  su è una colonna fissa a sinistra del testo (il testo si sposta a destra,
+  colonna di 640px); sotto i 1100px è una barra sotto l'intestazione con la
+  sezione attuale e il pulsante "Sections" che apre l'elenco. Compare quando
+  titolo e voto in alto sono usciti dallo schermo. Nell'anteprima gratuita
+  mostra solo le aree.
 - **Glossario sulla parola**: `glossify()` sottolinea a puntini la prima
   volta di ogni termine di `GLOSSARY` in ogni parte del report. La parola è
   testo normale (si può selezionare), il tocco apre una nuvoletta vicino alla
@@ -215,12 +220,14 @@ diversi per pallini e voti; le serie TV; i documentari; le etichette "Tier
   nomi (`namesLine`, al massimo 2 righe); il dettaglio si apre col tocco.
 - **Report di esempio Northbound**: report vero del motore (voto 5.0), fonti
   controllate il 23 ottobre e il 2 novembre 2026; 3 produttori verificati a
-  mano (Vivo Film, Leone Film Group, Lava Films); TorinoFilmLab FeatureLab 2027 è segnato "Closed (5 November 2026)".
+  mano (Vivo Film, Leone Film Group, Lava Films); TorinoFilmLab FeatureLab
+  2027 è segnato "Closed (5 November 2026)".
 - **`/roadmap/`**: 9 fasi, 49 lavori con spunta (solo nel browser,
   `oneciak-roadmap-v1`), 27 citazioni verificate parola per parola il
-  2026-10-24. Si raggiunge solo dal report ("Your plan", collegato alla fase
-  del progetto con `STAGE_TO_ROADMAP`). CSS `roadmap/roadmap.css`, da tenere
-  allineato al sito. Se cambia una regola citata, ricontrollare.
+  2026-10-24. Si raggiunge solo dal report (in fondo a "Your path",
+  collegato alla fase del progetto con `STAGE_TO_ROADMAP`). CSS
+  `roadmap/roadmap.css`, da tenere allineato al sito. Se cambia una regola
+  citata, ricontrollare.
 - `/guides/*` rimanda alla home (301 in `netlify.toml`).
 - **Traduttore del browser**: permesso (Chrome, Safari traducono il sito).
   Solo i nomi propri (fondi, festival, aziende, film: `.entry-name`,
@@ -281,7 +288,10 @@ diversi per pallini e voti; le serie TV; i documentari; le etichette "Tier
   regista francese; la scadenza è stata corretta), 12 non verificabili da qui
   (siti che bloccano i programmi). Il controllo verifica nomi, film, date e
   citazioni sulla fonte, non la qualità dei consigli. Prima misura (22
-  ottobre): report completi 78%. Problemi noti: regole di prima visione a
+  ottobre): report completi 78%. Problemi noti: il motore non controlla se
+  un fondo o un laboratorio è adatto a quel regista (La Résidence è solo per
+  registi non francesi ed è stata proposta a un progetto francese); a volte
+  nessun produttore verificato (report francese); regole di prima visione a
   volte parafrasate male, fondi senza scadenza scritta, qualche film di
   confronto poco pertinente, a volte fonti da aggregatori, nei corti spesso
   nessun film di confronto (regola severa, voluto).
@@ -301,6 +311,14 @@ Italia senza società di produzione niente fondi per sviluppo e produzione. Da
 qui "Who can apply", "Before you can apply", prossimo passo, produttori e
 calendario. Ancora scoperto: promemoria via email (serve conservare gli
 indirizzi: decide l'avvocato).
+Domanda del 10 novembre 2026, "qual è la prima cosa che fa chi vuole fare un
+film?": nessuno studio lo misura (cercato in inglese e in italiano). Le fonti
+dicono: il primo film di solito si paga con soldi di chi crede in te (Stephen
+Follows, 28 ottobre 2026: "Your first film will probably be funded");
+esperienza in corti o TV va con più possibilità di un secondo film (Follows,
+19 agosto 2026, senza dire che ne sia la causa); le guide consigliano di
+partire da un corto. Da qui il passo "Make a short first". Per sapere la
+risposta vera: chiederlo ai filmmaker della prova con persone reali.
 
 ## Sicurezza
 
@@ -349,11 +367,16 @@ corrispondono al sito, restano le parti legali.
 1. Avvocato: privacy, strada A o B, nome di Antonio. Poi riscrivere privacy e
    termini.
 2. Prima del lancio: decidere il tetto di spesa Anthropic e ricaricare il
-   credito (22,02 $ il 9 novembre, circa 55 report completi). Prova dal vivo fatta da Antonio l'8 novembre
-   2026 su iPhone (The Salt Road): report arrivato, mittente vero
+   credito (22,02 $ il 9 novembre, circa 55 report completi; dopo le prove
+   del 10 novembre è più basso). Prova dal vivo fatta da Antonio l'8
+   novembre 2026 su iPhone (The Salt Road): report arrivato, mittente vero
    `reports@report.oneciak.com`.
-3. Lancio (Product Hunt, Reddit, scuole): dopo l'avvocato, con la frase di
-   Antonio sul "perché" e una data; ogni testo lo approva lui.
+3. Prova con 20-30 filmmaker veri (per esempio una scuola di cinema) prima
+   della pubblicità: quanti chiedono il report completo, quanti lo aprono,
+   quanti fanno davvero qualcosa; e chiedere "qual è la prima cosa che hai
+   fatto quando hai deciso di fare il tuo film?".
+4. Lancio (Product Hunt, Reddit, scuole): dopo l'avvocato e la prova, con
+   la frase di Antonio sul "perché" e una data; ogni testo lo approva lui.
 
 ## Controlli (da rifare dopo ogni modifica visibile o pulizia)
 
@@ -363,7 +386,9 @@ corrispondono al sito, restano le parti legali.
   preferenza. Cercare: errori JS, richieste fallite, pagina più larga dello
   schermo, testo azzurro Safari, trattini lunghi, testi affiancati non
   allineati (quelli andati a capo uno sotto l'altro vanno bene, ma guardarli).
-- **Funzioni**: modulo vuoto (7 caselle rosse), glossario apre/chiude, copia
+- **Funzioni**: modulo vuoto (7 caselle rosse), nuvoletta del glossario che si
+  apre e si chiude, scaletta che cambia con il progetto (primo film, produttore
+  già presente, film finanziato, corto), copia
   email produttori, PDF scaricato, calendario nascosto senza date, una
   analisi vera su `/.netlify/functions/analyze` (NON start-full-report).
 - **Pulizia**: confronto pixel per pixel prima/dopo (server locale col codice
