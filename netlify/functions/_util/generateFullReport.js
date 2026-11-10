@@ -78,7 +78,7 @@ async function generateAndDeliverFullReport({ store, key, project, email, anthro
       // a page found by this report's own searches, and every date or figure
       // must appear on that page; anything else is removed, not shown.
       const today = new Date().toISOString().slice(0, 10);
-      const grounding = await groundReport(merged, searchUrlsByField, today);
+      const grounding = await groundReport(merged, searchUrlsByField, today, null, project);
       merged.sources_checked = today;
       applyFacts(merged, project);
       console.log('report', key, 'searches', parsedResults.reduce((a, r) => a + (r.searches || 0), 0),

@@ -257,7 +257,20 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
   (provato: Svezia, Cina, Italia). L'email per i produttori non nomina mai
   un'azienda: usa [COMPANY NAME]. Come un produttore accetta progetti
   (`approach`) resta solo se la sua frase (`approach_quote`) è sulla pagina
-  parola per parola (`checkApproach`).
+  parola per parola (`checkApproach`). Se la pagina citata non nomina
+  azienda e film insieme, il motore prova le altre pagine della stessa
+  ricerca (`findNamingPage`, al massimo 25): quella che li nomina entrambi
+  diventa la fonte (e `approach` si toglie).
+- Chi può fare domanda (`eligibility.js`): fondi, festival e laboratori la
+  cui frase (`rule_quote`, `eligibility`, `fit`) esclude il paese del
+  progetto ("non-French", "must not be residents or citizens of France",
+  "must be residents of Italy") vengono tolti, anche nell'anteprima.
+  Controlla solo il paese, non esperienza o formato; i paesi sono una
+  tabella di circa 50. Sul sito, senza la frase della fonte, "Who can apply"
+  dice "Not quoted from the source, check the official page".
+- Film di confronto (`checkComp`): restano solo se la loro pagina dice il
+  genere del progetto (e "short" per un corto); pagine illeggibili o
+  aggregatori non vengono giudicati.
 - Scadenza chiusa: conta la data dopo "until", "deadline", "by", "entro"
   e simili (`closingDateIn`), non la data più lontana della frase (La
   Résidence di Cannes: "open until September 30, 2026" per una sessione nel
@@ -288,10 +301,9 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
   regista francese; la scadenza è stata corretta), 12 non verificabili da qui
   (siti che bloccano i programmi). Il controllo verifica nomi, film, date e
   citazioni sulla fonte, non la qualità dei consigli. Prima misura (22
-  ottobre): report completi 78%. Problemi noti: il motore non controlla se
-  un fondo o un laboratorio è adatto a quel regista (La Résidence è solo per
-  registi non francesi ed è stata proposta a un progetto francese); a volte
-  nessun produttore verificato (report francese); regole di prima visione a
+  ottobre): report completi 78%. Problemi noti: l'adattezza al regista si
+  controlla solo sul paese (esperienza, formato e fase restano al prompt);
+  a volte nessun produttore verificato (report francese); regole di prima visione a
   volte parafrasate male, fondi senza scadenza scritta, qualche film di
   confronto poco pertinente, a volte fonti da aggregatori, nei corti spesso
   nessun film di confronto (regola severa, voluto).
