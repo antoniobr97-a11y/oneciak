@@ -266,8 +266,9 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
   progetto ("non-French", "must not be residents or citizens of France",
   "must be residents of Italy") vengono tolti, anche nell'anteprima.
   Controlla solo il paese, non esperienza o formato; i paesi sono una
-  tabella di circa 50. Sul sito, senza la frase della fonte, "Who can apply"
-  dice "Not quoted from the source, check the official page".
+  tabella di circa 50. Sul sito "Who can apply" compare solo con la frase
+  della fonte; le righe dei passi "Find the money" e "Get seen" dicono di
+  controllare la pagina ufficiale.
 - Film di confronto (`checkComp`): restano solo se la loro pagina dice il
   genere del progetto (e "short" per un corto); pagine illeggibili o
   aggregatori non vengono giudicati. Anno e budget restano solo se sono
