@@ -572,12 +572,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .tip-link:active { transform: scale(0.95); }
 
 /* ACTION PLAN */
-.action-block { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border-light); }
-.action-label { font-size: 11px; font-weight: 600; letter-spacing: 0.02em; text-transform: none; color: var(--accent); margin-bottom: 13px; display: block; }
-.action-item { display: flex; gap: 13px; align-items: flex-start; margin-bottom: 11px; }
-.action-item:last-child { margin-bottom: 0; }
-.action-tag { font-size: 10.5px; font-weight: 600; color: var(--white); background: var(--text); padding: 4px 10px; border-radius: 999px; white-space: nowrap; letter-spacing: 0; flex-shrink: 0; margin-top: 2px; }
-.action-text { font-size: 14px; color: var(--text); line-height: 1.6; font-weight: 400; }
 
 /* Where a fund, festival, film or company in the report was found, and when. */
 .src-line { display: inline-block; margin-top: 6px; padding: 4px 0; font-size: 13px; letter-spacing: 0; color: var(--muted); text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 3px; transition: color 0.15s, transform 0.15s ease-out; }
@@ -666,7 +660,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #sec-myreports .r-main { padding: 0 24px 90px; max-width: 688px; }
 .exec-card, .accordion-wrap, .pdf-card { background: transparent; box-shadow: none !important; border: 0 !important; border-radius: 0; padding-left: 0; padding-right: 0; }
 .exec-card { padding-top: 0; padding-bottom: 8px; margin-bottom: 28px; }
-.tips-label, .action-label { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; }
+.tips-label { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; }
 .exec-box { border-radius: 10px; }
 .exec-box.risk { background: rgba(177,50,37,0.07); }
 .exec-box.opp { background: rgba(15,122,61,0.07); }
@@ -710,7 +704,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #sec-results .disclaimer-box, #sec-myreports .disclaimer-box { background: none; padding: 0; }
 #sec-results .footer-note { text-align: left; }
 .tip-link { background: var(--field); }
-.action-tag { background: var(--text); }
 /* MY REPORTS: same header as results; sign-in is a plain field on the
    paper, the list is hairline rows (date, title, arrow), not boxes. */
 #sec-myreports .r-hero-inner { max-width: 640px; }
@@ -747,7 +740,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .exec-box.risk { border-left: 1px solid rgba(177,50,37,0.75); }
 .exec-box.opp { border-left: 1px solid rgba(15,122,61,0.75); }
 .exec-row { gap: 24px; }
-.tips-block, .action-block { border-top-color: var(--border); }
+.tips-block { border-top-color: var(--border); }
 @media (max-width: 640px) { .accordion-body { padding-left: 4px; } }
 
 /* REPORT READING LAYOUT: short paragraphs at a readable
@@ -766,8 +759,8 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .fs-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
 @media (max-width: 760px) { .fs-grid { grid-template-columns: 1fr; gap: 8px; } }
 
-.tips-block, .action-block { margin-top: 28px; padding-top: 24px; }
-.tips-label, .action-label { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: #b4552b; margin-bottom: 14px; }
+.tips-block { margin-top: 28px; padding-top: 24px; }
+.tips-label { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: #b4552b; margin-bottom: 14px; }
 .fs-col .fs-label { color: #b4552b; }
 .tips-list { list-style: none; margin: 0; padding: 0; counter-reset: tip; max-width: 70ch; }
 .tips-list li { position: relative; padding: 0 0 0 26px; margin-bottom: 16px; }
@@ -779,15 +772,11 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .ready-list li::before { content: ''; position: absolute; left: 1px; top: 0.5em; width: 8px; height: 8px; border: 1.5px solid #b4552b; border-radius: 2px; }
 .ready-miss { display: block; font-weight: 700; color: var(--text); }
 .ready-how { display: block; color: var(--text); }
-.next-step { margin: 36px 0 8px; }
-.next-action { font-size: 18px; line-height: 1.5; color: var(--text); max-width: 62ch; margin: 0 0 8px; }
 .next-why { font-size: 15px; line-height: 1.55; color: var(--muted); max-width: 62ch; margin: 0 0 14px; }
 .next-ready .sub-k { display: block; margin-bottom: 8px; }
 .email-draft { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
 .email-text { white-space: pre-wrap; font-size: 15px; line-height: 1.6; color: var(--text); max-width: 64ch; margin: 8px 0 12px; }
 .email-draft .copy-btn { width: auto; padding: 10px 16px; border: 1px solid currentColor; color: var(--text); }
-.action-item { margin-bottom: 14px; }
-.action-text { font-size: 15px; line-height: 1.6; max-width: 66ch; }
 
 .rblocks { margin-top: 32px; border-bottom: 1px solid var(--border); }
 .rblock { border-top: 1px solid var(--border); }
@@ -800,17 +789,25 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .rblock[open] .rblock-icon { transform: rotate(180deg); }
 /* Your plan: the steps in order, after the five areas, not a sixth area. */
 .entry-note { font-size: 14.5px; line-height: 1.5; color: var(--muted); margin: 0 0 6px; }
-.r-plan { margin-top: 44px; }
 .r-plan-h { font-family: var(--display); font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); margin: 0 0 14px; }
-.r-plan .r-road { margin-top: 28px; margin-bottom: 0; border-bottom: 0; } /* the download card below already opens with a line: no double line with an empty band */
-.r-contacts { margin: 44px 0 0; }
-.r-contacts .ready-block { margin-top: 0; padding-top: 0; border-top: 0; }
+.path-step .ready-block { margin-top: 0; padding-top: 0; border-top: 0; }
 .r-areas-h { margin-top: 44px; }
 @media (hover: hover) and (pointer: fine) { .rblock summary:hover .rblock-label { color: #000; } }
 .rblock-body { padding: 0 2px 22px; }
 .rblock summary { flex-wrap: wrap; }
+.path-step summary { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: baseline; column-gap: 10px; }
+.path-step .rblock-icon { align-self: start; margin-top: 5px; }
+.path-n { font-family: var(--display); font-size: 17px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+.path-main { display: block; min-width: 0; }
+.path-main .rblock-label { display: block; }
+.path-line { display: block; margin-top: 3px; font-size: 15px; line-height: 1.45; color: var(--text); }
+.path-step .rblock-names { display: -webkit-box; margin-top: 4px; }
+.path-step .rblock-body { padding-left: 36px; }
+@media (max-width: 600px) { .path-step .rblock-body { padding-left: 0; } }
+.path-step .sub-k { display: block; margin: 6px 0 10px; }
+.r-path .r-road { margin-top: 28px; }
 .rblock-names { order: 3; flex-basis: 100%; margin-top: 2px; font-size: 14px; line-height: 1.45; color: var(--muted); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
-.action-item .action-text { color: var(--muted); } /* the phase name carries the step, the detail reads lighter */
+ /* the phase name carries the step, the detail reads lighter */
 .rblock[open] > .rblock-body { animation: openIn 0.22s var(--ease) both; }
 
 .entry { padding: 16px 0; border-top: 1px solid var(--border-light); max-width: 72ch; }
@@ -829,7 +826,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .entry-quote { margin: 12px 0 0; }
 .entry-quote blockquote { margin-top: 4px; font-size: 15px; line-height: 1.55; font-style: italic; color: var(--text); }
 .the-ask { margin: 24px 0 8px; display: flex; flex-direction: column; gap: 6px; font-size: 17px; font-weight: 700; line-height: 1.45; color: var(--text); max-width: 62ch; }
-.action-item .action-tag:empty { display: none; }
 .entry .src-line { margin-top: 10px; }
 
 .sub-k { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
@@ -885,19 +881,10 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 }
 @media (max-width: 600px) { .an-bar { padding: 10px 20px; } .area-nav.is-open .an-col { padding-left: 20px; padding-right: 20px; } }
 /* Very narrow screens (Safari text zoom, ~260px): long words and labels wrap instead of widening the page. */
-.r-title, .accordion-left, .action-item .action-tag { overflow-wrap: break-word; }
-.action-item .action-tag { white-space: normal; }
+.r-title, .accordion-left { overflow-wrap: break-word; }
 @media (max-width: 300px) { .r-title { font-size: 32px; } }
 
 /* 30 / 60 / 90 day plan as a timeline. */
-.action-block { position: relative; }
-.action-item { position: relative; display: block; padding: 0 0 22px 26px; margin: 0; }
-.action-item::before { content: ''; position: absolute; left: 4px; top: 10px; bottom: -6px; width: 1px; background: var(--border); }
-.action-item:last-child::before { display: none; }
-.action-item::after { content: ''; position: absolute; left: 0; top: 4px; width: 9px; height: 9px; border-radius: 50%; background: var(--paper); box-shadow: inset 0 0 0 1.5px #b4552b; }
-.action-item:first-child::after { background: #b4552b; }
-.action-item .action-tag { display: block; background: none !important; color: var(--muted); padding: 0; margin: 0 0 4px; border-radius: 0; font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; }
-.action-item .action-text { display: block; }
 
 /* LOADING on the same night as the home (it sits between the form and the
    results, both of which now open on the night). */
@@ -1014,14 +1001,13 @@ details.more > summary:active { transform: scale(0.98); }
 /* Labels are words, so they are set as words: sentence case in
    the body face, small and bold. Mono caps stay only for numbers, dates and
    counts, where the fixed width helps reading. */
-.menu-sec-title, .tips-label, .action-label, .fs-label, .fact-k, .sub-k, .an-top, .mr-email {
+.menu-sec-title, .tips-label, .fs-label, .fact-k, .sub-k, .an-top, .mr-email {
   font-family: var(--sf); font-size: 14px; font-weight: 700; letter-spacing: 0; text-transform: none;
 }
 
 /* Report reorganised: counts in words, phases in plain bold,
    the verdict on the area row in readable size. */
 .rblock-count { font-family: var(--sf); font-size: 14px; color: var(--muted); margin-left: 10px; }
-.action-item .action-tag { font-family: var(--sf) !important; font-size: 15px !important; font-weight: 700 !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--text) !important; }
 .accordion-trigger { flex-wrap: wrap; row-gap: 4px; }
 .accordion-sublabel { flex-basis: 100%; font-size: 14px; line-height: 1.45; margin-top: 0; padding-right: 22%; color: var(--muted); }
 @media (max-width: 640px) { .accordion-sublabel { padding-right: 0; } }
@@ -1065,7 +1051,7 @@ details.more > summary:active { transform: scale(0.98); }
   /* Small text slightly darker in light mode . */
   :root { --muted: #3a3a3a; --muted-light: #3a3a3a; --success: #0a5c2d; --danger: #8a2419; }
   .score-mid { color: #6e3f00; }
-  .tips-label, .action-label, .an-top, .fs-col .fs-label, #sec-loading .loading-dim.is-active .loading-dim-num { color: #93391a !important; }
+  .tips-label, .an-top, .fs-col .fs-label, #sec-loading .loading-dim.is-active .loading-dim-num { color: #93391a !important; }
   .exec-box.risk .exec-lead { color: var(--danger); }
   .exec-box.opp .exec-lead { color: var(--success); }
   .fs-col.red li::before { background: var(--danger); }
@@ -1167,10 +1153,9 @@ details.more > summary:active { transform: scale(0.98); }
   .f-steps li.on { box-shadow: inset 2px 0 0 #f0a07c; }
   .an-item.on::before { background: #f0a07c; }
 
-.tips-label, .action-label, .an-top, .fs-col .fs-label, .loading-dim.is-active .loading-dim-num { color: #f0a07c; }
+.tips-label, .an-top, .fs-col .fs-label, .loading-dim.is-active .loading-dim-num { color: #f0a07c; }
   #sec-loading .loading-dim.is-active .loading-dim-num { color: #ffe0cf; }
   .l-hero, .menu-overlay, #sec-results, #sec-myreports, #sec-loading, .l-nav { --on-night-2: #b8b2ab; }
-  .action-item:first-child::after { background: #f0a07c; }
   .entry-lesson { border-left-color: rgba(240,160,124,0.6); }
   .score-mid { color: #f2b25c; }
   .bar-mid { background: #f2b25c; }
@@ -1179,8 +1164,6 @@ details.more > summary:active { transform: scale(0.98); }
   .exec-box.risk { border-left-color: rgba(255,154,135,0.7); }
   .exec-box.opp { border-left-color: rgba(116,214,160,0.7); }
   .flag-item { color: var(--text); }
-  .action-item .action-tag { color: var(--muted); }
-  .action-tag { background: var(--on-night); color: var(--night); }
   .btn-primary, .btn-unlock, #sec-form .btn-primary, .unlock .btn-unlock { background: var(--on-night); color: var(--night); }
   @media (hover: hover) and (pointer: fine) { .btn-primary:hover, .btn-unlock:hover { background: #fff; } }
   .tip-link { color: var(--text); }
@@ -1216,9 +1199,6 @@ details.more > summary:active { transform: scale(0.98); }
   content: ''; position: absolute; left: 2px; top: 0.66em; width: 5px; height: 5px; border: 0; border-radius: 50%; background: currentColor; opacity: 0.45;
 }
 .tips-list li, .ready-list li, .fs-col li, .fs-col.red li, .fs-col.green li { padding-left: 20px; }
-.action-item { padding-left: 20px; }
-.action-item::before { display: none; }
-.action-item::after, .action-item:first-child::after { left: 2px; top: 0.66em; width: 5px; height: 5px; background: currentColor; box-shadow: none; opacity: 0.45; }
 #accordionMenu .accordion-score { color: var(--text); } /* not inherit: on iPhone Safari a button is blue by default */
 </style>
 </head>
@@ -1343,13 +1323,13 @@ details.more > summary:active { transform: scale(0.98); }
           <label>Genre <span class="hint">(select up to 2)</span></label>
           <select id="genre1" onchange="checkOther()" aria-label="First genre">
             <option value="">First genre…</option>
-            <option>Drama</option><option>Documentary</option><option>Thriller</option>
+            <option>Drama</option><option>Thriller</option>
             <option>Comedy</option><option>Horror</option><option>Sci-Fi</option>
             <option>Action</option><option>Romance</option><option>Animation</option><option>Other</option>
           </select>
           <select id="genre2" style="margin-top:8px" onchange="checkOther()" aria-label="Second genre (optional)">
             <option value="">Second genre (optional)…</option>
-            <option>Drama</option><option>Documentary</option><option>Thriller</option>
+            <option>Drama</option><option>Thriller</option>
             <option>Comedy</option><option>Horror</option><option>Sci-Fi</option>
             <option>Action</option><option>Romance</option><option>Animation</option><option>Other</option>
           </select>
@@ -1360,7 +1340,6 @@ details.more > summary:active { transform: scale(0.98); }
           <select id="format">
             <option value="">Select format…</option>
             <option>Feature Film</option><option>Short Film</option>
-            <option>Documentary Feature</option><option>Documentary Short</option>
           </select>
         </div>
       </div>
@@ -2277,7 +2256,7 @@ function renderFree(r, title) {
     { num:'03', label:'Market and audience',    sublabel:'Demand · Trends · Comparables',  score:r.market_score,       verdict:r.market_verdict,       detail:r.market_detail,       tip:r.market_tip,       flag:r.market_flag,       strength:r.market_strength,
       extra: oneComp.title ? '<div class="rblocks">'+rblock('Comparable film', null, entry(oneComp.title + (oneComp.year ? ' ('+oneComp.year+')' : ''), null, '', oneComp.result, oneComp, oneComp.lesson))+'</div>' : '' },
     { num:'04', label:'Festival strategy',    sublabel:'Circuit · Festivals · Timing',   score:r.festival_score,     verdict:r.festival_verdict,     detail:r.festival_detail,     tip:r.festival_tip,     flag:r.festival_flag,     strength:r.festival_strength,
-      extra: oneFestival.name ? '<div class="rblocks">'+rblock('Suggested festival', null, entry(oneFestival.name, oneFestival.tier ? 'Tier '+oneFestival.tier : null, '', oneFestival.why, oneFestival))+'</div>' : '' },
+      extra: oneFestival.name ? '<div class="rblocks">'+rblock('Suggested festival', null, entry(oneFestival.name, null, '', oneFestival.why, oneFestival))+'</div>' : '' },
     { num:'05', label:'Distribution and revenue', sublabel:'Platforms · Pricing · Sales',  score:r.distribution_score, verdict:r.distribution_verdict, detail:r.distribution_detail, tip:r.distribution_tip, flag:r.distribution_flag, strength:r.distribution_strength, extra:'' }
   ];
 
@@ -2348,7 +2327,7 @@ var GLOSSARY = [
   { t: "Pitch deck", d: "A short visual document, like a slideshow, used to present your film to investors or financiers.", re: /\bpitch decks?\b/i }
 ];
 function glossify(root) {
-  var parts = root.querySelectorAll('.next-step, .r-contacts .rblock, .accordion-body, .r-plan .action-item');
+  var parts = root.querySelectorAll('.path-step, .accordion-body');
   Array.prototype.forEach.call(parts, function(part) {
     var used = {};
     var walker = document.createTreeWalker(part, NodeFilter.SHOW_TEXT, { acceptNode: function(n) {
@@ -2445,7 +2424,7 @@ function renderFull(r, title) {
 
   // The film, area by area: verdict, what to do, red flags and strengths.
   // Comparable films stay with the market, the only list that is not a contact.
-  function areaBody(k, extra) { return buildAccordionBody(r[k+'_score'], r[k+'_verdict'], r[k+'_detail'], r[k+'_flags'], r[k+'_strengths'], r[k+'_tips'], null, extra || ''); }
+  function areaBody(k, extra) { return buildAccordionBody(r[k+'_score'], r[k+'_verdict'], r[k+'_detail'], r[k+'_flags'], r[k+'_strengths'], r[k+'_tips'], extra || ''); }
   var sections = [
     { label:'Creative package', score: r.creative_score, verdict: r.creative_verdict, body: areaBody('creative') },
     { label:'Financial plan', score: r.financial_score, verdict: r.financial_verdict, body: areaBody('financial') },
@@ -2476,9 +2455,8 @@ function renderFull(r, title) {
   });
   html += '</div>';
 
-  // The order of the three questions: does my film stand up (the five areas),
-  // what do I do now, who do I contact; then the plan.
-  document.getElementById('accordionMenu').innerHTML = html + buildNextStep(r.next_step) + buildContacts(r) + buildPlanSection(r, lastProject);
+  // Does my film stand up (the five areas), then the path to make it.
+  document.getElementById('accordionMenu').innerHTML = html + buildPath(r, lastProject);
   setCalendarButton(r);
   document.getElementById('accordionMenu').style.display = 'block';
   mountReportNav(sections);
@@ -2487,7 +2465,7 @@ function renderFull(r, title) {
 }
 
 /* ── ACCORDION BODY BUILDER ── */
-function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan, extra, lead) {
+function buildAccordionBody(score, verdict, detail, flags, strengths, tips, extra) {
   var out = '';
 
   // Verdict and the point of the analysis; the full argument is one tap
@@ -2514,28 +2492,18 @@ function buildAccordionBody(score, verdict, detail, flags, strengths, tips, plan
 
   // What the filmmaker is missing before the funds above are open to them
   // stays in view, right under the advice.
-  if (lead) out += lead;
 
-  // Everything else folded: risks and strengths, the 90-day plan, the
+  // Everything else folded: risks and strengths and the
   // sourced lists. They mostly back up "what to do", so they wait a tap.
   var more = rblock('Red flags and strengths', null, riskGrid(flags, strengths, 'Red flags', 'Strengths'));
-  if ((plan||[]).length) {
-    var tags = ['30 days','60 days','90 days'];
-    more += rblock('Next 90 days', null, timeline('', plan.map(function(a, i){ return { tag: tags[i] || '', text: String(a||'').replace(/^(30|60|90)\s*days?:?\s*/i,'') }; })));
-  }
+
   if (extra) more += extra;
   if (more) out += '<div class="rblocks">'+more+'</div>';
 
   return out;
 }
 
-/* ── YOUR PLAN: the roadmap in order, after the five areas ── */
-function buildPlanSection(r, project) {
-  var steps = (r.roadmap || []).filter(Boolean).map(function(s){ return { tag: s.phase, text: s.action }; });
-  var out = timeline('', steps);
-  return '<section class="r-plan">'+(out ? '<h2 class="r-plan-h">Your plan</h2>'+out : '')+roadmapBlock(project)+'</section>';
-}
-function buildFestivalCalendar(list) {
+function festivalsBody(list) {
   var fc = '', items = (list || []).filter(Boolean);
   // When several sources publish no deadline, say it once, not under each one.
   var missing = items.filter(function(f){ return f.source && !f.deadline; }).length;
@@ -2543,27 +2511,16 @@ function buildFestivalCalendar(list) {
   if (once) fc += '<p class="entry-note">'+(missing === items.length ? 'None of these sources publishes' : missing+' of these sources do not publish')+' a deadline yet. Check each one before planning.</p>';
   items.forEach(function(f){
     var dl = f.source && !once ? notStated(f.deadline, 'Not published on the source, check before planning') : f.deadline;
-    fc += entry(f.festival, f.tier ? 'Tier '+f.tier : null, fact('Deadline', dl, isClosed(dl) || !f.deadline), f.fit, f);
+    fc += entry(f.festival, null, fact('Deadline', dl, isClosed(dl) || !f.deadline), f.fit, f);
   });
-  return rblock('Festival calendar', howMany(items, 'festival', 'festivals'), fc, false, items.map(function(f){ return f.festival; }));
+  return fc;
 }
-function buildSalesAgents(list) {
+function agentsBody(list) {
   var sa = '';
   (list || []).forEach(function(a){ if (a) sa += entry(a.name, null, '', a.why, a, null, a.focus); });
-  return rblock('Sales agents', howMany(list, 'company', 'companies'), sa, false, (list || []).map(function(a){ return a && a.name; }));
+  return sa;
 }
 
-// A short sequence of steps on a vertical line: the 90-day plans, the
-// roadmap and the business plan milestones all use it.
-function timeline(label, items) {
-  var h = '';
-  (items || []).forEach(function(it){
-    if (!it || !it.text) return;
-    var txt = foldShort(it.text);
-    h += '<div class="action-item">'+(it.tag ? '<span class="action-tag">'+esc(it.tag)+'</span>' : '')+'<span class="action-text">'+txt+'</span></div>';
-  });
-  return h ? '<div class="action-block">'+(label ? '<span class="action-label">'+label+'</span>' : '')+h+'</div>' : '';
-}
 
 function riskGrid(left, right, leftLabel, rightLabel) {
   var l = '', g = '';
@@ -2633,9 +2590,7 @@ function goToArea(i) {
 }
 var REPORT_PARTS = [
   { q: 'Does my film stand up?', sel: ['#accordionMenu .r-areas-h', '#accordionMenu .accordion-wrap'], areas: true },
-  { q: 'What do I do now?', sel: ['.next-step'] },
-  { q: 'Who do I contact?', sel: ['.r-contacts'] },
-  { q: 'Your plan', sel: ['#accordionMenu .r-plan'] }
+  { q: 'Your path', sel: ['#accordionMenu .r-path'] }
 ];
 function partEl(host, p) {
   for (var i = 0; i < p.sel.length; i++) { var el = host.querySelector(p.sel[i]); if (el) return el; }
@@ -2845,7 +2800,7 @@ function entry(name, chip, facts, text, item, extraText, subline) {
    a browser translator translates the report but keeps the name you search for. */
 function isClosed(v) { return /^closed\b/i.test(String(v || '')); }
 
-function buildFundingSources(sources) {
+function fundsBody(sources) {
   if (!sources || !sources.length) return '';
   var h = '';
   sources.forEach(function(f){
@@ -2853,29 +2808,58 @@ function buildFundingSources(sources) {
     var dl = f.source ? notStated(f.deadline, 'Not published on the source, check before planning') : f.deadline;
     h += entry(f.name, f.type, fact('Who can apply', APPLICANT[f.applicant]) + fact('Amount', f.amount) + fact('Deadline', dl, isClosed(dl) || !f.deadline), f.eligibility, f);
   });
-  return rblock('Funding sources', howMany(sources, 'fund', 'funds'), h, false, sources.map(function(f){ return f && f.name; }));
+  return h;
 }
-/* YOUR NEXT STEP and PRODUCERS (Antonio: the site must help
-   people actually make the film). The next step is one concrete action for
-   this week; the producers are real companies, each confirmed by a page
-   that names it with a film it produced (grounding.js, checkNamed). */
-function buildNextStep(n) {
-  if (!n || !n.action) return '';
-  var ready = (n.ready || []).filter(Boolean);
-  return '<section class="next-step"><h2 class="r-plan-h">Your next step</h2>'+
-    '<p class="next-action">'+esc(n.action)+'</p>'+
-    (n.why ? '<p class="next-why">'+esc(n.why)+'</p>' : '')+
-    (ready.length ? '<div class="next-ready"><span class="sub-k">Have ready</span><ul class="ready-list">'+ready.map(function(x){ return '<li><span class="ready-how">'+esc(x)+'</span></li>'; }).join('')+'</ul></div>' : '')+
-    '</section>';
+/* YOUR PATH: one ladder of steps, in order, from where the project is now.
+   Each step is a closed row: what to do in one line and the names already
+   visible; a tap opens the detail. Steps that do not apply to this project
+   are left out (no producer step when a producer is attached, no money step
+   once the film is funded). The producers are real companies, each confirmed
+   by a page that names it with a film it produced (grounding.js, checkNamed). */
+var FUNDED_STAGES = ['Funded, preparing to shoot', 'Shooting', 'In post-production', 'Finished'];
+function pathStep(n, title, line, names, body) {
+  if (!body) return '';
+  return '<details class="rblock path-step"><summary><span class="path-n">'+n+'</span><span class="path-main"><span class="rblock-label">'+title+'</span>'+(line ? '<span class="path-line">'+esc(line)+'</span>' : '')+namesLine(names)+'</span><span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="rblock-body">'+body+'</div></details>';
 }
-// Every name to contact, in one place: what you need first, then producers,
-// funds, festivals and labs, sales agents.
-function buildContacts(r) {
-  var h = buildBeforeApply(r.before_you_apply) + buildProducers(r.producers, r.producer_email) + buildFundingSources(r.financial_sources) +
-    buildFestivalCalendar(r.festival_calendar) + buildLabOpportunities(r.lab_and_market_opportunities) + buildSalesAgents(r.sales_agents);
-  return h ? '<section class="r-contacts"><h2 class="r-plan-h">Who to contact</h2><div class="rblocks">'+h+'</div></section>' : '';
+function buildPath(r, project) {
+  project = project || {};
+  var steps = [];
+  var ns = r.next_step;
+  if (ns && ns.action) {
+    var ready = (ns.ready || []).filter(Boolean);
+    var body = (ns.why ? '<p class="next-why">'+esc(ns.why)+'</p>' : '') +
+      (ready.length ? '<div class="next-ready"><span class="sub-k">Have ready</span><ul class="ready-list">'+ready.map(function(x){ return '<li><span class="ready-how">'+esc(x)+'</span></li>'; }).join('')+'</ul></div>' : '');
+    steps.push(['This week', ns.action, null, body || '<p class="next-why">'+esc(ns.action)+'</p>']);
+  }
+  // A first feature with no short behind it: the short comes first.
+  if (/feature/i.test(project.format || '') && project.experience === 'First film') {
+    steps.push(['Make a short first', 'Show what you can do before you ask anyone to pay for a feature.', null,
+      '<div class="prose"><p>Most first features are paid for by people who already believe in you: family, friends, crowdfunding. A short you can show is how they, festivals and producers see what you can do.</p>'+
+      '<p>In a study of 146,603 first-time feature directors, experience in short films or TV went with a better chance of making a second film.</p></div>'+
+      '<a class="src-line" href="https://stephenfollows.com/p/the-film-finance-numbers-nobody-shows-you" target="_blank" rel="noopener">Source: stephenfollows.com · checked 10 Nov 2026</a> '+
+      '<a class="src-line" href="https://stephenfollows.com/p/what-gets-a-director-a-second-film" target="_blank" rel="noopener">Source: stephenfollows.com · checked 10 Nov 2026</a>']);
+  }
+  var producers = (r.producers || []).filter(Boolean);
+  if (project.producer !== 'A producer or company is attached') {
+    steps.push(['Find a producer', 'Companies that make films like yours, and a first email you can copy.', producers.map(function(p){ return p.name; }),
+      beforeApplyBody(r.before_you_apply) + (producers.length ? producersBody(producers, r.producer_email) : '')]);
+  }
+  var funds = (r.financial_sources || []).filter(Boolean);
+  if (FUNDED_STAGES.indexOf(project.stage) < 0 && funds.length) {
+    steps.push(['Find the money', 'Funds and incentives that fit, with who can apply and the deadlines.', funds.map(function(f){ return f.name; }), fundsBody(funds)]);
+  }
+  var fests = (r.festival_calendar || []).filter(Boolean), labs = (r.lab_and_market_opportunities || []).filter(Boolean);
+  if (fests.length || labs.length) {
+    steps.push(['Get seen', 'Festivals, labs and markets, with deadlines for your calendar.', fests.map(function(f){ return f.festival; }).concat(labs.map(function(l){ return l.name; })),
+      (fests.length ? '<span class="sub-k">Festivals</span>'+festivalsBody(fests) : '') + (labs.length ? '<span class="sub-k">Labs and markets</span>'+labsBody(labs) : '')]);
+  }
+  var agents = (r.sales_agents || []).filter(Boolean);
+  if (agents.length) steps.push(['Find who sells it', 'Sales agents that handle films like yours.', agents.map(function(a){ return a.name; }), agentsBody(agents)]);
+  var h = '', n = 0;
+  steps.forEach(function(st){ var row = pathStep(n + 1, st[0], st[1], st[2], st[3]); if (row) { n++; h += row; } });
+  return h ? '<section class="r-path"><h2 class="r-plan-h">Your path</h2><div class="rblocks">'+h+'</div>'+roadmapBlock(project)+'</section>' : '';
 }
-function buildProducers(list, email) {
+function producersBody(list, email) {
   var items = (list || []).filter(Boolean);
   if (!items.length) return '';
   var h = '';
@@ -2883,7 +2867,7 @@ function buildProducers(list, email) {
     h += entry(p.name, p.country || null, fact('Produced', p.film + (p.year ? ' ('+p.year+')' : '')), p.why, p, p.approach ? 'How they take projects: '+p.approach : null);
   });
   if (email) h += '<div class="email-draft"><span class="sub-k">A first email you can adapt</span><p class="email-text">'+esc(email)+'</p><button type="button" class="btn-secondary copy-btn" onclick="copyEmail(this)">Copy the email</button></div>';
-  return rblock('Producers to contact', howMany(items, 'company', 'companies'), h, false, items.map(function(p){ return p.name; }));
+  return h;
 }
 function copyEmail(btn) {
   var t = btn.parentNode.querySelector('.email-text').textContent;
@@ -2898,7 +2882,7 @@ var APPLICANT = { Individual: 'Individuals', Company: 'Production companies only
 /* Before you can apply: most public funds take applications
    from production companies only, and a first-time director often has
    none. The report says what is missing and how to get it. */
-function buildBeforeApply(b) {
+function beforeApplyBody(b) {
   var miss = ((b && b.missing) || []).filter(Boolean), steps = ((b && b.steps) || []).filter(Boolean);
   if (!miss.length) return '';
   var h = '<div class="tips-block ready-block"><span class="tips-label">Before you can apply</span><ul class="ready-list">';
@@ -2907,7 +2891,7 @@ function buildBeforeApply(b) {
   return h + '</ul></div>';
 }
 
-function buildLabOpportunities(labs) {
+function labsBody(labs) {
   if (!labs || !labs.length) return '';
   var h = '';
   labs.forEach(function(l){
@@ -2915,7 +2899,7 @@ function buildLabOpportunities(labs) {
     var dl = l.source ? notStated(l.deadline, 'Not published on the source, check before planning') : l.deadline;
     h += entry(l.name, null, fact('Deadline', dl, isClosed(dl) || !l.deadline), l.fit, l);
   });
-  return rblock('Labs and markets', howMany(labs, 'programme', 'programmes'), h, false, labs.map(function(l){ return l && l.name; }));
+  return h;
 }
 
 
@@ -3358,7 +3342,7 @@ async function savePDF() {
       ln('FESTIVAL CALENDAR',10,true);
       lastResult.festival_calendar.forEach(function(f){
         if (!f) return;
-        ln((f.festival||'')+' (Tier '+(f.tier||'')+') · '+(f.source ? 'Deadline: '+notStated(f.deadline, 'not published on the source, check before planning') : (f.deadline||'')),10,true);
+        ln((f.festival||'')+' · '+(f.source ? 'Deadline: '+notStated(f.deadline, 'not published on the source, check before planning') : (f.deadline||'')),10,true);
         ln(f.fit||'',9,false,122,118,112);
         if (f.source && f.rule_quote) ln('The rule, word for word: \u201C'+f.rule_quote+'\u201D',9,false,26,25,22);
         if (f.source) ln(pdfSource(f),8,false,150,148,145);
