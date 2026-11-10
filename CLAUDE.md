@@ -158,7 +158,8 @@ nell'intestazione, foto d'archivio, logo gigante nel footer; più di 5 aree nel
 report; il PDF di una pagina; il pulsante "Next" tra le aree; contatti sparsi
 dentro le aree; scritte rosse sotto le caselle del modulo; le guide; la
 roadmap o le guide nel fondo della home; un riquadro glossario; i colori
-diversi per pallini e voti; le serie TV.
+diversi per pallini e voti; le serie TV; i documentari; le etichette "Tier
+  A/B/C" sui festival (giudizio dell'AI senza fonte).
 
 ## Pagine e flusso
 
@@ -174,26 +175,29 @@ diversi per pallini e voti; le serie TV.
   nessuna scritta sotto, la pagina sale al primo vuoto senza mettere il
   cursore; sotto il bottone "N fields are missing, marked in red above.".
   Le caselle di testo sono alte quanto il loro testo di esempio
-  (`fitPlaceholders`). Solo film (lunghi e corti, documentari compresi).
+  (`fitPlaceholders`). Solo lungometraggi e cortometraggi di finzione: niente
+  serie, niente documentari (Antonio, 10 novembre 2026).
 - **Caricamento**: 5 dimensioni che avanzano invece di uno spinner
   (`startLoadingDims` / `finishLoadingDims` / `resetLoadingDims`).
-- **Report completo**, segue le tre domande nell'ordine della spiegazione
-  semplice. Dall'alto: titolo, voto nella scheda di vetro, riassunto (4 righe
+- **Report completo**: titolo, voto nella scheda di vetro, riassunto (4 righe
   + "Read more" su telefono); "Your film, area by area" (5 aree chiuse, una
   aperta alla volta, `toggleAccordion`; dentro giudizio, "What to do", "Red
-  flags and strengths", Comparable films nel mercato); "Your next step"
-  (`buildNextStep`); "Who to contact" (`buildContacts`: Before you can
-  apply, Producers to contact con email da copiare, Funding sources,
-  Festival calendar, Labs and markets, Sales agents, righe chiuse con la
-  stessa freccia); "Your plan" (`buildPlanSection`)
-  + link alla roadmap; in fondo "Download the full report" e calendario
-  (.ics, nascosto senza date future). Solo nel PDF: rischio/opportunità,
-  marketing, budget, legale, piano a 90 giorni e i testi lunghi.
+  flags and strengths", Comparable films nel mercato); poi **"Your path"**
+  (`buildPath`): una sola scaletta numerata di righe chiuse, ognuna con cosa
+  fare in una riga e i nomi già visibili: This week (prossimo passo e cosa
+  preparare), Make a short first (solo lungometraggio e "First film", con le
+  fonti di Stephen Follows), Find a producer ("Before you can apply",
+  produttori, email da copiare; non c'è se il produttore c'è già), Find the
+  money (fondi; non c'è da "Funded" in poi), Get seen (festival, laboratori e
+  mercati), Find who sells it (agenti di vendita); sotto, il link alla
+  roadmap. In fondo "Download the full report" e calendario (.ics, nascosto
+  senza date future). Solo nel PDF: piano a fasi, rischio/opportunità,
+  marketing, budget, legale, piano a 90 giorni e i testi lunghi. Antonio:
+  "una scaletta già presentata da noi, non mille bottoni e mille link".
 - **Anteprima**: titolo, voto, riassunto, poi le 5 aree, poi rischio,
   opportunità e prossimo passo, poi la richiesta del report completo.
-- **Indice del report** (`mountReportNav`, `REPORT_PARTS`): le tre domande
-  ("Does my film stand up?" con sotto le 5 aree e il voto, "What do I do
-  now?", "Who do I contact?") più "Your plan". Dai 1100px in su è una colonna
+- **Indice del report** (`mountReportNav`, `REPORT_PARTS`): "Does my film
+  stand up?" con sotto le 5 aree e il voto, poi "Your path". Dai 1100px in su è una colonna
   fissa a sinistra del testo (il testo si sposta a destra, colonna di 640px);
   sotto i 1100px è una barra sotto l'intestazione con la sezione attuale e il
   pulsante "Sections" che apre l'elenco. Compare quando titolo e voto in alto
@@ -207,9 +211,8 @@ diversi per pallini e voti; le serie TV.
 - **"More" solo dove serve**: un testo fino a 90 parole (`FOLD_WORDS`) si
   vede intero; solo i più lunghi mostrano la prima frase e "More"/"Read
   more" (`foldShort`, `parasFold`).
-- **Righe chiuse di "Who to contact"**: sotto il titolo si vedono già i primi
-  3 nomi (`namesLine`, al massimo 2 righe); il dettaglio si apre col tocco.
-  Nel piano il nome della fase è scuro, il testo più chiaro.
+- **Righe chiuse della scaletta**: sotto il titolo si vedono già i primi 3
+  nomi (`namesLine`, al massimo 2 righe); il dettaglio si apre col tocco.
 - **Report di esempio Northbound**: report vero del motore (voto 5.0), fonti
   controllate il 23 ottobre e il 2 novembre 2026; 3 produttori verificati a
   mano (Vivo Film, Leone Film Group, Lava Films); TorinoFilmLab FeatureLab 2027 è segnato "Closed (5 November 2026)".
