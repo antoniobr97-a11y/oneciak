@@ -261,6 +261,10 @@ diversi per pallini e voti; le serie TV.
   52 min, in italiano, no IA; sviluppo e produzione = solo imprese
   indipendenti italiane Ateco 59.1 con un'opera negli ultimi 5 anni (salvo
   società nuove). `applySelective` sistema queste righe (anche 'Split').
+- Stile di scrittura (`STYLE` in `reportPrompts.js`, usato anche
+  nell'anteprima): un'idea per frase, circa 20 parole al massimo, "you",
+  verbi concreti, termini tecnici spiegati la prima volta, ogni punto detto una
+  volta sola. Antonio: "report leggero ma completo, non ripetitivo".
 - Prompt: `stageRules` (fase del progetto), rubrica `SCORING` (voto = media
   delle 5 aree), niente previsioni di incasso in euro né prezzi E&O. Ogni
   voce: "Source: dominio · checked data" su sito, PDF e mail.

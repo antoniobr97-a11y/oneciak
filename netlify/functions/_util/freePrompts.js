@@ -2,9 +2,9 @@
 // fields, never accepted from the browser: otherwise /analyze would forward
 // any text to the model on our key.
 
-const { SCORING, stageLines, stageRules } = require('./reportPrompts');
+const { SCORING, STYLE, stageLines, stageRules } = require('./reportPrompts');
 
-const FREE_PREAMBLE = 'You are a film market consultant. Write in clear English, no markdown. Be honest and specific: a filmmaker needs real information, not generic advice. Every sentence must add new, specific information: never restate a verdict field inside its paired detail field, and never pad with generic filler ("this is important", "it is worth noting").\n\nHONESTY RULES (strict): never invent a film, festival, fund, company, statistic, date, deadline, amount or percentage. In this quick preview do not state any deadline, budget, box-office figure, fund amount, rebate percentage or statistic at all: the full report researches those with sources. Name real organisations only when you are certain they exist.\n\n'+SCORING+'\n\nRespond ONLY with valid JSON, no text outside the JSON.';
+const FREE_PREAMBLE = 'You are a film market consultant. Write in clear English, no markdown. Be honest and specific: a filmmaker needs real information, not generic advice. Every sentence must add new, specific information: never restate a verdict field inside its paired detail field, and never pad with generic filler ("this is important", "it is worth noting").\n\n'+STYLE+'\n\nHONESTY RULES (strict): never invent a film, festival, fund, company, statistic, date, deadline, amount or percentage. In this quick preview do not state any deadline, budget, box-office figure, fund amount, rebate percentage or statistic at all: the full report researches those with sources. Name real organisations only when you are certain they exist.\n\n'+SCORING+'\n\nRespond ONLY with valid JSON, no text outside the JSON.';
 
 function freeCurrentDateLine() {
   var today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
