@@ -251,6 +251,10 @@ diversi per pallini e voti; le serie TV; i documentari; le etichette "Tier
   un'azienda: usa [COMPANY NAME]. Come un produttore accetta progetti
   (`approach`) resta solo se la sua frase (`approach_quote`) è sulla pagina
   parola per parola (`checkApproach`).
+- Scadenza chiusa: conta la data dopo "until", "deadline", "by", "entro"
+  e simili (`closingDateIn`), non la data più lontana della frase (La
+  Résidence di Cannes: "open until September 30, 2026" per una sessione nel
+  2027 risultava aperta).
 - Laboratori e mercati hanno la scadenza come fondi e festival: passata
   diventa "Closed (...)", assente diventa "Not published on the source,
   check before planning"; finisce anche nel calendario .ics. Siti di notizie
@@ -271,8 +275,13 @@ diversi per pallini e voti; le serie TV; i documentari; le etichette "Tier
 - Prompt: `stageRules` (fase del progetto), rubrica `SCORING` (voto = media
   delle 5 aree), niente previsioni di incasso in euro né prezzi E&O. Ogni
   voce: "Source: dominio · checked data" su sito, PDF e mail.
-- Qualità misurata sul sito live (fact-check): anteprime 90% corrette, report
-  completi 78%, 0 enti inventati. Problemi noti: regole di prima visione a
+- Qualità misurata il 10 novembre 2026 su 3 report nuovi (corto italiano,
+  lungometraggio francese, lungometraggio USA), 63 voci con fonte: 50 giuste
+  sulla fonte, 1 sbagliata (La Résidence data come aperta e non adatta a un
+  regista francese; la scadenza è stata corretta), 12 non verificabili da qui
+  (siti che bloccano i programmi). Il controllo verifica nomi, film, date e
+  citazioni sulla fonte, non la qualità dei consigli. Prima misura (22
+  ottobre): report completi 78%. Problemi noti: regole di prima visione a
   volte parafrasate male, fondi senza scadenza scritta, qualche film di
   confronto poco pertinente, a volte fonti da aggregatori, nei corti spesso
   nessun film di confronto (regola severa, voluto).
