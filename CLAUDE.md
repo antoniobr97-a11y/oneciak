@@ -75,6 +75,14 @@ con typo quando è frustrato: non vuol dire che vuole un tono più formale.
 
 ## Pubblicare su main (procedura obbligatoria)
 
+**Netlify ha un limite al mese** (il 9 novembre 2026 Antonio era al 75%):
+ogni pubblicazione su main e ogni aggiornamento della preview #81 consuma.
+Quindi: mai pubblicare solo CLAUDE.md o note (restano sul branch e partono
+con la pubblicazione vera successiva); raggruppare le modifiche approvate in
+una sola pubblicazione; provare tutto in locale prima; la preview solo per
+provare il motore dei report; i giri di controllo completi sul sito vero solo
+dopo una pubblicazione, non più volte di seguito.
+
 Mai merge di PR (un merge via API è risultato vuoto e il sito è rimasto
 vecchio). Sempre:
 ```bash
@@ -169,20 +177,23 @@ diversi per pallini e voti; le serie TV.
   (`fitPlaceholders`). Solo film (lunghi e corti, documentari compresi).
 - **Caricamento**: 5 dimensioni che avanzano invece di uno spinner
   (`startLoadingDims` / `finishLoadingDims` / `resetLoadingDims`).
-- **Report completo**, segue le tre domande. Dall'alto: titolo, voto nella
-  scheda di vetro, riassunto (4 righe + "Read more" su telefono); "Your next
-  step" (`buildNextStep`); "Who to contact" (`buildContacts`: Before you can
+- **Report completo**, segue le tre domande nell'ordine della spiegazione
+  semplice. Dall'alto: titolo, voto nella scheda di vetro, riassunto (4 righe
+  + "Read more" su telefono); "Your film, area by area" (5 aree chiuse, una
+  aperta alla volta, `toggleAccordion`; dentro giudizio, "What to do", "Red
+  flags and strengths", Comparable films nel mercato); "Your next step"
+  (`buildNextStep`); "Who to contact" (`buildContacts`: Before you can
   apply, Producers to contact con email da copiare, Funding sources,
   Festival calendar, Labs and markets, Sales agents, righe chiuse con la
-  stessa freccia); "Your film, area by area" (5 aree, una aperta alla volta,
-  `toggleAccordion`; dentro giudizio, "What to do", "Red flags and
-  strengths", Comparable films nel mercato); "Your plan" (`buildPlanSection`)
+  stessa freccia); "Your plan" (`buildPlanSection`)
   + link alla roadmap; in fondo "Download the full report" e calendario
   (.ics, nascosto senza date future). Solo nel PDF: rischio/opportunità,
   marketing, budget, legale, piano a 90 giorni e i testi lunghi.
+- **Anteprima**: titolo, voto, riassunto, poi le 5 aree, poi rischio,
+  opportunità e prossimo passo, poi la richiesta del report completo.
 - **Indice del report** (`mountReportNav`, `REPORT_PARTS`): le tre domande
-  ("What do I do now?", "Who do I contact?", "Does my film stand up?" con
-  sotto le 5 aree e il voto) più "Your plan". Dai 1100px in su è una colonna
+  ("Does my film stand up?" con sotto le 5 aree e il voto, "What do I do
+  now?", "Who do I contact?") più "Your plan". Dai 1100px in su è una colonna
   fissa a sinistra del testo (il testo si sposta a destra, colonna di 640px);
   sotto i 1100px è una barra sotto l'intestazione con la sezione attuale e il
   pulsante "Sections" che apre l'elenco. Compare quando titolo e voto in alto
@@ -218,11 +229,13 @@ diversi per pallini e voti; le serie TV.
 - Modello `claude-haiku-5-5` (anteprima effort `low`), ricerca web Anthropic:
   anteprima 2 ricerche; report completo sezioni A-G di `reportPrompts.js`
   con ricerche B 6, C 5, D 6, E 5, G 5. `FULL_MAX_TOKENS` 32000 (con meno una
-  sezione si interrompe a metà JSON). Costi misurati: anteprima ~0,025 $,
-  report completo ~0,22-0,24 $ senza la sezione produttori (con produttori:
-  da misurare sui primi report veri). Limite di spesa Anthropic: 50 al mese
-  (circa 200 report completi; poi le analisi falliscono fino al mese dopo: da
-  decidere con Antonio prima del lancio).
+  sezione si interrompe a metà JSON). Costi misurati: anteprima ~0,025 $;
+  report completo con produttori ~0,35-0,40 $ (misura del 9 novembre 2026:
+  il credito è sceso da 22,46 a 22,02 $ con 1 report completo e 2 anteprime;
+  la ricerca web è circa tre quarti della spesa). Credito prepagato rimasto
+  il 9 novembre: 22,02 $ (circa 55 report completi). Limite di spesa
+  Anthropic: 50 al mese (circa 120 report completi): da decidere con Antonio
+  prima del lancio, insieme alla ricarica del credito.
 - `grounding.js`: una voce (fondo, festival, film, agente, piattaforma,
   produttore) resta solo se la sua fonte è tra i risultati della ricerca;
   date e cifre solo se sono sulla pagina; niente cifre da aggregatori;
@@ -248,6 +261,10 @@ diversi per pallini e voti; le serie TV.
   52 min, in italiano, no IA; sviluppo e produzione = solo imprese
   indipendenti italiane Ateco 59.1 con un'opera negli ultimi 5 anni (salvo
   società nuove). `applySelective` sistema queste righe (anche 'Split').
+- Stile di scrittura (`STYLE` in `reportPrompts.js`, usato anche
+  nell'anteprima): un'idea per frase, circa 20 parole al massimo, "you",
+  verbi concreti, termini tecnici spiegati la prima volta, ogni punto detto una
+  volta sola. Antonio: "report leggero ma completo, non ripetitivo".
 - Prompt: `stageRules` (fase del progetto), rubrica `SCORING` (voto = media
   delle 5 aree), niente previsioni di incasso in euro né prezzi E&O. Ogni
   voce: "Source: dominio · checked data" su sito, PDF e mail.
@@ -319,9 +336,8 @@ corrispondono al sito, restano le parti legali.
 
 1. Avvocato: privacy, strada A o B, nome di Antonio. Poi riscrivere privacy e
    termini.
-2. Prima del lancio: decidere il tetto di spesa Anthropic e misurare il costo
-   di un report completo con i produttori (dalla console Anthropic, pagina
-   Usage: da qui non si vede). Prova dal vivo fatta da Antonio l'8 novembre
+2. Prima del lancio: decidere il tetto di spesa Anthropic e ricaricare il
+   credito (22,02 $ il 9 novembre, circa 55 report completi). Prova dal vivo fatta da Antonio l'8 novembre
    2026 su iPhone (The Salt Road): report arrivato, mittente vero
    `reports@report.oneciak.com`.
 3. Lancio (Product Hunt, Reddit, scuole): dopo l'avvocato, con la frase di
