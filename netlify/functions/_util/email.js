@@ -249,7 +249,7 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
 
   if (r.festival_calendar && r.festival_calendar.length) {
     let fc = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Festival Calendar</span>';
-    r.festival_calendar.forEach(f => { if (!f) return; fc += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.festival) + '</b> (Tier ' + esc(f.tier) + ') · ' + esc(f.source ? 'Deadline: ' + stated(f.deadline, f) : f.deadline) + '<br><span style="font-size:12px;color:#5c5852">' + esc(f.fit) + '</span>' + sourceHtml(f) + '</p>'; });
+    r.festival_calendar.forEach(f => { if (!f) return; fc += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.festival) + '</b> · ' + esc(f.source ? 'Deadline: ' + stated(f.deadline, f) : f.deadline) + '<br><span style="font-size:12px;color:#5c5852">' + esc(f.fit) + '</span>' + sourceHtml(f) + '</p>'; });
     fc += '</td></tr>';
     body += fc;
   }
