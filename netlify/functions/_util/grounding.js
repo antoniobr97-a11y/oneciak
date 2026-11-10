@@ -157,19 +157,35 @@ function monthIndex(word) {
   if (i === -1) i = MONTHS_IT.indexOf(w);
   return i;
 }
-function lastDateIn(text) {
+function datesIn(text) {
   const s = String(text || '');
   const found = [];
   let m;
   const dmy = /\b(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]{3,9})\.?,?\s+(20\d\d)\b/gi;
-  while ((m = dmy.exec(s))) { const mi = monthIndex(m[2]); if (mi >= 0) found.push(Date.UTC(+m[3], mi, +m[1])); }
+  while ((m = dmy.exec(s))) { const mi = monthIndex(m[2]); if (mi >= 0) found.push({ t: Date.UTC(+m[3], mi, +m[1]), at: m.index }); }
   const mdy = /\b([a-z]{3,9})\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(20\d\d)\b/gi;
-  while ((m = mdy.exec(s))) { const mi = monthIndex(m[1]); if (mi >= 0) found.push(Date.UTC(+m[3], mi, +m[2])); }
+  while ((m = mdy.exec(s))) { const mi = monthIndex(m[1]); if (mi >= 0) found.push({ t: Date.UTC(+m[3], mi, +m[2]), at: m.index }); }
   const iso = /\b(20\d\d)-(\d{2})-(\d{2})\b/g;
-  while ((m = iso.exec(s))) found.push(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  while ((m = iso.exec(s))) found.push({ t: Date.UTC(+m[1], +m[2] - 1, +m[3]), at: m.index });
   const dots = /\b(\d{1,2})[./](\d{1,2})[./](20\d\d)\b/g;
-  while ((m = dots.exec(s))) found.push(Date.UTC(+m[3], +m[2] - 1, +m[1]));
-  return found.length ? Math.max.apply(null, found) : null;
+  while ((m = dots.exec(s))) found.push({ t: Date.UTC(+m[3], +m[2] - 1, +m[1]), at: m.index });
+  return found;
+}
+function lastDateIn(text) {
+  const found = datesIn(text);
+  return found.length ? Math.max.apply(null, found.map(d => d.t)) : null;
+}
+// The date that closes a call. When the text says "open until", "deadline",
+// "by" or the like, that date counts, not the later dates of the programme
+// itself ("open until 30 September 2026 for the session of March to July
+// 2027" closed in September 2026).
+const CLOSE_WORDS = /\b(until|till|deadline|due|by|before|closes?|closing|ends?|entro|scadenza|jusqu'au|bis)\b[^.;]{0,25}$/i;
+function closingDateIn(text) {
+  const s = String(text || '');
+  const found = datesIn(s);
+  if (!found.length) return null;
+  const marked = found.filter(d => CLOSE_WORDS.test(s.slice(Math.max(0, d.at - 30), d.at)));
+  return Math.max.apply(null, (marked.length ? marked : found).map(d => d.t));
 }
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 function dayMonthYear(t) { const d = new Date(t); return d.getUTCDate() + ' ' + MONTH_NAMES[d.getUTCMonth()] + ' ' + d.getUTCFullYear(); }
@@ -177,7 +193,7 @@ function markIfClosed(item, field, today) {
   const own = item[field] != null && String(item[field]).trim() !== '';
   // No deadline of its own: the rule quoted from the official page may still
   // date the call ("was open from 15 January to 13 April 2026").
-  const last = lastDateIn(own ? item[field] : item.rule_quote);
+  const last = closingDateIn(own ? item[field] : item.rule_quote);
   if (last === null || last >= Date.parse(today + 'T00:00:00Z')) return;
   item.closed = true;
   if (!own) { item[field] = 'Closed (' + dayMonthYear(last) + ')'; return; }
