@@ -79,7 +79,7 @@ con typo quando è frustrato: non vuol dire che vuole un tono più formale.
 
 ## Pubblicare su main (procedura obbligatoria)
 
-**Netlify ha un limite al mese** (il 9 novembre 2026 Antonio era al 75%):
+**Netlify ha un limite al mese** (il 9 novembre 2026 Antonio era al 75%; il 10 novembre è passato al piano a pagamento e torna al Free a fine mese, promemoria `trig_01SEEuAVNJc5mCnfkSTcDufc` il 27 novembre):
 ogni pubblicazione su main e ogni aggiornamento della preview #81 consuma.
 Quindi: mai pubblicare solo CLAUDE.md o note (restano sul branch e partono
 con la pubblicazione vera successiva); raggruppare le modifiche approvate in
