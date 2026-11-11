@@ -267,8 +267,13 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
   cui frase (`rule_quote`, `eligibility`, `fit`) esclude il paese del
   progetto ("non-French", "must not be residents or citizens of France",
   "must be residents of Italy") vengono tolti, anche nell'anteprima.
-  Controlla solo il paese, non esperienza o formato; i paesi sono una
-  tabella di circa 50. Sul sito "Who can apply" compare solo con la frase
+  Stesso controllo (`excludesWork`) su formato (corto o lungo), durata
+  ("at least 60 minutes", "up to 30 minutes") e lungometraggi già fatti dal
+  regista ("is for first and second features", "must have directed at
+  least one feature"): solo frasi che limitano chi entra, non quelle su
+  prima visione, soldi o lingua; frasi con "not" non vengono giudicate. I
+  paesi sono una tabella di circa 50. 53 frasi di prova (vere e difficili)
+  l'11 novembre 2026, tutte giuste. Sul sito "Who can apply" compare solo con la frase
   della fonte; le righe dei passi "Find the money" e "Get seen" dicono di
   controllare la pagina ufficiale.
 - Film di confronto (`checkComp`): restano solo se la loro pagina dice il
@@ -318,8 +323,9 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
   esempio openfieldsproductions.com) a volte mostrano l'elenco dei film e a
   volte no: ricontrollare più volte prima di dire che un nome manca. Il controllo verifica nomi, film, date e
   citazioni sulla fonte, non la qualità dei consigli. Prima misura (22
-  ottobre): report completi 78%. Problemi noti: l'idoneità del regista si
-  controlla solo sul paese (esperienza, formato e fase restano al prompt);
+  ottobre): report completi 78%. Problemi noti: l'idoneità si controlla su paese,
+  formato, durata e lungometraggi già fatti, non su fase del progetto o
+  società richiesta (restano al prompt e a "Before you can apply");
   a volte nessun produttore verificato (report francese); regole di prima visione a
   volte parafrasate male, fondi senza scadenza scritta, qualche film di
   confronto poco pertinente, a volte fonti da aggregatori, nei corti spesso

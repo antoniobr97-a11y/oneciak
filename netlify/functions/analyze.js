@@ -4,7 +4,7 @@ const { callClaude, extractJSON } = require('./_util/anthropic');
 const { groundOne, sourcedSet } = require('./_util/grounding');
 const { incrementUsageCount } = require('./_util/stats');
 const { sanitizeProject } = require('./_util/project');
-const { countryOf, excludes } = require('./_util/eligibility');
+const { countryOf, excludes, excludesWork } = require('./_util/eligibility');
 const { allFreePrompts } = require('./_util/freePrompts');
 
 const ALLOWED_ORIGIN = process.env.SITE_URL || 'https://oneciak.com';
@@ -67,9 +67,10 @@ exports.handler = async (event) => {
       groundOne(merged.one_comp, set, ['result', 'lesson'], today),
       groundOne(merged.one_festival, set, ['why'], today)
     ]);
-    // A festival that shuts out this project's country is not shown (eligibility.js).
+    // A festival that shuts out this project (country, format, running time,
+    // the director's features) is not shown (eligibility.js).
     const country = countryOf(project.country);
-    if (merged.one_festival && country && [merged.one_festival.rule_quote, merged.one_festival.why].some(t => excludes(t, country))) merged.one_festival = null;
+    if (merged.one_festival && [merged.one_festival.rule_quote, merged.one_festival.why].some(t => (country && excludes(t, country)) || excludesWork(t, project))) merged.one_festival = null;
     merged.overall_score = overallFromAreas(merged);
     console.log('analyze: searches', results[0].searches, 'comp', !!merged.one_comp, 'festival', !!merged.one_festival);
     await incrementUsageCount();
