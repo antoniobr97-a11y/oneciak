@@ -1,4 +1,4 @@
-const { countryOf, excludes } = require('./eligibility');
+const { countryOf, excludes, excludesWork } = require('./eligibility');
 const https = require('https');
 const http = require('http');
 
@@ -436,14 +436,15 @@ async function groundReport(report, searchUrlsByField, today, fetcher, project) 
     stats.kept -= before - report.producers.length;
   }
 
-  // A fund, festival or lab whose words shut out this project's country goes
+  // A fund, festival or lab whose words shut out this project (its country,
+  // format, running time or the director's number of features) goes
   // (eligibility.js). The model's own quote counts even if it failed the
   // word-for-word check: removing a call never puts a false claim on screen.
   const country = countryOf(project && project.country);
-  if (country) ['financial_sources', 'festival_calendar', 'lab_and_market_opportunities'].forEach(field => {
+  ['financial_sources', 'festival_calendar', 'lab_and_market_opportunities'].forEach(field => {
     if (!Array.isArray(report[field])) return;
     const before = report[field].length;
-    report[field] = report[field].filter(item => ![quoted.get(item), item.rule_quote, item.eligibility, item.fit].some(t => excludes(t, country)));
+    report[field] = report[field].filter(item => ![quoted.get(item), item.rule_quote, item.eligibility, item.fit].some(t => (country && excludes(t, country)) || excludesWork(t, project)));
     stats.notEligible = (stats.notEligible || 0) + before - report[field].length;
     stats.kept -= before - report[field].length;
   });
