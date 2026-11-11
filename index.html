@@ -995,7 +995,7 @@ details.more > summary:active { transform: scale(0.98); }
 
 .accordion-score-label { display: none; }
 }
-@media (min-width: 641px) { .r-more:not(.has-extra) { display: none; } }
+@media (min-width: 641px) { .r-more { display: none; } }
 /* Labels are words, so they are set as words: sentence case in
    the body face, small and bold. Mono caps stay only for numbers, dates and
    counts, where the fixed width helps reading. */
@@ -1010,9 +1010,6 @@ details.more > summary:active { transform: scale(0.98); }
 .accordion-sublabel { flex-basis: 100%; font-size: 14px; line-height: 1.45; margin-top: 0; padding-right: 22%; color: var(--muted); }
 @media (max-width: 640px) { .accordion-sublabel { padding-right: 0; } }
 
-.r-summary-extra { margin-top: 14px; }
-.r-summary-extra p + p { margin-top: 10px; }
-@media (min-width: 641px) { .r-more.has-extra { display: inline-block; margin-top: 10px; padding: 6px 0; border: 0; background: none; font: inherit; font-size: 15px; color: var(--on-night); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; } }
 
 /* iPhone Safari zooms the whole page in when a field's text is under 16px
    and does not zoom back out, which left the site cut off at both sides on
@@ -2392,8 +2389,8 @@ function renderFull(r, title) {
   isFullReport = true;
   setPdfLabels();
   document.getElementById('resultTitle').textContent = '\u201C'+title+'\u201D';
-  var hasBoth = r.executive_summary && r.overall_summary && r.executive_summary !== r.overall_summary;
-  setHeroSummary(r.executive_summary || r.overall_summary || '', hasBoth ? r.overall_summary : '');
+  // One summary on screen; the PDF keeps both.
+  setHeroSummary(r.executive_summary || r.overall_summary || '');
 
   // Only a real, persisted full report has a session_id/token to flag an
   // issue against — hide it for the fictional sample report entirely.
@@ -2715,26 +2712,19 @@ function paras(t, cls) {
 }
 /* The hero summary is cut to four lines on phones (CSS) with a button to
    read it all; the button only appears when the text is actually cut. */
-function setHeroSummary(text, extra) {
+function setHeroSummary(text) {
   var el = document.getElementById('resultSubtitle');
   el.textContent = noDash(text);
   el.classList.remove('is-open');
-  // The longer summary, when there is one, opens under the short one with the
-  // same button: one "Read more" for the whole summary, never two links.
-  var ex = document.getElementById('heroExtra');
-  if (!ex) { ex = document.createElement('div'); ex.id = 'heroExtra'; ex.className = 'r-summary r-summary-extra'; el.parentNode.insertBefore(ex, el.nextSibling); }
-  ex.innerHTML = extra ? paras(extra) : '';
-  ex.hidden = true;
   var btn = document.getElementById('heroMore');
   if (!btn) {
     btn = document.createElement('button');
     btn.type = 'button'; btn.id = 'heroMore'; btn.className = 'r-more'; btn.textContent = 'Read more';
-    btn.onclick = function() { el.classList.add('is-open'); var x = document.getElementById('heroExtra'); if (x && x.innerHTML) x.hidden = false; btn.hidden = true; };
-    ex.parentNode.insertBefore(btn, ex.nextSibling);
+    btn.onclick = function() { el.classList.add('is-open'); btn.hidden = true; };
+    el.parentNode.insertBefore(btn, el.nextSibling);
   }
-  btn.classList.toggle('has-extra', !!extra);
   btn.hidden = true;
-  requestAnimationFrame(function() { btn.hidden = !(extra || el.scrollHeight > el.clientHeight + 2); });
+  requestAnimationFrame(function() { btn.hidden = !(el.scrollHeight > el.clientHeight + 2); });
 }
 /* "More" only where it saves real reading: a text up to FOLD_WORDS words is
    shown whole; a longer one shows its first sentence and the rest one tap
@@ -2849,7 +2839,7 @@ function buildPath(r, project) {
   }
   var fests = (r.festival_calendar || []).filter(Boolean), labs = (r.lab_and_market_opportunities || []).filter(Boolean);
   if (fests.length || labs.length) {
-    steps.push(['Get seen', 'Festivals, labs and markets to aim for.', fests.map(function(f){ return f.festival; }).concat(labs.map(function(l){ return l.name; })),
+    steps.push(['Get seen', 'Festivals, labs and markets to aim for. Check who can apply on each official page.', fests.map(function(f){ return f.festival; }).concat(labs.map(function(l){ return l.name; })),
       (fests.length ? '<span class="sub-k">Festivals</span>'+festivalsBody(fests) : '') + (labs.length ? '<span class="sub-k">Labs and markets</span>'+labsBody(labs) : '')]);
   }
   var agents = (r.sales_agents || []).filter(Boolean);

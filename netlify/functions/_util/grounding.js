@@ -1,3 +1,4 @@
+const { countryOf, excludes } = require('./eligibility');
 const https = require('https');
 const http = require('http');
 
@@ -39,8 +40,8 @@ function isSourced(url, set) {
 // sentences whose numbers are not on the page are removed).
 const LISTS = {
   financial_sources: { figures: ['amount', 'deadline'], prose: ['eligibility'] },
-  market_comps: { figures: ['budget'], prose: ['result', 'match'] },
-  cautionary_comps: { figures: ['budget'], prose: ['what_went_wrong', 'match'] },
+  market_comps: { figures: ['budget', 'year'], prose: ['result', 'match'] },
+  cautionary_comps: { figures: ['budget', 'year'], prose: ['what_went_wrong', 'match'] },
   festival_calendar: { figures: ['deadline'], prose: ['fit'] },
   lab_and_market_opportunities: { figures: ['deadline'], prose: ['fit'] },
   distribution_platforms: { figures: [], prose: ['reason'] },
@@ -194,7 +195,7 @@ function markIfClosed(item, field, today) {
   item.closed = true;
   if (!own) { item[field] = 'Closed (' + dayMonthYear(last) + ')'; return; }
   // The model sometimes already wrote "closed": say it once.
-  const v = String(item[field]).replace(/\bclosed\b/gi, ' ')
+  const v = String(item[field]).replace(/\b(?:(?:applications|submissions|entries|registrations|the call|call)\s+)?(?:(?:is|are|was|were|now|already|has|have)\s+)*(?:been\s+)?closed\b/gi, ' ')
     .replace(/\(\s*[;,:]?\s*\)/g, ' ').replace(/\(\s*[;,:]\s*/g, '(').replace(/\s*[;,:]\s*\)/g, ')')
     .replace(/\s*[;,]\s*[;,]\s*/g, '; ').replace(/\s+([;,])/g, '$1').replace(/\s{2,}/g, ' ')
     .replace(/^[\s,;:.-]+|[\s,;:-]+$/g, '').trim();
@@ -246,13 +247,39 @@ function nameCore(s) {
 function textCore(html) {
   return ' ' + quoteKey(html).replace(/["'.,:;!?()\[\]]/g, ' ').replace(/\s+/g, ' ') + ' ';
 }
-async function checkNamed(item, pages) {
-  const html = item.source ? await pages(item.source) : null;
+function namesBoth(item, html) {
   const name = nameCore(item.name), film = nameCore(item.film);
   // A film "title" that is just the company name proves nothing.
-  if (!html || name.length < 3 || film.length < 2 || name.includes(film) || film.includes(name)) { item.unconfirmed = true; return; }
+  if (!html || name.length < 3 || film.length < 2 || name.includes(film) || film.includes(name)) return false;
   const text = textCore(html);
-  if (!text.includes(' ' + name + ' ') || !text.includes(' ' + film + ' ')) item.unconfirmed = true;
+  return text.includes(' ' + name + ' ') && text.includes(' ' + film + ' ');
+}
+// A sales agent or platform is a name the reader will look up: it stays
+// only if its own source page names it (pages that cannot be read are not
+// judged). This removes descriptions passed off as names.
+async function checkListed(item, pages) {
+  const html = item.source ? await pages(item.source) : null;
+  if (!html) return;
+  const name = nameCore(String(item.name || '').split('(')[0]);
+  if (name.length < 2 || !textCore(html).includes(' ' + name + ' ')) item.unconfirmed = true;
+}
+async function checkNamed(item, pages) {
+  if (!namesBoth(item, item.source ? await pages(item.source) : null)) item.unconfirmed = true;
+}
+// The page the model cited often names the film but not the company (a
+// review, a festival entry). Another page from the same searches that names
+// both is the same proof; it becomes the source, and the approach, checked
+// on the first page, goes with it.
+async function findNamingPage(item, urls, pages) {
+  for (const url of urls) {
+    if (url === item.source) continue;
+    if (namesBoth(item, await pages(url))) {
+      item.source = item.url = url;
+      item.approach = null;
+      delete item.unconfirmed;
+      return;
+    }
+  }
 }
 
 // How a producer takes projects is advice the reader acts on: it stays only
@@ -270,6 +297,21 @@ async function checkQuote(item, pages) {
   const html = isAggregator(item.source) ? null : await pages(item.source);
   if (!quoteOnPage(item.rule_quote, html)) item.rule_quote = null;
   else item.rule_quote = String(item.rule_quote).trim().replace(/^["“]+|["”]+$/g, '');
+}
+
+// A comparable film is kept only if its own page says it is the project's
+// genre (and a short, for a short): a famous film that only shares a theme
+// is not a comparable. Pages that cannot be read are not judged.
+const GENRE_WORDS = { drama: /\bdrama/, thriller: /\bthriller/, comedy: /\bcomed/, horror: /\bhorror/,
+  'sci-fi': /\bsci-fi\b|\bscience[- ]fiction/, action: /\baction\b/, romance: /\bromanc|\bromantic/, animation: /\banimat/ };
+async function checkComp(item, pages, project) {
+  const wanted = String(project.genre || '').toLowerCase().split('/').map(g => GENRE_WORDS[g.trim()]).filter(Boolean);
+  const short = /short/i.test(project.format || '');
+  if (!wanted.length && !short) return;
+  const html = isAggregator(item.source) ? null : await pages(item.source);
+  if (!html) return;
+  const text = quoteKey(html);
+  if ((wanted.length && !wanted.some(re => re.test(text))) || (short && !/\bshort/.test(text))) item.offTopic = true;
 }
 
 // Model citation markup that sometimes leaks into JSON strings.
@@ -310,7 +352,7 @@ function applicantOf(item) {
   return null;
 }
 
-async function groundReport(report, searchUrlsByField, today, fetcher) {
+async function groundReport(report, searchUrlsByField, today, fetcher, project) {
   stripMarkup(report);
   const cache = new Map();
   const pages = (url) => {
@@ -319,6 +361,7 @@ async function groundReport(report, searchUrlsByField, today, fetcher) {
   };
   const stats = { kept: 0, dropped: 0, figuresCleared: 0 };
   const checks = [];
+  const quoted = new Map();
 
   Object.keys(LISTS).forEach(field => {
     if (!(field in report)) return;
@@ -336,8 +379,10 @@ async function groundReport(report, searchUrlsByField, today, fetcher) {
       checks.push(checkFigures(out, LISTS[field], pages).then(() => {
         stats.figuresCleared += before - figs.filter(f => out[f] != null).length;
       }));
-      if (QUOTED.includes(field)) checks.push(checkQuote(out, pages));
+      if (QUOTED.includes(field)) { quoted.set(out, out.rule_quote); checks.push(checkQuote(out, pages)); }
       else delete out.rule_quote;
+      if (field === 'sales_agents' || field === 'distribution_platforms') checks.push(checkListed(out, pages));
+      if (project && (field === 'market_comps' || field === 'cautionary_comps')) checks.push(checkComp(out, pages, project));
       if (field === 'producers') { checks.push(checkNamed(out, pages)); checks.push(checkApproach(out, pages)); }
     });
     report[field] = kept;
@@ -364,13 +409,44 @@ async function groundReport(report, searchUrlsByField, today, fetcher) {
 
   await Promise.all(checks);
 
-  // A producer stays only if its page names it and the film it produced.
+  ['sales_agents', 'distribution_platforms'].forEach(field => {
+    if (!Array.isArray(report[field])) return;
+    const before = report[field].length;
+    report[field] = report[field].filter(a => !a.unconfirmed);
+    stats.dropped += before - report[field].length;
+    stats.kept -= before - report[field].length;
+  });
+  ['market_comps', 'cautionary_comps'].forEach(field => {
+    if (!Array.isArray(report[field])) return;
+    const before = report[field].length;
+    report[field] = report[field].filter(c => !c.offTopic);
+    stats.offTopic = (stats.offTopic || 0) + before - report[field].length;
+    stats.kept -= before - report[field].length;
+  });
+
+  // A producer stays only if a page from its searches names it and the film it produced.
   if (Array.isArray(report.producers)) {
+    const urls = Array.from(new Set((searchUrlsByField.producers || []).filter(u => /^https?:\/\//.test(u)))).slice(0, 25);
+    const unconfirmed = report.producers.filter(p => p.unconfirmed);
+    if (unconfirmed.length) await Promise.all(urls.map(pages)); // fetched once, in parallel
+    for (const p of unconfirmed) await findNamingPage(p, urls, pages);
     const before = report.producers.length;
     report.producers = report.producers.filter(p => !p.unconfirmed);
     stats.dropped += before - report.producers.length;
     stats.kept -= before - report.producers.length;
   }
+
+  // A fund, festival or lab whose words shut out this project's country goes
+  // (eligibility.js). The model's own quote counts even if it failed the
+  // word-for-word check: removing a call never puts a false claim on screen.
+  const country = countryOf(project && project.country);
+  if (country) ['financial_sources', 'festival_calendar', 'lab_and_market_opportunities'].forEach(field => {
+    if (!Array.isArray(report[field])) return;
+    const before = report[field].length;
+    report[field] = report[field].filter(item => ![quoted.get(item), item.rule_quote, item.eligibility, item.fit].some(t => excludes(t, country)));
+    stats.notEligible = (stats.notEligible || 0) + before - report[field].length;
+    stats.kept -= before - report[field].length;
+  });
 
   // "Who can apply" is shown only next to the source's own sentence
   // (rule_quote, checked word for word above); without it, it goes.
@@ -383,10 +459,13 @@ async function groundReport(report, searchUrlsByField, today, fetcher) {
   const firstHand = Array.from(cache.keys()).filter(u => !isAggregator(u));
   const fetched = await Promise.all(firstHand.map(u => cache.get(u)));
   const allPages = fetched.filter(Boolean).map(pageNumbers).join(' ');
+  // The filmmaker's own figures (budget, running time) are facts of the
+  // project, not claims about the world: a sentence stating them stays.
+  const own = project ? pageNumbers(Object.keys(project).map(k => project[k]).join(' . ')) : '';
   Object.keys(report).forEach(field => {
     if (field in LISTS || field === 'tax_incentive') return;
     if (!(searchUrlsByField[field] && searchUrlsByField[field].length)) return;
-    report[field] = checkProse(report[field], allPages || null);
+    report[field] = checkProse(report[field], (allPages + ' ' + own).trim() || null);
   });
   return stats;
 }
