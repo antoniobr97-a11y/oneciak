@@ -195,7 +195,7 @@ function markIfClosed(item, field, today) {
   item.closed = true;
   if (!own) { item[field] = 'Closed (' + dayMonthYear(last) + ')'; return; }
   // The model sometimes already wrote "closed": say it once.
-  const v = String(item[field]).replace(/\bclosed\b/gi, ' ')
+  const v = String(item[field]).replace(/\b(?:(?:applications|submissions|entries|registrations|the call|call)\s+)?(?:(?:is|are|was|were|now|already|has|have)\s+)*(?:been\s+)?closed\b/gi, ' ')
     .replace(/\(\s*[;,:]?\s*\)/g, ' ').replace(/\(\s*[;,:]\s*/g, '(').replace(/\s*[;,:]\s*\)/g, ')')
     .replace(/\s*[;,]\s*[;,]\s*/g, '; ').replace(/\s+([;,])/g, '$1').replace(/\s{2,}/g, ' ')
     .replace(/^[\s,;:.-]+|[\s,;:-]+$/g, '').trim();
