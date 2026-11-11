@@ -183,8 +183,9 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
   serie, niente documentari (Antonio, 10 novembre 2026).
 - **Caricamento**: 5 dimensioni che avanzano invece di uno spinner
   (`startLoadingDims` / `finishLoadingDims` / `resetLoadingDims`).
-- **Report completo**: titolo, voto nella scheda di vetro, riassunto (4 righe
-  + "Read more" su telefono); "Your film, area by area" (5 aree chiuse, una
+- **Report completo**: titolo, voto nella scheda di vetro, un solo riassunto
+  (`executive_summary`, 3-4 frasi; 4 righe + "Read more" su telefono; il PDF
+  ha anche `overall_summary`); "Your film, area by area" (5 aree chiuse, una
   aperta alla volta, `toggleAccordion`; dentro giudizio, "What to do", "Red
   flags and strengths", Comparable films nel mercato); poi **"Your path"**
   (`buildPath`): una sola scaletta numerata di righe chiuse, ognuna con cosa
@@ -296,7 +297,11 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
 - Stile di scrittura (`STYLE` in `reportPrompts.js`, usato anche
   nell'anteprima): un'idea per frase, circa 20 parole al massimo, "you",
   verbi concreti, termini tecnici spiegati la prima volta, ogni punto detto una
-  volta sola, mai "I"/"we" né racconti della ricerca. Antonio: "report leggero ma completo, non ripetitivo".
+  volta sola, mai "I"/"we" né racconti della ricerca. Lunghezza (`LENGTH` nel
+  `PREAMBLE`): testo di ogni area 3-4 frasi, problemi e punti di forza da 1 a
+  3, consigli 2 o 3, mai liste riempite; ogni punto appartiene a una sola
+  area (le 5 aree si scrivono in chiamate separate). Antonio: "report
+  leggero ma completo, non ripetitivo".
 - Prompt: `stageRules` (fase del progetto), rubrica `SCORING` (voto = media
   delle 5 aree), niente previsioni di incasso in euro né prezzi E&O. Ogni
   voce: "Source: dominio · checked data" su sito, PDF e mail.
