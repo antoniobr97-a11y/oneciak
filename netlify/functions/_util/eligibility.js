@@ -71,4 +71,4 @@ function excludes(text, country) {
   return false;
 }
 
-module.exports = { countryOf, excludes, COUNTRIES };
+module.exports = { countryOf, excludes };
