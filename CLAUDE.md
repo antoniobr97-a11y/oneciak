@@ -249,7 +249,8 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
   prima del lancio, insieme alla ricarica del credito.
 - `grounding.js`: una voce (fondo, festival, film, agente, piattaforma,
   produttore) resta solo se la sua fonte è tra i risultati della ricerca;
-  date e cifre solo se sono sulla pagina; niente cifre da aggregatori;
+  date e cifre solo se sono sulla pagina (i numeri del progetto, come budget
+  e durata, contano come verificati); niente cifre da aggregatori;
   scadenze passate "Closed (...)" una volta sola; `rule_quote` resta solo se è
   sulla pagina parola per parola (i PDF non si leggono); `applicant` resta
   solo con la sua `rule_quote`. Produttori (`checkNamed`): restano solo se la
@@ -305,16 +306,17 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
 - Prompt: `stageRules` (fase del progetto), rubrica `SCORING` (voto = media
   delle 5 aree), niente previsioni di incasso in euro né prezzi E&O. Ogni
   voce: "Source: dominio · checked data" su sito, PDF e mail.
-- Qualità misurata il 10 novembre 2026 (sera) su 3 report nuovi della
-  preview (stessi progetti della misura precedente: corto italiano,
-  lungometraggio francese, lungometraggio USA), 54 voci con fonte: 45 giuste
-  sulla fonte, 2 sbagliate (una piattaforma che era una descrizione, un anno
-  di film non sulla pagina: corretti dopo, con `checkListed` e l'anno tra
-  le cifre), 7 non verificabili da qui (siti che bloccano i programmi o
-  pagine che cambiano). Misura precedente sugli stessi progetti: 63 voci,
-  50 giuste, 1 sbagliata (La Résidence a un francese), 12 non verificabili.
-  Ogni giro dà voci diverse: una sola corsa per progetto non misura l'effetto
-  di una modifica. Il controllo verifica nomi, film, date e
+- Qualità misurata l'11 novembre 2026 su 3 report nuovi della preview col
+  report accorciato (corto italiano, lungometraggio francese, lungometraggio
+  USA, gli stessi delle misure precedenti): 57 voci con fonte, 46 giuste
+  sulla fonte, 0 sbagliate, 11 non verificabili da qui (siti che bloccano i
+  programmi). Lunghezza con tutto aperto: da 3.360-3.460 parole a
+  2.570-2.840; testi delle 5 aree circa -40%. Misure precedenti: 54 voci,
+  45 giuste, 2 sbagliate (10 novembre sera); 63 voci, 50 giuste, 1
+  sbagliata (10 novembre). Ogni giro dà voci diverse: una sola corsa per
+  progetto non misura l'effetto di una modifica. Alcuni siti (Wix, per
+  esempio openfieldsproductions.com) a volte mostrano l'elenco dei film e a
+  volte no: ricontrollare più volte prima di dire che un nome manca. Il controllo verifica nomi, film, date e
   citazioni sulla fonte, non la qualità dei consigli. Prima misura (22
   ottobre): report completi 78%. Problemi noti: l'idoneità del regista si
   controlla solo sul paese (esperienza, formato e fase restano al prompt);

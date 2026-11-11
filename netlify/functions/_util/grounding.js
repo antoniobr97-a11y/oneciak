@@ -459,10 +459,13 @@ async function groundReport(report, searchUrlsByField, today, fetcher, project) 
   const firstHand = Array.from(cache.keys()).filter(u => !isAggregator(u));
   const fetched = await Promise.all(firstHand.map(u => cache.get(u)));
   const allPages = fetched.filter(Boolean).map(pageNumbers).join(' ');
+  // The filmmaker's own figures (budget, running time) are facts of the
+  // project, not claims about the world: a sentence stating them stays.
+  const own = project ? pageNumbers(Object.keys(project).map(k => project[k]).join(' . ')) : '';
   Object.keys(report).forEach(field => {
     if (field in LISTS || field === 'tax_incentive') return;
     if (!(searchUrlsByField[field] && searchUrlsByField[field].length)) return;
-    report[field] = checkProse(report[field], allPages || null);
+    report[field] = checkProse(report[field], (allPages + ' ' + own).trim() || null);
   });
   return stats;
 }
