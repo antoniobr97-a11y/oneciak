@@ -111,7 +111,7 @@ function producersHtml(list, email) {
   const items = (list || []).filter(Boolean);
   if (!items.length) return '';
   let h = '<div style="margin-top:16px">' + monoLabel('Producers to contact', '#5c5852');
-  items.forEach(p => { h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(p.name) + '</b>' + (p.country ? ' (' + esc(p.country) + ')' : '') + '<br><span style="font-size:12px;color:#5c5852">Produced: ' + esc(p.film) + (p.year ? ' (' + esc(p.year) + ')' : '') + (p.why ? ' · ' + esc(p.why) : '') + (p.approach ? ' · How they take projects: ' + esc(p.approach) : '') + '</span>' + sourceHtml(p) + '</p>'; });
+  items.forEach(p => { h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(p.name) + '</b>' + (p.country ? ' (' + esc(p.country) + ')' : '') + '<br><span style="font-size:12px;color:#5c5852">Produced: ' + esc(p.film) + (p.year ? ' (' + esc(p.year) + ')' : '') + (p.why ? ' · ' + esc(p.why) : '') + (p.approach_quote && p.approach_url ? '<br>How they take projects, word for word: \u201C' + esc(p.approach_quote) + '\u201D <a href="' + esc(p.approach_url) + '" style="color:#6b665f;text-decoration:underline">their page</a>' : '<br>How they take projects: not found on their site. Ask before you send a script.') + '</span>' + sourceHtml(p) + '</p>'; });
   if (email) h += '<p style="margin:14px 0 0;font-size:12px;font-weight:700;color:#5c5852">A first email you can adapt</p><p style="margin:6px 0 0;padding:10px 12px;background:#f4f1ec;border-radius:8px;font-size:13px;line-height:1.6;color:#161616;white-space:pre-wrap">' + esc(email) + '</p>';
   return h + '</div>';
 }

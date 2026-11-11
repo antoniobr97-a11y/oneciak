@@ -257,12 +257,20 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
   pagina contiene il nome (senza Srl/Ltd/AB...) E il titolo del film; un
   "film" uguale al nome dell'azienda viene scartato. Funziona in ogni paese
   (provato: Svezia, Cina, Italia). L'email per i produttori non nomina mai
-  un'azienda: usa [COMPANY NAME]. Come un produttore accetta progetti
-  (`approach`) resta solo se la sua frase (`approach_quote`) è sulla pagina
-  parola per parola (`checkApproach`). Se la pagina citata non nomina
+  un'azienda: usa [COMPANY NAME]. Se la pagina citata non nomina
   azienda e film insieme, il motore prova le altre pagine della stessa
   ricerca (`findNamingPage`, al massimo 25): quella che li nomina entrambi
-  diventa la fonte (e `approach` si toglie).
+  diventa la fonte. Come un produttore accetta progetti (`checkApproach`,
+  dopo la scelta della fonte): si mostra solo la sua frase
+  (`approach_quote`) parola per parola, dalla pagina `approach_url` trovata
+  dalla ricerca e sul sito dell'azienda (l'indirizzo contiene una parola
+  distintiva del nome, `ownSite`: niente festival, notizie, Wikipedia).
+  Sul sito, PDF e mail: "How they take projects, word for word" con il
+  link alla pagina; senza frase "not found on their site. Ask before you
+  send a script." (una volta sola in alto se nessuna azienda ce l'ha). In
+  cima al passo la regola di Film4 ("we cannot consider unsolicited
+  material", channel4.com, controllata l'11 novembre 2026). I 3 produttori
+  di Northbound: sui loro siti nessuna frase (controllato l'11 novembre).
 - Chi può fare domanda (`eligibility.js`): fondi, festival e laboratori la
   cui frase (`rule_quote`, `eligibility`, `fit`) esclude il paese del
   progetto ("non-French", "must not be residents or citizens of France",
