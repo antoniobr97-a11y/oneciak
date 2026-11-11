@@ -183,8 +183,9 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
   serie, niente documentari (Antonio, 10 novembre 2026).
 - **Caricamento**: 5 dimensioni che avanzano invece di uno spinner
   (`startLoadingDims` / `finishLoadingDims` / `resetLoadingDims`).
-- **Report completo**: titolo, voto nella scheda di vetro, riassunto (4 righe
-  + "Read more" su telefono); "Your film, area by area" (5 aree chiuse, una
+- **Report completo**: titolo, voto nella scheda di vetro, un solo riassunto
+  (`executive_summary`, 3-4 frasi; 4 righe + "Read more" su telefono; il PDF
+  ha anche `overall_summary`); "Your film, area by area" (5 aree chiuse, una
   aperta alla volta, `toggleAccordion`; dentro giudizio, "What to do", "Red
   flags and strengths", Comparable films nel mercato); poi **"Your path"**
   (`buildPath`): una sola scaletta numerata di righe chiuse, ognuna con cosa
@@ -266,11 +267,16 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
   progetto ("non-French", "must not be residents or citizens of France",
   "must be residents of Italy") vengono tolti, anche nell'anteprima.
   Controlla solo il paese, non esperienza o formato; i paesi sono una
-  tabella di circa 50. Sul sito, senza la frase della fonte, "Who can apply"
-  dice "Not quoted from the source, check the official page".
+  tabella di circa 50. Sul sito "Who can apply" compare solo con la frase
+  della fonte; le righe dei passi "Find the money" e "Get seen" dicono di
+  controllare la pagina ufficiale.
 - Film di confronto (`checkComp`): restano solo se la loro pagina dice il
   genere del progetto (e "short" per un corto); pagine illeggibili o
-  aggregatori non vengono giudicati.
+  aggregatori non vengono giudicati. Anno e budget restano solo se sono
+  sulla pagina.
+- Agenti di vendita e piattaforme (`checkListed`): restano solo se la loro
+  pagina contiene il nome (toglie descrizioni scambiate per nomi, come
+  "French theatrical distributor backed by CNC release aid").
 - Scadenza chiusa: conta la data dopo "until", "deadline", "by", "entro"
   e simili (`closingDateIn`), non la data più lontana della frase (La
   Résidence di Cannes: "open until September 30, 2026" per una sessione nel
@@ -291,17 +297,26 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
 - Stile di scrittura (`STYLE` in `reportPrompts.js`, usato anche
   nell'anteprima): un'idea per frase, circa 20 parole al massimo, "you",
   verbi concreti, termini tecnici spiegati la prima volta, ogni punto detto una
-  volta sola. Antonio: "report leggero ma completo, non ripetitivo".
+  volta sola, mai "I"/"we" né racconti della ricerca. Lunghezza (`LENGTH` nel
+  `PREAMBLE`): testo di ogni area 3-4 frasi, problemi e punti di forza da 1 a
+  3, consigli 2 o 3, mai liste riempite; ogni punto appartiene a una sola
+  area (le 5 aree si scrivono in chiamate separate). Antonio: "report
+  leggero ma completo, non ripetitivo".
 - Prompt: `stageRules` (fase del progetto), rubrica `SCORING` (voto = media
   delle 5 aree), niente previsioni di incasso in euro né prezzi E&O. Ogni
   voce: "Source: dominio · checked data" su sito, PDF e mail.
-- Qualità misurata il 10 novembre 2026 su 3 report nuovi (corto italiano,
-  lungometraggio francese, lungometraggio USA), 63 voci con fonte: 50 giuste
-  sulla fonte, 1 sbagliata (La Résidence data come aperta e non adatta a un
-  regista francese; la scadenza è stata corretta), 12 non verificabili da qui
-  (siti che bloccano i programmi). Il controllo verifica nomi, film, date e
+- Qualità misurata il 10 novembre 2026 (sera) su 3 report nuovi della
+  preview (stessi progetti della misura precedente: corto italiano,
+  lungometraggio francese, lungometraggio USA), 54 voci con fonte: 45 giuste
+  sulla fonte, 2 sbagliate (una piattaforma che era una descrizione, un anno
+  di film non sulla pagina: corretti dopo, con `checkListed` e l'anno tra
+  le cifre), 7 non verificabili da qui (siti che bloccano i programmi o
+  pagine che cambiano). Misura precedente sugli stessi progetti: 63 voci,
+  50 giuste, 1 sbagliata (La Résidence a un francese), 12 non verificabili.
+  Ogni giro dà voci diverse: una sola corsa per progetto non misura l'effetto
+  di una modifica. Il controllo verifica nomi, film, date e
   citazioni sulla fonte, non la qualità dei consigli. Prima misura (22
-  ottobre): report completi 78%. Problemi noti: l'adattezza al regista si
+  ottobre): report completi 78%. Problemi noti: l'idoneità del regista si
   controlla solo sul paese (esperienza, formato e fase restano al prompt);
   a volte nessun produttore verificato (report francese); regole di prima visione a
   volte parafrasate male, fondi senza scadenza scritta, qualche film di

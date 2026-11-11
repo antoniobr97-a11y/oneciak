@@ -40,8 +40,8 @@ function isSourced(url, set) {
 // sentences whose numbers are not on the page are removed).
 const LISTS = {
   financial_sources: { figures: ['amount', 'deadline'], prose: ['eligibility'] },
-  market_comps: { figures: ['budget'], prose: ['result', 'match'] },
-  cautionary_comps: { figures: ['budget'], prose: ['what_went_wrong', 'match'] },
+  market_comps: { figures: ['budget', 'year'], prose: ['result', 'match'] },
+  cautionary_comps: { figures: ['budget', 'year'], prose: ['what_went_wrong', 'match'] },
   festival_calendar: { figures: ['deadline'], prose: ['fit'] },
   lab_and_market_opportunities: { figures: ['deadline'], prose: ['fit'] },
   distribution_platforms: { figures: [], prose: ['reason'] },
@@ -195,7 +195,7 @@ function markIfClosed(item, field, today) {
   item.closed = true;
   if (!own) { item[field] = 'Closed (' + dayMonthYear(last) + ')'; return; }
   // The model sometimes already wrote "closed": say it once.
-  const v = String(item[field]).replace(/\bclosed\b/gi, ' ')
+  const v = String(item[field]).replace(/\b(?:(?:applications|submissions|entries|registrations|the call|call)\s+)?(?:(?:is|are|was|were|now|already|has|have)\s+)*(?:been\s+)?closed\b/gi, ' ')
     .replace(/\(\s*[;,:]?\s*\)/g, ' ').replace(/\(\s*[;,:]\s*/g, '(').replace(/\s*[;,:]\s*\)/g, ')')
     .replace(/\s*[;,]\s*[;,]\s*/g, '; ').replace(/\s+([;,])/g, '$1').replace(/\s{2,}/g, ' ')
     .replace(/^[\s,;:.-]+|[\s,;:-]+$/g, '').trim();
@@ -253,6 +253,15 @@ function namesBoth(item, html) {
   if (!html || name.length < 3 || film.length < 2 || name.includes(film) || film.includes(name)) return false;
   const text = textCore(html);
   return text.includes(' ' + name + ' ') && text.includes(' ' + film + ' ');
+}
+// A sales agent or platform is a name the reader will look up: it stays
+// only if its own source page names it (pages that cannot be read are not
+// judged). This removes descriptions passed off as names.
+async function checkListed(item, pages) {
+  const html = item.source ? await pages(item.source) : null;
+  if (!html) return;
+  const name = nameCore(String(item.name || '').split('(')[0]);
+  if (name.length < 2 || !textCore(html).includes(' ' + name + ' ')) item.unconfirmed = true;
 }
 async function checkNamed(item, pages) {
   if (!namesBoth(item, item.source ? await pages(item.source) : null)) item.unconfirmed = true;
@@ -372,6 +381,7 @@ async function groundReport(report, searchUrlsByField, today, fetcher, project) 
       }));
       if (QUOTED.includes(field)) { quoted.set(out, out.rule_quote); checks.push(checkQuote(out, pages)); }
       else delete out.rule_quote;
+      if (field === 'sales_agents' || field === 'distribution_platforms') checks.push(checkListed(out, pages));
       if (project && (field === 'market_comps' || field === 'cautionary_comps')) checks.push(checkComp(out, pages, project));
       if (field === 'producers') { checks.push(checkNamed(out, pages)); checks.push(checkApproach(out, pages)); }
     });
@@ -399,6 +409,13 @@ async function groundReport(report, searchUrlsByField, today, fetcher, project) 
 
   await Promise.all(checks);
 
+  ['sales_agents', 'distribution_platforms'].forEach(field => {
+    if (!Array.isArray(report[field])) return;
+    const before = report[field].length;
+    report[field] = report[field].filter(a => !a.unconfirmed);
+    stats.dropped += before - report[field].length;
+    stats.kept -= before - report[field].length;
+  });
   ['market_comps', 'cautionary_comps'].forEach(field => {
     if (!Array.isArray(report[field])) return;
     const before = report[field].length;
