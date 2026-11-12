@@ -1,4 +1,4 @@
-const { countryOf, excludes } = require('./eligibility');
+const { countryOf, excludes, excludesWork } = require('./eligibility');
 const https = require('https');
 const http = require('http');
 
@@ -46,7 +46,7 @@ const LISTS = {
   lab_and_market_opportunities: { figures: ['deadline'], prose: ['fit'] },
   distribution_platforms: { figures: [], prose: ['reason'] },
   sales_agents: { figures: [], prose: ['focus', 'why'] },
-  producers: { figures: ['year'], prose: ['why', 'approach'] }
+  producers: { figures: ['year'], prose: ['why'] }
 };
 
 // Lists whose items may carry a `rule_quote` (checked by checkQuote).
@@ -268,28 +268,38 @@ async function checkNamed(item, pages) {
 }
 // The page the model cited often names the film but not the company (a
 // review, a festival entry). Another page from the same searches that names
-// both is the same proof; it becomes the source, and the approach, checked
-// on the first page, goes with it.
+// both is the same proof; it becomes the source.
 async function findNamingPage(item, urls, pages) {
   for (const url of urls) {
     if (url === item.source) continue;
     if (namesBoth(item, await pages(url))) {
       item.source = item.url = url;
-      item.approach = null;
       delete item.unconfirmed;
       return;
     }
   }
 }
 
-// How a producer takes projects is advice the reader acts on: it stays only
-// next to the sentence of the source page that says it, word for word.
-async function checkApproach(item, pages) {
-  const q = item.approach_quote;
-  delete item.approach_quote;
-  if (!item.approach) return;
-  const html = q && !isAggregator(item.source) ? await pages(item.source) : null;
-  if (!quoteOnPage(q, html)) item.approach = null;
+// How a producer takes projects (a form, an agent only, no unsolicited
+// scripts) decides whether the reader writes at all. It is shown only as
+// the company's own sentence, word for word, from a page found in the
+// searches on the company's own site: its address holds a distinctive word
+// of the name (vivofilm.it for Vivo Film). A festival's "submit your film"
+// line, or a news page, is not the company's rule.
+const GENERIC = /^(?:the|and|film|films|filmes|pictures|picture|productions?|produzioni|production|prod|studios?|media|entertainment|cinema|group|company|house|creative|arts?|works|international|italia|italy)$/;
+function ownSite(url, name) {
+  let host;
+  try { host = new URL(url).hostname.toLowerCase().replace(/^www\./, ''); } catch (e) { return false; }
+  const site = host.replace(/[^a-z0-9]/g, '');
+  return nameCore(name).split(' ').some(w => w.length >= 3 && !GENERIC.test(w) && site.includes(w.replace(/[^a-z0-9]/g, '')));
+}
+async function checkApproach(item, pages, set) {
+  const q = item.approach_quote, url = item.approach_url || item.source;
+  item.approach_quote = item.approach_url = null;
+  if (!q || !url || !isSourced(url, set) || !ownSite(url, item.name)) return;
+  if (!quoteOnPage(q, await pages(url))) return;
+  item.approach_quote = String(q).trim().replace(/^["“]+|["”]+$/g, '');
+  item.approach_url = url;
 }
 
 async function checkQuote(item, pages) {
@@ -383,7 +393,7 @@ async function groundReport(report, searchUrlsByField, today, fetcher, project) 
       else delete out.rule_quote;
       if (field === 'sales_agents' || field === 'distribution_platforms') checks.push(checkListed(out, pages));
       if (project && (field === 'market_comps' || field === 'cautionary_comps')) checks.push(checkComp(out, pages, project));
-      if (field === 'producers') { checks.push(checkNamed(out, pages)); checks.push(checkApproach(out, pages)); }
+      if (field === 'producers') checks.push(checkNamed(out, pages));
     });
     report[field] = kept;
     stats.kept += kept.length;
@@ -434,16 +444,19 @@ async function groundReport(report, searchUrlsByField, today, fetcher, project) 
     report.producers = report.producers.filter(p => !p.unconfirmed);
     stats.dropped += before - report.producers.length;
     stats.kept -= before - report.producers.length;
+    const set = sourcedSet(searchUrlsByField.producers);
+    await Promise.all(report.producers.map(p => checkApproach(p, pages, set)));
   }
 
-  // A fund, festival or lab whose words shut out this project's country goes
+  // A fund, festival or lab whose words shut out this project (its country,
+  // format, running time or the director's number of features) goes
   // (eligibility.js). The model's own quote counts even if it failed the
   // word-for-word check: removing a call never puts a false claim on screen.
   const country = countryOf(project && project.country);
-  if (country) ['financial_sources', 'festival_calendar', 'lab_and_market_opportunities'].forEach(field => {
+  ['financial_sources', 'festival_calendar', 'lab_and_market_opportunities'].forEach(field => {
     if (!Array.isArray(report[field])) return;
     const before = report[field].length;
-    report[field] = report[field].filter(item => ![quoted.get(item), item.rule_quote, item.eligibility, item.fit].some(t => excludes(t, country)));
+    report[field] = report[field].filter(item => ![quoted.get(item), item.rule_quote, item.eligibility, item.fit].some(t => (country && excludes(t, country)) || excludesWork(t, project)));
     stats.notEligible = (stats.notEligible || 0) + before - report[field].length;
     stats.kept -= before - report[field].length;
   });
@@ -459,10 +472,13 @@ async function groundReport(report, searchUrlsByField, today, fetcher, project) 
   const firstHand = Array.from(cache.keys()).filter(u => !isAggregator(u));
   const fetched = await Promise.all(firstHand.map(u => cache.get(u)));
   const allPages = fetched.filter(Boolean).map(pageNumbers).join(' ');
+  // The filmmaker's own figures (budget, running time) are facts of the
+  // project, not claims about the world: a sentence stating them stays.
+  const own = project ? pageNumbers(Object.keys(project).map(k => project[k]).join(' . ')) : '';
   Object.keys(report).forEach(field => {
     if (field in LISTS || field === 'tax_incentive') return;
     if (!(searchUrlsByField[field] && searchUrlsByField[field].length)) return;
-    report[field] = checkProse(report[field], allPages || null);
+    report[field] = checkProse(report[field], (allPages + ' ' + own).trim() || null);
   });
   return stats;
 }
