@@ -285,7 +285,8 @@ async function findNamingPage(item, urls, pages) {
 // the company's own sentence, word for word, from a page found in the
 // searches on the company's own site: its address holds a distinctive word
 // of the name (vivofilm.it for Vivo Film). A festival's "submit your film"
-// line, or a news page, is not the company's rule.
+// line, or a news page, is not the company's rule; nor is how its
+// distribution arm takes finished films.
 const GENERIC = /^(?:the|and|film|films|filmes|pictures|picture|productions?|produzioni|production|prod|studios?|media|entertainment|cinema|group|company|house|creative|arts?|works|international|italia|italy)$/;
 function ownSite(url, name) {
   let host;
@@ -297,6 +298,10 @@ async function checkApproach(item, pages, set) {
   const q = item.approach_quote, url = item.approach_url || item.source;
   item.approach_quote = item.approach_url = null;
   if (!q || !url || !isSourced(url, set) || !ownSite(url, item.name)) return;
+  // A distribution page's "send us your finished short" is not how the
+  // company takes a project to produce; a sentence cut at "contact:" has
+  // lost the address it points to.
+  if (/distribu|catalog/i.test(q + ' ' + url) || /:\s*$/.test(String(q).trim())) return;
   if (!quoteOnPage(q, await pages(url))) return;
   item.approach_quote = String(q).trim().replace(/^["“]+|["”]+$/g, '');
   item.approach_url = url;

@@ -89,12 +89,14 @@ function facts(p) {
   const min = parseInt(p.runtime, 10);
   const runtime = min > 0 && min < 1000 ? min : null;
   const e = String(p.experience || '');
+  // "First film": nothing made yet, not even a short.
+  const noWork = /^first film/i.test(e);
   // which feature this project is, for the director: debut, 2nd or 3rd, 4th on
   const nth = format !== 'feature' ? null
     : /first film|short films|tv|advertising/i.test(e) ? [1]
     : /1.2 feature/i.test(e) ? [2, 3]
     : /3\+/.test(e) ? [4] : null;
-  return { format, runtime, nth };
+  return { format, runtime, nth, noWork };
 }
 
 // The running time a clause asks for: { min, max } in minutes, or null.
@@ -114,7 +116,7 @@ function minutesRule(span) {
 function excludesWork(text, project) {
   if (!text) return false;
   const f = facts(project);
-  if (!f.format && !f.runtime && !f.nth) return false;
+  if (!f.format && !f.runtime && !f.nth && !f.noWork) return false;
   const t = ' ' + String(text).toLowerCase().replace(/[‐-―−]/g, '-').replace(/\s+/g, ' ') + ' ';
   if (f.nth && f.nth[0] === 1 && /\b(?:first|debut) (?:feature|full-length)[a-z -]{0,20} (?:are|is) not (?:eligible|accepted)/.test(t)) return true;
   let m;
@@ -138,6 +140,11 @@ function excludesWork(text, project) {
     if (!pastWork && f.format === 'feature' && isShort && !isFeature) return true;
     const mins = f.runtime && minutesRule(span);
     if (mins && ((mins.min && f.runtime < mins.min) || (mins.max && f.runtime > mins.max))) return true;
+    // A rule that asks for work already made ("must have directed at least
+    // one short film", "the filmmaker's previous short film(s) ... must have
+    // been selected") shuts out a first film.
+    if (f.noWork && (/must have (?:directed|made|completed|produced) (?:at least )?(?:one|a|an|two|three|1|2|3)\b[a-z -]{0,30}\b(?:films?|shorts?|features?|works?)/.test(span) ||
+      (/^must (?:have|be)/.test(span) && /\bprevious (?:short )?(?:films?|works?|shorts?)|\bprevious\b[a-z ()-]{0,30}\b(?:films?|works?)/.test(subject)))) return true;
     if (f.nth && /must have (?:directed|made|written|produced) (?:at least )?(?:one|a|an|two|three|1|2|3)\b[a-z -]{0,30}\b(?:feature|full-length)/.test(span) && f.nth[0] === 1) return true;
     if (f.nth) {
       const allowed = [];

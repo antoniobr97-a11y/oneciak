@@ -264,7 +264,9 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
   dopo la scelta della fonte): si mostra solo la sua frase
   (`approach_quote`) parola per parola, dalla pagina `approach_url` trovata
   dalla ricerca e sul sito dell'azienda (l'indirizzo contiene una parola
-  distintiva del nome, `ownSite`: niente festival, notizie, Wikipedia).
+  distintiva del nome, `ownSite`: niente festival, notizie, Wikipedia);
+  scartate le frasi delle pagine di distribuzione (film finiti, non
+  progetti) e quelle tagliate a "contact:" senza l'indirizzo.
   Sul sito, PDF e mail: "How they take projects, word for word" con il
   link alla pagina; senza frase "not found on their site. Ask before you
   send a script." (una volta sola in alto se nessuna azienda ce l'ha). In
@@ -278,10 +280,12 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
   Stesso controllo (`excludesWork`) su formato (corto o lungo), durata
   ("at least 60 minutes", "up to 30 minutes") e lungometraggi già fatti dal
   regista ("is for first and second features", "must have directed at
-  least one feature"): solo frasi che limitano chi entra, non quelle su
+  least one feature"); con "First film" toglie anche le regole che chiedono
+  lavori già fatti ("previous short film(s) ... must have been selected",
+  La Résidence di Cannes): solo frasi che limitano chi entra, non quelle su
   prima visione, soldi o lingua; frasi con "not" non vengono giudicate. I
-  paesi sono una tabella di circa 50. 53 frasi di prova (vere e difficili)
-  l'11 novembre 2026, tutte giuste. Sul sito "Who can apply" compare solo con la frase
+  paesi sono una tabella di circa 50. 62 frasi di prova (vere e difficili)
+  il 12 novembre 2026, tutte giuste. Sul sito "Who can apply" compare solo con la frase
   della fonte; le righe dei passi "Find the money" e "Get seen" dicono di
   controllare la pagina ufficiale.
 - Film di confronto (`checkComp`): restano solo se la loro pagina dice il
