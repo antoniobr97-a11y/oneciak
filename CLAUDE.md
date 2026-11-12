@@ -129,6 +129,13 @@ fondo a `roadmap/roadmap.css`; anche privacy, termini, 404.
   ambientali asimmetrici; hover solo dentro `@media (hover: hover) and
   (pointer: fine)`; ogni cliccabile ha `:active` con `scale(...)`; su touch
   le aree cliccabili piccole sono allargate a ~44px senza cambiare l'aspetto.
+- **Scala dei caratteri del report** (Antonio, 12 novembre 2026: "troppi
+  titoli grandi, troppe robe piccole, troppe medie"): oltre al titolo del
+  film, al voto grande e al logo, solo 5 misure. 24 titoli di sezione e voti
+  delle aree; 18 titoli delle righe (aree, passi, blocchi), logline,
+  riassunto; 15 testo, elenchi, nomi, frase del voto; 14 etichette,
+  sottotitoli delle righe, bottoni; 13 fonti, note, piè di pagina, paesi.
+  Niente mezzi pixel. Misurato con tutto aperto: da 27 combinazioni a 18.
 - Niente etichette sopra i titoli né numeri decorativi. Le etichette sono
   parole in Carlito grassetto. Icone disegnate (freccia, spunta), mai simboli
   di testo come "+".
@@ -219,7 +226,12 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
   stand up?" con sotto le 5 aree e il voto, poi "Your path". Dai 1100px in
   su è una colonna fissa a sinistra del testo (il testo si sposta a destra,
   colonna di 640px); sotto i 1100px è una barra sotto l'intestazione con la
-  sezione attuale e il pulsante "Sections" che apre l'elenco. Compare quando
+  sezione attuale e il pulsante "Sections" che apre l'elenco. Toccare
+  un'area la apre, chiude le altre e porta il suo titolo 12px sotto le
+  barre (`scrollUnderBars`: sul telefono, andando giù l'intestazione
+  sparisce, andando su torna; il conto tiene la direzione). Provato il 12
+  novembre 2026: 5 aree e "Your path" da 3 punti di partenza, telefono e
+  computer, 36 su 36. Compare quando
   titolo e voto in alto sono usciti dallo schermo. Nell'anteprima gratuita
   mostra solo le aree.
 - **Glossario sulla parola**: `glossify()` sottolinea a puntini la prima
