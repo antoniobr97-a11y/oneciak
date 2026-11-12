@@ -183,6 +183,12 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
   serie, niente documentari (Antonio, 10 novembre 2026).
 - **Caricamento**: 5 dimensioni che avanzano invece di uno spinner
   (`startLoadingDims` / `finishLoadingDims` / `resetLoadingDims`).
+- **Apertura del report** (Antonio, 12 novembre 2026: "come A24"): il nome
+  del film senza virgolette, grande come un manifesto (`fitTitle`: una riga
+  larga quanto la colonna, 24-168px; i titoli lunghi vanno a capo tra le
+  parole in circa 3 righe, mai una parola tagliata), sotto i "crediti"
+  (genere · formato · paese · lingua come scritti nel modulo) e la logline
+  (`setHeroTitle`), poi la scheda di vetro con il voto.
 - **Report completo**: titolo, voto nella scheda di vetro, un solo riassunto
   (`executive_summary`, 3-4 frasi; 4 righe + "Read more" su telefono; il PDF
   ha anche `overall_summary`); "Your film, area by area" (5 aree chiuse, una

@@ -643,6 +643,12 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #sec-results .r-hero-inner, #sec-myreports .r-hero-inner { position: relative; z-index: 1; }
 .r-title { font-family: var(--display); font-size: clamp(40px, 6vw, 72px); font-weight: 700; letter-spacing: -0.035em; line-height: 1; color: var(--on-night); margin-bottom: 20px; }
 .r-summary { font-size: 17px; line-height: 1.55; color: var(--on-night-2); max-width: 60ch; }
+/* The film's name set like a poster (Antonio, 12 Nov 2026: "come A24"):
+   as wide as the column, sized by fitTitle(); its credits and logline
+   under it, the way a one-sheet bills a film. */
+#sec-results .r-title { font-size: clamp(48px, 12vw, 168px); letter-spacing: -0.055em; line-height: 0.88; margin: 0 0 22px; text-wrap: balance; }
+.r-credits { font-size: 15px; line-height: 1.5; color: var(--on-night-2); margin: 0; }
+.r-logline { font-size: 20px; line-height: 1.45; color: var(--on-night); max-width: 46ch; margin: 14px 0 0; }
 #overallScore { margin-top: 36px; }
 .overall-card {
   background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.07) !important;
@@ -1492,7 +1498,9 @@ details.more > summary:active { transform: scale(0.98); }
   </div>
   <div class="r-hero">
     <div class="r-hero-inner reveal">
-      <div class="r-title" id="resultTitle"></div>
+      <h1 class="r-title" id="resultTitle"></h1>
+      <p class="r-credits" id="resultCredits" hidden></p>
+      <p class="r-logline" id="resultLogline" hidden></p>
       <div id="overallScore"></div>
       <div class="r-summary" id="resultSubtitle"></div>
     </div>
@@ -2219,7 +2227,7 @@ function scoreColor(s) { return s >= 7 ? 'high' : s >= 5 ? 'mid' : 'low'; }
 function renderFree(r, title) {
   isFullReport = false;
   setPdfLabels();
-  document.getElementById('resultTitle').textContent = '\u201C'+title+'\u201D';
+  setHeroTitle(title, lastProject);
   setHeroSummary(r.overall_summary||'');
 
   // Overall score
@@ -2388,7 +2396,7 @@ window.addEventListener('resize', closeGloss);
 function renderFull(r, title) {
   isFullReport = true;
   setPdfLabels();
-  document.getElementById('resultTitle').textContent = '\u201C'+title+'\u201D';
+  setHeroTitle(title, lastProject);
   // One summary on screen; the PDF keeps both.
   setHeroSummary(r.executive_summary || r.overall_summary || '');
 
@@ -2712,6 +2720,41 @@ function paras(t, cls) {
 }
 /* The hero summary is cut to four lines on phones (CSS) with a button to
    read it all; the button only appears when the text is actually cut. */
+/* Poster opening: the film's name, its credits (genre, format, country,
+   language, as the filmmaker typed them) and its logline. */
+function setHeroTitle(title, p) {
+  var t = document.getElementById('resultTitle');
+  t.textContent = title;
+  var credits = p ? [p.genre, p.format, p.country, p.language].filter(function(x){ return x && x !== 'Not specified'; }) : [];
+  var c = document.getElementById('resultCredits'), l = document.getElementById('resultLogline');
+  c.textContent = credits.join(' \u00B7 '); c.hidden = !credits.length;
+  l.textContent = noDash(p && p.logline || ''); l.hidden = !(p && p.logline);
+  // measured once shown and once Geist has loaded (a fallback face is narrower)
+  requestAnimationFrame(fitTitle);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitTitle);
+}
+/* The title fills the column on one line, up to 168px. A long name that
+   would fall under 56px on one line wraps between words instead, in about
+   three lines, never wider than its longest word allows (up to 120px). */
+function fitTitle() {
+  var t = document.getElementById('resultTitle');
+  if (!t || !t.textContent || !t.offsetParent) return;
+  var full = t.textContent, room = t.parentNode.clientWidth;
+  function fit(text) {
+    t.textContent = text; t.style.fontSize = '100px'; t.style.whiteSpace = 'nowrap'; t.style.display = 'inline-block';
+    var w = t.getBoundingClientRect().width;
+    t.style.whiteSpace = ''; t.style.display = '';
+    return 100 * room / w;
+  }
+  var size = fit(full);
+  if (size < 56 && /\s/.test(full.trim())) {
+    var longest = full.trim().split(/\s+/).reduce(function(a, w){ return w.length > a.length ? w : a; }, '');
+    size = Math.min(120, fit(longest), size * 3);
+  }
+  t.textContent = full;
+  t.style.fontSize = Math.max(24, Math.min(168, Math.floor(size))) + 'px';
+}
+window.addEventListener('resize', fitTitle);
 function setHeroSummary(text) {
   var el = document.getElementById('resultSubtitle');
   el.textContent = noDash(text);
