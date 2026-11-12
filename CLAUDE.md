@@ -119,8 +119,11 @@ fondo a `roadmap/roadmap.css`; anche privacy, termini, 404.
   con grana nelle parti chiare.
 - **Font** self-hosted in `/fonts` (niente Google Fonts, GDPR; CSP
   `font-src 'self'`): titoli **Geist**, tutto il resto **Carlito**
-  (`size-adjust: 112%`). PDF: `fonts/carlito-*-pdf.ttf` caricati al clic,
-  Helvetica di riserva. Mail: Calibri, Carlito, Arial. Raptor Text gli piaceva
+  (`size-adjust: 112%`). PDF: `fonts/carlito-*-pdf.ttf` e
+  `fonts/geist-700-pdf.ttf`, `geist-300-pdf.ttf` (dal pacchetto ufficiale
+  `geist` 1.9.2 di Vercel, licenza OFL) caricati al clic, Helvetica di
+  riserva. Mail: Calibri, Carlito, Arial; il titolo in Geist (Apple Mail lo
+  carica da oneciak.com, gli altri usano Helvetica/Arial). Raptor Text gli piaceva
   ma è a pagamento: non usarlo senza licenza.
 - Bottoni `border-radius: 10px`; testo allineato a sinistra; colori
   ambientali asimmetrici; hover solo dentro `@media (hover: hover) and
@@ -188,7 +191,12 @@ A/B/C" sui festival (giudizio dell'AI senza fonte).
   larga quanto la colonna, 24-168px; i titoli lunghi vanno a capo tra le
   parole in circa 3 righe, mai una parola tagliata), sotto i "crediti"
   (genere · formato · paese · lingua come scritti nel modulo) e la logline
-  (`setHeroTitle`), poi la scheda di vetro con il voto.
+  (`setHeroTitle`), poi la scheda di vetro con il voto. Stessa apertura
+  nel PDF (copertina: titolo Geist largo quanto la pagina, crediti, logline,
+  voto in Geist Light) e nella mail (titolo 30-96px, sotto i 520px
+  ridotto per stare nello schermo). PDF e mail: titoli come parole in
+  grassetto (niente maiuscole né caratteri a macchina), niente rosso e
+  verde, voti "X.X/10" senza "Moderate".
 - **Report completo**: titolo, voto nella scheda di vetro, un solo riassunto
   (`executive_summary`, 3-4 frasi; 4 righe + "Read more" su telefono; il PDF
   ha anche `overall_summary`); "Your film, area by area" (5 aree chiuse, una

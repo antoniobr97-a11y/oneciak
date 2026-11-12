@@ -3142,8 +3142,8 @@ function loadJsPDF() {
 var pdfFontsPromise = null;
 function loadPdfFonts() {
   if (pdfFontsPromise) return pdfFontsPromise;
-  pdfFontsPromise = Promise.all(['400', '700'].map(function(w) {
-    return fetch('/fonts/carlito-'+w+'-pdf.ttf').then(function(r) {
+  pdfFontsPromise = Promise.all(['carlito-400', 'carlito-700', 'geist-700', 'geist-300'].map(function(w) {
+    return fetch('/fonts/'+w+'-pdf.ttf').then(function(r) {
       if (!r.ok) throw new Error('font');
       return r.arrayBuffer();
     }).then(function(buf) {
@@ -3157,11 +3157,13 @@ function loadPdfFonts() {
 async function newPdfDoc() {
   var fonts = await loadPdfFonts();
   var doc = new window.jspdf.jsPDF();
-  doc.pdfFont = 'helvetica';
+  doc.pdfFont = 'helvetica'; doc.displayFont = 'helvetica';
   if (fonts) {
     doc.addFileToVFS('Carlito-400.ttf', fonts[0]); doc.addFont('Carlito-400.ttf', 'Carlito', 'normal');
     doc.addFileToVFS('Carlito-700.ttf', fonts[1]); doc.addFont('Carlito-700.ttf', 'Carlito', 'bold');
-    doc.pdfFont = 'Carlito';
+    doc.addFileToVFS('Geist-700.ttf', fonts[2]); doc.addFont('Geist-700.ttf', 'Geist', 'bold');
+    doc.addFileToVFS('Geist-300.ttf', fonts[3]); doc.addFont('Geist-300.ttf', 'Geist', 'normal');
+    doc.pdfFont = 'Carlito'; doc.displayFont = 'Geist';
   }
   return doc;
 }
@@ -3174,28 +3176,61 @@ async function savePDF() {
     var doc = await newPdfDoc();
     var y=22, margin=22, maxW=doc.internal.pageSize.getWidth()-margin*2;
     function ln(txt,sz,bold,r,g,b) {
+      if (txt == null || String(txt).trim() === '') return;
       doc.setFontSize(sz||11); doc.setFont(doc.pdfFont,bold?'bold':'normal');
       doc.setTextColor(r!==undefined?r:26, g!==undefined?g:25, b!==undefined?b:22);
       doc.splitTextToSize(noDash(txt||''),maxW).forEach(function(l){ if(y>272){doc.addPage();y=22;} doc.text(l,margin,y); y+=(sz||11)*0.52; }); y+=2;
     }
     function hr() { y+=3; doc.setDrawColor(226,224,219); doc.line(margin,y,doc.internal.pageSize.getWidth()-margin,y); y+=7; }
 
-    ln('OneCiak · Film Market Intelligence',10,true,122,118,112);
-    ln('"'+lastProject.title+'"',18);
-    ln(lastResult.overall_summary||'',10,false,122,118,112);
-    y+=2;
-    ln('OneCiak Score: '+Number(lastResult.overall_score||0).toFixed(1)+'/10 · '+(lastResult.overall_label||''),12,true);
+    // Section heading: a plain word in Carlito bold, like the site.
+    function head(txt) { if (y > 250) { doc.addPage(); y = 22; } y += 3; ln(txt,13,true); y += 1; }
+
+    // Cover, set like the report's opening on the site: the film's name as
+    // wide as the page (Geist bold), its credits and logline, the score.
+    var pageW = doc.internal.pageSize.getWidth();
+    ln('OneCiak',10,true,122,118,112);
+    y += 14;
+    doc.setFont(doc.displayFont,'bold'); doc.setTextColor(26,25,22);
+    var title = noDash(lastProject.title||''), tSize = 100;
+    doc.setFontSize(tSize);
+    var track = function(sz){ return -sz*0.045*0.3528; };
+    doc.setCharSpace(track(tSize));
+    var tW = doc.getTextWidth(title) + track(tSize)*title.length;
+    tSize = Math.max(24, Math.min(110, Math.floor(tSize * maxW / tW)));
+    var tLines = [title];
+    if (tSize < 44 && /\s/.test(title.trim())) {
+      tSize = 44; doc.setFontSize(tSize); doc.setCharSpace(track(tSize));
+      tLines = doc.splitTextToSize(title, maxW);
+      while (tLines.length > 3 && tSize > 24) { tSize -= 2; doc.setFontSize(tSize); doc.setCharSpace(track(tSize)); tLines = doc.splitTextToSize(title, maxW); }
+    }
+    doc.setFontSize(tSize); doc.setCharSpace(track(tSize));
+    tLines.forEach(function(l){ y += tSize*0.3528*0.86; doc.text(l, margin - tSize*0.006, y); });
+    doc.setCharSpace(0);
+    y += 8;
+    var credits = [lastProject.genre, lastProject.format, lastProject.country, lastProject.language].filter(function(x){ return x && x !== 'Not specified'; });
+    if (credits.length) ln(credits.join(' \u00B7 '),11,false,90,86,80);
+    if (lastProject.logline) { y += 1; ln(lastProject.logline,14,false); }
+    y += 8;
+    doc.setFont(doc.displayFont,'normal'); doc.setFontSize(48); doc.setTextColor(26,25,22);
+    var sc = Number(lastResult.overall_score||0).toFixed(1);
+    doc.text(sc, margin, y + 14);
+    var scW = doc.getTextWidth(sc);
+    doc.setFontSize(18); doc.setTextColor(122,118,112); doc.text('/10', margin + scW + 1, y + 14);
+    doc.setFont(doc.pdfFont,'normal'); doc.setFontSize(13); doc.setTextColor(26,25,22);
+    doc.splitTextToSize(noDash(lastResult.overall_label||''), maxW - scW - 30).forEach(function(l, i){ doc.text(l, margin + scW + 16, y + 6 + i*6); });
+    y += 24;
     hr();
+    if (!isFullReport || !lastResult.executive_summary) { ln(lastResult.overall_summary||'',10.5,false,60,58,54); hr(); }
 
     if (isFullReport && lastResult.executive_summary) {
-      ln('EXECUTIVE SUMMARY',10,true);
-      ln(lastResult.executive_summary,10,false,122,118,112);
+      ln(lastResult.executive_summary,10.5,false,60,58,54);
       y+=2;
-      if(lastResult.biggest_risk) ln('Biggest Risk: '+lastResult.biggest_risk,10,true,185,28,28);
-      if(lastResult.biggest_opportunity) ln('Biggest Opportunity: '+lastResult.biggest_opportunity,10,true,22,101,52);
+      if(lastResult.biggest_risk) ln('Biggest risk. '+lastResult.biggest_risk,10,false);
+      if(lastResult.biggest_opportunity) ln('Biggest opportunity. '+lastResult.biggest_opportunity,10,false);
       var ns = lastResult.next_step;
       if (isFullReport && ns && ns.action) {
-        y+=2; ln('YOUR NEXT STEP',10,true); ln(ns.action,10,false,26,25,22);
+        y+=2; head('Your next step'); ln(ns.action,10,false,26,25,22);
         if (ns.why) ln(ns.why,9,false,122,118,112);
         var nsReady = (ns.ready||[]).filter(Boolean);
         if (nsReady.length) ln('Have ready: '+nsReady.join(' · '),9,false,70,68,64);
@@ -3204,21 +3239,21 @@ async function savePDF() {
     }
 
     var dims = [
-      {k:'creative',   l:'CREATIVE PACKAGE'},
-      {k:'financial',  l:'FINANCIAL PLAN'},
-      {k:'market',     l:'MARKET & AUDIENCE'},
-      {k:'festival',   l:'FESTIVAL STRATEGY'},
-      {k:'distribution',l:'DISTRIBUTION & REVENUE'}
+      {k:'creative',   l:'Creative package'},
+      {k:'financial',  l:'Financial plan'},
+      {k:'market',     l:'Market and audience'},
+      {k:'festival',   l:'Festival strategy'},
+      {k:'distribution',l:'Distribution and revenue'}
     ];
     dims.forEach(function(d){
-      ln(d.l+' · '+(lastResult[d.k+'_score']||'')+'/10',10,true);
+      head(d.l+'  '+Number(lastResult[d.k+'_score']||0).toFixed(1)+'/10');
       ln(lastResult[d.k+'_verdict']||'',11,true,50,50,50);
-      ln(lastResult[d.k+'_detail']||'',10,false,122,118,112);
+      ln(lastResult[d.k+'_detail']||'',10,false,60,58,54);
       if (isFullReport) {
         var flags = lastResult[d.k+'_flags']||[];
-        if(flags.length){ ln('Red Flags:',9,true,185,28,28); flags.forEach(function(f){ ln('• '+f,9,false,185,28,28); }); }
+        if(flags.length){ ln('Red flags',9,true); flags.forEach(function(f){ ln('• '+f,9,false); }); }
         var strengths = lastResult[d.k+'_strengths']||[];
-        if(strengths.length){ ln('Strengths:',9,true,22,101,52); strengths.forEach(function(s){ ln('• '+s,9,false,22,101,52); }); }
+        if(strengths.length){ ln('Strengths',9,true); strengths.forEach(function(s){ ln('• '+s,9,false); }); }
         var tips = lastResult[d.k+'_tips']||[];
         if(tips.length){ ln('Recommendations:',9,true); tips.forEach(function(t,i){ if(!t) return; var txt=typeof t==='string'?t:(t.advice||''); ln((i+1)+'. '+txt,9); }); }
         var plan = lastResult[d.k+'_action_plan']||[];
@@ -3231,21 +3266,21 @@ async function savePDF() {
     });
 
     if (isFullReport && lastResult.roadmap && lastResult.roadmap.length) {
-      ln('YOUR ROADMAP',10,true);
+      head('Your roadmap');
       lastResult.roadmap.forEach(function(s,i){ if(!s) return; ln((i+1)+'. '+(s.phase||''),10,true); ln(s.action||'',10); y+=2; });
       hr();
     }
 
     var bya = lastResult.before_you_apply, byaMiss = ((bya && bya.missing) || []).filter(Boolean), byaSteps = ((bya && bya.steps) || []).filter(Boolean);
     if (isFullReport && byaMiss.length) {
-      ln('BEFORE YOU CAN APPLY',10,true);
+      head('Before you can apply');
       byaMiss.forEach(function(m, i){ ln('• '+m,10,true); if (byaSteps[i]) ln(byaSteps[i],9,false,70,68,64); });
       byaSteps.slice(byaMiss.length).forEach(function(x){ ln('• '+x,9,false,70,68,64); });
       hr();
     }
     var prods = (lastResult.producers || []).filter(Boolean);
     if (isFullReport && prods.length) {
-      ln('PRODUCERS TO CONTACT',10,true);
+      head('Producers to contact');
       prods.forEach(function(p){
         ln(p.name+(p.country ? ' ('+p.country+')' : ''),10,true);
         ln('Produced: '+p.film+(p.year ? ' ('+p.year+')' : '')+(p.why ? ' · '+p.why : ''),9,false,122,118,112);
@@ -3257,7 +3292,7 @@ async function savePDF() {
       hr();
     }
     if (isFullReport && lastResult.financial_sources && lastResult.financial_sources.length) {
-      ln('FUNDING SOURCES',10,true);
+      head('Funding sources');
       lastResult.financial_sources.forEach(function(f){
         if (!f) return;
         ln((f.name||'')+' ('+(f.type||'')+')'+(f.amount?' · '+f.amount:''),10,true);
@@ -3270,10 +3305,10 @@ async function savePDF() {
     }
 
     if (isFullReport && (lastResult.talent_leverage || (lastResult.tax_incentive && (lastResult.tax_incentive.estimate || lastResult.tax_incentive.note)))) {
-      ln('TALENT LEVERAGE & TAX INCENTIVE',10,true);
+      head('Talent leverage and tax incentive');
       if (lastResult.talent_leverage) ln(lastResult.talent_leverage,10,false,122,118,112);
       if (lastResult.tax_incentive && (lastResult.tax_incentive.estimate || lastResult.tax_incentive.note)) {
-        ln('Tax Incentive'+(lastResult.tax_incentive.region?': '+lastResult.tax_incentive.region:'')+(lastResult.tax_incentive.estimate?': '+lastResult.tax_incentive.estimate:''),10,true,22,101,52);
+        ln('Tax Incentive'+(lastResult.tax_incentive.region?': '+lastResult.tax_incentive.region:'')+(lastResult.tax_incentive.estimate?': '+lastResult.tax_incentive.estimate:''),10,true);
         if (lastResult.tax_incentive.note) ln(lastResult.tax_incentive.note,9,false,122,118,112);
         if (lastResult.tax_incentive.source) ln(pdfSource(lastResult.tax_incentive),8,false,150,148,145);
       }
@@ -3281,19 +3316,19 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.budget_breakdown_guidance) {
-      ln('BUDGET BREAKDOWN GUIDANCE',10,true);
+      head('Budget breakdown guidance');
       ln(lastResult.budget_breakdown_guidance,10,false,122,118,112);
       hr();
     }
 
     if (isFullReport && lastResult.pitch_assessment) {
       var pa = lastResult.pitch_assessment;
-      ln('PITCH ASSESSMENT',10,true);
+      head('Pitch assessment');
       if (pa.thirty_second_pitch) { ln('30-Second Pitch:',9,true); ln('"'+pa.thirty_second_pitch+'"',9,false,122,118,112); }
       if (pa.logline_improved) {
         ln('Logline Assessment'+(pa.logline_score?' · '+pa.logline_score+'/10':''),9,true);
         if (pa.logline_issues) ln(pa.logline_issues,9,false,122,118,112);
-        ln('Improved: '+pa.logline_improved,9,true,22,101,52);
+        ln('Improved: '+pa.logline_improved,9,true);
       }
       if (pa.pitch_deck_checklist && pa.pitch_deck_checklist.length) {
         ln('Pitch Deck Checklist:',9,true);
@@ -3303,13 +3338,13 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.attachment_strategy) {
-      ln('ATTACHMENT STRATEGY',10,true);
+      head('Attachment strategy');
       ln(lastResult.attachment_strategy,10,false,122,118,112);
       hr();
     }
 
     if (isFullReport && lastResult.key_crew_recommendations && lastResult.key_crew_recommendations.length) {
-      ln('KEY CREW RECOMMENDATIONS',10,true);
+      head('Key crew recommendations');
       lastResult.key_crew_recommendations.forEach(function(c){
         if (!c) return;
         ln(c.role||'',10,true);
@@ -3322,7 +3357,7 @@ async function savePDF() {
 
     if (isFullReport && lastResult.marketing_strategy) {
       var ms = lastResult.marketing_strategy;
-      ln('MARKETING STRATEGY',10,true);
+      head('Marketing strategy');
       if (ms.overview) ln(ms.overview,10,false,122,118,112);
       if (ms.pre_release && ms.pre_release.length) { ln('Pre-Release Actions:',9,true); ms.pre_release.forEach(function(a){ if(a) ln('• '+a,9); }); }
       if (ms.social_strategy) ln('Social: '+ms.social_strategy,9,false,122,118,112);
@@ -3333,13 +3368,13 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.target_audience_profile) {
-      ln('TARGET AUDIENCE PROFILE',10,true);
+      head('Target audience profile');
       ln(lastResult.target_audience_profile,10,false,122,118,112);
       hr();
     }
 
     if (isFullReport && lastResult.distribution_platforms && lastResult.distribution_platforms.length) {
-      ln('DISTRIBUTION PLATFORMS',10,true);
+      head('Distribution platforms');
       lastResult.distribution_platforms.forEach(function(pl){
         if (!pl) return;
         ln((pl.priority||'')+': '+(pl.name||''),10,true);
@@ -3351,13 +3386,13 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.self_distribution_playbook) {
-      ln('SELF-DISTRIBUTION PLAYBOOK',10,true);
+      head('Self-distribution playbook');
       ln(lastResult.self_distribution_playbook,10,false,122,118,112);
       hr();
     }
 
     if (isFullReport && lastResult.market_comps && lastResult.market_comps.length) {
-      ln('COMPARABLE FILMS',10,true);
+      head('Comparable films');
       lastResult.market_comps.forEach(function(c){
         if (!c) return;
         ln((c.title||'')+(c.year?' ('+c.year+')':'')+(c.budget?' · Budget: '+c.budget:'')+(c.result?'. '+c.result:''),10,true);
@@ -3370,10 +3405,10 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.cautionary_comps && lastResult.cautionary_comps.length) {
-      ln('CAUTIONARY COMPARABLES',10,true);
+      head('Cautionary comparables');
       lastResult.cautionary_comps.forEach(function(c){
         if (!c) return;
-        ln((c.title||'')+(c.year?' ('+c.year+')':'')+(c.budget?' · Budget: '+c.budget:'')+(c.what_went_wrong?'. '+c.what_went_wrong:''),10,true,185,28,28);
+        ln((c.title||'')+(c.year?' ('+c.year+')':'')+(c.budget?' · Budget: '+c.budget:'')+(c.what_went_wrong?'. '+c.what_went_wrong:''),10,true);
         ln(c.lesson||'',9,false,122,118,112);
         if (c.source) ln(pdfSource(c),8,false,150,148,145);
         y+=1;
@@ -3382,7 +3417,7 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.festival_calendar && lastResult.festival_calendar.length) {
-      ln('FESTIVAL CALENDAR',10,true);
+      head('Festival calendar');
       lastResult.festival_calendar.forEach(function(f){
         if (!f) return;
         ln((f.festival||'')+' · '+(f.source ? 'Deadline: '+notStated(f.deadline, 'not published on the source, check before planning') : (f.deadline||'')),10,true);
@@ -3395,7 +3430,7 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.lab_and_market_opportunities && lastResult.lab_and_market_opportunities.length) {
-      ln('LABS & MARKET OPPORTUNITIES',10,true);
+      head('Labs and market opportunities');
       lastResult.lab_and_market_opportunities.forEach(function(l){
         if (!l) return;
         ln(l.name||'',10,true);
@@ -3409,7 +3444,7 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.sales_agents && lastResult.sales_agents.length) {
-      ln('SALES AGENTS',10,true);
+      head('Sales agents');
       lastResult.sales_agents.forEach(function(a){
         if (!a) return;
         ln(a.name||'',10,true);
@@ -3421,7 +3456,7 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.international_markets && lastResult.international_markets.length) {
-      ln('INTERNATIONAL MARKETS',10,true);
+      head('International markets');
       lastResult.international_markets.forEach(function(m){
         if (!m) return;
         ln((m.country||'')+': '+(m.reason||''),9,false,122,118,112);
@@ -3430,20 +3465,20 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.risk_assessment && ((lastResult.risk_assessment.top_risks||[]).length || (lastResult.risk_assessment.mitigation||[]).length)) {
-      ln('RISK ASSESSMENT',10,true);
-      (lastResult.risk_assessment.top_risks||[]).forEach(function(risk){ if(risk) ln('• '+risk,9,false,185,28,28); });
-      (lastResult.risk_assessment.mitigation||[]).forEach(function(m){ if(m) ln('• '+m,9,false,22,101,52); });
+      head('Risk assessment');
+      (lastResult.risk_assessment.top_risks||[]).forEach(function(risk){ if(risk) ln('• '+risk,9,false); });
+      (lastResult.risk_assessment.mitigation||[]).forEach(function(m){ if(m) ln('• '+m,9,false); });
       hr();
     }
 
     if (isFullReport && lastResult.awards_qualification_strategy) {
-      ln('AWARDS QUALIFICATION STRATEGY',10,true);
+      head('Awards qualification strategy');
       ln(lastResult.awards_qualification_strategy,10,false,122,118,112);
       hr();
     }
 
     if (isFullReport && lastResult.legal_and_rights_considerations) {
-      ln('LEGAL & RIGHTS CONSIDERATIONS',10,true);
+      head('Legal and rights considerations');
       ln(lastResult.legal_and_rights_considerations,10,false,122,118,112);
       hr();
     }
@@ -3451,14 +3486,14 @@ async function savePDF() {
     if (isFullReport && lastResult.revenue_projection && lastResult.revenue_projection.total_realistic) {
       var rp = lastResult.revenue_projection;
       ln(lastResult.sources_checked ? 'REVENUE SCENARIOS' : 'REVENUE PROJECTION',10,true);
-      ln((lastResult.sources_checked ? '' : 'Total Realistic: ')+rp.total_realistic,10,true,22,101,52);
+      ln((lastResult.sources_checked ? '' : 'Total Realistic: ')+rp.total_realistic,10,true);
       if (rp.breakeven_note) ln(rp.breakeven_note,9,false,122,118,112);
       hr();
     }
 
     if (isFullReport && lastResult.business_plan_summary) {
       var bp = lastResult.business_plan_summary;
-      ln('BUSINESS PLAN SUMMARY',10,true);
+      head('Business plan summary');
       if (bp.executive_summary) ln(bp.executive_summary,9,false,122,118,112);
       if (bp.the_ask) ln('The Ask: '+bp.the_ask,9,true);
       if (bp.market_opportunity) { ln('Market Opportunity',9,true); ln(bp.market_opportunity,9,false,122,118,112); }
@@ -3469,13 +3504,13 @@ async function savePDF() {
         ln('Key Milestones',9,true);
         bp.key_milestones.forEach(function(m){ if (m) ln('• '+m,9,false,122,118,112); });
       }
-      if (bp.risk_summary) { ln('Biggest Risk',9,true); ln(bp.risk_summary,9,false,197,56,42); }
+      if (bp.risk_summary) { ln('Biggest Risk',9,true); ln(bp.risk_summary,9,false); }
       hr();
     }
 
     ln('Report by OneCiak · oneciak.com',9,false,122,118,112);
     y+=4; hr();
-    ln('LEGAL DISCLAIMER',9,true,122,118,112);
+    head('Legal disclaimer');
     ln('Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. OneCiak assumes no liability. Results are estimates and do not guarantee any outcome. OneCiak is not a licensed consulting firm.',8,false,150,148,145);
 
     doc.save('OneCiak-'+lastProject.title.replace(/\s+/g,'-')+'.pdf');
