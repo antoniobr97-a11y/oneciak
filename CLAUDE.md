@@ -318,9 +318,13 @@ art. 7. Scheda per l'avvocato: claude.ai/artifact/Y776k28X7HyxzMxcQgNXDX.
 
 - Google indicizza già il sito (confermato da Antonio).
 - Agente del lunedì (`trig_01LhjUc5ZkrXiqCkiqh5hiKo`, lunedì 8:52 ora
-  italiana): "punto della situazione" (sito in breve, cosa è cambiato dal
-  git log di main, 3 cose da "Cosa manca"), controlla il sito, prepara 3
-  post come Artifact privato. Non può fare push e non pubblica.
+  italiana, in automatico; Antonio: "ogni lunedì controlla il sito a fondo"):
+  per primo il controllo a fondo del sito vero (pagine, un'analisi vera,
+  giro nel browser di "Controlli" qui sotto con foto dei problemi, link,
+  fonti della roadmap), poi "punto della situazione" (sito in breve, cosa
+  è cambiato dal git log di main, 3 cose da "Cosa manca") e 3 post come
+  Artifact privato. Non può fare push e non pubblica. Se cambiano i
+  controlli, aggiornare anche il suo testo.
 - r/Screenwriting vieta contenuti AI, r/Filmmakers vieta i post solo-link.
 
 ## Cosa manca, in ordine
