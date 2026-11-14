@@ -167,6 +167,12 @@ sui festival.
   (`setHeroTitle`), poi la scheda di vetro col voto. Stessa apertura nel PDF
   (copertina) e nella mail (titolo 30-96px, ridotto sotto i 520px). PDF e
   mail: titoli come parole in grassetto, niente rosso e verde, voti "X.X/10".
+- **Aprire e chiudere** (aree, righe di "Your path", blocchi dentro
+  un'area): una aperta per gruppo; il titolo toccato resta fermo mentre le
+  altre si chiudono, poi la pagina scivola finché è 12px sotto le barre
+  (`settleOpened`, `jumpBy` senza `behavior:'instant'` che i Safari vecchi
+  non conoscono, `scrollUnderBars`); chiudere non sposta nulla. La sezione
+  attuale nell'indice si legge dalla posizione vera a ogni scroll.
 - **Report completo**: un solo riassunto (`executive_summary`; 4 righe e
   "Read more" su telefono); "Your film, area by area" (5 aree chiuse, una
   aperta alla volta, `toggleAccordion`); poi **"Your path"** (`buildPath`):
