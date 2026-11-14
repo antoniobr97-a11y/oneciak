@@ -2560,9 +2560,34 @@ function toggleAccordion(idx) {
   }
   body.classList.toggle('open', !isOpen);
   trigger.classList.toggle('open', !isOpen);
-  var shift = trigger.getBoundingClientRect().top - before;
-  if (Math.abs(shift) > 1) window.scrollTo({ top: window.scrollY + shift, behavior: 'instant' });
+  settleOpened(trigger, before, !isOpen);
 }
+/* After an area or a path row opens or closes: the tapped title first stays
+   exactly where it was while the rows above close (no jump), then, if it
+   opened, the page glides until it sits just under the bars. */
+function jumpBy(dy) {
+  // Without the page's smooth scrolling, and without behavior:'instant',
+  // which older Safari does not know.
+  var html = document.documentElement, prev = html.style.scrollBehavior;
+  html.style.scrollBehavior = 'auto';
+  window.scrollTo(0, window.scrollY + dy);
+  html.style.scrollBehavior = prev;
+}
+function settleOpened(head, before, opened) {
+  var shift = head.getBoundingClientRect().top - before;
+  if (Math.abs(shift) > 1) jumpBy(shift);
+  if (opened) scrollUnderBars(head);
+}
+/* Path rows and the blocks inside an area open one at a time, like the areas. */
+document.addEventListener('click', function(e) {
+  var sum = e.target.closest && e.target.closest('#accordionMenu details.rblock > summary');
+  if (!sum || e.target.closest('a')) return;
+  e.preventDefault();
+  var d = sum.parentNode, opening = !d.open, before = sum.getBoundingClientRect().top;
+  if (opening) Array.prototype.forEach.call(d.parentNode.children, function(x) { if (x !== d && x.matches('details.rblock[open]')) x.open = false; });
+  d.open = opening;
+  settleOpened(sum, before, opening);
+});
 
 /* AREA NAVIGATION: an index of all areas that follows the scroll: a column
    in the left margin on wide screens, a slim bar under the header on phones. */
@@ -2602,7 +2627,8 @@ function scrollUnderBars(el) {
     var bar = document.querySelector('#areaNav .an-bar');
     cover = (target > window.scrollY ? 0 : 64) + (bar ? bar.offsetHeight : 48);
   }
-  window.scrollTo({ top: Math.max(0, target - cover - 12), behavior: 'smooth' });
+  var to = Math.max(0, target - cover - 12);
+  if (Math.abs(to - window.scrollY) > 4) window.scrollTo({ top: to, behavior: 'smooth' });
 }
 var REPORT_PARTS = [
   { q: 'Does my film stand up?', sel: ['#accordionMenu .r-areas-h', '#accordionMenu .accordion-wrap'], areas: true },
@@ -2633,6 +2659,7 @@ document.addEventListener('click', function(e) {
   if (!(e.target.closest && e.target.closest('#areaNav'))) closeReportNav();
 });
 var areaNavObserver = null, areaVisObserver = null;
+var navScrollSync = null;
 function mountReportNav(sections) {
   var host = document.getElementById('sec-results');
   var nav = document.getElementById('areaNav');
@@ -2666,16 +2693,20 @@ function mountReportNav(sections) {
     if (i != null && sections[i]) cur.innerHTML = esc(sections[i].label)+(sections[i].score != null ? '<span class="an-score">'+Number(sections[i].score).toFixed(1)+'/10</span>' : '');
     else cur.textContent = REPORT_PARTS[k].q;
   };
-  var areasK = 0;
-  areaNavObserver = new IntersectionObserver(function(entries) {
-    entries.forEach(function(e) {
-      if (!e.isIntersecting) return;
-      var i = areaEls.indexOf(e.target);
-      if (i >= 0) { show(areasK, i); return; }
-      var part = parts.filter(function(x) { return x.el === e.target; })[0];
-      if (part) show(part.k, null);
-    });
-  }, { rootMargin: '-30% 0px -60% 0px' });
+  // The current section is read from where things are on screen (the last
+  // part and area whose top has passed 35% of the height), on every scroll:
+  // a jump (a row closing above, a tap in the index) must not leave it stale.
+  var sync = function() {
+    var line = window.innerHeight * 0.35, k = parts.length ? parts[0].k : 0, i = null;
+    parts.forEach(function(x) { if (x.el.getBoundingClientRect().top < line) k = x.k; });
+    if (REPORT_PARTS[k] && REPORT_PARTS[k].areas) areaEls.forEach(function(el, n) { if (el.getBoundingClientRect().top < line) i = n; });
+    show(k, i);
+  };
+  var queued = false;
+  if (navScrollSync) window.removeEventListener('scroll', navScrollSync);
+  navScrollSync = function() { if (queued) return; queued = true; requestAnimationFrame(function() { queued = false; sync(); }); };
+  window.addEventListener('scroll', navScrollSync, { passive: true });
+  areaNavObserver = new IntersectionObserver(sync, { rootMargin: '-30% 0px -60% 0px' });
   parts.forEach(function(x) { areaNavObserver.observe(x.el); });
   areaEls.forEach(function(el) { areaNavObserver.observe(el); });
   // Phones: the bar shows once the whole opening has scrolled away. Wide
@@ -2688,7 +2719,7 @@ function mountReportNav(sections) {
     entries.forEach(function(e) { nav.classList.toggle('is-on', !e.isIntersecting); if (e.isIntersecting) closeReportNav(); });
   }, { rootMargin: (wide ? '-112px' : '-64px') + ' 0px 0px 0px' });
   if (watch) areaVisObserver.observe(watch);
-  if (parts.length) show(parts[0].k, null);
+  sync();
 }
 
 
