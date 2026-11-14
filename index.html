@@ -880,14 +880,17 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 @media (max-width: 1099px) {
   .area-nav { top: 64px; left: 0; right: 0; transform: translateY(-6px); background: rgba(244,241,236,0.94); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); overflow: hidden; } /* hidden: its content never widens the page */
   .area-nav.is-on { transform: none; }
-  .area-nav.is-open { overflow: visible; }
   .an-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 928px; margin: 0 auto; padding: 10px 24px; font-size: 14px; color: var(--text); }
   .an-cur { display: flex; align-items: baseline; min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .an-cur .an-score { margin-left: 10px; padding-left: 0; }
   .an-top { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; font-size: 14px; font-weight: 700; color: #b4552b; padding: 6px 0 6px 8px; }
   .an-top svg { transition: transform 0.2s var(--ease); }
   .area-nav.is-open .an-top svg { transform: rotate(180deg); }
-  .area-nav.is-open .an-col { display: block; position: absolute; top: 100%; left: 0; right: 0; max-height: 70vh; overflow-y: auto; padding: 6px 24px 14px; background: var(--paper); border-bottom: 1px solid var(--border); animation: openIn 0.22s var(--ease) both; }
+  /* The list opens inside the bar, which grows: nothing hangs outside the
+     blurred bar, where iPhone Safari may not deliver taps to it. */
+  .area-nav { display: flex; flex-direction: column; }
+  .an-bar { order: -1; width: 100%; box-sizing: border-box; }
+  .area-nav.is-open .an-col { display: block; max-height: 70vh; overflow-y: auto; padding: 6px 24px 14px; background: var(--paper); border-top: 1px solid var(--border); animation: openIn 0.22s var(--ease) both; }
 }
 @media (max-width: 600px) { .an-bar { padding: 10px 20px; } .area-nav.is-open .an-col { padding-left: 20px; padding-right: 20px; } }
 /* Very narrow screens (Safari text zoom, ~260px): long words and labels wrap instead of widening the page. */

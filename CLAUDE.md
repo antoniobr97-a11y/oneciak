@@ -200,7 +200,9 @@ sui festival.
   mai testi dell'apertura (misurato a 1100, 1280, 1600). L'area attuale
   scivola di 8px e si accende col segno arancio in 0.3s, come i passi del
   modulo. Sotto i 1100px, barra con la sezione attuale e "Sections" che
-  compare quando tutta l'apertura è uscita. Nell'anteprima solo le aree.
+  compare quando tutta l'apertura è uscita; l'elenco si apre DENTRO la
+  barra, che si allunga (fuori da una barra col vetro sfocato iPhone Safari
+  può non ricevere i tocchi: "Your path" non si toccava). Nell'anteprima solo le aree.
 - **Glossario sulla parola** (`glossify`, `GLOSSARY`, `openGloss`): prima
   volta di ogni termine sottolineata a puntini, il tocco apre una nuvoletta
   dentro lo schermo; secondo tocco, tocco fuori o Esc la chiude. Mai in
