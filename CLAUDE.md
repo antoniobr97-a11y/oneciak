@@ -171,7 +171,10 @@ sui festival.
   un'area): una aperta per gruppo; il titolo toccato resta fermo mentre le
   altre si chiudono, poi la pagina scivola finché è 12px sotto le barre
   (`settleOpened`, `jumpBy` senza `behavior:'instant'` che i Safari vecchi
-  non conoscono, `scrollUnderBars`); chiudere non sposta nulla. La sezione
+  non conoscono, `scrollUnderBars`); chiudere non sposta nulla. Le righe
+  (`<details>`) le apre il browser (niente `preventDefault`: su iPhone il
+  tocco su una riga non si apriva); il codice ascolta `toggle` e poi chiude
+  le altre. La sezione
   attuale nell'indice si legge dalla posizione vera a ogni scroll.
 - **Report completo**: un solo riassunto (`executive_summary`; 4 righe e
   "Read more" su telefono); "Your film, area by area" (5 aree chiuse, una
@@ -189,7 +192,9 @@ sui festival.
 - **Anteprima**: titolo, voto, riassunto, 5 aree, rischio, opportunità,
   prossimo passo, richiesta del report completo.
 - **Indice** (`mountReportNav`, `REPORT_PARTS`): "Does my film stand up?"
-  con le 5 aree e il voto, poi "Your path". Dai 1100px colonna fissa a
+  con le 5 aree e il voto, poi "Your path" con i passi del report (presi
+  dalle righe della pagina; `goToStep` apre la riga come un tocco; la barra
+  del telefono mostra il nome del passo), su computer e telefono. Dai 1100px colonna fissa a
   sinistra (testo del corpo in colonna di 640px): non c'è in alto, così il
   titolo resta grande e libero (Antonio: la colonna da subito "ha rovinato
   il titolo"); entra (dissolvenza e 8px da sinistra) appena il riassunto
@@ -197,7 +202,9 @@ sui festival.
   mai testi dell'apertura (misurato a 1100, 1280, 1600). L'area attuale
   scivola di 8px e si accende col segno arancio in 0.3s, come i passi del
   modulo. Sotto i 1100px, barra con la sezione attuale e "Sections" che
-  compare quando tutta l'apertura è uscita. Nell'anteprima solo le aree.
+  compare quando tutta l'apertura è uscita; l'elenco si apre DENTRO la
+  barra, che si allunga (fuori da una barra col vetro sfocato iPhone Safari
+  può non ricevere i tocchi: "Your path" non si toccava). Nell'anteprima solo le aree.
 - **Glossario sulla parola** (`glossify`, `GLOSSARY`, `openGloss`): prima
   volta di ogni termine sottolineata a puntini, il tocco apre una nuvoletta
   dentro lo schermo; secondo tocco, tocco fuori o Esc la chiude. Mai in
@@ -360,6 +367,9 @@ art. 7. Scheda per l'avvocato: claude.ai/artifact/Y776k28X7HyxzMxcQgNXDX.
   copia email, PDF, calendario nascosto senza date, menu "Sections" (ogni
   area da più punti, telefono e computer), un'analisi vera su
   `/.netlify/functions/analyze` (NON start-full-report).
+- **Codice della pagina**: estrarre lo script di index.html e passarlo a
+  `node --check` prima di ogni prova (un errore di sintassi spegne tutto il
+  sito).
 - **Pulizia**: confronto pixel per pixel col codice vecchio (`git archive
   HEAD` su un'altra porta), telefono e computer, 3 schemi: 0 differenze.
 - **Link esterni** di report di esempio e roadmap: 2xx/3xx. Locarno ha un
