@@ -161,8 +161,8 @@ sui festival.
   esempio (`fitPlaceholders`).
 - **Caricamento**: 5 dimensioni che avanzano (`startLoadingDims` e simili).
 - **Apertura del report** ("come A24"): nome del film senza virgolette,
-  grande come un manifesto (`fitTitle`: una riga larga quanto la colonna di
-  testo, 24-168px; i titoli lunghi vanno a capo tra le parole in circa 3 righe),
+  grande come un manifesto (`fitTitle`: una riga larga quanto l'apertura,
+  24-168px; i titoli lunghi vanno a capo tra le parole in circa 3 righe),
   sotto i crediti (genere · formato · paese · lingua) e la logline
   (`setHeroTitle`), poi la scheda di vetro col voto. Stessa apertura nel PDF
   (copertina) e nella mail (titolo 30-96px, ridotto sotto i 520px). PDF e
@@ -184,16 +184,14 @@ sui festival.
   prossimo passo, richiesta del report completo.
 - **Indice** (`mountReportNav`, `REPORT_PARTS`): "Does my film stand up?"
   con le 5 aree e il voto, poi "Your path". Dai 1100px colonna fissa a
-  sinistra visibile da subito, come l'elenco dei passi del modulo (Antonio:
-  "compare troppo all'ultimo", "stessa motion del menu del modulo"): tutto
-  il report, apertura compresa, sta nella colonna di testo di 640px a
-  destra; l'area attuale scivola di 8px e si accende col segno arancio in
-  0.3s. Sotto i 1100px, barra con la sezione attuale e "Sections" che
-  compare quando titolo e voto sono usciti dallo schermo. Nell'anteprima
-  solo le aree. Toccare un'area la apre, chiude le altre e
-  porta il titolo 12px sotto le barre (`scrollUnderBars`: sul telefono
-  l'intestazione sparisce scendendo e torna salendo, il conto tiene la
-  direzione).
+  sinistra (testo del corpo in colonna di 640px): non c'è in alto, così il
+  titolo resta grande e libero (Antonio: la colonna da subito "ha rovinato
+  il titolo"); entra (dissolvenza e 8px da sinistra) appena il riassunto
+  dell'apertura è salito sopra di lei, poco prima delle 5 aree, e non copre
+  mai testi dell'apertura (misurato a 1100, 1280, 1600). L'area attuale
+  scivola di 8px e si accende col segno arancio in 0.3s, come i passi del
+  modulo. Sotto i 1100px, barra con la sezione attuale e "Sections" che
+  compare quando tutta l'apertura è uscita. Nell'anteprima solo le aree.
 - **Glossario sulla parola** (`glossify`, `GLOSSARY`, `openGloss`): prima
   volta di ogni termine sottolineata a puntini, il tocco apre una nuvoletta
   dentro lo schermo; secondo tocco, tocco fuori o Esc la chiude. Mai in

@@ -870,12 +870,9 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .an-score { font-size: 13px; color: var(--muted); margin-left: auto; padding-left: 10px; font-variant-numeric: tabular-nums; }
 .an-col { display: none; }
 @media (min-width: 1100px) {
-  /* Like the form's step list: the column is there from the start, beside
-     the whole report, so the top of the report sits in the text column. */
   #sec-results .r-main { padding-left: 264px; }
-  #sec-results .r-hero-inner { padding-left: 240px; }
-  .area-nav, .area-nav.is-on { opacity: 1; pointer-events: auto; }
-  .area-nav { top: 112px; left: max(24px, calc(50% - 440px)); width: 200px; }
+  .area-nav { top: 112px; left: max(24px, calc(50% - 440px)); width: 200px; transform: translateX(-8px); }
+  .area-nav.is-on { transform: none; }
   .an-col { display: block; }
   .an-bar { display: none; }
   @media (hover: hover) and (pointer: fine) { .an-sec:hover, .an-item:hover { color: var(--text); } }
@@ -2681,12 +2678,16 @@ function mountReportNav(sections) {
   }, { rootMargin: '-30% 0px -60% 0px' });
   parts.forEach(function(x) { areaNavObserver.observe(x.el); });
   areaEls.forEach(function(el) { areaNavObserver.observe(el); });
-  // Shown once the title and score at the top have scrolled away.
-  var hero = host.querySelector('.r-hero');
+  // Phones: the bar shows once the whole opening has scrolled away. Wide
+  // screens: the column shows as soon as the opening's summary has gone
+  // above it, just before the five areas arrive, so it never sits on the
+  // poster title (Antonio: "un attimo prima che si scorre per vedere" le aree).
+  var wide = window.innerWidth >= 1100;
+  var watch = wide ? document.getElementById('resultSubtitle') : host.querySelector('.r-hero');
   areaVisObserver = new IntersectionObserver(function(entries) {
     entries.forEach(function(e) { nav.classList.toggle('is-on', !e.isIntersecting); if (e.isIntersecting) closeReportNav(); });
-  }, { rootMargin: '-64px 0px 0px 0px' });
-  if (hero) areaVisObserver.observe(hero);
+  }, { rootMargin: (wide ? '-112px' : '-64px') + ' 0px 0px 0px' });
+  if (watch) areaVisObserver.observe(watch);
   if (parts.length) show(parts[0].k, null);
 }
 
