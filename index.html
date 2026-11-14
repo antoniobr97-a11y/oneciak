@@ -2578,16 +2578,22 @@ function settleOpened(head, before, opened) {
   if (Math.abs(shift) > 1) jumpBy(shift);
   if (opened) scrollUnderBars(head);
 }
-/* Path rows and the blocks inside an area open one at a time, like the areas. */
+/* Path rows and the blocks inside an area open one at a time, like the areas.
+   The browser opens the row itself (no preventDefault: iPhone Safari is the
+   judge of a tap on a <summary>); the tap only notes where the title was,
+   and once the row has opened the others close and the page settles. */
+var rowTap = null;
 document.addEventListener('click', function(e) {
   var sum = e.target.closest && e.target.closest('#accordionMenu details.rblock > summary');
-  if (!sum || e.target.closest('a')) return;
-  e.preventDefault();
-  var d = sum.parentNode, opening = !d.open, before = sum.getBoundingClientRect().top;
-  if (opening) Array.prototype.forEach.call(d.parentNode.children, function(x) { if (x !== d && x.matches('details.rblock[open]')) x.open = false; });
-  d.open = opening;
-  settleOpened(sum, before, opening);
-});
+  rowTap = sum ? { d: sum.parentNode, top: sum.getBoundingClientRect().top } : null;
+}, true);
+document.addEventListener('toggle', function(e) {
+  var d = e.target;
+  if (!rowTap || rowTap.d !== d) return;
+  var tap = rowTap; rowTap = null;
+  if (d.open) Array.prototype.forEach.call(d.parentNode.children, function(x) { if (x !== d && x.matches('details.rblock[open]')) x.open = false; });
+  settleOpened(d.querySelector('summary'), tap.top, d.open);
+}, true);
 
 /* AREA NAVIGATION: an index of all areas that follows the scroll: a column
    in the left margin on wide screens, a slim bar under the header on phones. */

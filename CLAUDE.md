@@ -171,7 +171,10 @@ sui festival.
   un'area): una aperta per gruppo; il titolo toccato resta fermo mentre le
   altre si chiudono, poi la pagina scivola finché è 12px sotto le barre
   (`settleOpened`, `jumpBy` senza `behavior:'instant'` che i Safari vecchi
-  non conoscono, `scrollUnderBars`); chiudere non sposta nulla. La sezione
+  non conoscono, `scrollUnderBars`); chiudere non sposta nulla. Le righe
+  (`<details>`) le apre il browser (niente `preventDefault`: su iPhone il
+  tocco su una riga non si apriva); il codice ascolta `toggle` e poi chiude
+  le altre. La sezione
   attuale nell'indice si legge dalla posizione vera a ogni scroll.
 - **Report completo**: un solo riassunto (`executive_summary`; 4 righe e
   "Read more" su telefono); "Your film, area by area" (5 aree chiuse, una
@@ -360,6 +363,9 @@ art. 7. Scheda per l'avvocato: claude.ai/artifact/Y776k28X7HyxzMxcQgNXDX.
   copia email, PDF, calendario nascosto senza date, menu "Sections" (ogni
   area da più punti, telefono e computer), un'analisi vera su
   `/.netlify/functions/analyze` (NON start-full-report).
+- **Codice della pagina**: estrarre lo script di index.html e passarlo a
+  `node --check` prima di ogni prova (un errore di sintassi spegne tutto il
+  sito).
 - **Pulizia**: confronto pixel per pixel col codice vecchio (`git archive
   HEAD` su un'altra porta), telefono e computer, 3 schemi: 0 differenze.
 - **Link esterni** di report di esempio e roadmap: 2xx/3xx. Locarno ha un
