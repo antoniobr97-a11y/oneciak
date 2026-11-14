@@ -856,18 +856,25 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .area-nav.is-on { opacity: 1; pointer-events: auto; }
 .an-sec, .an-item, .an-top { border: 0; background: none; font: inherit; color: inherit; cursor: pointer; text-align: left; }
 .an-sec:active, .an-item:active, .an-top:active { transform: scale(0.97); }
-.an-sec { display: block; width: 100%; padding: 9px 0; font-size: 14px; font-weight: 700; color: var(--muted); transition: color 0.2s; }
+.an-sec { display: block; width: 100%; padding: 9px 0; font-size: 14px; font-weight: 700; color: var(--muted); transition: color 0.3s var(--ease); }
 .an-sec.on { color: var(--text); }
 .an-areas { margin: 0 0 6px; border-left: 1px solid var(--border); }
-.an-item { position: relative; display: flex; align-items: baseline; width: 100%; padding: 6px 0 6px 12px; font-size: 14px; color: var(--muted); transition: color 0.2s; }
-.an-item.on { color: var(--text); }
+/* Same motion as the form's step list: the current area slides in and
+   lights up, 0.3s on the shared curve. */
+.an-item { position: relative; display: flex; align-items: baseline; width: 100%; padding: 6px 0 6px 12px; font-size: 14px; color: var(--muted); transition: color 0.3s var(--ease), padding-left 0.3s var(--ease); }
+.an-item.on { color: var(--text); padding-left: 20px; }
 /* The marker is a real 2px line, not a box-shadow: Safari drew the shadow as
    lines across the whole row. */
-.an-item.on::before { content: ''; position: absolute; left: -1px; top: 5px; bottom: 5px; width: 2px; border-radius: 1px; background: #b4552b; }
+.an-item::before { content: ''; position: absolute; left: -1px; top: 5px; bottom: 5px; width: 2px; border-radius: 1px; background: #b4552b; opacity: 0; transition: opacity 0.3s var(--ease); }
+.an-item.on::before { opacity: 1; }
 .an-score { font-size: 13px; color: var(--muted); margin-left: auto; padding-left: 10px; font-variant-numeric: tabular-nums; }
 .an-col { display: none; }
 @media (min-width: 1100px) {
+  /* Like the form's step list: the column is there from the start, beside
+     the whole report, so the top of the report sits in the text column. */
   #sec-results .r-main { padding-left: 264px; }
+  #sec-results .r-hero-inner { padding-left: 240px; }
+  .area-nav, .area-nav.is-on { opacity: 1; pointer-events: auto; }
   .area-nav { top: 112px; left: max(24px, calc(50% - 440px)); width: 200px; }
   .an-col { display: block; }
   .an-bar { display: none; }
@@ -2746,7 +2753,8 @@ function setHeroTitle(title, p) {
 function fitTitle() {
   var t = document.getElementById('resultTitle');
   if (!t || !t.textContent || !t.offsetParent) return;
-  var full = t.textContent, room = t.parentNode.clientWidth;
+  var cs = getComputedStyle(t.parentNode);
+  var full = t.textContent, room = t.parentNode.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
   function fit(text) {
     t.textContent = text; t.style.fontSize = '100px'; t.style.whiteSpace = 'nowrap'; t.style.display = 'inline-block';
     var w = t.getBoundingClientRect().width;
