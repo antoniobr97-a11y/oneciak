@@ -192,7 +192,9 @@ sui festival.
 - **Anteprima**: titolo, voto, riassunto, 5 aree, rischio, opportunità,
   prossimo passo, richiesta del report completo.
 - **Indice** (`mountReportNav`, `REPORT_PARTS`): "Does my film stand up?"
-  con le 5 aree e il voto, poi "Your path". Dai 1100px colonna fissa a
+  con le 5 aree e il voto, poi "Your path" con i passi del report (presi
+  dalle righe della pagina; `goToStep` apre la riga come un tocco; la barra
+  del telefono mostra il nome del passo), su computer e telefono. Dai 1100px colonna fissa a
   sinistra (testo del corpo in colonna di 640px): non c'è in alto, così il
   titolo resta grande e libero (Antonio: la colonna da subito "ha rovinato
   il titolo"); entra (dissolvenza e 8px da sinistra) appena il riassunto

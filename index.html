@@ -2641,11 +2641,22 @@ function scrollUnderBars(el) {
 }
 var REPORT_PARTS = [
   { q: 'Does my film stand up?', sel: ['#accordionMenu .r-areas-h', '#accordionMenu .accordion-wrap'], areas: true },
-  { q: 'Your path', sel: ['#accordionMenu .r-path'] }
+  { q: 'Your path', sel: ['#accordionMenu .r-path'], steps: true }
 ];
 function partEl(host, p) {
   for (var i = 0; i < p.sel.length; i++) { var el = host.querySelector(p.sel[i]); if (el) return el; }
   return null;
+}
+/* A step of "Your path" from the index: it opens like a tap on its row. */
+function goToStep(j) {
+  var d = document.querySelectorAll('#accordionMenu .r-path details.path-step')[j];
+  if (!d) return;
+  var sum = d.querySelector('summary'), before = sum.getBoundingClientRect().top;
+  if (!d.open) {
+    Array.prototype.forEach.call(d.parentNode.children, function(x) { if (x !== d && x.matches('details.rblock[open]')) x.open = false; });
+    d.open = true;
+  }
+  settleOpened(sum, before, true);
 }
 function goToPart(k) {
   closeReportNav();
@@ -2686,6 +2697,18 @@ function mountReportNav(sections) {
       });
       col += '</div>';
     }
+    if (p.steps) {
+      // The report's own steps, from the rows on the page.
+      var rows = el.querySelectorAll('details.path-step');
+      if (rows.length) {
+        col += '<div class="an-areas an-steps">';
+        Array.prototype.forEach.call(rows, function(row, j) {
+          var t = row.querySelector('.rblock-label');
+          col += '<button type="button" class="an-item an-step" data-j="'+j+'" onclick="closeReportNav();goToStep('+j+')"><span class="an-label">'+esc(t ? t.textContent : '')+'</span></button>';
+        });
+        col += '</div>';
+      }
+    }
   });
   nav.innerHTML = '<div class="an-col">'+col+'</div>'+
     '<div class="an-bar"><span class="an-cur" id="areaNavCur"></span><button type="button" class="an-top" aria-expanded="false" onclick="toggleReportNav()">Sections<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
@@ -2695,21 +2718,25 @@ function mountReportNav(sections) {
   if (!('IntersectionObserver' in window)) return;
   var areaEls = Array.prototype.slice.call(host.querySelectorAll('#accordionMenu .accordion-item'));
   var cur = document.getElementById('areaNavCur');
-  var show = function(k, i) {
+  var stepEls = Array.prototype.slice.call(host.querySelectorAll('#accordionMenu .r-path details.path-step'));
+  var show = function(k, i, j) {
     nav.querySelectorAll('.an-sec').forEach(function(b) { b.classList.toggle('on', Number(b.getAttribute('data-k')) === k); });
-    nav.querySelectorAll('.an-item').forEach(function(b) { b.classList.toggle('on', i != null && Number(b.getAttribute('data-i')) === i); });
+    nav.querySelectorAll('.an-item:not(.an-step)').forEach(function(b) { b.classList.toggle('on', i != null && Number(b.getAttribute('data-i')) === i); });
+    nav.querySelectorAll('.an-step').forEach(function(b) { b.classList.toggle('on', j != null && Number(b.getAttribute('data-j')) === j); });
     if (!cur) return;
     if (i != null && sections[i]) cur.innerHTML = esc(sections[i].label)+(sections[i].score != null ? '<span class="an-score">'+Number(sections[i].score).toFixed(1)+'/10</span>' : '');
+    else if (j != null && stepEls[j]) cur.textContent = (stepEls[j].querySelector('.rblock-label') || {}).textContent || REPORT_PARTS[k].q;
     else cur.textContent = REPORT_PARTS[k].q;
   };
   // The current section is read from where things are on screen (the last
   // part and area whose top has passed 35% of the height), on every scroll:
   // a jump (a row closing above, a tap in the index) must not leave it stale.
   var sync = function() {
-    var line = window.innerHeight * 0.35, k = parts.length ? parts[0].k : 0, i = null;
+    var line = window.innerHeight * 0.35, k = parts.length ? parts[0].k : 0, i = null, j = null;
     parts.forEach(function(x) { if (x.el.getBoundingClientRect().top < line) k = x.k; });
     if (REPORT_PARTS[k] && REPORT_PARTS[k].areas) areaEls.forEach(function(el, n) { if (el.getBoundingClientRect().top < line) i = n; });
-    show(k, i);
+    if (REPORT_PARTS[k] && REPORT_PARTS[k].steps) stepEls.forEach(function(el, n) { if (el.getBoundingClientRect().top < line) j = n; });
+    show(k, i, j);
   };
   var queued = false;
   if (navScrollSync) window.removeEventListener('scroll', navScrollSync);
