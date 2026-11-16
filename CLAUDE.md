@@ -189,6 +189,10 @@ sui festival.
   Solo nel PDF: piano a fasi, rischio/opportunità, marketing, budget,
   legale, piano a 90 giorni. Antonio: "una scaletta già presentata da noi,
   non mille bottoni e mille link".
+- **"For later"**: per un film non ancora girato (fase prima di
+  "Shooting"), le aree Festival e Distribuzione si aprono con "For later:
+  your film is not shot yet, so this is the plan for when it is finished."
+  (`laterNote`), nel report e nell'anteprima.
 - **Anteprima**: titolo, voto, riassunto, 5 aree, rischio, opportunità,
   prossimo passo, richiesta del report completo.
 - **Indice** (`mountReportNav`, `REPORT_PARTS`): "Does my film stand up?"
@@ -265,7 +269,12 @@ sui festival.
   "by", "entro". Anche laboratori e mercati: passata "Closed (...)",
   assente "Not published on the source, check before planning"; finiscono
   nel calendario. Aggregatori (`AGGREGATORS`): il nome resta, scadenze,
-  cifre e citazioni no.
+  cifre e citazioni no; un fondo trovato solo su un aggregatore viene tolto
+  e con lui le righe di "Before you can apply" che lo nominano
+  (`dropStepsForGoneFunds`, che toglie anche quelle dei fondi scartati da
+  altri controlli). xhbt.org (da dove arrivò un fondo di Milano proposto a
+  un progetto del Kansas) blocca i programmi: non verificato se è un
+  aggregatore, non è in lista.
 - `verifiedFacts.js`, fatti controllati a mano (ricontrollare se cambia la
   legge): tax credit italiano 30% per produttori indipendenti, tetto 4 mln
   (D.I. MiC-MEF 6/7/2026 n. 281); bando MiC selettivi 2026 (d.d. 15/5/2026
@@ -276,8 +285,17 @@ sui festival.
 - **Scrittura** (`STYLE`, anche nell'anteprima; `LENGTH` nel `PREAMBLE`):
   un'idea per frase, ~20 parole, "you", termini spiegati, mai "I"/"we";
   ogni area 3-4 frasi, problemi e punti di forza 1-3, consigli 2-3, ogni
-  punto in una sola area. `stageRules`, rubrica `SCORING` (voto = media
-  delle 5 aree), niente previsioni di incasso né prezzi E&O. Ogni voce:
+  punto in una sola area. `stageRules`; rubrica `SCORING` (in tutte le
+  chiamate, anche dell'anteprima): il voto giudica il progetto, mai la fase
+  (copione non scritto, soldi non trovati, film non girato non abbassano il
+  voto), con esempi area per area e tutta la scala; negli esempi JSON dei
+  prompt nessun numero (un "6" lì faceva finire tutto tra 4,5 e 6).
+  `_util/scores.js`: voti in numeri 1-10 (`normalizeScores`) e voto finale =
+  media delle 5 aree (`overallFromAreas`). Misurato il 16 novembre 2026 su 6
+  progetti diversi (2 giri ciascuno): prima 3,6-5,6, dopo 2,0-6,5, stabile
+  entro 0,2. Nessun confronto con altri report ("più alto del 28% di 18
+  progetti": erano quasi tutte prove, tolto). Niente previsioni di incasso
+  né prezzi E&O. Ogni voce:
   "Source: dominio · checked data".
 - **Qualità** (11 novembre 2026, 3 report della preview: corto italiano,
   lungometraggio francese, lungometraggio USA): 57 voci con fonte, 46
