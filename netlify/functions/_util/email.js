@@ -339,7 +339,6 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
       '</tr></table>' +
     '</td></tr>' +
     '<tr><td style="padding:26px 32px 6px">' +
-    (r.score_benchmark ? '<p style="margin:0 0 14px;font-size:12.5px;color:#5c5852;line-height:1.55">' + esc(r.score_benchmark) + '</p>' : '') +
     '<p style="margin:0;font-size:15px;line-height:1.7;color:#161616">' + esc(r.executive_summary || r.overall_summary || '') + '</p>' +
     (r.biggest_risk ? '<p style="margin:18px 0 0;font-size:14px;line-height:1.6;color:#161616"><b>Biggest risk.</b> ' + esc(r.biggest_risk) + '</p>' : '') +
     (r.biggest_opportunity ? '<p style="margin:10px 0 0;font-size:14px;line-height:1.6;color:#161616"><b>Biggest opportunity.</b> ' + esc(r.biggest_opportunity) + '</p>' : '') +
