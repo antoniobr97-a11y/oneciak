@@ -8,7 +8,7 @@ function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
 }
 
-// Same read-modify-write pattern as benchmarkStats.js: one small JSON blob
+// One small JSON blob
 // per email, keyed by the normalized address, holding just enough to link
 // back to each report — never the report content itself.
 //

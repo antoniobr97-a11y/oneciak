@@ -1,3 +1,4 @@
+const { normalizeScores, overallFromAreas } = require('./_util/scores');
 const { connectLambda } = require('@netlify/blobs');
 const { checkRateLimit } = require('./_util/rateLimit');
 const { callClaude, extractJSON } = require('./_util/anthropic');
@@ -11,13 +12,6 @@ const ALLOWED_ORIGIN = process.env.SITE_URL || 'https://oneciak.com';
 const FREE_MODEL = 'claude-haiku-5-5';
 const FREE_MAX_TOKENS = 8000; // room for thinking plus the JSON; low effort keeps the preview fast
 const FREE_EFFORT = 'low';
-
-function overallFromAreas(r) {
-  const vals = ['creative_score', 'financial_score', 'market_score', 'festival_score', 'distribution_score']
-    .map(k => Number(r[k])).filter(v => isFinite(v) && v >= 1 && v <= 10);
-  if (!vals.length) return null;
-  return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 10) / 10;
-}
 
 exports.handler = async (event) => {
   const headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Vary': 'Origin' };
@@ -71,6 +65,7 @@ exports.handler = async (event) => {
     // the director's features) is not shown (eligibility.js).
     const country = countryOf(project.country);
     if (merged.one_festival && [merged.one_festival.rule_quote, merged.one_festival.why].some(t => (country && excludes(t, country)) || excludesWork(t, project))) merged.one_festival = null;
+    normalizeScores(merged);
     merged.overall_score = overallFromAreas(merged);
     console.log('analyze: searches', results[0].searches, 'comp', !!merged.one_comp, 'festival', !!merged.one_festival);
     await incrementUsageCount();

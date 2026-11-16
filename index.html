@@ -236,7 +236,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 .l-btn:focus-visible { outline: 2px solid var(--on-night); outline-offset: 3px; }
 .l-specs { margin-top: 16px; font-size: 14px; color: var(--on-night-2); }
-.sample-banner { background: var(--night); color: var(--on-night); text-align: left; font-size: 12.5px; line-height: 1.4; font-weight: 400; padding: 7px 20px; }
+.sample-banner { background: var(--night); color: var(--on-night); text-align: left; font-size: 13px; line-height: 1.4; font-weight: 400; padding: 7px 20px; }
 .sample-banner a { color: inherit; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
 
 /* Sample-report excerpt: smoked glass on the night, same surface as the
@@ -429,12 +429,12 @@ input[type="range"] { outline: none; }
 input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: 4px; }
 .budget-row.disabled select, .budget-amount.disabled { opacity: 0.4; }
 .btn-primary { width: 100%; padding: 16px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--sf); font-size: 16px; font-weight: 500; cursor: pointer; letter-spacing: -0.01em; }
-.btn-secondary { width: 100%; padding: 14px; background: transparent; color: var(--accent); border: none; border-radius: 10px; font-family: var(--sf); font-size: 14.5px; font-weight: 500; cursor: pointer; transition: opacity 0.2s; margin-top: 10px; letter-spacing: -0.01em; }
+.btn-secondary { width: 100%; padding: 14px; background: transparent; color: var(--accent); border: none; border-radius: 10px; font-family: var(--sf); font-size: 14px; font-weight: 500; cursor: pointer; transition: opacity 0.2s; margin-top: 10px; letter-spacing: -0.01em; }
 .btn-secondary:hover { opacity: 0.7; }
 .btn-unlock { width: 100%; padding: 16px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--sf); font-size: 16px; font-weight: 500; cursor: pointer; letter-spacing: -0.01em; }
 .error-box { background: var(--danger-wash); border: none; border-radius: var(--radius); padding: 14px 16px; font-size: 13.5px; color: var(--danger); margin-top: 12px; display: none; }
 .disclaimer-box { background: var(--cream); border: none; border-radius: var(--radius); padding: 15px 17px; margin-bottom: 16px; }
-.disclaimer-text { font-size: 12.5px; color: var(--muted); line-height: 1.7; }
+.disclaimer-text { font-size: 13px; color: var(--muted); line-height: 1.7; }
 .disclaimer-text strong { color: var(--text); font-weight: 600; }
 
 /* Closed box at the end of a real report: "Found an outdated link or a mistake?" */
@@ -596,7 +596,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .accordion-sublabel { font-size: 12.5px; color: var(--muted); font-weight: 400; margin-top: 2px; }
 .accordion-score-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
 .accordion-score { font-family: var(--sf); font-size: 19px; font-weight: 700; }
-.accordion-score .denom { font-size: 12px; color: var(--muted); font-weight: 500; }
+.accordion-score .denom { font-size: 13px; color: var(--muted); font-weight: 500; }
 .accordion-score-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
 .accordion-chevron { display: inline-flex; color: var(--muted-light); flex-shrink: 0; transition: transform 0.2s var(--ease); }
 .accordion-trigger.open .accordion-chevron { transform: rotate(180deg); }
@@ -618,7 +618,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 @media (hover: hover) and (pointer: fine) { .pdf-row button:hover { background: var(--accent-hover); } }
 .pdf-row button:active { transform: scale(0.97); }
 .success-msg { background: var(--success-wash); border: none; border-radius: var(--radius); padding: 12px 16px; font-size: 13.5px; color: var(--success); margin-top: 11px; display: none; text-align: center; }
-.footer-note { text-align: center; font-size: 12px; color: var(--muted-light); padding-top: 24px; line-height: 1.7; font-weight: 400; }
+.footer-note { text-align: center; font-size: 13px; color: var(--muted-light); padding-top: 24px; line-height: 1.7; font-weight: 400; }
 
 /* ══════════════════════
    RESULTS / LOADING
@@ -642,14 +642,20 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 }
 #sec-results .r-hero-inner, #sec-myreports .r-hero-inner { position: relative; z-index: 1; }
 .r-title { font-family: var(--display); font-size: clamp(40px, 6vw, 72px); font-weight: 700; letter-spacing: -0.035em; line-height: 1; color: var(--on-night); margin-bottom: 20px; }
-.r-summary { font-size: 17px; line-height: 1.55; color: var(--on-night-2); max-width: 60ch; }
+.r-summary { font-size: 18px; line-height: 1.55; color: var(--on-night-2); max-width: 60ch; }
+/* The film's name set like a poster (Antonio, 12 Nov 2026: "come A24"):
+   as wide as the column, sized by fitTitle(); its credits and logline
+   under it, the way a one-sheet bills a film. */
+#sec-results .r-title { font-size: clamp(48px, 12vw, 168px); letter-spacing: -0.055em; line-height: 0.88; margin: 0 0 22px; text-wrap: balance; }
+.r-credits { font-size: 15px; line-height: 1.5; color: var(--on-night-2); margin: 0; }
+.r-logline { font-size: 18px; line-height: 1.45; color: var(--on-night); max-width: 46ch; margin: 14px 0 0; }
 #overallScore { margin-top: 36px; }
 .overall-card {
   background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.07) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.08) !important; border-radius: 16px; padding: 24px 26px; margin-bottom: 0;
   -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
 }
-.overall-sublabel { font-size: 17px; font-weight: 500; color: var(--on-night); }
+.overall-sublabel { font-size: 15px; font-weight: 500; color: var(--on-night); }
 .overall-num { font-family: var(--display); font-size: 64px; font-weight: 300; letter-spacing: -0.04em; color: var(--on-night) !important; }
 .overall-num .denom { font-family: var(--display); font-size: 22px; font-weight: 300; color: var(--on-night-2); }
 #overallScore > div:last-child:not(.overall-card) { color: var(--on-night-2) !important; font-weight: 400 !important; padding: 0 !important; margin-top: 14px !important; font-size: 13px !important; }
@@ -674,7 +680,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .accordion-trigger { padding: 20px 4px; border-radius: 0; }
 .accordion-trigger.open { background: transparent; }
 @media (hover: hover) and (pointer: fine) { .accordion-trigger:hover { background: transparent; } .accordion-trigger:hover .accordion-label { color: #000; } }
-.accordion-label { font-family: var(--display); font-size: 21px; font-weight: 500; letter-spacing: -0.015em; }
+.accordion-label { font-family: var(--display); font-size: 18px; font-weight: 500; letter-spacing: -0.015em; }
 .accordion-score { font-family: var(--display); font-size: 24px; font-weight: 400; letter-spacing: -0.02em; }
 .accordion-score-label { font-family: var(--sf); font-size: 13px; font-weight: 400; letter-spacing: 0; text-transform: none; }
 .acc-bar { flex: 0 1 180px; height: 4px; margin: 0 6px; background: var(--border); border-radius: 2px; overflow: hidden; }
@@ -683,7 +689,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 @media (max-width: 640px) { .acc-bar { flex-basis: 56px; margin: 0 2px; } #accordionMenu .accordion-score-wrap { min-width: 62px; } }
 .pdf-card { border-top: 1px solid var(--border) !important; padding-top: 24px; margin-top: 36px; }
 .pdf-row button { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; white-space: normal; padding: 14px 16px; background: var(--field); color: var(--text); font-weight: 500; }
-.pdf-row button small { font-size: 12.5px; font-weight: 400; color: var(--muted); }
+.pdf-row button small { font-size: 13px; font-weight: 400; color: var(--muted); }
 @media (hover: hover) and (pointer: fine) { .pdf-row button:hover { background: var(--field-hover); } }
 .pdf-note { margin-top: 12px; font-size: 13px; color: var(--muted); line-height: 1.5; }
 .pdf-card + .btn-secondary { width: auto; padding: 14px 0; text-align: left; display: block; }
@@ -753,7 +759,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .prose p:last-child { margin-bottom: 0; }
 .fs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); }
 .fs-col ul { list-style: none; margin: 0; padding: 0; }
-.fs-col li { font-size: 14.5px; line-height: 1.55; color: var(--text); padding: 2px 0 2px 14px; margin-bottom: 12px; }
+.fs-col li { font-size: 15px; line-height: 1.55; color: var(--text); padding: 2px 0 2px 14px; margin-bottom: 12px; }
 .fs-col.red li { border-left: 1px solid rgba(177,50,37,0.75); }
 .fs-col.green li { border-left: 1px solid rgba(15,122,61,0.75); }
 .fs-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
@@ -783,12 +789,12 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .rblock summary { list-style: none; display: flex; align-items: baseline; gap: 10px; padding: 16px 2px; cursor: pointer; transition: transform 0.15s ease-out; }
 .rblock summary::-webkit-details-marker { display: none; }
 .rblock summary:active { transform: scale(0.99); }
-.rblock-label { font-family: var(--display); font-size: 17px; font-weight: 500; letter-spacing: -0.01em; color: var(--text); }
+.rblock-label { font-family: var(--display); font-size: 18px; font-weight: 500; letter-spacing: -0.01em; color: var(--text); }
 .rblock-count { font-family: var(--mono); font-size: 11px; color: var(--muted); }
 .rblock-icon { margin-left: auto; display: inline-flex; flex-shrink: 0; align-self: center; color: var(--muted); transition: transform 0.2s var(--ease); }
 .rblock[open] .rblock-icon { transform: rotate(180deg); }
 /* Section headings and the path, after the five areas. */
-.entry-note { font-size: 14.5px; line-height: 1.5; color: var(--muted); margin: 0 0 6px; }
+.entry-note { font-size: 14px; line-height: 1.5; color: var(--muted); margin: 0 0 6px; }
 .r-plan-h { font-family: var(--display); font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); margin: 0 0 14px; }
 .path-step .ready-block { margin-top: 0; padding-top: 0; border-top: 0; }
 .r-areas-h { margin-top: 44px; }
@@ -797,7 +803,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .rblock summary { flex-wrap: wrap; }
 .path-step summary { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: baseline; column-gap: 10px; }
 .path-step .rblock-icon { align-self: start; margin-top: 5px; }
-.path-n { font-family: var(--display); font-size: 17px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+.path-n { font-family: var(--display); font-size: 18px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
 .path-main { display: block; min-width: 0; }
 .path-main .rblock-label { display: block; }
 .path-line { display: block; margin-top: 3px; font-size: 15px; line-height: 1.45; color: var(--text); }
@@ -813,19 +819,19 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .entry { padding: 16px 0; border-top: 1px solid var(--border-light); max-width: 72ch; }
 .entry:first-child { border-top: 0; padding-top: 4px; }
 .entry-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-.entry-name { font-size: 15.5px; font-weight: 700; line-height: 1.35; color: var(--text); }
-.entry-chip { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.entry-name { font-size: 15px; font-weight: 700; line-height: 1.35; color: var(--text); }
+.entry-chip { font-size: 13px; color: var(--muted); white-space: nowrap; }
 .entry-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px 24px; margin-top: 10px; }
 .fact { display: flex; flex-direction: column; gap: 3px; }
 .fact-k { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .fact-v { font-size: 15px; font-weight: 700; color: var(--success); line-height: 1.4; }
 .fact-v.is-muted { color: var(--text); font-weight: 400; }
-.entry-text { margin-top: 10px; font-size: 14.5px; line-height: 1.6; color: var(--muted); }
-.entry-lesson { margin-top: 10px; font-size: 14.5px; line-height: 1.6; color: var(--text); padding-left: 12px; border-left: 1px solid #b4552b; }
+.entry-text { margin-top: 10px; font-size: 15px; line-height: 1.6; color: var(--muted); }
+.entry-lesson { margin-top: 10px; font-size: 15px; line-height: 1.6; color: var(--text); padding-left: 12px; border-left: 1px solid #b4552b; }
 .entry-sub { margin-top: 4px; font-size: 13px; line-height: 1.5; color: var(--muted); }
 .entry-quote { margin: 12px 0 0; }
 .entry-quote blockquote { margin-top: 4px; font-size: 15px; line-height: 1.55; font-style: italic; color: var(--text); }
-.the-ask { margin: 24px 0 8px; display: flex; flex-direction: column; gap: 6px; font-size: 17px; font-weight: 700; line-height: 1.45; color: var(--text); max-width: 62ch; }
+.the-ask { margin: 24px 0 8px; display: flex; flex-direction: column; gap: 6px; font-size: 18px; font-weight: 700; line-height: 1.45; color: var(--text); max-width: 62ch; }
 .entry .src-line { margin-top: 10px; }
 
 .sub-k { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
@@ -837,8 +843,8 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #upgradeSection + .guide-box { margin-top: 32px; }
 .r-road:active { transform: scale(0.99); }
 .r-road-k { font-size: 14px; color: var(--muted); }
-.r-road-t { font-size: 16px; font-weight: 700; }
-.r-road-d { grid-column: 2; font-size: 14.5px; line-height: 1.5; color: var(--muted); text-decoration: underline; text-decoration-color: rgba(22,22,22,0.3); text-underline-offset: 3px; }
+.r-road-t { font-size: 15px; font-weight: 700; }
+.r-road-d { grid-column: 2; font-size: 14px; line-height: 1.5; color: var(--muted); text-decoration: underline; text-decoration-color: rgba(22,22,22,0.3); text-underline-offset: 3px; }
 @media (hover: hover) and (pointer: fine) { .r-road:hover .r-road-d { color: var(--text); text-decoration-color: currentColor; } }
 
 /* REPORT INDEX: the three questions the report answers plus the plan, with the
@@ -850,19 +856,23 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .area-nav.is-on { opacity: 1; pointer-events: auto; }
 .an-sec, .an-item, .an-top { border: 0; background: none; font: inherit; color: inherit; cursor: pointer; text-align: left; }
 .an-sec:active, .an-item:active, .an-top:active { transform: scale(0.97); }
-.an-sec { display: block; width: 100%; padding: 9px 0; font-size: 14.5px; font-weight: 700; color: var(--muted); transition: color 0.2s; }
+.an-sec { display: block; width: 100%; padding: 9px 0; font-size: 14px; font-weight: 700; color: var(--muted); transition: color 0.3s var(--ease); }
 .an-sec.on { color: var(--text); }
 .an-areas { margin: 0 0 6px; border-left: 1px solid var(--border); }
-.an-item { position: relative; display: flex; align-items: baseline; width: 100%; padding: 6px 0 6px 12px; font-size: 14px; color: var(--muted); transition: color 0.2s; }
-.an-item.on { color: var(--text); }
+/* Same motion as the form's step list: the current area slides in and
+   lights up, 0.3s on the shared curve. */
+.an-item { position: relative; display: flex; align-items: baseline; width: 100%; padding: 6px 0 6px 12px; font-size: 14px; color: var(--muted); transition: color 0.3s var(--ease), padding-left 0.3s var(--ease); }
+.an-item.on { color: var(--text); padding-left: 20px; }
 /* The marker is a real 2px line, not a box-shadow: Safari drew the shadow as
    lines across the whole row. */
-.an-item.on::before { content: ''; position: absolute; left: -1px; top: 5px; bottom: 5px; width: 2px; border-radius: 1px; background: #b4552b; }
-.an-score { font-size: 12.5px; color: var(--muted); margin-left: auto; padding-left: 10px; font-variant-numeric: tabular-nums; }
+.an-item::before { content: ''; position: absolute; left: -1px; top: 5px; bottom: 5px; width: 2px; border-radius: 1px; background: #b4552b; opacity: 0; transition: opacity 0.3s var(--ease); }
+.an-item.on::before { opacity: 1; }
+.an-score { font-size: 13px; color: var(--muted); margin-left: auto; padding-left: 10px; font-variant-numeric: tabular-nums; }
 .an-col { display: none; }
 @media (min-width: 1100px) {
   #sec-results .r-main { padding-left: 264px; }
-  .area-nav { top: 112px; left: max(24px, calc(50% - 440px)); width: 200px; }
+  .area-nav { top: 112px; left: max(24px, calc(50% - 440px)); width: 200px; transform: translateX(-8px); }
+  .area-nav.is-on { transform: none; }
   .an-col { display: block; }
   .an-bar { display: none; }
   @media (hover: hover) and (pointer: fine) { .an-sec:hover, .an-item:hover { color: var(--text); } }
@@ -870,14 +880,17 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 @media (max-width: 1099px) {
   .area-nav { top: 64px; left: 0; right: 0; transform: translateY(-6px); background: rgba(244,241,236,0.94); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); overflow: hidden; } /* hidden: its content never widens the page */
   .area-nav.is-on { transform: none; }
-  .area-nav.is-open { overflow: visible; }
   .an-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 928px; margin: 0 auto; padding: 10px 24px; font-size: 14px; color: var(--text); }
   .an-cur { display: flex; align-items: baseline; min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .an-cur .an-score { margin-left: 10px; padding-left: 0; }
   .an-top { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; font-size: 14px; font-weight: 700; color: #b4552b; padding: 6px 0 6px 8px; }
   .an-top svg { transition: transform 0.2s var(--ease); }
   .area-nav.is-open .an-top svg { transform: rotate(180deg); }
-  .area-nav.is-open .an-col { display: block; position: absolute; top: 100%; left: 0; right: 0; max-height: 70vh; overflow-y: auto; padding: 6px 24px 14px; background: var(--paper); border-bottom: 1px solid var(--border); animation: openIn 0.22s var(--ease) both; }
+  /* The list opens inside the bar, which grows: nothing hangs outside the
+     blurred bar, where iPhone Safari may not deliver taps to it. */
+  .area-nav { display: flex; flex-direction: column; }
+  .an-bar { order: -1; width: 100%; box-sizing: border-box; }
+  .area-nav.is-open .an-col { display: block; max-height: 70vh; overflow-y: auto; padding: 6px 24px 14px; background: var(--paper); border-top: 1px solid var(--border); animation: openIn 0.22s var(--ease) both; }
 }
 @media (max-width: 600px) { .an-bar { padding: 10px 20px; } .area-nav.is-open .an-col { padding-left: 20px; padding-right: 20px; } }
 /* Very narrow screens (Safari text zoom, ~260px): long words and labels wrap instead of widening the page. */
@@ -921,7 +934,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   #sec-results .r-main, #sec-myreports .r-main { padding-left: 20px; padding-right: 20px; }
   .overall-card { padding: 20px; }
   .overall-num { font-size: 52px; }
-  .accordion-label { font-size: 18px; }
 }
 
 /* ══════════════════════
@@ -990,7 +1002,7 @@ details.more > summary:active { transform: scale(0.98); }
   body.rh-hidden .area-nav { top: 0; }
   #resultSubtitle { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
   #resultSubtitle.is-open { display: block; }
-  .r-more { margin-top: 6px; padding: 6px 0; border: 0; background: none; font: inherit; font-size: 14.5px; color: var(--on-night); text-decoration: underline; text-decoration-color: rgba(242,237,230,0.4); text-underline-offset: 3px; cursor: pointer; }
+  .r-more { margin-top: 6px; padding: 6px 0; border: 0; background: none; font: inherit; font-size: 14px; color: var(--on-night); text-decoration: underline; text-decoration-color: rgba(242,237,230,0.4); text-underline-offset: 3px; cursor: pointer; }
   .r-more:active { transform: scale(0.98); }
 
 .accordion-score-label { display: none; }
@@ -1492,7 +1504,9 @@ details.more > summary:active { transform: scale(0.98); }
   </div>
   <div class="r-hero">
     <div class="r-hero-inner reveal">
-      <div class="r-title" id="resultTitle"></div>
+      <h1 class="r-title" id="resultTitle"></h1>
+      <p class="r-credits" id="resultCredits" hidden></p>
+      <p class="r-logline" id="resultLogline" hidden></p>
       <div id="overallScore"></div>
       <div class="r-summary" id="resultSubtitle"></div>
     </div>
@@ -1747,9 +1761,7 @@ function onStartClick() {
 
 /* ── BUDGET SLIDER ──
    Fixed, log-spaced "clean number" stops instead of a free-form number —
-   keeps the display always readable (never "€347,283"), and keeps the
-   comparative-benchmark cohorts meaningful (every user picks from the same
-   small set of values, so "similar budget" matches are still possible). */
+   keeps the display always readable (never "€347,283"). */
 var BUDGET_STOPS = ['1K','2K','5K','10K','15K','20K','30K','50K','75K','100K','150K','200K','300K','500K','750K','1M','1.5M','2M','3M','5M','7.5M','10M','15M','20M+'];
 var CURRENCY_FORMAT = {
   EUR: { symbol: '€', suffix: false }, USD: { symbol: '$', suffix: false }, GBP: { symbol: '£', suffix: false },
@@ -2219,7 +2231,7 @@ function scoreColor(s) { return s >= 7 ? 'high' : s >= 5 ? 'mid' : 'low'; }
 function renderFree(r, title) {
   isFullReport = false;
   setPdfLabels();
-  document.getElementById('resultTitle').textContent = '\u201C'+title+'\u201D';
+  setHeroTitle(title, lastProject);
   setHeroSummary(r.overall_summary||'');
 
   // Overall score
@@ -2259,6 +2271,7 @@ function renderFree(r, title) {
   freeSections.forEach(function(sec, idx) {
     // Body content
     var body = '<div class="accordion-divider"></div>';
+    body += laterNote(['', 'creative', 'financial', 'market', 'festival', 'distribution'][Number(sec.num)], lastProject);
     body += paras(sec.detail);
     if (sec.tip) body += '<div class="tips-block"><span class="tips-label">What to do</span><ol class="tips-list"><li><div class="tip-text">'+esc(sec.tip)+'</div></li></ol></div>';
     if (sec.extra) body += sec.extra;
@@ -2388,7 +2401,7 @@ window.addEventListener('resize', closeGloss);
 function renderFull(r, title) {
   isFullReport = true;
   setPdfLabels();
-  document.getElementById('resultTitle').textContent = '\u201C'+title+'\u201D';
+  setHeroTitle(title, lastProject);
   // One summary on screen; the PDF keeps both.
   setHeroSummary(r.executive_summary || r.overall_summary || '');
 
@@ -2407,8 +2420,7 @@ function renderFull(r, title) {
     '<div><div class="overall-sublabel">'+esc(r.overall_label)+'</div></div>'+
     '<div style="text-align:right">'+
     '<div class="overall-num score-'+col+'">'+Number(r.overall_score||5).toFixed(1)+'<span class="denom">/10</span></div>'+
-    '</div></div>'+
-    (r.score_benchmark ? '<div style="font-size:12.5px;color:var(--muted);line-height:1.5;font-weight:300;margin-top:10px;padding:0 4px">'+esc(r.score_benchmark)+'</div>' : '');
+    '</div></div>';
 
   /* The report in the order of the three questions it answers
      (Antonio: "troppe cose, tutte disordinate"): what to do now, who to
@@ -2419,7 +2431,7 @@ function renderFull(r, title) {
 
   // The film, area by area: verdict, what to do, red flags and strengths.
   // Comparable films stay inside the market area.
-  function areaBody(k, extra) { return buildAccordionBody(r[k+'_score'], r[k+'_verdict'], r[k+'_detail'], r[k+'_flags'], r[k+'_strengths'], r[k+'_tips'], extra || ''); }
+  function areaBody(k, extra) { return laterNote(k, lastProject) + buildAccordionBody(r[k+'_score'], r[k+'_verdict'], r[k+'_detail'], r[k+'_flags'], r[k+'_strengths'], r[k+'_tips'], extra || ''); }
   var sections = [
     { label:'Creative package', score: r.creative_score, verdict: r.creative_verdict, body: areaBody('creative') },
     { label:'Financial plan', score: r.financial_score, verdict: r.financial_verdict, body: areaBody('financial') },
@@ -2549,9 +2561,40 @@ function toggleAccordion(idx) {
   }
   body.classList.toggle('open', !isOpen);
   trigger.classList.toggle('open', !isOpen);
-  var shift = trigger.getBoundingClientRect().top - before;
-  if (Math.abs(shift) > 1) window.scrollTo({ top: window.scrollY + shift, behavior: 'instant' });
+  settleOpened(trigger, before, !isOpen);
 }
+/* After an area or a path row opens or closes: the tapped title first stays
+   exactly where it was while the rows above close (no jump), then, if it
+   opened, the page glides until it sits just under the bars. */
+function jumpBy(dy) {
+  // Without the page's smooth scrolling, and without behavior:'instant',
+  // which older Safari does not know.
+  var html = document.documentElement, prev = html.style.scrollBehavior;
+  html.style.scrollBehavior = 'auto';
+  window.scrollTo(0, window.scrollY + dy);
+  html.style.scrollBehavior = prev;
+}
+function settleOpened(head, before, opened) {
+  var shift = head.getBoundingClientRect().top - before;
+  if (Math.abs(shift) > 1) jumpBy(shift);
+  if (opened) scrollUnderBars(head);
+}
+/* Path rows and the blocks inside an area open one at a time, like the areas.
+   The browser opens the row itself (no preventDefault: iPhone Safari is the
+   judge of a tap on a <summary>); the tap only notes where the title was,
+   and once the row has opened the others close and the page settles. */
+var rowTap = null;
+document.addEventListener('click', function(e) {
+  var sum = e.target.closest && e.target.closest('#accordionMenu details.rblock > summary');
+  rowTap = sum ? { d: sum.parentNode, top: sum.getBoundingClientRect().top } : null;
+}, true);
+document.addEventListener('toggle', function(e) {
+  var d = e.target;
+  if (!rowTap || rowTap.d !== d) return;
+  var tap = rowTap; rowTap = null;
+  if (d.open) Array.prototype.forEach.call(d.parentNode.children, function(x) { if (x !== d && x.matches('details.rblock[open]')) x.open = false; });
+  settleOpened(d.querySelector('summary'), tap.top, d.open);
+}, true);
 
 /* AREA NAVIGATION: an index of all areas that follows the scroll: a column
    in the left margin on wide screens, a slim bar under the header on phones. */
@@ -2579,24 +2622,44 @@ function goToArea(i) {
   var trigger = document.getElementById('acc-trigger-'+i);
   if (!trigger) return;
   if (body && !body.classList.contains('open')) toggleAccordion(i);
-  // On phones the header hides while scrolling down, leaving only the area bar.
-  var y = trigger.getBoundingClientRect().top + window.scrollY - (window.innerWidth < 1100 ? 112 : 76);
-  window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+  scrollUnderBars(trigger);
+}
+/* Scrolls so `el` lands just under what covers the top of the screen. On
+   phones that depends on the direction: going down the header slides away
+   and only the area bar stays; going up the header comes back above it. */
+function scrollUnderBars(el) {
+  var target = el.getBoundingClientRect().top + window.scrollY;
+  var cover = 64;
+  if (window.innerWidth < 1100) {
+    var bar = document.querySelector('#areaNav .an-bar');
+    cover = (target > window.scrollY ? 0 : 64) + (bar ? bar.offsetHeight : 48);
+  }
+  var to = Math.max(0, target - cover - 12);
+  if (Math.abs(to - window.scrollY) > 4) window.scrollTo({ top: to, behavior: 'smooth' });
 }
 var REPORT_PARTS = [
   { q: 'Does my film stand up?', sel: ['#accordionMenu .r-areas-h', '#accordionMenu .accordion-wrap'], areas: true },
-  { q: 'Your path', sel: ['#accordionMenu .r-path'] }
+  { q: 'Your path', sel: ['#accordionMenu .r-path'], steps: true }
 ];
 function partEl(host, p) {
   for (var i = 0; i < p.sel.length; i++) { var el = host.querySelector(p.sel[i]); if (el) return el; }
   return null;
 }
+/* A step of "Your path" from the index: it opens like a tap on its row. */
+function goToStep(j) {
+  var d = document.querySelectorAll('#accordionMenu .r-path details.path-step')[j];
+  if (!d) return;
+  var sum = d.querySelector('summary'), before = sum.getBoundingClientRect().top;
+  if (!d.open) {
+    Array.prototype.forEach.call(d.parentNode.children, function(x) { if (x !== d && x.matches('details.rblock[open]')) x.open = false; });
+    d.open = true;
+  }
+  settleOpened(sum, before, true);
+}
 function goToPart(k) {
   closeReportNav();
   var el = partEl(document.getElementById('sec-results'), REPORT_PARTS[k]);
-  if (!el) return;
-  var y = el.getBoundingClientRect().top + window.scrollY - (window.innerWidth < 1100 ? 112 : 76);
-  window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+  if (el) scrollUnderBars(el);
 }
 function closeReportNav() {
   var nav = document.getElementById('areaNav');
@@ -2614,6 +2677,7 @@ document.addEventListener('click', function(e) {
   if (!(e.target.closest && e.target.closest('#areaNav'))) closeReportNav();
 });
 var areaNavObserver = null, areaVisObserver = null;
+var navScrollSync = null;
 function mountReportNav(sections) {
   var host = document.getElementById('sec-results');
   var nav = document.getElementById('areaNav');
@@ -2631,6 +2695,18 @@ function mountReportNav(sections) {
       });
       col += '</div>';
     }
+    if (p.steps) {
+      // The report's own steps, from the rows on the page.
+      var rows = el.querySelectorAll('details.path-step');
+      if (rows.length) {
+        col += '<div class="an-areas an-steps">';
+        Array.prototype.forEach.call(rows, function(row, j) {
+          var t = row.querySelector('.rblock-label');
+          col += '<button type="button" class="an-item an-step" data-j="'+j+'" onclick="closeReportNav();goToStep('+j+')"><span class="an-label">'+esc(t ? t.textContent : '')+'</span></button>';
+        });
+        col += '</div>';
+      }
+    }
   });
   nav.innerHTML = '<div class="an-col">'+col+'</div>'+
     '<div class="an-bar"><span class="an-cur" id="areaNavCur"></span><button type="button" class="an-top" aria-expanded="false" onclick="toggleReportNav()">Sections<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
@@ -2640,32 +2716,44 @@ function mountReportNav(sections) {
   if (!('IntersectionObserver' in window)) return;
   var areaEls = Array.prototype.slice.call(host.querySelectorAll('#accordionMenu .accordion-item'));
   var cur = document.getElementById('areaNavCur');
-  var show = function(k, i) {
+  var stepEls = Array.prototype.slice.call(host.querySelectorAll('#accordionMenu .r-path details.path-step'));
+  var show = function(k, i, j) {
     nav.querySelectorAll('.an-sec').forEach(function(b) { b.classList.toggle('on', Number(b.getAttribute('data-k')) === k); });
-    nav.querySelectorAll('.an-item').forEach(function(b) { b.classList.toggle('on', i != null && Number(b.getAttribute('data-i')) === i); });
+    nav.querySelectorAll('.an-item:not(.an-step)').forEach(function(b) { b.classList.toggle('on', i != null && Number(b.getAttribute('data-i')) === i); });
+    nav.querySelectorAll('.an-step').forEach(function(b) { b.classList.toggle('on', j != null && Number(b.getAttribute('data-j')) === j); });
     if (!cur) return;
     if (i != null && sections[i]) cur.innerHTML = esc(sections[i].label)+(sections[i].score != null ? '<span class="an-score">'+Number(sections[i].score).toFixed(1)+'/10</span>' : '');
+    else if (j != null && stepEls[j]) cur.textContent = (stepEls[j].querySelector('.rblock-label') || {}).textContent || REPORT_PARTS[k].q;
     else cur.textContent = REPORT_PARTS[k].q;
   };
-  var areasK = 0;
-  areaNavObserver = new IntersectionObserver(function(entries) {
-    entries.forEach(function(e) {
-      if (!e.isIntersecting) return;
-      var i = areaEls.indexOf(e.target);
-      if (i >= 0) { show(areasK, i); return; }
-      var part = parts.filter(function(x) { return x.el === e.target; })[0];
-      if (part) show(part.k, null);
-    });
-  }, { rootMargin: '-30% 0px -60% 0px' });
+  // The current section is read from where things are on screen (the last
+  // part and area whose top has passed 35% of the height), on every scroll:
+  // a jump (a row closing above, a tap in the index) must not leave it stale.
+  var sync = function() {
+    var line = window.innerHeight * 0.35, k = parts.length ? parts[0].k : 0, i = null, j = null;
+    parts.forEach(function(x) { if (x.el.getBoundingClientRect().top < line) k = x.k; });
+    if (REPORT_PARTS[k] && REPORT_PARTS[k].areas) areaEls.forEach(function(el, n) { if (el.getBoundingClientRect().top < line) i = n; });
+    if (REPORT_PARTS[k] && REPORT_PARTS[k].steps) stepEls.forEach(function(el, n) { if (el.getBoundingClientRect().top < line) j = n; });
+    show(k, i, j);
+  };
+  var queued = false;
+  if (navScrollSync) window.removeEventListener('scroll', navScrollSync);
+  navScrollSync = function() { if (queued) return; queued = true; requestAnimationFrame(function() { queued = false; sync(); }); };
+  window.addEventListener('scroll', navScrollSync, { passive: true });
+  areaNavObserver = new IntersectionObserver(sync, { rootMargin: '-30% 0px -60% 0px' });
   parts.forEach(function(x) { areaNavObserver.observe(x.el); });
   areaEls.forEach(function(el) { areaNavObserver.observe(el); });
-  // Shown once the title and score at the top have scrolled away.
-  var hero = host.querySelector('.r-hero');
+  // Phones: the bar shows once the whole opening has scrolled away. Wide
+  // screens: the column shows as soon as the opening's summary has gone
+  // above it, just before the five areas arrive, so it never sits on the
+  // poster title (Antonio: "un attimo prima che si scorre per vedere" le aree).
+  var wide = window.innerWidth >= 1100;
+  var watch = wide ? document.getElementById('resultSubtitle') : host.querySelector('.r-hero');
   areaVisObserver = new IntersectionObserver(function(entries) {
     entries.forEach(function(e) { nav.classList.toggle('is-on', !e.isIntersecting); if (e.isIntersecting) closeReportNav(); });
-  }, { rootMargin: '-64px 0px 0px 0px' });
-  if (hero) areaVisObserver.observe(hero);
-  if (parts.length) show(parts[0].k, null);
+  }, { rootMargin: (wide ? '-112px' : '-64px') + ' 0px 0px 0px' });
+  if (watch) areaVisObserver.observe(watch);
+  sync();
 }
 
 
@@ -2712,6 +2800,42 @@ function paras(t, cls) {
 }
 /* The hero summary is cut to four lines on phones (CSS) with a button to
    read it all; the button only appears when the text is actually cut. */
+/* Poster opening: the film's name, its credits (genre, format, country,
+   language, as the filmmaker typed them) and its logline. */
+function setHeroTitle(title, p) {
+  var t = document.getElementById('resultTitle');
+  t.textContent = title;
+  var credits = p ? [p.genre, p.format, p.country, p.language].filter(function(x){ return x && x !== 'Not specified'; }) : [];
+  var c = document.getElementById('resultCredits'), l = document.getElementById('resultLogline');
+  c.textContent = credits.join(' \u00B7 '); c.hidden = !credits.length;
+  l.textContent = noDash(p && p.logline || ''); l.hidden = !(p && p.logline);
+  // measured once shown and once Geist has loaded (a fallback face is narrower)
+  requestAnimationFrame(fitTitle);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitTitle);
+}
+/* The title fills the column on one line, up to 168px. A long name that
+   would fall under 56px on one line wraps between words instead, in about
+   three lines, never wider than its longest word allows (up to 120px). */
+function fitTitle() {
+  var t = document.getElementById('resultTitle');
+  if (!t || !t.textContent || !t.offsetParent) return;
+  var cs = getComputedStyle(t.parentNode);
+  var full = t.textContent, room = t.parentNode.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  function fit(text) {
+    t.textContent = text; t.style.fontSize = '100px'; t.style.whiteSpace = 'nowrap'; t.style.display = 'inline-block';
+    var w = t.getBoundingClientRect().width;
+    t.style.whiteSpace = ''; t.style.display = '';
+    return 100 * room / w;
+  }
+  var size = fit(full);
+  if (size < 56 && /\s/.test(full.trim())) {
+    var longest = full.trim().split(/\s+/).reduce(function(a, w){ return w.length > a.length ? w : a; }, '');
+    size = Math.min(120, fit(longest), size * 3);
+  }
+  t.textContent = full;
+  t.style.fontSize = Math.max(24, Math.min(168, Math.floor(size))) + 'px';
+}
+window.addEventListener('resize', fitTitle);
 function setHeroSummary(text) {
   var el = document.getElementById('resultSubtitle');
   el.textContent = noDash(text);
@@ -2805,6 +2929,14 @@ function fundsBody(sources) {
    once the film is funded). The producers are real companies, each confirmed
    by a page that names it with a film it produced (grounding.js, checkNamed). */
 var FUNDED_STAGES = ['Funded, preparing to shoot', 'Shooting', 'In post-production', 'Finished'];
+/* Festivals and distribution come after the shoot: for a film not shot yet
+   their area says it is the plan for later, so the reader does not take it
+   as this week's work. The score judges the fit, not the stage. */
+var SHOT_STAGES = ['Shooting', 'In post-production', 'Finished'];
+function laterNote(k, project) {
+  if ((k !== 'festival' && k !== 'distribution') || !project || !project.stage || project.stage === 'Not specified' || SHOT_STAGES.indexOf(project.stage) >= 0) return '';
+  return '<p class="entry-note later-note">For later: your film is not shot yet, so this is the plan for when it is finished.</p>';
+}
 function pathStep(n, title, line, names, body) {
   if (!body) return '';
   return '<details class="rblock path-step"><summary><span class="path-n">'+n+'</span><span class="path-main"><span class="rblock-label">'+title+'</span>'+(line ? '<span class="path-line">'+esc(line)+'</span>' : '')+namesLine(names)+'</span><span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="rblock-body">'+body+'</div></details>';
@@ -3099,8 +3231,8 @@ function loadJsPDF() {
 var pdfFontsPromise = null;
 function loadPdfFonts() {
   if (pdfFontsPromise) return pdfFontsPromise;
-  pdfFontsPromise = Promise.all(['400', '700'].map(function(w) {
-    return fetch('/fonts/carlito-'+w+'-pdf.ttf').then(function(r) {
+  pdfFontsPromise = Promise.all(['carlito-400', 'carlito-700', 'geist-700', 'geist-300'].map(function(w) {
+    return fetch('/fonts/'+w+'-pdf.ttf').then(function(r) {
       if (!r.ok) throw new Error('font');
       return r.arrayBuffer();
     }).then(function(buf) {
@@ -3114,11 +3246,13 @@ function loadPdfFonts() {
 async function newPdfDoc() {
   var fonts = await loadPdfFonts();
   var doc = new window.jspdf.jsPDF();
-  doc.pdfFont = 'helvetica';
+  doc.pdfFont = 'helvetica'; doc.displayFont = 'helvetica';
   if (fonts) {
     doc.addFileToVFS('Carlito-400.ttf', fonts[0]); doc.addFont('Carlito-400.ttf', 'Carlito', 'normal');
     doc.addFileToVFS('Carlito-700.ttf', fonts[1]); doc.addFont('Carlito-700.ttf', 'Carlito', 'bold');
-    doc.pdfFont = 'Carlito';
+    doc.addFileToVFS('Geist-700.ttf', fonts[2]); doc.addFont('Geist-700.ttf', 'Geist', 'bold');
+    doc.addFileToVFS('Geist-300.ttf', fonts[3]); doc.addFont('Geist-300.ttf', 'Geist', 'normal');
+    doc.pdfFont = 'Carlito'; doc.displayFont = 'Geist';
   }
   return doc;
 }
@@ -3131,28 +3265,61 @@ async function savePDF() {
     var doc = await newPdfDoc();
     var y=22, margin=22, maxW=doc.internal.pageSize.getWidth()-margin*2;
     function ln(txt,sz,bold,r,g,b) {
+      if (txt == null || String(txt).trim() === '') return;
       doc.setFontSize(sz||11); doc.setFont(doc.pdfFont,bold?'bold':'normal');
       doc.setTextColor(r!==undefined?r:26, g!==undefined?g:25, b!==undefined?b:22);
       doc.splitTextToSize(noDash(txt||''),maxW).forEach(function(l){ if(y>272){doc.addPage();y=22;} doc.text(l,margin,y); y+=(sz||11)*0.52; }); y+=2;
     }
     function hr() { y+=3; doc.setDrawColor(226,224,219); doc.line(margin,y,doc.internal.pageSize.getWidth()-margin,y); y+=7; }
 
-    ln('OneCiak · Film Market Intelligence',10,true,122,118,112);
-    ln('"'+lastProject.title+'"',18);
-    ln(lastResult.overall_summary||'',10,false,122,118,112);
-    y+=2;
-    ln('OneCiak Score: '+Number(lastResult.overall_score||0).toFixed(1)+'/10 · '+(lastResult.overall_label||''),12,true);
+    // Section heading: a plain word in Carlito bold, like the site.
+    function head(txt) { if (y > 250) { doc.addPage(); y = 22; } y += 3; ln(txt,13,true); y += 1; }
+
+    // Cover, set like the report's opening on the site: the film's name as
+    // wide as the page (Geist bold), its credits and logline, the score.
+    var pageW = doc.internal.pageSize.getWidth();
+    ln('OneCiak',10,true,122,118,112);
+    y += 14;
+    doc.setFont(doc.displayFont,'bold'); doc.setTextColor(26,25,22);
+    var title = noDash(lastProject.title||''), tSize = 100;
+    doc.setFontSize(tSize);
+    var track = function(sz){ return -sz*0.045*0.3528; };
+    doc.setCharSpace(track(tSize));
+    var tW = doc.getTextWidth(title) + track(tSize)*title.length;
+    tSize = Math.max(24, Math.min(110, Math.floor(tSize * maxW / tW)));
+    var tLines = [title];
+    if (tSize < 44 && /\s/.test(title.trim())) {
+      tSize = 44; doc.setFontSize(tSize); doc.setCharSpace(track(tSize));
+      tLines = doc.splitTextToSize(title, maxW);
+      while (tLines.length > 3 && tSize > 24) { tSize -= 2; doc.setFontSize(tSize); doc.setCharSpace(track(tSize)); tLines = doc.splitTextToSize(title, maxW); }
+    }
+    doc.setFontSize(tSize); doc.setCharSpace(track(tSize));
+    tLines.forEach(function(l){ y += tSize*0.3528*0.86; doc.text(l, margin - tSize*0.006, y); });
+    doc.setCharSpace(0);
+    y += 8;
+    var credits = [lastProject.genre, lastProject.format, lastProject.country, lastProject.language].filter(function(x){ return x && x !== 'Not specified'; });
+    if (credits.length) ln(credits.join(' \u00B7 '),11,false,90,86,80);
+    if (lastProject.logline) { y += 1; ln(lastProject.logline,14,false); }
+    y += 8;
+    doc.setFont(doc.displayFont,'normal'); doc.setFontSize(48); doc.setTextColor(26,25,22);
+    var sc = Number(lastResult.overall_score||0).toFixed(1);
+    doc.text(sc, margin, y + 14);
+    var scW = doc.getTextWidth(sc);
+    doc.setFontSize(18); doc.setTextColor(122,118,112); doc.text('/10', margin + scW + 1, y + 14);
+    doc.setFont(doc.pdfFont,'normal'); doc.setFontSize(13); doc.setTextColor(26,25,22);
+    doc.splitTextToSize(noDash(lastResult.overall_label||''), maxW - scW - 30).forEach(function(l, i){ doc.text(l, margin + scW + 16, y + 6 + i*6); });
+    y += 24;
     hr();
+    if (!isFullReport || !lastResult.executive_summary) { ln(lastResult.overall_summary||'',10.5,false,60,58,54); hr(); }
 
     if (isFullReport && lastResult.executive_summary) {
-      ln('EXECUTIVE SUMMARY',10,true);
-      ln(lastResult.executive_summary,10,false,122,118,112);
+      ln(lastResult.executive_summary,10.5,false,60,58,54);
       y+=2;
-      if(lastResult.biggest_risk) ln('Biggest Risk: '+lastResult.biggest_risk,10,true,185,28,28);
-      if(lastResult.biggest_opportunity) ln('Biggest Opportunity: '+lastResult.biggest_opportunity,10,true,22,101,52);
+      if(lastResult.biggest_risk) ln('Biggest risk. '+lastResult.biggest_risk,10,false);
+      if(lastResult.biggest_opportunity) ln('Biggest opportunity. '+lastResult.biggest_opportunity,10,false);
       var ns = lastResult.next_step;
       if (isFullReport && ns && ns.action) {
-        y+=2; ln('YOUR NEXT STEP',10,true); ln(ns.action,10,false,26,25,22);
+        y+=2; head('Your next step'); ln(ns.action,10,false,26,25,22);
         if (ns.why) ln(ns.why,9,false,122,118,112);
         var nsReady = (ns.ready||[]).filter(Boolean);
         if (nsReady.length) ln('Have ready: '+nsReady.join(' · '),9,false,70,68,64);
@@ -3161,21 +3328,21 @@ async function savePDF() {
     }
 
     var dims = [
-      {k:'creative',   l:'CREATIVE PACKAGE'},
-      {k:'financial',  l:'FINANCIAL PLAN'},
-      {k:'market',     l:'MARKET & AUDIENCE'},
-      {k:'festival',   l:'FESTIVAL STRATEGY'},
-      {k:'distribution',l:'DISTRIBUTION & REVENUE'}
+      {k:'creative',   l:'Creative package'},
+      {k:'financial',  l:'Financial plan'},
+      {k:'market',     l:'Market and audience'},
+      {k:'festival',   l:'Festival strategy'},
+      {k:'distribution',l:'Distribution and revenue'}
     ];
     dims.forEach(function(d){
-      ln(d.l+' · '+(lastResult[d.k+'_score']||'')+'/10',10,true);
+      head(d.l+'  '+Number(lastResult[d.k+'_score']||0).toFixed(1)+'/10');
       ln(lastResult[d.k+'_verdict']||'',11,true,50,50,50);
-      ln(lastResult[d.k+'_detail']||'',10,false,122,118,112);
+      ln(lastResult[d.k+'_detail']||'',10,false,60,58,54);
       if (isFullReport) {
         var flags = lastResult[d.k+'_flags']||[];
-        if(flags.length){ ln('Red Flags:',9,true,185,28,28); flags.forEach(function(f){ ln('• '+f,9,false,185,28,28); }); }
+        if(flags.length){ ln('Red flags',9,true); flags.forEach(function(f){ ln('• '+f,9,false); }); }
         var strengths = lastResult[d.k+'_strengths']||[];
-        if(strengths.length){ ln('Strengths:',9,true,22,101,52); strengths.forEach(function(s){ ln('• '+s,9,false,22,101,52); }); }
+        if(strengths.length){ ln('Strengths',9,true); strengths.forEach(function(s){ ln('• '+s,9,false); }); }
         var tips = lastResult[d.k+'_tips']||[];
         if(tips.length){ ln('Recommendations:',9,true); tips.forEach(function(t,i){ if(!t) return; var txt=typeof t==='string'?t:(t.advice||''); ln((i+1)+'. '+txt,9); }); }
         var plan = lastResult[d.k+'_action_plan']||[];
@@ -3188,21 +3355,21 @@ async function savePDF() {
     });
 
     if (isFullReport && lastResult.roadmap && lastResult.roadmap.length) {
-      ln('YOUR ROADMAP',10,true);
+      head('Your roadmap');
       lastResult.roadmap.forEach(function(s,i){ if(!s) return; ln((i+1)+'. '+(s.phase||''),10,true); ln(s.action||'',10); y+=2; });
       hr();
     }
 
     var bya = lastResult.before_you_apply, byaMiss = ((bya && bya.missing) || []).filter(Boolean), byaSteps = ((bya && bya.steps) || []).filter(Boolean);
     if (isFullReport && byaMiss.length) {
-      ln('BEFORE YOU CAN APPLY',10,true);
+      head('Before you can apply');
       byaMiss.forEach(function(m, i){ ln('• '+m,10,true); if (byaSteps[i]) ln(byaSteps[i],9,false,70,68,64); });
       byaSteps.slice(byaMiss.length).forEach(function(x){ ln('• '+x,9,false,70,68,64); });
       hr();
     }
     var prods = (lastResult.producers || []).filter(Boolean);
     if (isFullReport && prods.length) {
-      ln('PRODUCERS TO CONTACT',10,true);
+      head('Producers to contact');
       prods.forEach(function(p){
         ln(p.name+(p.country ? ' ('+p.country+')' : ''),10,true);
         ln('Produced: '+p.film+(p.year ? ' ('+p.year+')' : '')+(p.why ? ' · '+p.why : ''),9,false,122,118,112);
@@ -3214,7 +3381,7 @@ async function savePDF() {
       hr();
     }
     if (isFullReport && lastResult.financial_sources && lastResult.financial_sources.length) {
-      ln('FUNDING SOURCES',10,true);
+      head('Funding sources');
       lastResult.financial_sources.forEach(function(f){
         if (!f) return;
         ln((f.name||'')+' ('+(f.type||'')+')'+(f.amount?' · '+f.amount:''),10,true);
@@ -3227,10 +3394,10 @@ async function savePDF() {
     }
 
     if (isFullReport && (lastResult.talent_leverage || (lastResult.tax_incentive && (lastResult.tax_incentive.estimate || lastResult.tax_incentive.note)))) {
-      ln('TALENT LEVERAGE & TAX INCENTIVE',10,true);
+      head('Talent leverage and tax incentive');
       if (lastResult.talent_leverage) ln(lastResult.talent_leverage,10,false,122,118,112);
       if (lastResult.tax_incentive && (lastResult.tax_incentive.estimate || lastResult.tax_incentive.note)) {
-        ln('Tax Incentive'+(lastResult.tax_incentive.region?': '+lastResult.tax_incentive.region:'')+(lastResult.tax_incentive.estimate?': '+lastResult.tax_incentive.estimate:''),10,true,22,101,52);
+        ln('Tax Incentive'+(lastResult.tax_incentive.region?': '+lastResult.tax_incentive.region:'')+(lastResult.tax_incentive.estimate?': '+lastResult.tax_incentive.estimate:''),10,true);
         if (lastResult.tax_incentive.note) ln(lastResult.tax_incentive.note,9,false,122,118,112);
         if (lastResult.tax_incentive.source) ln(pdfSource(lastResult.tax_incentive),8,false,150,148,145);
       }
@@ -3238,19 +3405,19 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.budget_breakdown_guidance) {
-      ln('BUDGET BREAKDOWN GUIDANCE',10,true);
+      head('Budget breakdown guidance');
       ln(lastResult.budget_breakdown_guidance,10,false,122,118,112);
       hr();
     }
 
     if (isFullReport && lastResult.pitch_assessment) {
       var pa = lastResult.pitch_assessment;
-      ln('PITCH ASSESSMENT',10,true);
+      head('Pitch assessment');
       if (pa.thirty_second_pitch) { ln('30-Second Pitch:',9,true); ln('"'+pa.thirty_second_pitch+'"',9,false,122,118,112); }
       if (pa.logline_improved) {
         ln('Logline Assessment'+(pa.logline_score?' · '+pa.logline_score+'/10':''),9,true);
         if (pa.logline_issues) ln(pa.logline_issues,9,false,122,118,112);
-        ln('Improved: '+pa.logline_improved,9,true,22,101,52);
+        ln('Improved: '+pa.logline_improved,9,true);
       }
       if (pa.pitch_deck_checklist && pa.pitch_deck_checklist.length) {
         ln('Pitch Deck Checklist:',9,true);
@@ -3260,13 +3427,13 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.attachment_strategy) {
-      ln('ATTACHMENT STRATEGY',10,true);
+      head('Attachment strategy');
       ln(lastResult.attachment_strategy,10,false,122,118,112);
       hr();
     }
 
     if (isFullReport && lastResult.key_crew_recommendations && lastResult.key_crew_recommendations.length) {
-      ln('KEY CREW RECOMMENDATIONS',10,true);
+      head('Key crew recommendations');
       lastResult.key_crew_recommendations.forEach(function(c){
         if (!c) return;
         ln(c.role||'',10,true);
@@ -3279,7 +3446,7 @@ async function savePDF() {
 
     if (isFullReport && lastResult.marketing_strategy) {
       var ms = lastResult.marketing_strategy;
-      ln('MARKETING STRATEGY',10,true);
+      head('Marketing strategy');
       if (ms.overview) ln(ms.overview,10,false,122,118,112);
       if (ms.pre_release && ms.pre_release.length) { ln('Pre-Release Actions:',9,true); ms.pre_release.forEach(function(a){ if(a) ln('• '+a,9); }); }
       if (ms.social_strategy) ln('Social: '+ms.social_strategy,9,false,122,118,112);
@@ -3290,13 +3457,13 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.target_audience_profile) {
-      ln('TARGET AUDIENCE PROFILE',10,true);
+      head('Target audience profile');
       ln(lastResult.target_audience_profile,10,false,122,118,112);
       hr();
     }
 
     if (isFullReport && lastResult.distribution_platforms && lastResult.distribution_platforms.length) {
-      ln('DISTRIBUTION PLATFORMS',10,true);
+      head('Distribution platforms');
       lastResult.distribution_platforms.forEach(function(pl){
         if (!pl) return;
         ln((pl.priority||'')+': '+(pl.name||''),10,true);
@@ -3308,13 +3475,13 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.self_distribution_playbook) {
-      ln('SELF-DISTRIBUTION PLAYBOOK',10,true);
+      head('Self-distribution playbook');
       ln(lastResult.self_distribution_playbook,10,false,122,118,112);
       hr();
     }
 
     if (isFullReport && lastResult.market_comps && lastResult.market_comps.length) {
-      ln('COMPARABLE FILMS',10,true);
+      head('Comparable films');
       lastResult.market_comps.forEach(function(c){
         if (!c) return;
         ln((c.title||'')+(c.year?' ('+c.year+')':'')+(c.budget?' · Budget: '+c.budget:'')+(c.result?'. '+c.result:''),10,true);
@@ -3327,10 +3494,10 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.cautionary_comps && lastResult.cautionary_comps.length) {
-      ln('CAUTIONARY COMPARABLES',10,true);
+      head('Cautionary comparables');
       lastResult.cautionary_comps.forEach(function(c){
         if (!c) return;
-        ln((c.title||'')+(c.year?' ('+c.year+')':'')+(c.budget?' · Budget: '+c.budget:'')+(c.what_went_wrong?'. '+c.what_went_wrong:''),10,true,185,28,28);
+        ln((c.title||'')+(c.year?' ('+c.year+')':'')+(c.budget?' · Budget: '+c.budget:'')+(c.what_went_wrong?'. '+c.what_went_wrong:''),10,true);
         ln(c.lesson||'',9,false,122,118,112);
         if (c.source) ln(pdfSource(c),8,false,150,148,145);
         y+=1;
@@ -3339,7 +3506,7 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.festival_calendar && lastResult.festival_calendar.length) {
-      ln('FESTIVAL CALENDAR',10,true);
+      head('Festival calendar');
       lastResult.festival_calendar.forEach(function(f){
         if (!f) return;
         ln((f.festival||'')+' · '+(f.source ? 'Deadline: '+notStated(f.deadline, 'not published on the source, check before planning') : (f.deadline||'')),10,true);
@@ -3352,7 +3519,7 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.lab_and_market_opportunities && lastResult.lab_and_market_opportunities.length) {
-      ln('LABS & MARKET OPPORTUNITIES',10,true);
+      head('Labs and market opportunities');
       lastResult.lab_and_market_opportunities.forEach(function(l){
         if (!l) return;
         ln(l.name||'',10,true);
@@ -3366,7 +3533,7 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.sales_agents && lastResult.sales_agents.length) {
-      ln('SALES AGENTS',10,true);
+      head('Sales agents');
       lastResult.sales_agents.forEach(function(a){
         if (!a) return;
         ln(a.name||'',10,true);
@@ -3378,7 +3545,7 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.international_markets && lastResult.international_markets.length) {
-      ln('INTERNATIONAL MARKETS',10,true);
+      head('International markets');
       lastResult.international_markets.forEach(function(m){
         if (!m) return;
         ln((m.country||'')+': '+(m.reason||''),9,false,122,118,112);
@@ -3387,20 +3554,20 @@ async function savePDF() {
     }
 
     if (isFullReport && lastResult.risk_assessment && ((lastResult.risk_assessment.top_risks||[]).length || (lastResult.risk_assessment.mitigation||[]).length)) {
-      ln('RISK ASSESSMENT',10,true);
-      (lastResult.risk_assessment.top_risks||[]).forEach(function(risk){ if(risk) ln('• '+risk,9,false,185,28,28); });
-      (lastResult.risk_assessment.mitigation||[]).forEach(function(m){ if(m) ln('• '+m,9,false,22,101,52); });
+      head('Risk assessment');
+      (lastResult.risk_assessment.top_risks||[]).forEach(function(risk){ if(risk) ln('• '+risk,9,false); });
+      (lastResult.risk_assessment.mitigation||[]).forEach(function(m){ if(m) ln('• '+m,9,false); });
       hr();
     }
 
     if (isFullReport && lastResult.awards_qualification_strategy) {
-      ln('AWARDS QUALIFICATION STRATEGY',10,true);
+      head('Awards qualification strategy');
       ln(lastResult.awards_qualification_strategy,10,false,122,118,112);
       hr();
     }
 
     if (isFullReport && lastResult.legal_and_rights_considerations) {
-      ln('LEGAL & RIGHTS CONSIDERATIONS',10,true);
+      head('Legal and rights considerations');
       ln(lastResult.legal_and_rights_considerations,10,false,122,118,112);
       hr();
     }
@@ -3408,14 +3575,14 @@ async function savePDF() {
     if (isFullReport && lastResult.revenue_projection && lastResult.revenue_projection.total_realistic) {
       var rp = lastResult.revenue_projection;
       ln(lastResult.sources_checked ? 'REVENUE SCENARIOS' : 'REVENUE PROJECTION',10,true);
-      ln((lastResult.sources_checked ? '' : 'Total Realistic: ')+rp.total_realistic,10,true,22,101,52);
+      ln((lastResult.sources_checked ? '' : 'Total Realistic: ')+rp.total_realistic,10,true);
       if (rp.breakeven_note) ln(rp.breakeven_note,9,false,122,118,112);
       hr();
     }
 
     if (isFullReport && lastResult.business_plan_summary) {
       var bp = lastResult.business_plan_summary;
-      ln('BUSINESS PLAN SUMMARY',10,true);
+      head('Business plan summary');
       if (bp.executive_summary) ln(bp.executive_summary,9,false,122,118,112);
       if (bp.the_ask) ln('The Ask: '+bp.the_ask,9,true);
       if (bp.market_opportunity) { ln('Market Opportunity',9,true); ln(bp.market_opportunity,9,false,122,118,112); }
@@ -3426,13 +3593,13 @@ async function savePDF() {
         ln('Key Milestones',9,true);
         bp.key_milestones.forEach(function(m){ if (m) ln('• '+m,9,false,122,118,112); });
       }
-      if (bp.risk_summary) { ln('Biggest Risk',9,true); ln(bp.risk_summary,9,false,197,56,42); }
+      if (bp.risk_summary) { ln('Biggest Risk',9,true); ln(bp.risk_summary,9,false); }
       hr();
     }
 
     ln('Report by OneCiak · oneciak.com',9,false,122,118,112);
     y+=4; hr();
-    ln('LEGAL DISCLAIMER',9,true,122,118,112);
+    head('Legal disclaimer');
     ln('Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. OneCiak assumes no liability. Results are estimates and do not guarantee any outcome. OneCiak is not a licensed consulting firm.',8,false,150,148,145);
 
     doc.save('OneCiak-'+lastProject.title.replace(/\s+/g,'-')+'.pdf');

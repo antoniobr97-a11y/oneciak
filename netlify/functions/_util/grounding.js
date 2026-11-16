@@ -285,7 +285,8 @@ async function findNamingPage(item, urls, pages) {
 // the company's own sentence, word for word, from a page found in the
 // searches on the company's own site: its address holds a distinctive word
 // of the name (vivofilm.it for Vivo Film). A festival's "submit your film"
-// line, or a news page, is not the company's rule.
+// line, or a news page, is not the company's rule; nor is how its
+// distribution arm takes finished films.
 const GENERIC = /^(?:the|and|film|films|filmes|pictures|picture|productions?|produzioni|production|prod|studios?|media|entertainment|cinema|group|company|house|creative|arts?|works|international|italia|italy)$/;
 function ownSite(url, name) {
   let host;
@@ -297,9 +298,29 @@ async function checkApproach(item, pages, set) {
   const q = item.approach_quote, url = item.approach_url || item.source;
   item.approach_quote = item.approach_url = null;
   if (!q || !url || !isSourced(url, set) || !ownSite(url, item.name)) return;
+  // A distribution page's "send us your finished short" is not how the
+  // company takes a project to produce; a sentence cut at "contact:" has
+  // lost the address it points to.
+  if (/distribu|catalog/i.test(q + ' ' + url) || /:\s*$/.test(String(q).trim())) return;
   if (!quoteOnPage(q, await pages(url))) return;
   item.approach_quote = String(q).trim().replace(/^["“]+|["”]+$/g, '');
   item.approach_url = url;
+}
+
+// "Before you can apply" pairs each missing thing with the step to get it
+// (missing[i] with steps[i]), from what the listed funds require. A pair
+// that names a fund no longer in the report goes with it.
+function dropStepsForGoneFunds(report, fundsListed) {
+  const b = report.before_you_apply;
+  if (!b || !Array.isArray(b.missing)) return;
+  const kept = new Set((report.financial_sources || []).map(f => nameCore(f.name)));
+  const gone = fundsListed.map(nameCore).filter(n => n.length >= 4 && !kept.has(n));
+  if (!gone.length) return;
+  const steps = Array.isArray(b.steps) ? b.steps : [];
+  const names = (t) => { const x = textCore(t); return gone.some(n => x.includes(' ' + n + ' ')); };
+  const keep = b.missing.map((m, i) => !names(m) && !(steps[i] && names(steps[i])));
+  b.missing = b.missing.filter((m, i) => keep[i]);
+  b.steps = steps.filter((x, i) => i >= keep.length ? !names(x) : keep[i]);
 }
 
 async function checkQuote(item, pages) {
@@ -364,6 +385,9 @@ function applicantOf(item) {
 
 async function groundReport(report, searchUrlsByField, today, fetcher, project) {
   stripMarkup(report);
+  // The funds as the model listed them, to clean "Before you can apply" of
+  // any fund that does not survive the checks below.
+  const fundsListed = (report.financial_sources || []).filter(f => f && f.name).map(f => f.name);
   const cache = new Map();
   const pages = (url) => {
     if (!cache.has(url)) cache.set(url, (fetcher || fetchPage)(url));
@@ -460,6 +484,18 @@ async function groundReport(report, searchUrlsByField, today, fetcher, project) 
     stats.notEligible = (stats.notEligible || 0) + before - report[field].length;
     stats.kept -= before - report[field].length;
   });
+
+  // A fund known only from a news or listing site goes: "Find the money"
+  // sends the reader to apply, which needs the fund's own page (on 12 Nov
+  // 2026 a Milan foundation's fund, found on a listing site, was offered to
+  // a Kansas project and "Before you can apply" was built on it).
+  if (Array.isArray(report.financial_sources)) {
+    const before = report.financial_sources.length;
+    report.financial_sources = report.financial_sources.filter(f => !isAggregator(f.source));
+    stats.aggregatorFunds = before - report.financial_sources.length;
+    stats.kept -= before - report.financial_sources.length;
+  }
+  dropStepsForGoneFunds(report, fundsListed);
 
   // "Who can apply" is shown only next to the source's own sentence
   // (rule_quote, checked word for word above); without it, it goes.
