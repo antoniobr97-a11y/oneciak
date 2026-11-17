@@ -1761,9 +1761,7 @@ function onStartClick() {
 
 /* ── BUDGET SLIDER ──
    Fixed, log-spaced "clean number" stops instead of a free-form number —
-   keeps the display always readable (never "€347,283"), and keeps the
-   comparative-benchmark cohorts meaningful (every user picks from the same
-   small set of values, so "similar budget" matches are still possible). */
+   keeps the display always readable (never "€347,283"). */
 var BUDGET_STOPS = ['1K','2K','5K','10K','15K','20K','30K','50K','75K','100K','150K','200K','300K','500K','750K','1M','1.5M','2M','3M','5M','7.5M','10M','15M','20M+'];
 var CURRENCY_FORMAT = {
   EUR: { symbol: '€', suffix: false }, USD: { symbol: '$', suffix: false }, GBP: { symbol: '£', suffix: false },
@@ -2273,6 +2271,7 @@ function renderFree(r, title) {
   freeSections.forEach(function(sec, idx) {
     // Body content
     var body = '<div class="accordion-divider"></div>';
+    body += laterNote(['', 'creative', 'financial', 'market', 'festival', 'distribution'][Number(sec.num)], lastProject);
     body += paras(sec.detail);
     if (sec.tip) body += '<div class="tips-block"><span class="tips-label">What to do</span><ol class="tips-list"><li><div class="tip-text">'+esc(sec.tip)+'</div></li></ol></div>';
     if (sec.extra) body += sec.extra;
@@ -2421,8 +2420,7 @@ function renderFull(r, title) {
     '<div><div class="overall-sublabel">'+esc(r.overall_label)+'</div></div>'+
     '<div style="text-align:right">'+
     '<div class="overall-num score-'+col+'">'+Number(r.overall_score||5).toFixed(1)+'<span class="denom">/10</span></div>'+
-    '</div></div>'+
-    (r.score_benchmark ? '<div style="font-size:12.5px;color:var(--muted);line-height:1.5;font-weight:300;margin-top:10px;padding:0 4px">'+esc(r.score_benchmark)+'</div>' : '');
+    '</div></div>';
 
   /* The report in the order of the three questions it answers
      (Antonio: "troppe cose, tutte disordinate"): what to do now, who to
@@ -2433,7 +2431,7 @@ function renderFull(r, title) {
 
   // The film, area by area: verdict, what to do, red flags and strengths.
   // Comparable films stay inside the market area.
-  function areaBody(k, extra) { return buildAccordionBody(r[k+'_score'], r[k+'_verdict'], r[k+'_detail'], r[k+'_flags'], r[k+'_strengths'], r[k+'_tips'], extra || ''); }
+  function areaBody(k, extra) { return laterNote(k, lastProject) + buildAccordionBody(r[k+'_score'], r[k+'_verdict'], r[k+'_detail'], r[k+'_flags'], r[k+'_strengths'], r[k+'_tips'], extra || ''); }
   var sections = [
     { label:'Creative package', score: r.creative_score, verdict: r.creative_verdict, body: areaBody('creative') },
     { label:'Financial plan', score: r.financial_score, verdict: r.financial_verdict, body: areaBody('financial') },
@@ -2931,6 +2929,14 @@ function fundsBody(sources) {
    once the film is funded). The producers are real companies, each confirmed
    by a page that names it with a film it produced (grounding.js, checkNamed). */
 var FUNDED_STAGES = ['Funded, preparing to shoot', 'Shooting', 'In post-production', 'Finished'];
+/* Festivals and distribution come after the shoot: for a film not shot yet
+   their area says it is the plan for later, so the reader does not take it
+   as this week's work. The score judges the fit, not the stage. */
+var SHOT_STAGES = ['Shooting', 'In post-production', 'Finished'];
+function laterNote(k, project) {
+  if ((k !== 'festival' && k !== 'distribution') || !project || !project.stage || project.stage === 'Not specified' || SHOT_STAGES.indexOf(project.stage) >= 0) return '';
+  return '<p class="entry-note later-note">For later: your film is not shot yet, so this is the plan for when it is finished.</p>';
+}
 function pathStep(n, title, line, names, body) {
   if (!body) return '';
   return '<details class="rblock path-step"><summary><span class="path-n">'+n+'</span><span class="path-main"><span class="rblock-label">'+title+'</span>'+(line ? '<span class="path-line">'+esc(line)+'</span>' : '')+namesLine(names)+'</span><span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="rblock-body">'+body+'</div></details>';

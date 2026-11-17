@@ -1,3 +1,4 @@
+const { normalizeScores, overallFromAreas } = require('./scores');
 const { callClaude, extractJSON } = require('./anthropic');
 const { groundReport } = require('./grounding');
 const { applyFacts } = require('./verifiedFacts');
@@ -5,7 +6,6 @@ const { allFullPrompts } = require('./reportPrompts');
 const { buildReportEmailHtml, sendReportEmail } = require('./email');
 const { incrementUsageCount } = require('./stats');
 const { verifyReportLinks } = require('./linkCheck');
-const { recordAndBenchmark } = require('./benchmarkStats');
 const { recordReportForEmail } = require('./userReports');
 
 const FULL_MODEL = 'claude-haiku-5-5';
@@ -41,15 +41,6 @@ async function callAndParseWithRetry(apiKey, section) {
   throw lastErr;
 }
 
-// The overall score is the average of the five area scores, so it can never
-// contradict them.
-function overallFromAreas(r) {
-  const keys = ['creative_score', 'financial_score', 'market_score', 'festival_score', 'distribution_score'];
-  const vals = keys.map(k => Number(r[k])).filter(v => isFinite(v) && v >= 1 && v <= 10);
-  if (!vals.length) return null;
-  return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 10) / 10;
-}
-
 // Core used to generate and deliver a full report, kept separate from
 // generate-report-background.js so the retry/reliability behavior has a
 // single home. Always runs inside a Background Function — callers are not
@@ -72,6 +63,7 @@ async function generateAndDeliverFullReport({ store, key, project, email, anthro
         Object.assign(merged, r.data);
         Object.keys(r.data).forEach(k => { searchUrlsByField[k] = r.searchUrls; });
       });
+      normalizeScores(merged);
       merged.overall_score = overallFromAreas(merged);
 
       // Every festival, fund, film, sales agent and platform must come from
@@ -89,16 +81,6 @@ async function generateAndDeliverFullReport({ store, key, project, email, anthro
       // plausible hallucinations — strip any that don't actually resolve
       // before the report ever reaches screen, PDF, or email.
       await verifyReportLinks(merged);
-
-      // Replace the AI's generic score_benchmark guess with a factual one
-      // computed from our own accumulated, anonymized report data, once
-      // there's enough of it to say something real — this is the one field
-      // a generic chatbot can never produce, since it has no access to data
-      // from every other project run through OneCiak.
-      try {
-        const realBenchmark = await recordAndBenchmark(project, merged.overall_score);
-        if (realBenchmark) merged.score_benchmark = realBenchmark;
-      } catch (e) { /* benchmarking must never block report delivery */ }
 
       const html = buildReportEmailHtml(project, merged, key, viewUrl);
       const emailResult = await sendReportEmail({
