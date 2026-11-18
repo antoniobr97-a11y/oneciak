@@ -365,7 +365,10 @@ art. 7. Scheda per l'avvocato: claude.ai/artifact/Y776k28X7HyxzMxcQgNXDX.
 1. Avvocato: privacy, strada A o B, nome di Antonio; poi riscrivere privacy
    e termini.
 2. Prima del lancio: tetto di spesa Anthropic e ricarica del credito.
-3. Prova con 20-30 filmmaker veri (per esempio una scuola di cinema):
+3. Prima, prova con 5 filmmaker che Antonio conosce: piano e messaggi
+   pronti il 18 novembre 2026 (rivisti col plugin EGM); conta solo un passo
+   concreto che viene dal report, chiesto con il dettaglio (a chi, cosa).
+   Poi prova con 20-30 filmmaker veri (per esempio una scuola di cinema):
    quanti chiedono il report completo, quanti lo aprono, chi dopo 7 e 14
    giorni ha fatto davvero il passo consigliato; chiedere "qual è l'ultima
    cosa che hai fatto per il tuo film?". Ricontattarli richiede il loro
@@ -399,6 +402,13 @@ art. 7. Scheda per l'avvocato: claude.ai/artifact/Y776k28X7HyxzMxcQgNXDX.
   locale, hook in `.claude/settings.local.json`. Comando:
   `.claude/skills/impeccable/scripts/impeccable detect index.html`; falsi
   positivi spiegati in `.impeccable/config.json`.
+- **Elephant-Goldfish Model** (plugin `egm@egm` 0.1.1, github.com/google/
+  elephant-goldfish-model, Apache 2.0, "not an officially supported Google
+  product"; attivo da `.claude/settings.json`, solo istruzioni in testo,
+  niente comandi automatici): prima di un cambiamento grosso, il piano lo
+  rileggono revisori senza memoria della conversazione (`/egm:egm-review-loop`
+  con `comprehension` e `design_critic`). Provato il 18 novembre 2026 sul
+  piano della prova con 5 filmmaker: 2 problemi bloccanti trovati e corretti.
 - **Emil Kowalski design-eng** (`.claude/skills/emil-design-eng`, commit
   c8a7962, MIT): regole per animazioni e tocco.
 - **Prove nel browser**: script Playwright a mano con
