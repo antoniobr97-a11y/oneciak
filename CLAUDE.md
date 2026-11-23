@@ -171,7 +171,10 @@ sui festival.
   un'area): una aperta per gruppo; il titolo toccato resta fermo mentre le
   altre si chiudono, poi la pagina scivola finché è 12px sotto le barre
   (`settleOpened`, `jumpBy` senza `behavior:'instant'` che i Safari vecchi
-  non conoscono, `scrollUnderBars`); chiudere non sposta nulla. Le righe
+  non conoscono, `scrollUnderBars`: sul telefono conta la direzione in cui
+  si muoverà la pagina, non dove sta il titolo, perché salendo torna
+  l'intestazione; il 23 novembre 2026 un titolo appena sotto le barre
+  restava coperto); chiudere non sposta nulla. Le righe
   (`<details>`) le apre il browser (niente `preventDefault`: su iPhone il
   tocco su una riga non si apriva); il codice ascolta `toggle` e poi chiude
   le altre. La sezione
@@ -219,9 +222,13 @@ sui festival.
   controllate il 23 ottobre e il 2 novembre 2026; 3 produttori verificati a
   mano (Vivo Film, Leone Film Group, Lava Films; sui loro siti nessuna
   frase su come accettano progetti); TorinoFilmLab FeatureLab 2027 "Closed
-  (5 November 2026)".
+  (5 November 2026)", e nei testi "the 2027 call closed on 5 November 2026"
+  (trovato dal controllo del lunedì: tre frasi lo davano ancora aperto).
 - **`/roadmap/`**: 9 fasi, 49 lavori con spunta (`oneciak-roadmap-v1` nel
-  browser), 27 citazioni verificate parola per parola il 2026-10-24. Si
+  browser); le 25 citazioni (riquadri con fonte) ricontrollate parola per
+  parola sulle fonti il 23 novembre 2026 (anche i 4 PDF, con `pdftotext`):
+  Stephen Follows aveva cambiato due numeri sulle sue pagine (quote dei
+  festival $25-45 e $37-67, 13,038 festival studiati), aggiornati. Si
   raggiunge solo dal report (`STAGE_TO_ROADMAP`). CSS `roadmap/roadmap.css`
   allineato al sito. Se cambia una regola citata, ricontrollare.
 - `/guides/*` rimanda alla home (301 in `netlify.toml`).
