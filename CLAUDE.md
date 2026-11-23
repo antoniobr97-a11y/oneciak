@@ -52,18 +52,16 @@ typo quando è frustrato: non vuol dire che vuole un tono più formale.
    differenze" vuol dire mostrarlo meglio.
 5. **Niente si pubblica senza il suo ok**: si prepara sul branch, si prova,
    si mostrano foto e numeri; su main solo quando scrive "pubblica". "Vai"
-   o "procedi" vogliono dire prepara e prova. **Unica eccezione, il
-   controllo del lunedì** (Antonio, 23 novembre 2026: "se trova errori li
-   deve sistemare senza chiedermi"): gli errori che trova li corregge,
-   prova e pubblica da solo, poi gli scrive cosa ha fatto con foto e numeri.
-   Errori vuol dire: cose rotte (errori nella pagina, menu, PDF, modulo,
-   pagina più larga dello schermo, testo azzurro), link morti, fatti
-   scaduti o cambiati sulla fonte (date, cifre, citazioni, ricontrollati
-   parola per parola). NON rientrano e restano da chiedere: cambi di aspetto
-   o di testi del sito, cose nuove, il motore dei report e i prompt,
-   privacy e termini, post e messaggi promozionali, spese. Se la correzione
-   non è sicura o le prove non passano, la prepara sul branch e gli scrive.
-   Al massimo una pubblicazione per lunedì (limite di Netlify).
+   o "procedi" vogliono dire prepara e prova. **Controllo del lunedì**
+   (Antonio, 23 novembre 2026): gli errori che trova li corregge e li
+   prova da solo, senza chiedere, poi gli scrive cosa ha fatto con foto e
+   numeri; per metterli online Antonio scrive "pubblica". Errori vuol dire:
+   cose rotte (errori nella pagina, menu, PDF, modulo, pagina più larga
+   dello schermo, testo azzurro), link morti, fatti scaduti o cambiati
+   sulla fonte (date, cifre, citazioni, ricontrollati parola per parola).
+   NON rientrano e restano da chiedere prima: cambi di aspetto o di testi
+   del sito, cose nuove, il motore dei report e i prompt, privacy e
+   termini, post e messaggi promozionali, spese.
 6. Domande esplorative: risposta breve con una raccomandazione.
 7. **Onestà**: mai inventare o gonfiare numeri per gli utenti. Link sempre
    verificati (`_util/linkCheck.js` per i report).
@@ -369,12 +367,14 @@ art. 7. Scheda per l'avvocato: claude.ai/artifact/Y776k28X7HyxzMxcQgNXDX.
 
 - Google indicizza già il sito (confermato da Antonio).
 - Controllo del lunedì (lunedì 8:52 ora italiana, in automatico; Antonio:
-  "ogni lunedì controlla il sito a fondo" e "se trova errori li deve
-  sistemare senza chiedermi"): parte nella sessione di lavoro principale,
-  che può correggere e pubblicare (`trig_01Hw3VgdAYog52NywzNU8RK9`; la vecchia routine
+  "ogni lunedì controlla il sito a fondo", "se trova errori li deve
+  sistemare senza chiedermi", "devo solo dirti io pubblica"): parte nella
+  sessione di lavoro principale, che può correggere e pubblicare
+  (`trig_01Hw3VgdAYog52NywzNU8RK9`; la vecchia routine
   `trig_01LhjUc5ZkrXiqCkiqh5hiKo` girava in sola lettura ed è spenta).
   Fa: controllo a fondo del sito vero ("Controlli" qui sotto, con foto),
-  correzione degli errori secondo la regola 5, "punto della situazione"
+  correzione e prova degli errori secondo la regola 5 (online quando
+  Antonio scrive "pubblica"), "punto della situazione"
   (sito in breve, cosa è cambiato dal git log di main, 3 cose da "Cosa
   manca") e 3 post come Artifact privato (bozze: li pubblica Antonio).
   Se cambiano i controlli, aggiornare anche il suo testo.
