@@ -57,7 +57,7 @@ typo quando è frustrato: non vuol dire che vuole un tono più formale.
    prova da solo, senza chiedere, poi gli scrive cosa ha fatto con foto e
    numeri; per metterli online Antonio scrive "pubblica". Errori vuol dire:
    cose rotte (errori nella pagina, menu, PDF, modulo, pagina più larga
-   dello schermo, testo azzurro), link morti, fatti scaduti o cambiati
+   dello schermo, testo azzurro), link morti, falle del controllo "Sicurezza da fuori", fatti scaduti o cambiati
    sulla fonte (date, cifre, citazioni, ricontrollati parola per parola).
    NON rientrano e restano da chiedere prima: cambi di aspetto o di testi
    del sito, cose nuove, il motore dei report e i prompt, privacy e
@@ -415,6 +415,19 @@ art. 7. Scheda per l'avvocato: claude.ai/artifact/Y776k28X7HyxzMxcQgNXDX.
   HEAD` su un'altra porta), telefono e computer, 3 schemi: 0 differenze.
 - **Link esterni** di report di esempio e roadmap: 2xx/3xx. Locarno ha un
   controllo anti-robot (403): va aperto a mano.
+- **Sicurezza da fuori** (dalla skill `web-perimeter-owasp-2025-audit` del
+  pacchetto ECC, letta e provata il 23 novembre 2026, non installata; solo
+  letture, mai la prova sulla cache sul sito vero): 404 per `/.git/HEAD`,
+  `/.git/config`, `/package.json`, `/package-lock.json`, `/.npmrc`, `/.env`,
+  `/CLAUDE.md`, `/netlify.toml`, `/.claude/settings.json`,
+  `/.impeccable/config.json`, `/netlify/functions/*.js`; intestazioni HSTS,
+  CSP, X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy;
+  http con 301 verso https; le funzioni con `Origin` estraneo rispondono
+  solo `https://oneciak.com`; corpo sbagliato a `analyze` dà un errore corto.
+  La libreria PDF (jsPDF 2.5.1 da cdnjs) ha il sigillo `integrity`: deve
+  essere uguale a quello di `api.cdnjs.com/libraries/jspdf/2.5.1?fields=sri`
+  e il PDF deve scaricarsi; se si cambia versione, cambiare anche il
+  sigillo. `/admin-stats.html` risponde 200 apposta (serve la chiave).
 
 ## Strumenti
 
