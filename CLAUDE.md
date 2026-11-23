@@ -52,7 +52,16 @@ typo quando è frustrato: non vuol dire che vuole un tono più formale.
    differenze" vuol dire mostrarlo meglio.
 5. **Niente si pubblica senza il suo ok**: si prepara sul branch, si prova,
    si mostrano foto e numeri; su main solo quando scrive "pubblica". "Vai"
-   o "procedi" vogliono dire prepara e prova.
+   o "procedi" vogliono dire prepara e prova. **Controllo del lunedì**
+   (Antonio, 23 novembre 2026): gli errori che trova li corregge e li
+   prova da solo, senza chiedere, poi gli scrive cosa ha fatto con foto e
+   numeri; per metterli online Antonio scrive "pubblica". Errori vuol dire:
+   cose rotte (errori nella pagina, menu, PDF, modulo, pagina più larga
+   dello schermo, testo azzurro), link morti, fatti scaduti o cambiati
+   sulla fonte (date, cifre, citazioni, ricontrollati parola per parola).
+   NON rientrano e restano da chiedere prima: cambi di aspetto o di testi
+   del sito, cose nuove, il motore dei report e i prompt, privacy e
+   termini, post e messaggi promozionali, spese.
 6. Domande esplorative: risposta breve con una raccomandazione.
 7. **Onestà**: mai inventare o gonfiare numeri per gli utenti. Link sempre
    verificati (`_util/linkCheck.js` per i report).
@@ -171,7 +180,10 @@ sui festival.
   un'area): una aperta per gruppo; il titolo toccato resta fermo mentre le
   altre si chiudono, poi la pagina scivola finché è 12px sotto le barre
   (`settleOpened`, `jumpBy` senza `behavior:'instant'` che i Safari vecchi
-  non conoscono, `scrollUnderBars`); chiudere non sposta nulla. Le righe
+  non conoscono, `scrollUnderBars`: sul telefono conta la direzione in cui
+  si muoverà la pagina, non dove sta il titolo, perché salendo torna
+  l'intestazione; il 23 novembre 2026 un titolo appena sotto le barre
+  restava coperto); chiudere non sposta nulla. Le righe
   (`<details>`) le apre il browser (niente `preventDefault`: su iPhone il
   tocco su una riga non si apriva); il codice ascolta `toggle` e poi chiude
   le altre. La sezione
@@ -219,9 +231,13 @@ sui festival.
   controllate il 23 ottobre e il 2 novembre 2026; 3 produttori verificati a
   mano (Vivo Film, Leone Film Group, Lava Films; sui loro siti nessuna
   frase su come accettano progetti); TorinoFilmLab FeatureLab 2027 "Closed
-  (5 November 2026)".
+  (5 November 2026)", e nei testi "the 2027 call closed on 5 November 2026"
+  (trovato dal controllo del lunedì: tre frasi lo davano ancora aperto).
 - **`/roadmap/`**: 9 fasi, 49 lavori con spunta (`oneciak-roadmap-v1` nel
-  browser), 27 citazioni verificate parola per parola il 2026-10-24. Si
+  browser); le 25 citazioni (riquadri con fonte) ricontrollate parola per
+  parola sulle fonti il 23 novembre 2026 (anche i 4 PDF, con `pdftotext`):
+  Stephen Follows aveva cambiato due numeri sulle sue pagine (quote dei
+  festival $25-45 e $37-67, 13,038 festival studiati), aggiornati. Si
   raggiunge solo dal report (`STAGE_TO_ROADMAP`). CSS `roadmap/roadmap.css`
   allineato al sito. Se cambia una regola citata, ricontrollare.
 - `/guides/*` rimanda alla home (301 in `netlify.toml`).
@@ -350,14 +366,18 @@ art. 7. Scheda per l'avvocato: claude.ai/artifact/Y776k28X7HyxzMxcQgNXDX.
 ## Marketing
 
 - Google indicizza già il sito (confermato da Antonio).
-- Agente del lunedì (`trig_01LhjUc5ZkrXiqCkiqh5hiKo`, lunedì 8:52 ora
-  italiana, in automatico; Antonio: "ogni lunedì controlla il sito a fondo"):
-  per primo il controllo a fondo del sito vero (pagine, un'analisi vera,
-  giro nel browser di "Controlli" qui sotto con foto dei problemi, link,
-  fonti della roadmap), poi "punto della situazione" (sito in breve, cosa
-  è cambiato dal git log di main, 3 cose da "Cosa manca") e 3 post come
-  Artifact privato. Non può fare push e non pubblica. Se cambiano i
-  controlli, aggiornare anche il suo testo.
+- Controllo del lunedì (lunedì 8:52 ora italiana, in automatico; Antonio:
+  "ogni lunedì controlla il sito a fondo", "se trova errori li deve
+  sistemare senza chiedermi", "devo solo dirti io pubblica"): parte nella
+  sessione di lavoro principale, che può correggere e pubblicare
+  (`trig_01Hw3VgdAYog52NywzNU8RK9`; la vecchia routine
+  `trig_01LhjUc5ZkrXiqCkiqh5hiKo` girava in sola lettura ed è spenta).
+  Fa: controllo a fondo del sito vero ("Controlli" qui sotto, con foto),
+  correzione e prova degli errori secondo la regola 5 (online quando
+  Antonio scrive "pubblica"), "punto della situazione"
+  (sito in breve, cosa è cambiato dal git log di main, 3 cose da "Cosa
+  manca") e 3 post come Artifact privato (bozze: li pubblica Antonio).
+  Se cambiano i controlli, aggiornare anche il suo testo.
 - r/Screenwriting vieta contenuti AI, r/Filmmakers vieta i post solo-link.
 
 ## Cosa manca, in ordine
@@ -365,7 +385,10 @@ art. 7. Scheda per l'avvocato: claude.ai/artifact/Y776k28X7HyxzMxcQgNXDX.
 1. Avvocato: privacy, strada A o B, nome di Antonio; poi riscrivere privacy
    e termini.
 2. Prima del lancio: tetto di spesa Anthropic e ricarica del credito.
-3. Prova con 20-30 filmmaker veri (per esempio una scuola di cinema):
+3. Prima, prova con 5 filmmaker che Antonio conosce: piano e messaggi
+   pronti il 18 novembre 2026 (rivisti col plugin EGM); conta solo un passo
+   concreto che viene dal report, chiesto con il dettaglio (a chi, cosa).
+   Poi prova con 20-30 filmmaker veri (per esempio una scuola di cinema):
    quanti chiedono il report completo, quanti lo aprono, chi dopo 7 e 14
    giorni ha fatto davvero il passo consigliato; chiedere "qual è l'ultima
    cosa che hai fatto per il tuo film?". Ricontattarli richiede il loro
@@ -399,6 +422,13 @@ art. 7. Scheda per l'avvocato: claude.ai/artifact/Y776k28X7HyxzMxcQgNXDX.
   locale, hook in `.claude/settings.local.json`. Comando:
   `.claude/skills/impeccable/scripts/impeccable detect index.html`; falsi
   positivi spiegati in `.impeccable/config.json`.
+- **Elephant-Goldfish Model** (plugin `egm@egm` 0.1.1, github.com/google/
+  elephant-goldfish-model, Apache 2.0, "not an officially supported Google
+  product"; attivo da `.claude/settings.json`, solo istruzioni in testo,
+  niente comandi automatici): prima di un cambiamento grosso, il piano lo
+  rileggono revisori senza memoria della conversazione (`/egm:egm-review-loop`
+  con `comprehension` e `design_critic`). Provato il 18 novembre 2026 sul
+  piano della prova con 5 filmmaker: 2 problemi bloccanti trovati e corretti.
 - **Emil Kowalski design-eng** (`.claude/skills/emil-design-eng`, commit
   c8a7962, MIT): regole per animazioni e tocco.
 - **Prove nel browser**: script Playwright a mano con
