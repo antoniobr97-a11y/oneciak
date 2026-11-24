@@ -94,6 +94,20 @@ for (const dev of ['tel','pc']) {
   const bb=await barsBottom(p); T(dev+' indice "'+label+'" porta alla voce aperta', r.open && r.t>=bb-1 && r.t<400, 'titolo '+Math.round(r.t)+' barre '+Math.round(bb)+' aperta '+r.open);
  }
  T(dev+' indice ha 10 voci (5 aree + 5 passi)', items===10, 'voci '+items);
+ // the report's side column moves exactly like the form's side steps (computer)
+ if (dev==='pc') {
+  const look=sel=>p.evaluate(sel=>{const e=document.querySelector(sel); if(!e) return null; const c=getComputedStyle(e); return [c.fontSize,c.color,c.paddingTop,c.paddingLeft,c.borderBottomWidth,c.boxShadow].join(' | ');},sel);
+  await p.evaluate(()=>{const a=document.querySelector('.r-areas-h'); scrollTo(0,a.getBoundingClientRect().top+scrollY+150);}); await W(900);
+  const repOn=await look('#areaNav .an-item.on'), repOff=await look('#areaNav .an-item:not(.on)');
+  await p.evaluate(()=>{const a=document.getElementById('acc-trigger-4'); scrollTo(0,a.getBoundingClientRect().top+scrollY-250);});
+  const fr=[]; for(let k=0;k<8;k++){ fr.push(await p.evaluate(()=>parseFloat(getComputedStyle([...document.querySelectorAll('#areaNav .an-item')][4]).paddingLeft))); await W(45); }
+  T(dev+' colonna del report: lo scivolamento è animato', fr.some(v=>v>0.5&&v<11.5), fr.map(v=>v.toFixed(1)).join(' '));
+  const f2=await ctx.newPage(); await f2.goto(BASE); await f2.evaluate(()=>{document.getElementById('termsCheck').checked=true;onStartClick();}); await f2.waitForTimeout(700);
+  const formOn=await f2.evaluate(()=>{const e=document.querySelector('#formSteps li.on'); const c=getComputedStyle(e); return [c.fontSize,c.color,c.paddingTop,c.paddingLeft,c.borderBottomWidth,c.boxShadow].join(' | ');});
+  const formOff=await f2.evaluate(()=>{const e=document.querySelector('#formSteps li:not(.on)'); const c=getComputedStyle(e); return [c.fontSize,c.color,c.paddingTop,c.paddingLeft,c.borderBottomWidth,c.boxShadow].join(' | ');});
+  await f2.close();
+  T(dev+' colonna del report uguale ai passi del modulo', repOn===formOn && repOff===formOff, repOn+' vs '+formOn);
+ }
  // PDF
  await p.evaluate(()=>scrollTo(0,document.body.scrollHeight)); await W(400);
  try { const [dl]=await Promise.all([p.waitForEvent('download',{timeout:30000}), tap(p.locator('.pdf-row button').first())]); const f=OUT+dev+'_report.pdf'; await dl.saveAs(f); const sz=fs.statSync(f).size; T(dev+' PDF si scarica',sz>100000,sz+' byte'); } catch(e){ T(dev+' PDF si scarica',false,e.message.slice(0,60)); }
