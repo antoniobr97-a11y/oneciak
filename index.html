@@ -50,7 +50,6 @@
   --night: #140d10;
   --on-night: #f2ede6;
   --on-night-2: #a5a09a;
-  --ember: #d6784c;
   /* form fields: a tint of the ground, not a white box on top of it */
   --field: rgba(20,18,16,0.045);
   --field-hover: rgba(20,18,16,0.07);
@@ -267,8 +266,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-sheet-name small { display: block; margin-top: 3px; font-size: 13px; line-height: 1.4; color: var(--on-night-2); }
 .l-sheet-row b { font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
 .l-bar { display: block; height: 3px; background: rgba(255,255,255,0.12); border-radius: 2px; overflow: hidden; }
-.l-bar i { display: block; height: 100%; background: var(--on-night); border-radius: 2px; transform-origin: left; animation: barIn 1s var(--ease) both; }
-.l-bar i.ember { background: var(--ember); }
+/* The sample card colours its bars like the report it opens (bar-high,
+   bar-mid, bar-low from scoreColor: 7+, 5+, under 5). */
+.l-bar i { display: block; height: 100%; border-radius: 2px; transform-origin: left; animation: barIn 1s var(--ease) both; }
 .l-sheet-row:nth-child(1) .l-bar i { animation-delay: 0.45s; }
 .l-sheet-row:nth-child(2) .l-bar i { animation-delay: 0.52s; }
 .l-sheet-row:nth-child(3) .l-bar i { animation-delay: 0.59s; }
@@ -1099,7 +1099,6 @@ details.more > summary:active { transform: scale(0.98); }
   @media (hover: hover) and (pointer: fine) { .l-sheet:hover { border-color: rgba(20,18,16,0.16); } }
   .l-sheet-score, .l-sheet-row { border-bottom-color: rgba(20,18,16,0.08); }
   .l-bar { background: rgba(20,18,16,0.1); }
-  .l-bar i.ember { background: #c4562a; }
   .menu-header { border-bottom-color: rgba(20,18,16,0.07); }
   .menu-faq-item:first-of-type { border-top-color: rgba(20,18,16,0.14); }
   .menu-faq-item { border-bottom-color: rgba(20,18,16,0.08); }
@@ -1271,11 +1270,11 @@ details.more > summary:active { transform: scale(0.98); }
         <span class="l-sheet-credits">Drama · Feature Film · Italy</span>
         <span class="l-sheet-score"><span class="n">5.0<small>/10</small></span><span class="l">Promising intimate concept, underdeveloped</span></span>
         <span class="l-sheet-rows">
-          <span class="l-sheet-row"><span class="l-sheet-name">Creative package<small>Is the logline strong, which attachments would move financiers.</small></span><span class="l-bar"><i class="ember" style="width:65%"></i></span><b>6.5</b></span>
-          <span class="l-sheet-row"><span class="l-sheet-name">Financial plan<small>Is the budget realistic, which funds and tax credits fit.</small></span><span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
-          <span class="l-sheet-row"><span class="l-sheet-name">Market &amp; audience<small>Who watches films like this, how comparable titles did.</small></span><span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
-          <span class="l-sheet-row"><span class="l-sheet-name">Festival strategy<small>Where to premiere first without burning your status.</small></span><span class="l-bar"><i style="width:50%"></i></span><b>5.0</b></span>
-          <span class="l-sheet-row" style="border-bottom:0"><span class="l-sheet-name">Distribution<small>Realistic routes to buyers, from festivals to streaming.</small></span><span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
+          <span class="l-sheet-row"><span class="l-sheet-name">Creative package<small>Is the logline strong, which attachments would move financiers.</small></span><span class="l-bar"><i class="bar-mid" style="width:65%"></i></span><b>6.5</b></span>
+          <span class="l-sheet-row"><span class="l-sheet-name">Financial plan<small>Is the budget realistic, which funds and tax credits fit.</small></span><span class="l-bar"><i class="bar-low" style="width:45%"></i></span><b>4.5</b></span>
+          <span class="l-sheet-row"><span class="l-sheet-name">Market &amp; audience<small>Who watches films like this, how comparable titles did.</small></span><span class="l-bar"><i class="bar-low" style="width:45%"></i></span><b>4.5</b></span>
+          <span class="l-sheet-row"><span class="l-sheet-name">Festival strategy<small>Where to premiere first without burning your status.</small></span><span class="l-bar"><i class="bar-mid" style="width:50%"></i></span><b>5.0</b></span>
+          <span class="l-sheet-row" style="border-bottom:0"><span class="l-sheet-name">Distribution<small>Realistic routes to buyers, from festivals to streaming.</small></span><span class="l-bar"><i class="bar-low" style="width:45%"></i></span><b>4.5</b></span>
         </span>
         <span class="l-sheet-foot"><span>Sample report, illustrative project</span><span>Open full report <span class="arrow">→</span></span></span>
       </button>

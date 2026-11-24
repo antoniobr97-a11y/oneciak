@@ -133,7 +133,10 @@ pulsante. Blocchi CSS "LIGHT AND DARK" in fondo a index.html e a
 - **Un solo segno, un solo stile di voto**: stesso pallino grigio in tutte
   le liste; voti sempre "X.X/10" nel colore del testo, colore solo sulla
   barretta (blocco CSS "ONE MARKER, ONE SCORE STYLE"); anche Strong, Moderate,
-  Weak sotto i voti delle aree sono grigi.
+  Weak sotto i voti delle aree sono grigi. Le barre della scheda in home
+  hanno gli stessi colori del report (`bar-high/mid/low` da `scoreColor`;
+  prima erano a mano, arancio sul 6.5 e bianco sul 4.5: Antonio se n'è
+  accorto, i controlli no; ora `tests/functions.js` lo prova).
 - **Movimento** (regole di Emil Kowalski, `.claude/skills/emil-design-eng`):
   `--ease: cubic-bezier(0.23, 1, 0.32, 1)` anche in roadmap, privacy,
   termini; aperture 220 ms con `openIn`, freccia che gira, pressione
