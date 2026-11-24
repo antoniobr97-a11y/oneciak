@@ -207,7 +207,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 /* Grid items may shrink below their longest word: with Safari text zoom (aA 150%) the phone is ~260px wide. */
 .l-hero-grid > * { min-width: 0; }
 .l-headline { overflow-wrap: break-word; }
-.l-mono { font-family: var(--mono); font-size: 12px; font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; }
 .l-headline {
   font-family: var(--display); font-size: clamp(44px, 6.2vw, 86px);
   font-weight: 300; line-height: 0.98; letter-spacing: -0.045em; color: var(--on-night);
@@ -235,7 +234,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   font-size: 15px; font-weight: 500; cursor: pointer; width: fit-content; letter-spacing: -0.01em;
 }
 .l-btn:focus-visible { outline: 2px solid var(--on-night); outline-offset: 3px; }
-.l-specs { margin-top: 16px; font-size: 14px; color: var(--on-night-2); }
 .sample-banner { background: var(--night); color: var(--on-night); text-align: left; font-size: 13px; line-height: 1.4; font-weight: 400; padding: 7px 20px; }
 .sample-banner a { color: inherit; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
 
@@ -255,17 +253,18 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 @media (hover: hover) and (pointer: fine) { .l-sheet:hover { border-color: rgba(255,255,255,0.16); transform: translateY(-2px); } }
 .l-sheet:active { transform: scale(0.99); }
 .l-sheet:focus-visible { outline: 2px solid var(--on-night); outline-offset: 4px; }
-.l-sheet-h { display: flex; justify-content: space-between; gap: 12px; color: var(--on-night-2); }
-.l-sheet-title { display: block; font-family: var(--display); font-weight: 500; font-size: 26px; letter-spacing: -0.02em; margin-top: 18px; }
+/* The sample card reads like the report it opens: poster title, credits
+   under it, the score no bigger than the title (Antonio: the title was small
+   here and huge once opened, the 5.0 too big). */
+.l-sheet-title { display: block; font-family: var(--display); font-weight: 700; font-size: clamp(28px, 11vw, 48px); line-height: 0.95; letter-spacing: -0.05em; overflow-wrap: break-word; }
+.l-sheet-credits { display: block; margin-top: 10px; font-size: 14px; color: var(--on-night-2); }
 .l-sheet-score { display: flex; align-items: baseline; gap: 12px; margin-top: 22px; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.09); }
-.l-sheet-score .n { font-family: var(--display); font-size: 56px; font-weight: 300; letter-spacing: -0.04em; line-height: 1; }
-.l-sheet-score .n small { font-size: 20px; color: var(--on-night-2); }
+.l-sheet-score .n { font-family: var(--display); font-size: 40px; font-weight: 300; letter-spacing: -0.04em; line-height: 1; }
+.l-sheet-score .n small { font-size: 18px; color: var(--on-night-2); }
 .l-sheet-score .l { font-size: 14px; font-weight: 500; }
 .l-sheet-rows { display: block; }
 .l-sheet-row { display: grid; grid-template-columns: 1fr 96px 26px; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.09); font-size: 14px; }
-.l-sheet-row .l-mono { color: var(--on-night-2); font-size: 11px; }
 .l-sheet-row { align-items: start; }
-.l-sheet-row .l-mono { padding-top: 3px; }
 .l-sheet-row .l-bar { margin-top: 9px; }
 .l-sheet-name small { display: block; margin-top: 3px; font-size: 13px; line-height: 1.4; color: var(--on-night-2); }
 .l-sheet-row b { font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
@@ -310,9 +309,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .menu-body { flex-shrink: 0; position: relative; width: 100%; max-width: 640px; margin: 0 auto; padding: 56px 24px 56px; }
 .menu-sec { margin-bottom: 48px; }
 .menu-sec-title { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-night-2); margin-bottom: 14px; }
-.menu-steps { list-style: none; border-top: 1px solid rgba(255,255,255,0.14); }
-.menu-steps li { display: flex; gap: 16px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
-.menu-step-title { font-family: var(--display); font-size: 20px; font-weight: 400; letter-spacing: -0.015em; color: var(--on-night); }
+/* One sentence, not rows: rows here looked like links you could tap. */
+.menu-how { font-size: 18px; line-height: 1.5; color: var(--on-night); max-width: 36ch; }
 .menu-faq-item { border-bottom: 1px solid rgba(255,255,255,0.08); }
 .menu-faq-item:first-of-type { border-top: 1px solid rgba(255,255,255,0.14); }
 .menu-faq-item summary { list-style: none; cursor: pointer; padding: 16px 0; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
@@ -365,13 +363,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .f-subtitle { margin-top: 20px; font-size: 15.5px; line-height: 1.55; color: var(--muted); max-width: 34ch; font-weight: 400; }
 .f-steps { list-style: none; margin-top: 40px; border-top: 1px solid var(--border); }
 .f-steps li { display: flex; gap: 14px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); transition: color 0.3s var(--ease); }
-.f-steps li .l-mono { transition: color 0.3s var(--ease); }
 .f-steps li.on { color: var(--text); }
 .f-steps li.on { box-shadow: inset 2px 0 0 #b4552b; padding-left: 12px; }
 .f-steps li { transition: color 0.3s var(--ease), padding-left 0.3s var(--ease), box-shadow 0.3s var(--ease); }
 #sec-form .card { background: transparent; box-shadow: none; border: 0; border-radius: 0; padding: 0 0 44px; margin-bottom: 44px; border-bottom: 1px solid var(--border); }
 #sec-form .card-title { display: flex; gap: 14px; align-items: baseline; font-family: var(--display); font-size: 22px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 28px; color: var(--text); }
-#sec-form .card-title .l-mono { color: var(--muted); }
 #sec-form label { font-weight: 500; font-size: 13.5px; margin-bottom: 9px; }
 #sec-form input[type="text"], #sec-form input[type="email"], #sec-form select, #sec-form textarea {
   background-color: var(--field); box-shadow: inset 0 0 0 1px transparent; border-radius: 10px; padding: 14px 16px; font-size: 15.5px;
@@ -656,8 +652,8 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
 }
 .overall-sublabel { font-size: 15px; font-weight: 500; color: var(--on-night); }
-.overall-num { font-family: var(--display); font-size: 64px; font-weight: 300; letter-spacing: -0.04em; color: var(--on-night) !important; }
-.overall-num .denom { font-family: var(--display); font-size: 22px; font-weight: 300; color: var(--on-night-2); }
+.overall-num { font-family: var(--display); font-size: 48px; font-weight: 300; letter-spacing: -0.04em; color: var(--on-night) !important; }
+.overall-num .denom { font-family: var(--display); font-size: 18px; font-weight: 300; color: var(--on-night-2); }
 #overallScore > div:last-child:not(.overall-card) { color: var(--on-night-2) !important; font-weight: 400 !important; padding: 0 !important; margin-top: 14px !important; font-size: 13px !important; }
 /* the night hero above is the "header"; the body starts right at the dissolve */
 /* body column lines up exactly with the header text: same max width plus
@@ -871,8 +867,10 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .an-col { display: none; }
 @media (min-width: 1100px) {
   #sec-results .r-main { padding-left: 264px; }
-  .area-nav { top: 112px; left: max(24px, calc(50% - 440px)); width: 200px; transform: translateX(-8px); }
-  .area-nav.is-on { transform: none; }
+  /* Always there, never fading in (Antonio: "farli comparire tutto a un
+     tratto non mi piace"): it starts level with "Your film, area by area",
+     rides up with the page and stops under the header (top set by sync). */
+  .area-nav { top: 112px; left: max(24px, calc(50% - 440px)); width: 200px; opacity: 1; pointer-events: auto; transition: none; }
   .an-col { display: block; }
   .an-bar { display: none; }
   @media (hover: hover) and (pointer: fine) { .an-sec:hover, .an-item:hover { color: var(--text); } }
@@ -933,7 +931,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   #sec-results .r-hero, #sec-myreports .r-hero { padding: 108px 20px 200px; }
   #sec-results .r-main, #sec-myreports .r-main { padding-left: 20px; padding-right: 20px; }
   .overall-card { padding: 20px; }
-  .overall-num { font-size: 52px; }
+  .overall-num { font-size: 40px; }
 }
 
 /* ══════════════════════
@@ -1099,8 +1097,8 @@ details.more > summary:active { transform: scale(0.98); }
   .l-bar { background: rgba(20,18,16,0.1); }
   .l-bar i.ember { background: #c4562a; }
   .menu-header { border-bottom-color: rgba(20,18,16,0.07); }
-  .menu-steps, .menu-faq-item:first-of-type { border-top-color: rgba(20,18,16,0.14); }
-  .menu-steps li, .menu-faq-item { border-bottom-color: rgba(20,18,16,0.08); }
+  .menu-faq-item:first-of-type { border-top-color: rgba(20,18,16,0.14); }
+  .menu-faq-item { border-bottom-color: rgba(20,18,16,0.08); }
   #sec-results .r-header, #sec-myreports .r-header { border-bottom-color: rgba(20,18,16,0.07); }
   #sec-results .back-btn, #sec-myreports .back-btn { background: rgba(255,255,255,0.45); border-color: rgba(20,18,16,0.18); }
   .overall-card { background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.4)); border-color: rgba(20,18,16,0.08) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.7) !important; }
@@ -1223,11 +1221,7 @@ details.more > summary:active { transform: scale(0.98); }
     <div class="menu-body">
       <div class="menu-sec">
         <div class="menu-sec-title">How it works</div>
-        <ol class="menu-steps">
-          <li><span class="menu-step-title">Describe your project</span></li>
-          <li><span class="menu-step-title">See a preview of all five scores</span></li>
-          <li><span class="menu-step-title">Get the full report by email, free</span></li>
-        </ol>
+        <p class="menu-how">Describe your project and see all five scores right away. The full report, with the names of producers, funds and festivals, arrives by email. Both are free.</p>
       </div>
       <div class="menu-sec">
         <div class="menu-sec-title">Questions</div>
@@ -1267,11 +1261,10 @@ details.more > summary:active { transform: scale(0.98); }
         <div class="l-actions">
           <button class="l-btn" onclick="onStartClick()">Analyze your project</button>
         </div>
-        <p class="l-specs">No account needed. Save it as a PDF.</p>
       </div>
       <button type="button" class="l-sheet" onclick="showSampleReport()">
-        <span class="l-sheet-h l-mono"><span>Drama / Feature</span></span>
         <span class="l-sheet-title">Northbound</span>
+        <span class="l-sheet-credits">Drama · Feature Film · Italy</span>
         <span class="l-sheet-score"><span class="n">5.0<small>/10</small></span><span class="l">Promising intimate concept, underdeveloped</span></span>
         <span class="l-sheet-rows">
           <span class="l-sheet-row"><span class="l-sheet-name">Creative package<small>Is the logline strong, which attachments would move financiers.</small></span><span class="l-bar"><i class="ember" style="width:65%"></i></span><b>6.5</b></span>
@@ -2686,7 +2679,7 @@ document.addEventListener('click', function(e) {
   if (!(e.target.closest && e.target.closest('#areaNav'))) closeReportNav();
 });
 var areaNavObserver = null, areaVisObserver = null;
-var navScrollSync = null;
+var navScrollSync = null, navResize = null;
 function mountReportNav(sections) {
   var host = document.getElementById('sec-results');
   var nav = document.getElementById('areaNav');
@@ -2738,7 +2731,20 @@ function mountReportNav(sections) {
   // The current section is read from where things are on screen (the last
   // part and area whose top has passed 35% of the height), on every scroll:
   // a jump (a row closing above, a tap in the index) must not leave it stale.
+  // Wide screens: the column starts level with the first part and stops
+  // under the header; set on the scroll event itself so it never lags.
+  // offsetTop, not getBoundingClientRect: the areas rise 28px as they
+  // reveal, and the column would be left 28px low once they settle.
+  var place = function() {
+    if (window.innerWidth >= 1100 && parts.length) {
+      var y = 0, e = parts[0].el;
+      while (e) { y += e.offsetTop; e = e.offsetParent; }
+      nav.style.top = Math.max(112, Math.round(y - window.scrollY)) + 'px';
+    }
+    else nav.style.top = '';
+  };
   var sync = function() {
+    place();
     var line = window.innerHeight * 0.35, k = parts.length ? parts[0].k : 0, i = null, j = null;
     parts.forEach(function(x) { if (x.el.getBoundingClientRect().top < line) k = x.k; });
     if (REPORT_PARTS[k] && REPORT_PARTS[k].areas) areaEls.forEach(function(el, n) { if (el.getBoundingClientRect().top < line) i = n; });
@@ -2746,21 +2752,24 @@ function mountReportNav(sections) {
     show(k, i, j);
   };
   var queued = false;
-  if (navScrollSync) window.removeEventListener('scroll', navScrollSync);
-  navScrollSync = function() { if (queued) return; queued = true; requestAnimationFrame(function() { queued = false; sync(); }); };
+  if (navScrollSync) { window.removeEventListener('scroll', navScrollSync); window.removeEventListener('resize', navScrollSync); }
+  navScrollSync = function() { place(); if (queued) return; queued = true; requestAnimationFrame(function() { queued = false; sync(); }); };
   window.addEventListener('scroll', navScrollSync, { passive: true });
+  window.addEventListener('resize', navScrollSync);
+  // Text above changing height (the summary opening) moves the areas
+  // without a scroll: follow it too.
+  if (navResize) navResize.disconnect();
+  if ('ResizeObserver' in window) { navResize = new ResizeObserver(place); navResize.observe(host); }
   areaNavObserver = new IntersectionObserver(sync, { rootMargin: '-30% 0px -60% 0px' });
   parts.forEach(function(x) { areaNavObserver.observe(x.el); });
   areaEls.forEach(function(el) { areaNavObserver.observe(el); });
   // Phones: the bar shows once the whole opening has scrolled away. Wide
-  // screens: the column shows as soon as the opening's summary has gone
-  // above it, just before the five areas arrive, so it never sits on the
-  // poster title (Antonio: "un attimo prima che si scorre per vedere" le aree).
-  var wide = window.innerWidth >= 1100;
-  var watch = wide ? document.getElementById('resultSubtitle') : host.querySelector('.r-hero');
+  // screens: the column is always shown, placed by sync() beside the five
+  // areas, so it never sits on the poster title.
+  var watch = host.querySelector('.r-hero');
   areaVisObserver = new IntersectionObserver(function(entries) {
     entries.forEach(function(e) { nav.classList.toggle('is-on', !e.isIntersecting); if (e.isIntersecting) closeReportNav(); });
-  }, { rootMargin: (wide ? '-112px' : '-64px') + ' 0px 0px 0px' });
+  }, { rootMargin: '-64px 0px 0px 0px' });
   if (watch) areaVisObserver.observe(watch);
   sync();
 }

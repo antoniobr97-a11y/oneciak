@@ -158,7 +158,11 @@ sui festival.
 ## Pagine e flusso
 
 - **Home**: compatta. Navbar trasparente, poi vetro, poi chiara
-  (`updateLandingNav()`). Scheda di vetro con i voti veri di Northbound. In
+  (`updateLandingNav()`). Scheda di vetro con i voti veri di Northbound,
+  fatta come l'apertura del report: titolo grande Geist 700 (fino a 48px),
+  sotto i crediti, voto 40px (prima titolo 26px e voto 56px: "piccolo qui,
+  un bestione una volta aperto"). Niente riga "No account needed". Nel menu
+  "How it works" è una frase sola, non righe che sembrano link. In
   fondo e nel menu solo Privacy Policy e Terms of Service; nel menu domande
   frequenti che si aprono come le righe del report.
 - **Modulo**: niente card, sezioni separate da una linea. Solo
@@ -173,7 +177,8 @@ sui festival.
   grande come un manifesto (`fitTitle`: una riga larga quanto l'apertura,
   24-168px; i titoli lunghi vanno a capo tra le parole in circa 3 righe),
   sotto i crediti (genere · formato · paese · lingua) e la logline
-  (`setHeroTitle`), poi la scheda di vetro col voto. Stessa apertura nel PDF
+  (`setHeroTitle`), poi la scheda di vetro col voto (48px, 40px sul
+  telefono: prima 64 e 52, "sproporzionato"). Stessa apertura nel PDF
   (copertina) e nella mail (titolo 30-96px, ridotto sotto i 520px). PDF e
   mail: titoli come parole in grassetto, niente rosso e verde, voti "X.X/10".
 - **Aprire e chiudere** (aree, righe di "Your path", blocchi dentro
@@ -211,11 +216,13 @@ sui festival.
   con le 5 aree e il voto, poi "Your path" con i passi del report (presi
   dalle righe della pagina; `goToStep` apre la riga come un tocco; la barra
   del telefono mostra il nome del passo), su computer e telefono. Dai 1100px colonna fissa a
-  sinistra (testo del corpo in colonna di 640px): non c'è in alto, così il
-  titolo resta grande e libero (Antonio: la colonna da subito "ha rovinato
-  il titolo"); entra (dissolvenza e 8px da sinistra) appena il riassunto
-  dell'apertura è salito sopra di lei, poco prima delle 5 aree, e non copre
-  mai testi dell'apertura (misurato a 1100, 1280, 1600). L'area attuale
+  sinistra (testo del corpo in colonna di 640px): non sta accanto al titolo
+  (Antonio: la colonna da subito "ha rovinato il titolo") e non compare
+  all'improvviso ("farli comparire tutto a un tratto non mi piace", 24
+  novembre 2026): c'è sempre, parte all'altezza di "Your film, area by
+  area", sale con la pagina e si ferma sotto l'intestazione (`place` in
+  `mountReportNav`, con `offsetTop` perché le aree salgono di 28px quando
+  appaiono; misurato a 1100, 1280, 1600: 0 scarti su 30 colpi di rotella). L'area attuale
   scivola di 8px e si accende col segno arancio in 0.3s, come i passi del
   modulo. Sotto i 1100px, barra con la sezione attuale e "Sections" che
   compare quando tutta l'apertura è uscita; l'elenco si apre DENTRO la
