@@ -245,9 +245,12 @@ sui festival.
   novembre 2026): c'è sempre, parte all'altezza di "Your film, area by
   area", sale con la pagina e si ferma sotto l'intestazione (`place` in
   `mountReportNav`, con `offsetTop` perché le aree salgono di 28px quando
-  appaiono; misurato a 1100, 1280, 1600: 0 scarti su 30 colpi di rotella). L'area attuale
-  scivola di 8px e si accende col segno arancio in 0.3s, come i passi del
-  modulo. Sotto i 1100px, barra con la sezione attuale e "Sections" che
+  appaiono; misurato a 1100, 1280, 1600: 0 scarti su 30 colpi di rotella). Le
+  voci sono righe identiche ai passi del modulo (Antonio: "la stessa identica
+  cosa"): linea tra le righe, quella attuale si accende, scivola di 12px e
+  prende la linea arancio in 0.3s; `tests/functions.js` le confronta col
+  modulo e controlla che lo scivolamento sia animato (il blocco ONE PRESS
+  l'aveva tolto: per `#areaNav` la transizione resta 0.3s). Sotto i 1100px, barra con la sezione attuale e "Sections" che
   compare quando tutta l'apertura è uscita; l'elenco si apre DENTRO la
   barra, che si allunga (fuori da una barra col vetro sfocato iPhone Safari
   può non ricevere i tocchi: "Your path" non si toccava). Nell'anteprima solo le aree.
