@@ -127,7 +127,8 @@ pulsante. Blocchi CSS "LIGHT AND DARK" in fondo a index.html e a
   parole in Carlito grassetto. Icone disegnate, mai simboli di testo.
 - **Un solo segno, un solo stile di voto**: stesso pallino grigio in tutte
   le liste; voti sempre "X.X/10" nel colore del testo, colore solo sulla
-  barretta (blocco CSS "ONE MARKER, ONE SCORE STYLE").
+  barretta (blocco CSS "ONE MARKER, ONE SCORE STYLE"); anche Strong, Moderate,
+  Weak sotto i voti delle aree sono grigi.
 - **Movimento** (regole di Emil Kowalski, `.claude/skills/emil-design-eng`):
   `--ease: cubic-bezier(0.23, 1, 0.32, 1)` anche in roadmap, privacy,
   termini; aperture 220 ms con `openIn`, freccia che gira, pressione
