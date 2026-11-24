@@ -459,7 +459,13 @@ testo azzurro, trattini lunghi, mezzi pixel). Se cambia una funzione, si
 aggiorna il programma nello stesso commit. Terzo e quarto, `tests/rules.js`
 (caratteri, `:active`, angoli 10px, maiuscolo, contrasto su ogni vista; in
 locale la 404 è quella di python, in Times) e `tests/press.js` (stessa
-pressione su ogni tasto).
+pressione su ogni tasto). Quinto, `tests/motion.js A B`: confronta i movimenti di
+ogni elemento tra due versioni (di solito il sito vero e il server locale)
+e segnala quelli cambiati e, soprattutto, quelli PERSI (una cosa che si
+muoveva e ora salta): va lanciato prima di ogni pubblicazione che tocca il
+CSS. Nato dal 24 novembre 2026: il blocco ONE PRESS aveva tolto lo
+scivolamento alla colonna del report e la sfumatura dell'ombra ai 4
+bottoni principali, e nessun controllo se n'era accorto.
 
 - **Giro sul sito vero**: home, menu, modulo, report di esempio tutto
   aperto, My Reports, roadmap, privacy, termini, 404 × larghezze 262, 320,
