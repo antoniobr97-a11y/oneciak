@@ -38,8 +38,11 @@ a { color: inherit; }
   backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid rgba(0,0,0,0.06);
 }
-.logo { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; text-decoration: none; color: var(--text); }
-.back-link { font-size: 14px; font-weight: 500; color: var(--text); text-decoration: none; }
+.logo { font-family: 'Geist', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; text-decoration: none; color: var(--text); }
+.back-link .ic { display: inline-block; vertical-align: -1px; margin-right: 6px; }
+.back-link { display: inline-flex; align-items: center; font-size: 14px; font-weight: 500; color: var(--text); text-decoration: none; }
+.logo, .back-link { transition: transform 0.16s cubic-bezier(0.23, 1, 0.32, 1); }
+.logo:active, .back-link:active { transform: scale(0.97); }
 @media (hover: hover) and (pointer: fine) { .back-link:hover { opacity: 0.7; } }
 @media (pointer: coarse) { .logo, .back-link { display: inline-block; padding: 12px 0; margin: -12px 0; } }
 
@@ -55,7 +58,7 @@ strong { font-weight: 600; }
 .card { background: var(--cream); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 20px 22px; margin: 24px 0; }
 .card p:last-child { margin-bottom: 0; }
 a.inline { text-decoration: underline; text-underline-offset: 2px; }
-a.inline:hover { opacity: 0.7; }
+@media (hover: hover) and (pointer: fine) { a.inline:hover { opacity: 0.7; } }
 footer { border-top: 1px solid var(--border-light); padding: 32px 24px; text-align: center; }
 footer p { font-size: 13px; color: var(--muted-light); font-weight: 400; }
 footer a { text-decoration: underline; text-underline-offset: 2px; }
@@ -71,7 +74,7 @@ footer a { text-decoration: underline; text-underline-offset: 2px; }
 
 <nav class="nav">
   <a href="/" class="logo">OneCiak</a>
-  <a href="/" class="back-link">← Back to OneCiak</a>
+  <a href="/" class="back-link"><svg class="ic" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M10.5 6H2M5.5 2.5 2 6l3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Back to OneCiak</a>
 </nav>
 
 <div class="wrap">

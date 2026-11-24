@@ -50,7 +50,6 @@
   --night: #140d10;
   --on-night: #f2ede6;
   --on-night-2: #a5a09a;
-  --ember: #d6784c;
   /* form fields: a tint of the ground, not a white box on top of it */
   --field: rgba(20,18,16,0.045);
   --field-hover: rgba(20,18,16,0.07);
@@ -125,9 +124,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   transition: transform 0.16s var(--ease), box-shadow 0.2s var(--ease), background 0.2s;
 }
 @media (hover: hover) and (pointer: fine) { .btn-primary:hover, .btn-unlock:hover { background: var(--accent-hover); } .l-btn:hover { background: #fff; } }
-.btn-primary:active, .btn-unlock:active { background: var(--accent-press); transform: scale(0.98); }
-.menu-cta:active { transform: scale(0.97); }
-.l-btn:active { transform: scale(0.97); }
+.btn-primary:active, .btn-unlock:active { background: var(--accent-press); }
 
 /* ── SECTIONS ── */
 #sec-landing { display: block; }
@@ -155,9 +152,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-logo { font-family: var(--display); font-size: 16px; font-weight: 600; color: inherit; letter-spacing: -0.01em; display: inline-flex; align-items: center; gap: 9px; cursor: pointer; }
 .l-logo svg path, .l-logo svg rect { fill: currentColor; }
 .l-nav-right { display: flex; align-items: center; gap: 26px; }
-.l-nav-reports { font-size: 14px; font-weight: 500; color: inherit; text-decoration: none; white-space: nowrap; padding: 8px 14px; border-radius: 8px; border: 1px solid currentColor; border-color: rgba(255,255,255,0.22); transition: border-color 0.35s var(--ease), background 0.2s; }
+.l-nav-reports { font-size: 14px; font-weight: 500; color: inherit; text-decoration: none; white-space: nowrap; padding: 8px 14px; border-radius: 10px; border: 1px solid currentColor; border-color: rgba(255,255,255,0.22); transition: border-color 0.35s var(--ease), background 0.2s; }
 .l-nav.is-light .l-nav-reports { border-color: rgba(20,18,16,0.18); }
-.l-nav-reports:active { transform: scale(0.97); }
 .l-nav .hamburger { background: none; }
 .l-nav .hamburger span { background: currentColor; }
 .l-nav.is-light .hamburger { background: none; }
@@ -244,11 +240,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   color: var(--on-night); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
   padding: 28px 28px 14px;
-  animation: riseIn 0.9s 0.2s var(--ease) both;
+  animation: riseIn 0.9s 0.2s var(--ease) backwards; /* backwards: "both" kept transform and killed :hover and :active */
   transition: border-color 0.3s var(--ease), transform 0.3s var(--ease);
 }
 @media (hover: hover) and (pointer: fine) { .l-sheet:hover { border-color: rgba(255,255,255,0.16); transform: translateY(-2px); } }
-.l-sheet:active { transform: scale(0.99); }
 .l-sheet:focus-visible { outline: 2px solid var(--on-night); outline-offset: 4px; }
 /* The sample card reads like the report it opens: poster title, credits
    under it, the score no bigger than the title (Antonio: the title was small
@@ -267,8 +262,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-sheet-name small { display: block; margin-top: 3px; font-size: 13px; line-height: 1.4; color: var(--on-night-2); }
 .l-sheet-row b { font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
 .l-bar { display: block; height: 3px; background: rgba(255,255,255,0.12); border-radius: 2px; overflow: hidden; }
-.l-bar i { display: block; height: 100%; background: var(--on-night); border-radius: 2px; transform-origin: left; animation: barIn 1s var(--ease) both; }
-.l-bar i.ember { background: var(--ember); }
+/* The sample card colours its bars like the report it opens (bar-high,
+   bar-mid, bar-low from scoreColor: 7+, 5+, under 5). */
+.l-bar i { display: block; height: 100%; border-radius: 2px; transform-origin: left; animation: barIn 1s var(--ease) both; }
 .l-sheet-row:nth-child(1) .l-bar i { animation-delay: 0.45s; }
 .l-sheet-row:nth-child(2) .l-bar i { animation-delay: 0.52s; }
 .l-sheet-row:nth-child(3) .l-bar i { animation-delay: 0.59s; }
@@ -303,7 +299,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .menu-close::before { transform: rotate(45deg); }
 .menu-close::after { transform: rotate(-45deg); }
 @media (hover: hover) and (pointer: fine) { .menu-close:hover { opacity: 0.7; } }
-.menu-close:active { transform: scale(0.92); }
 .menu-body { flex-shrink: 0; position: relative; width: 100%; max-width: 640px; margin: 0 auto; padding: 56px 24px 56px; }
 .menu-sec { margin-bottom: 48px; }
 .menu-sec-title { font-family: var(--mono); font-size: 13px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-night-2); margin-bottom: 14px; }
@@ -314,7 +309,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .menu-faq-item summary { list-style: none; cursor: pointer; padding: 16px 0; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .menu-faq-item summary::-webkit-details-marker { display: none; }
 .menu-faq-item summary { transition: transform 0.15s ease-out; }
-.menu-faq-item summary:active { transform: scale(0.99); }
 .menu-faq-item .rblock-icon { color: var(--on-night-2); }
 .menu-faq-item[open] .rblock-icon { transform: rotate(180deg); }
 .menu-faq-item[open] > .menu-faq-a { animation: openIn 0.22s var(--ease) both; }
@@ -329,7 +323,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 /* HAMBURGER */
 .hamburger { background: none; border: none; border-radius: 0; width: 34px; height: 34px; padding: 0; margin-right: -6px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 5px; color: inherit; transition: opacity 0.2s, transform 0.15s; }
 @media (hover: hover) and (pointer: fine) { .hamburger:hover { opacity: 0.7; } }
-.hamburger:active { transform: scale(0.92); }
 .hamburger span { display: block; width: 20px; height: 1.5px; background: currentColor; border-radius: 2px; transition: transform 0.25s var(--ease), opacity 0.25s var(--ease); }
 .hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
 .hamburger.open span:nth-child(2) { opacity: 0; }
@@ -346,9 +339,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   position: sticky; top: 0; z-index: 100;
 }
 .f-logo { font-family: var(--sf); font-size: 15px; font-weight: 600; color: var(--text); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.ic { display: inline-block; flex-shrink: 0; vertical-align: -1px; }
+/* About 6px between an icon and its word everywhere: the back button has a
+   4px gap already, the arrows after a word follow a space. */
+.back-btn .ic { margin-right: 2px; }
+.arrow .ic, .mr-arrow .ic { margin-left: 2px; }
+#loadingRetryBtn .ic, .sample-banner .ic { margin-left: 6px; }
 .back-btn { font-size: 14px; color: var(--accent); background: none; border: none; cursor: pointer; font-family: var(--sf); font-weight: 400; transition: opacity 0.15s, transform 0.15s ease-out; display: inline-flex; align-items: center; gap: 4px; }
 @media (hover: hover) and (pointer: fine) { .back-btn:hover { opacity: 0.7; } }
-.back-btn:active { transform: scale(0.95); }
 
 /* FORM: no white boxes on the ground. Sections are separated by a hair
    line and a mono number; fields are a tint of the paper itself. */
@@ -424,7 +422,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .budget-row.disabled select, .budget-amount.disabled { opacity: 0.4; }
 .btn-primary { width: 100%; padding: 16px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--sf); font-size: 16px; font-weight: 500; cursor: pointer; letter-spacing: -0.01em; }
 .btn-secondary { width: 100%; padding: 14px; background: transparent; color: var(--accent); border: none; border-radius: 10px; font-family: var(--sf); font-size: 14px; font-weight: 500; cursor: pointer; transition: opacity 0.2s; margin-top: 10px; letter-spacing: -0.01em; }
-.btn-secondary:hover { opacity: 0.7; }
+@media (hover: hover) and (pointer: fine) { .btn-secondary:hover { opacity: 0.7; } }
 .btn-unlock { width: 100%; padding: 16px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--sf); font-size: 16px; font-weight: 500; cursor: pointer; letter-spacing: -0.01em; }
 .error-box { background: var(--danger-wash); border: none; border-radius: var(--radius); padding: 14px 16px; font-size: 14px; color: var(--danger); margin-top: 12px; display: none; }
 .disclaimer-box { background: var(--cream); border: none; border-radius: var(--radius); padding: 15px 17px; margin-bottom: 16px; }
@@ -478,7 +476,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .loading-dim.is-done .loading-dim-num::after { content: ''; display: block; width: 9px; height: 5px; margin-top: 2px; border-left: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); }
 @keyframes loadingDimPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0,0,0,0.18); } 50% { box-shadow: 0 0 0 5px rgba(0,0,0,0); } }
 .loading-dim-name { font-size: 15px; font-weight: 600; color: var(--text); }
-.loading-timer { margin-top: 28px; font-size: 13px; color: var(--muted-light); font-weight: 500; font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border-light); border-radius: 999px; padding: 6px 14px; }
+.loading-timer { margin-top: 28px; font-size: 13px; color: var(--muted-light); font-weight: 500; font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border-light); border-radius: 10px; padding: 6px 14px; }
 .loading-timer-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: loadingPulse 1.4s ease-in-out infinite; }
 @keyframes loadingPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .loading-dim.is-active .loading-dim-num { animation: none; } }
@@ -559,17 +557,14 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .tips-block { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border-light); }
 .tips-label { font-size: 13px; font-weight: 600; letter-spacing: 0.02em; text-transform: none; color: var(--accent); margin-bottom: 13px; display: block; }
 .tip-text { font-size: 14px; color: var(--text); line-height: 1.6; padding-left: 18px; position: relative; margin-bottom: 7px; }
-.tip-text::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-weight: 600; }
 .tip-links { padding-left: 18px; display: flex; flex-wrap: wrap; gap: 7px; margin-top: 7px; }
-.tip-link { font-size: 13px; font-weight: 500; color: var(--accent); text-decoration: none; border: none; background: var(--cream); border-radius: 999px; padding: 5px 12px; transition: background 0.15s, color 0.15s, transform 0.15s ease-out; white-space: nowrap; }
+.tip-link { font-size: 13px; font-weight: 500; color: var(--accent); text-decoration: none; border: none; background: var(--cream); border-radius: 10px; padding: 5px 12px; transition: background 0.15s, color 0.15s, transform 0.15s ease-out; white-space: nowrap; }
 @media (hover: hover) and (pointer: fine) { .tip-link:hover { background: var(--accent); color: #fff; } }
-.tip-link:active { transform: scale(0.95); }
 
 /* ACTION PLAN */
 
 /* Where a fund, festival, film or company in the report was found, and when. */
 .src-line { display: inline-block; margin-top: 6px; padding: 4px 0; font-size: 13px; letter-spacing: 0; color: var(--muted); text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 3px; transition: color 0.15s, transform 0.15s ease-out; }
-.src-line:active { transform: scale(0.98); }
 @media (hover: hover) and (pointer: fine) { .src-line:hover { color: var(--text); text-decoration-color: currentColor; } }
 
 /* ACCORDION */
@@ -583,7 +578,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   font-family: var(--sf); transition: background 0.15s, transform 0.15s ease-out;
 }
 @media (hover: hover) and (pointer: fine) { .accordion-trigger:hover { background: rgba(0,0,0,0.02); } }
-.accordion-trigger:active { transform: scale(0.99); }
 .accordion-trigger.open { background: var(--white); }
 .accordion-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
 .accordion-label { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
@@ -601,7 +595,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .preview-blur-wrap { position: relative; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-light); overflow: hidden; }
 .preview-blur-content { filter: blur(3px); user-select: none; pointer-events: none; opacity: 0.5; }
 .preview-blur-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 0%, var(--white) 60%); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 12px; }
-.preview-blur-label { font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: 0; text-transform: none; background: var(--white); padding: 6px 16px; border: none; border-radius: 999px; box-shadow: var(--shadow-sm); }
+.preview-blur-label { font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: 0; text-transform: none; background: var(--white); padding: 6px 16px; border: none; border-radius: 10px; box-shadow: var(--shadow-sm); }
 
 /* PDF */
 .pdf-card { background: var(--cream); border: none; border-radius: var(--radius-lg); padding: 24px 22px; margin-bottom: 16px; margin-top: 28px; }
@@ -610,7 +604,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 @media (min-width: 641px) { .pdf-card .pdf-row button { width: auto; min-width: 280px; } }
 .pdf-row button { width: 100%; padding: 13px 20px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--sf); font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background 0.2s, transform 0.15s ease-out; }
 @media (hover: hover) and (pointer: fine) { .pdf-row button:hover { background: var(--accent-hover); } }
-.pdf-row button:active { transform: scale(0.97); }
 .success-msg { background: var(--success-wash); border: none; border-radius: var(--radius); padding: 12px 16px; font-size: 14px; color: var(--success); margin-top: 11px; display: none; text-align: center; }
 .footer-note { text-align: center; font-size: 13px; color: var(--muted-light); padding-top: 24px; line-height: 1.7; font-weight: 400; }
 
@@ -626,7 +619,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .r-logo { font-family: var(--display); font-size: 16px; color: inherit; }
 .r-logo svg path, .r-logo svg rect, .f-logo svg path, .f-logo svg rect { fill: currentColor; }
 .f-logo { font-family: var(--display); font-size: 16px; }
-#sec-results .back-btn, #sec-myreports .back-btn { color: inherit; font-weight: 500; padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.22); background: rgba(20,13,16,0.62); transition: background 0.3s var(--ease), border-color 0.3s var(--ease), color 0.3s var(--ease); }
+#sec-results .back-btn, #sec-myreports .back-btn { color: inherit; font-weight: 500; padding: 8px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.22); background: rgba(20,13,16,0.62); transition: background 0.3s var(--ease), border-color 0.3s var(--ease), color 0.3s var(--ease); }
 #sec-results .r-header.is-light .back-btn, #sec-myreports .r-header.is-light .back-btn { background: transparent; border-color: rgba(20,18,16,0.18); }
 #sec-results .r-hero, #sec-myreports .r-hero {
   color: var(--on-night); position: relative;
@@ -699,7 +692,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .unlock-field input:focus { background: rgba(255,255,255,0.6); box-shadow: inset 0 0 0 1px rgba(214,120,76,0.55), 0 0 0 4px rgba(214,120,76,0.12); }
 .unlock .checkbox-row { max-width: 560px; text-align: left; }
 .unlock .btn-unlock { width: auto; padding: 15px 22px; background: var(--text); margin-top: 6px; }
-.unlock .btn-unlock:active { transform: scale(0.97); }
 @media (max-width: 600px) { .unlock-title { font-size: 24px; } .unlock .btn-unlock { width: 100%; } .unlock-field { max-width: none; } }
 #sec-results .disclaimer-box, #sec-myreports .disclaimer-box { background: none; padding: 0; }
 #sec-results .footer-note { text-align: left; }
@@ -725,7 +717,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .mr-title { font-family: var(--display); font-size: 18px; font-weight: 500; letter-spacing: -0.015em; }
 .mr-arrow { color: var(--muted); transition: transform 0.2s var(--ease), color 0.2s; }
 @media (hover: hover) and (pointer: fine) { .mr-row:hover .mr-arrow { transform: translateX(3px); color: var(--text); } }
-.mr-row:active { transform: scale(0.99); }
 .mr-logout { width: auto; padding: 14px 0; margin-top: 12px; }
 @media (max-width: 640px) { .mr-row { grid-template-columns: 1fr 20px; gap: 4px 12px; } .mr-date { grid-column: 1 / -1; } }
 
@@ -766,7 +757,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .tips-list li { position: relative; padding: 0 0 0 26px; margin-bottom: 16px; }
 .tips-list li::before { content: ''; position: absolute; left: 0; top: 0.8em; width: 12px; height: 1.5px; background: #b4552b; }
 .tips-list .tip-text { padding-left: 0; font-size: 15px; line-height: 1.6; margin-bottom: 0; }
-.tips-list .tip-text::before { content: none; }
 .ready-list { list-style: none; margin: 0; padding: 0; max-width: 70ch; }
 .ready-list li { position: relative; padding: 0 0 0 26px; margin-bottom: 16px; font-size: 15px; line-height: 1.6; }
 .ready-list li::before { content: ''; position: absolute; left: 1px; top: 0.5em; width: 8px; height: 8px; border: 1.5px solid #b4552b; border-radius: 2px; }
@@ -783,7 +773,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .rblock { border-top: 1px solid var(--border); }
 .rblock summary { list-style: none; display: flex; align-items: baseline; gap: 10px; padding: 16px 2px; cursor: pointer; transition: transform 0.15s ease-out; }
 .rblock summary::-webkit-details-marker { display: none; }
-.rblock summary:active { transform: scale(0.99); }
 .rblock-label { font-family: var(--display); font-size: 18px; font-weight: 500; letter-spacing: -0.01em; color: var(--text); }
 .rblock-count { font-family: var(--mono); font-size: 13px; color: var(--muted); }
 .rblock-icon { margin-left: auto; display: inline-flex; flex-shrink: 0; align-self: center; color: var(--muted); transition: transform 0.2s var(--ease); }
@@ -842,7 +831,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .r-road { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: baseline; margin: 0 0 36px; padding: 14px 2px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); color: var(--text); text-decoration: none; transition: transform 0.15s ease-out; }
 .accordion-wrap + .r-road { margin-top: 28px; }
 #upgradeSection + .guide-box { margin-top: 32px; }
-.r-road:active { transform: scale(0.99); }
 .r-road-k { font-size: 14px; color: var(--muted); }
 .r-road-t { font-size: 15px; font-weight: 700; }
 .r-road-d { grid-column: 2; font-size: 14px; line-height: 1.5; color: var(--muted); text-decoration: underline; text-decoration-color: rgba(22,22,22,0.3); text-underline-offset: 3px; }
@@ -856,7 +844,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .area-nav { position: fixed; z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.25s var(--ease), transform 0.25s var(--ease); }
 .area-nav.is-on { opacity: 1; pointer-events: auto; }
 .an-sec, .an-item, .an-top { border: 0; background: none; font: inherit; color: inherit; cursor: pointer; text-align: left; }
-.an-sec:active, .an-item:active, .an-top:active { transform: scale(0.97); }
 .an-sec { display: block; width: 100%; padding: 9px 0; font-size: 14px; font-weight: 700; color: var(--muted); transition: color 0.3s var(--ease); }
 .an-sec.on { color: var(--text); }
 .an-areas { margin: 0 0 6px; border-left: 1px solid var(--border); }
@@ -988,7 +975,6 @@ details.more .prose { margin-top: 12px; }
 .more-inline { margin-top: 2px; }
 .more-inline > summary { font-size: 14px; padding: 4px 0; }
 .action-rest { display: block; margin-top: 6px; }
-details.more > summary:active { transform: scale(0.98); }
 @media (hover: hover) and (pointer: fine) { details.more > summary:hover { text-decoration-color: currentColor; } }
 .fs-col li, .fs-col.red li, .fs-col.green li { border-left: 0; position: relative; padding: 0 0 0 16px; }
 .fs-col li::before { content: ''; position: absolute; left: 1px; top: 0.62em; width: 6px; height: 6px; border-radius: 50%; }
@@ -1005,7 +991,6 @@ details.more > summary:active { transform: scale(0.98); }
   #resultSubtitle { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
   #resultSubtitle.is-open { display: block; }
   .r-more { margin-top: 6px; padding: 6px 0; border: 0; background: none; font: inherit; font-size: 14px; color: var(--on-night); text-decoration: underline; text-decoration-color: rgba(242,237,230,0.4); text-underline-offset: 3px; cursor: pointer; }
-  .r-more:active { transform: scale(0.98); }
 
 .accordion-score-label { display: none; }
 }
@@ -1041,6 +1026,21 @@ details.more > summary:active { transform: scale(0.98); }
   #sec-form .back-btn { padding: 12px 0; margin: -12px 0; }
   .sample-banner a { display: inline-block; padding: 12px 0; margin: -12px 0; }
 }
+
+/* ONE PRESS (Antonio, 24 Nov 2026: "che abbiano tutte la stessa animazione
+   quando clicchi i tasti"). Every button, link-button and icon sinks to 97%,
+   every row or card that opens to 99% (they are wide, 97% would jump); all
+   in 160ms on --ease. Measured before: six scales from 0.92 to none, four
+   durations, three curves. tests/rules.js checks it. */
+:is(.l-btn, .menu-cta, .btn-primary, .btn-unlock, .btn-secondary, .copy-btn, .back-btn, .l-nav-reports, .hamburger, .menu-close, .an-top, .an-item, .an-sec, .r-more, .l-logo, .menu-logo, .f-logo, .r-logo, .pdf-row button, .src-line, .l-foot a, .menu-legal a, .sample-banner a, .tip-link, #loadingRetryBtn, #sec-results .back-btn, #sec-myreports .back-btn) {
+  transition-property: transform, opacity, background-color, border-color, color; transition-duration: 160ms; transition-timing-function: var(--ease);
+}
+:is(.l-btn, .menu-cta, .btn-primary, .btn-unlock, .btn-secondary, .copy-btn, .back-btn, .l-nav-reports, .hamburger, .menu-close, .an-top, .an-item, .an-sec, .r-more, .l-logo, .menu-logo, .f-logo, .r-logo, .pdf-row button, .src-line, .l-foot a, .menu-legal a, .sample-banner a, .tip-link, #loadingRetryBtn, #sec-results .back-btn, #sec-myreports .back-btn):active { transform: scale(0.97); }
+.menu-legal a, .sample-banner a { display: inline-block; }
+:is(.accordion-trigger, details > summary, .l-sheet, .r-road, .mr-row, #sec-results details > summary, #menuOverlay details > summary) {
+  transition-property: transform, background-color, border-color, color; transition-duration: 160ms; transition-timing-function: var(--ease);
+}
+:is(.accordion-trigger, details > summary, .l-sheet, .r-road, .mr-row, #sec-results details > summary, #menuOverlay details > summary):active { transform: scale(0.99); }
 
 /* ══════════════════════
    LIGHT AND DARK (Antonio): the site follows the device.
@@ -1099,7 +1099,6 @@ details.more > summary:active { transform: scale(0.98); }
   @media (hover: hover) and (pointer: fine) { .l-sheet:hover { border-color: rgba(20,18,16,0.16); } }
   .l-sheet-score, .l-sheet-row { border-bottom-color: rgba(20,18,16,0.08); }
   .l-bar { background: rgba(20,18,16,0.1); }
-  .l-bar i.ember { background: #c4562a; }
   .menu-header { border-bottom-color: rgba(20,18,16,0.07); }
   .menu-faq-item:first-of-type { border-top-color: rgba(20,18,16,0.14); }
   .menu-faq-item { border-bottom-color: rgba(20,18,16,0.08); }
@@ -1221,7 +1220,7 @@ details.more > summary:active { transform: scale(0.98); }
   <div class="menu-overlay" id="menuOverlay">
     <div class="menu-header">
       <div class="menu-logo" onclick="closeMenuGoLanding()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')closeMenuGoLanding()"><svg width="18" height="18" viewBox="0 0 124 124" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><path d="M6 0L117 0A6 6 0 0 1 123 6L123 19Q123 25 117.11 26.15L5.89 47.85Q0 49 0 43L0 6A6 6 0 0 1 6 0Z" fill="#000"/><rect x="0" y="62" width="123" height="62" rx="6" fill="#000"/></svg>OneCiak</div>
-      <button class="menu-close" onclick="closeMenu()" aria-label="Close menu">✕</button>
+      <button class="menu-close" onclick="closeMenu()" aria-label="Close menu"></button>
     </div>
     <div class="menu-body">
       <div class="menu-sec">
@@ -1271,13 +1270,13 @@ details.more > summary:active { transform: scale(0.98); }
         <span class="l-sheet-credits">Drama · Feature Film · Italy</span>
         <span class="l-sheet-score"><span class="n">5.0<small>/10</small></span><span class="l">Promising intimate concept, underdeveloped</span></span>
         <span class="l-sheet-rows">
-          <span class="l-sheet-row"><span class="l-sheet-name">Creative package<small>Is the logline strong, which attachments would move financiers.</small></span><span class="l-bar"><i class="ember" style="width:65%"></i></span><b>6.5</b></span>
-          <span class="l-sheet-row"><span class="l-sheet-name">Financial plan<small>Is the budget realistic, which funds and tax credits fit.</small></span><span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
-          <span class="l-sheet-row"><span class="l-sheet-name">Market &amp; audience<small>Who watches films like this, how comparable titles did.</small></span><span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
-          <span class="l-sheet-row"><span class="l-sheet-name">Festival strategy<small>Where to premiere first without burning your status.</small></span><span class="l-bar"><i style="width:50%"></i></span><b>5.0</b></span>
-          <span class="l-sheet-row" style="border-bottom:0"><span class="l-sheet-name">Distribution<small>Realistic routes to buyers, from festivals to streaming.</small></span><span class="l-bar"><i style="width:45%"></i></span><b>4.5</b></span>
+          <span class="l-sheet-row"><span class="l-sheet-name">Creative package<small>Is the logline strong, which attachments would move financiers.</small></span><span class="l-bar"><i class="bar-mid" style="width:65%"></i></span><b>6.5</b></span>
+          <span class="l-sheet-row"><span class="l-sheet-name">Financial plan<small>Is the budget realistic, which funds and tax credits fit.</small></span><span class="l-bar"><i class="bar-low" style="width:45%"></i></span><b>4.5</b></span>
+          <span class="l-sheet-row"><span class="l-sheet-name">Market &amp; audience<small>Who watches films like this, how comparable titles did.</small></span><span class="l-bar"><i class="bar-low" style="width:45%"></i></span><b>4.5</b></span>
+          <span class="l-sheet-row"><span class="l-sheet-name">Festival strategy<small>Where to premiere first without burning your status.</small></span><span class="l-bar"><i class="bar-mid" style="width:50%"></i></span><b>5.0</b></span>
+          <span class="l-sheet-row" style="border-bottom:0"><span class="l-sheet-name">Distribution<small>Realistic routes to buyers, from festivals to streaming.</small></span><span class="l-bar"><i class="bar-low" style="width:45%"></i></span><b>4.5</b></span>
         </span>
-        <span class="l-sheet-foot"><span>Sample report, illustrative project</span><span>Open full report <span class="arrow">→</span></span></span>
+        <span class="l-sheet-foot"><span>Sample report, illustrative project</span><span>Open full report <span class="arrow"><svg class="ic" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8.5M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></span>
       </button>
     </div>
   </header>
@@ -1298,7 +1297,7 @@ details.more > summary:active { transform: scale(0.98); }
 <div id="sec-form">
   <div class="f-header">
     <div class="f-logo" onclick="goLanding()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')goLanding()"><svg width="18" height="18" viewBox="0 0 124 124" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><path d="M6 0L117 0A6 6 0 0 1 123 6L123 19Q123 25 117.11 26.15L5.89 47.85Q0 49 0 43L0 6A6 6 0 0 1 6 0Z" fill="#000"/><rect x="0" y="62" width="123" height="62" rx="6" fill="#000"/></svg>OneCiak</div>
-    <button class="back-btn" onclick="goLanding()">← Back</button>
+    <button class="back-btn" onclick="goLanding()"><svg class="ic" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M10.5 6H2M5.5 2.5 2 6l3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</button>
   </div>
   <div class="f-main">
     <div class="f-side">
@@ -1487,17 +1486,17 @@ details.more > summary:active { transform: scale(0.98); }
       <div class="loading-dim" data-dim="4"><span class="loading-dim-num" aria-hidden="true"></span><span class="loading-dim-name">Distribution &amp; Revenue<small>Realistic routes to buyers, from festivals to streaming.</small></span></div>
     </div>
     <div class="loading-timer" id="loadingTimer" style="display:none"></div>
-    <button class="btn-primary" id="loadingRetryBtn" style="display:none;margin-top:20px;max-width:280px" onclick="retryLastAction()">Try again →</button>
+    <button class="btn-primary" id="loadingRetryBtn" style="display:none;margin-top:20px;max-width:280px" onclick="retryLastAction()">Try again<svg class="ic" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8.5M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
 </div>
 
 
 <!-- ══ RESULTS ══ -->
 <div id="sec-results">
-  <div class="sample-banner" id="sampleBanner" style="display:none">Sample report, sources checked 23 Oct and 2 Nov 2026 · <a href="#" onclick="goLanding();return false">Analyze yours →</a></div>
+  <div class="sample-banner" id="sampleBanner" style="display:none">Sample report, sources checked 23 Oct and 2 Nov 2026 · <a href="#" onclick="goLanding();return false">Analyze yours<svg class="ic" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8.5M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
   <div class="r-header">
     <div class="r-logo" onclick="goLanding()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')goLanding()"><svg width="18" height="18" viewBox="0 0 124 124" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><path d="M6 0L117 0A6 6 0 0 1 123 6L123 19Q123 25 117.11 26.15L5.89 47.85Q0 49 0 43L0 6A6 6 0 0 1 6 0Z" fill="#000"/><rect x="0" y="62" width="123" height="62" rx="6" fill="#000"/></svg>OneCiak</div>
-    <button class="back-btn" onclick="goLanding()">← Back</button>
+    <button class="back-btn" onclick="goLanding()"><svg class="ic" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M10.5 6H2M5.5 2.5 2 6l3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</button>
   </div>
   <div class="r-hero">
     <div class="r-hero-inner reveal">
@@ -1551,7 +1550,7 @@ details.more > summary:active { transform: scale(0.98); }
 <div id="sec-myreports" style="display:none">
   <div class="r-header">
     <div class="r-logo" onclick="goLanding()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')goLanding()"><svg width="18" height="18" viewBox="0 0 124 124" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><path d="M6 0L117 0A6 6 0 0 1 123 6L123 19Q123 25 117.11 26.15L5.89 47.85Q0 49 0 43L0 6A6 6 0 0 1 6 0Z" fill="#000"/><rect x="0" y="62" width="123" height="62" rx="6" fill="#000"/></svg>OneCiak</div>
-    <button class="back-btn" onclick="goLanding()">← Back</button>
+    <button class="back-btn" onclick="goLanding()"><svg class="ic" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M10.5 6H2M5.5 2.5 2 6l3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</button>
   </div>
   <div class="r-hero mr-hero">
     <div class="r-hero-inner">
@@ -1946,7 +1945,7 @@ async function requestLogin() {
     status.style.color = 'var(--danger)';
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Send me a sign-in link →';
+    btn.textContent = 'Send me a sign-in link';
   }
 }
 
@@ -2015,7 +2014,7 @@ async function showMyReportsLoggedIn(session) {
       return '<a class="mr-row" href="' + esc(r.viewUrl) + '">' +
         '<span class="mr-date">' + esc(date) + '</span>' +
         '<span class="mr-title">' + esc(r.title) + '</span>' +
-        '<span class="mr-arrow" aria-hidden="true">→</span>' +
+        '<span class="mr-arrow" aria-hidden="true"><svg class="ic" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8.5M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
         '</a>';
     }).join('');
   } catch (e) {

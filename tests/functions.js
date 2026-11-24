@@ -39,8 +39,12 @@ for (const dev of ['tel','pc']) {
  // MY REPORTS
  await p.goto(BASE); await W(500); await p.evaluate(()=>openMyReports()); await W(500);
  T(dev+' My Reports si apre con la casella email', await p.evaluate(()=>!!document.querySelector('#sec-myreports input[type=email]') && document.querySelector('#sec-myreports input[type=email]').offsetParent!==null));
- // REPORT
- await p.goto(BASE); await W(500); await tap(p.locator('.l-sheet')); await W(1300);
+ // REPORT (the sample card's bars must have the report's colours)
+ await p.goto(BASE); await W(500);
+ const cardBars=await p.evaluate(()=>[...document.querySelectorAll('.l-sheet-row .l-bar i')].map(i=>getComputedStyle(i).backgroundColor));
+ await tap(p.locator('.l-sheet')); await W(1300);
+ const repBars=await p.evaluate(()=>[...document.querySelectorAll('#accordionMenu .acc-bar i')].map(i=>getComputedStyle(i).backgroundColor));
+ T(dev+' barre della scheda come quelle del report', JSON.stringify(cardBars)===JSON.stringify(repBars), JSON.stringify(cardBars)+' vs '+JSON.stringify(repBars));
  T(dev+' scheda Northbound apre il report', await p.evaluate(()=>document.getElementById('resultTitle').textContent.trim()==='Northbound'));
  if (dev==='tel') { const more=p.locator('#heroMore'); if(await more.count()){ await tap(more); await W(300); T(dev+' Read more apre il riassunto', await p.evaluate(()=>document.getElementById('resultSubtitle').classList.contains('is-open'))); } else T(dev+' Read more presente',false); }
  // areas: tap each, in order and back
