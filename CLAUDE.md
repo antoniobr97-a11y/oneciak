@@ -119,7 +119,12 @@ pulsante. Blocchi CSS "LIGHT AND DARK" in fondo a index.html e a
   24 titoli di sezione e voti delle aree; 18 titoli delle righe, logline,
   riassunto; 15 testo, elenchi, nomi, frase del voto; 14 etichette,
   sottotitoli, bottoni; 13 fonti, note, piè di pagina, paesi. Niente mezzi
-  pixel.
+  pixel. Dal 24 novembre 2026 la stessa scala vale in tutto il sito
+  (home, modulo, menu, My Reports, roadmap, privacy, termini, 404; 16 per
+  domande del menu e testo della roadmap): via 11, 12,5, 13,5, 14,5, 15,5,
+  16,5, 17, 19, 21, 22 px. Mail: 13, 14, 15, 16, 18 più titolo e voto. PDF
+  (punti): 48 titolo, 14 logline, 13 titoli, 11 riassunto e frase del voto,
+  10 testo, 9 fonti e note.
 - Bottoni `border-radius: 10px`; testo a sinistra; hover solo dentro
   `@media (hover: hover) and (pointer: fine)`; ogni cliccabile ha `:active`
   con `scale(...)`; su touch le aree piccole allargate a ~44px.
@@ -424,6 +429,16 @@ art. 7. Scheda per l'avvocato: claude.ai/artifact/Y776k28X7HyxzMxcQgNXDX.
    lo approva Antonio.
 
 ## Controlli (dopo ogni modifica visibile o pulizia)
+
+Due programmi nel repo (`/tests/*` chiuso con 404 in `netlify.toml`), da
+lanciare su un server locale o sul sito vero, sempre tutti e due:
+`NODE_PATH=/opt/node22/lib/node_modules node tests/functions.js [url]`
+(151 prove su telefono e computer: menu, modulo, ogni area, ogni blocco,
+ogni passo, ogni voce dell'indice, glossario, copia email, PDF,
+calendario, roadmap, 404) e `node tests/pages.js [url]` (180 viste: ogni
+pagina × 6 larghezze × 3 schemi; errori, richieste fallite, pagina larga,
+testo azzurro, trattini lunghi, mezzi pixel). Se cambia una funzione, si
+aggiorna il programma nello stesso commit.
 
 - **Giro sul sito vero**: home, menu, modulo, report di esempio tutto
   aperto, My Reports, roadmap, privacy, termini, 404 × larghezze 262, 320,
