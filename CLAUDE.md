@@ -144,8 +144,13 @@ pulsante. Blocchi CSS "LIGHT AND DARK" in fondo a index.html e a
   accorto, i controlli no; ora `tests/functions.js` lo prova).
 - **Movimento** (regole di Emil Kowalski, `.claude/skills/emil-design-eng`):
   `--ease: cubic-bezier(0.23, 1, 0.32, 1)` anche in roadmap, privacy,
-  termini; aperture 220 ms con `openIn`, freccia che gira, pressione
-  `scale(0.99)`; bottoni 160 ms; niente `transition: all` né `scale(0)`.
+  termini; aperture 220 ms con `openIn`, freccia che gira; niente
+  `transition: all` né `scale(0)`. **Una sola pressione** (blocco CSS "ONE
+  PRESS", Antonio 24 novembre 2026: "che abbiano tutte la stessa animazione
+  quando clicchi i tasti"): bottoni, link-bottone e icone `scale(0.97)`,
+  righe e schede che si aprono `scale(0.99)`, tutto 160 ms `--ease`; prima
+  6 scale diverse (0,92-nessuna), 4 durate, 3 curve. Le parole nel testo
+  (glossario, citazioni) non si rimpiccioliscono. Prova: `tests/press.js`.
 - **Colori mai `inherit` dentro un `<button>`** (su iPhone Safari i bottoni
   sono azzurri). Prova: `:where(button){color:rgb(0,122,255)}` e cercare
   testo azzurro.
@@ -448,9 +453,10 @@ ogni passo, ogni voce dell'indice, glossario, copia email, PDF,
 calendario, roadmap, 404) e `node tests/pages.js [url]` (180 viste: ogni
 pagina × 6 larghezze × 3 schemi; errori, richieste fallite, pagina larga,
 testo azzurro, trattini lunghi, mezzi pixel). Se cambia una funzione, si
-aggiorna il programma nello stesso commit. Terzo programma, `tests/rules.js`:
-le regole di design (caratteri, `:active`, angoli 10px, maiuscolo,
-contrasto) su ogni vista.
+aggiorna il programma nello stesso commit. Terzo e quarto, `tests/rules.js`
+(caratteri, `:active`, angoli 10px, maiuscolo, contrasto su ogni vista; in
+locale la 404 è quella di python, in Times) e `tests/press.js` (stessa
+pressione su ogni tasto).
 
 - **Giro sul sito vero**: home, menu, modulo, report di esempio tutto
   aperto, My Reports, roadmap, privacy, termini, 404 × larghezze 262, 320,

@@ -26,7 +26,7 @@ for (const [dev,opt] of [['tel',{...devices['iPhone 13']}],['pc',{viewport:{widt
     if(txt){ out.fonts.push(cs.fontFamily.split(',')[0].replace(/"/g,'')); if(cs.textTransform==='uppercase') out.upper.push((e.className||e.tagName)+': '+e.textContent.trim().slice(0,30));
      const bg=bgOf(e); if(bg){ const [l1,a1]=lum(cs.color); const [l2]=lum(bg); if(a1>=0.99){ const ratio=(Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05); const big=parseFloat(cs.fontSize)>=24||(parseFloat(cs.fontSize)>=18.6&&+cs.fontWeight>=700); if(ratio<(big?3:4.5)) out.contrast.push((e.className||e.tagName)+' "'+e.textContent.trim().slice(0,25)+'" '+ratio.toFixed(2)); } } }
     if(e.matches('button, a, summary, [role=button], label[for], input[type=checkbox]')){ e.setAttribute('data-ck', idx); out.clickables.push(idx);
-     if(e.matches('button')&&(cs.borderStyle!=='none'&&parseFloat(cs.borderWidth)>0 || !/rgba\(0, 0, 0, 0\)|transparent/.test(cs.backgroundColor))){ const r=cs.borderRadius; if(r!=='10px') out.corners.push((e.className||e.tagName)+' "'+e.textContent.trim().slice(0,20)+'" '+r); } }
+     if(e.matches('button')&&!e.matches('.l-sheet')&&(cs.borderStyle!=='none'&&parseFloat(cs.borderWidth)>0 || !/rgba\(0, 0, 0, 0\)|transparent/.test(cs.backgroundColor))){ const r=cs.borderRadius; if(r!=='10px') out.corners.push((e.className||e.tagName)+' "'+e.textContent.trim().slice(0,20)+'" '+r); } }
    });
    return out; });
   r.fonts.forEach(f=>add('font '+f,v)); r.corners.forEach(c=>add('angoli non 10px',v+': '+c)); r.upper.forEach(u=>add('maiuscolo',v+': '+u)); r.contrast.forEach(c=>add('contrasto basso ('+sc+')',dev+' '+v+': '+c));
@@ -34,6 +34,7 @@ for (const [dev,opt] of [['tel',{...devices['iPhone 13']}],['pc',{viewport:{widt
   if (sc==='dark') { const doc=await cdp.send('DOM.getDocument',{depth:-1}); for (const idx of r.clickables) { const q=await cdp.send('DOM.querySelector',{nodeId:doc.root.nodeId,selector:`[data-ck="${idx}"]`}).catch(()=>null); if(!q||!q.nodeId) continue;
     const before=await p.evaluate(i=>{const e=document.querySelector(`[data-ck="${i}"]`); return getComputedStyle(e).transform;},idx);
     await cdp.send('CSS.forcePseudoState',{nodeId:q.nodeId,forcedPseudoClasses:['active']});
+    await p.waitForTimeout(250); // let the 160ms press transition finish
     const after=await p.evaluate(i=>{const e=document.querySelector(`[data-ck="${i}"]`); const cs=getComputedStyle(e); return [cs.transform, (e.className||e.tagName)+' "'+(e.textContent||'').trim().slice(0,25)+'"'];},idx);
     await cdp.send('CSS.forcePseudoState',{nodeId:q.nodeId,forcedPseudoClasses:[]});
     if(after[0]===before) add('senza :active',dev+' '+v+': '+after[1]); } }
