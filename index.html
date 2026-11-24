@@ -860,12 +860,15 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   /* Always there, never fading in (Antonio: "farli comparire tutto a un
      tratto non mi piace"): it starts level with "Your film, area by area",
      rides up with the page and stops under the header (top set by sync). */
-  .area-nav { top: 112px; left: max(24px, calc(50% - 440px)); width: 200px; opacity: 1; pointer-events: auto; transition: none; max-height: calc(100vh - 130px); overflow-y: auto; }
+  .area-nav { top: 112px; left: max(24px, calc(50% - 440px)); width: 200px; opacity: 1; pointer-events: auto; transition: none; max-height: calc(100vh - 124px); overflow-y: auto; scrollbar-width: none; }
+  .area-nav::-webkit-scrollbar { display: none; }
   /* Rows exactly like the form's side steps (Antonio: "la stessa identica
      cosa"): a line between rows, the current one lights up, slides 12px and
      takes the rust line, in 0.3s. */
   #areaNav .an-areas { border-left: 0; border-top: 1px solid var(--border); margin: 0 0 18px; }
-  #areaNav .an-item { padding: 12px 0; border-bottom: 1px solid var(--border); transition: transform 160ms var(--ease), opacity 160ms var(--ease), background-color 160ms var(--ease), border-color 160ms var(--ease), color 0.3s var(--ease), padding-left 0.3s var(--ease), box-shadow 0.3s var(--ease); }
+  /* 12px like the form; on short laptop screens (1366x657 inside the
+     browser) the rows tighten so the whole column fits without a scroll bar. */
+  #areaNav .an-item { padding: clamp(6px, calc((100vh - 440px) / 20), 12px) 0; border-bottom: 1px solid var(--border); transition: transform 160ms var(--ease), opacity 160ms var(--ease), background-color 160ms var(--ease), border-color 160ms var(--ease), color 0.3s var(--ease), padding-left 0.3s var(--ease), box-shadow 0.3s var(--ease); }
   #areaNav .an-item.on { padding-left: 12px; box-shadow: inset 2px 0 0 #b4552b; }
   #areaNav .an-item::before { display: none; }
   .an-col { display: block; }
