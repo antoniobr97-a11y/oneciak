@@ -140,13 +140,14 @@ function keepFactualSentences(text, pageText) {
 // Sites that copy festival and fund listings from elsewhere and are often
 // out of date. They can show that something exists, but a deadline or
 // amount taken only from them is not shown.
-const AGGREGATORS = ['festagent.com', 'fundsforngos.org', 'vitrina.ai', 'scriptmatch.ai', 'asianfilmfestivals.com', 'indieshortsmag.com', 'mauxa.com', 'filmfreeway.com', 'festhome.com', 'withoutabox.com', 'shortfilmdepot.com', 'clickforfestivals.com', 'movibeta.com', 'caligari.com.ar', 'filmcane.com', 'creativepathwayscanada.com'];
-function isAggregator(url) {
+const AGGREGATORS = ['festagent.com', 'fundsforngos.org', 'vitrina.ai', 'scriptmatch.ai', 'asianfilmfestivals.com', 'indieshortsmag.com', 'mauxa.com', 'filmfreeway.com', 'festhome.com', 'withoutabox.com', 'shortfilmdepot.com', 'clickforfestivals.com', 'movibeta.com', 'caligari.com.ar', 'filmcane.com', 'creativepathwayscanada.com', 'dossierdeprod.fr', 'les-aides.fr'];
+function onSite(url, sites) {
   try {
     const host = new URL(url).hostname.toLowerCase();
-    return AGGREGATORS.some(d => host === d || host.endsWith('.' + d));
+    return sites.some(d => host === d || host.endsWith('.' + d));
   } catch (e) { return false; }
 }
+function isAggregator(url) { return onSite(url, AGGREGATORS); }
 
 // A deadline that has already passed is marked closed instead of being
 // presented as a target. Only unambiguous written dates are parsed.
@@ -390,6 +391,10 @@ function applicantOf(item) {
   return null;
 }
 
+// News sites: fine for a film's release or a festival line-up, but a fund
+// needs its own page to apply from (AT&T Untold Stories came from a
+// variety.com article, 24 November 2026).
+const NEWS = ['variety.com', 'hollywoodreporter.com', 'deadline.com', 'screendaily.com', 'cineuropa.org', 'indiewire.com', 'filmneweurope.com', 'thewrap.com'];
 const THIRD_PARTY = /\bthird[- ]party\b|\blisting (?:site|page)\b/i;
 
 async function groundReport(report, searchUrlsByField, today, fetcher, project) {
@@ -502,7 +507,7 @@ async function groundReport(report, searchUrlsByField, today, fetcher, project) 
     const before = report.financial_sources.length;
     // The model sometimes says so itself ("This listing is from a
     // third-party site, so confirm on the SFFILM site", 23 November 2026).
-    report.financial_sources = report.financial_sources.filter(f => !isAggregator(f.source) && !THIRD_PARTY.test(f.eligibility || ''));
+    report.financial_sources = report.financial_sources.filter(f => !isAggregator(f.source) && !onSite(f.source, NEWS) && !THIRD_PARTY.test(f.eligibility || ''));
     stats.aggregatorFunds = before - report.financial_sources.length;
     stats.kept -= before - report.financial_sources.length;
   }

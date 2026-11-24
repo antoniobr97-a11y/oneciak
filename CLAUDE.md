@@ -288,7 +288,14 @@ sui festival.
   cifre e citazioni no; un fondo trovato solo su un aggregatore viene tolto
   e con lui le righe di "Before you can apply" che lo nominano
   (`dropStepsForGoneFunds`, che toglie anche quelle dei fondi scartati da
-  altri controlli). xhbt.org (da dove arrivò un fondo di Milano proposto a
+  altri controlli). Un fondo va via anche se viene da un sito di notizie
+  (`NEWS`: variety, screendaily, cineuropa...) o se il report stesso lo
+  dice preso da un "third-party site" (`THIRD_PARTY`). Dopo `linkCheck`,
+  `dropDeadSources` toglie intera ogni voce con il link della fonte morto
+  (prima restava la riga "Source" col link rotto). Una `rule_quote` che
+  comincia a metà elenco ("soit par...", "or by...", `FRAGMENT`) non regge
+  "Who can apply" e sparisce (il CNC diceva "solo società" ma accetta anche
+  il regista). xhbt.org (da dove arrivò un fondo di Milano proposto a
   un progetto del Kansas) blocca i programmi: non verificato se è un
   aggregatore, non è in lista.
 - `verifiedFacts.js`, fatti controllati a mano (ricontrollare se cambia la
@@ -313,7 +320,15 @@ sui festival.
   progetti": erano quasi tutte prove, tolto). Niente previsioni di incasso
   né prezzi E&O. Ogni voce:
   "Source: dominio · checked data".
-- **Qualità** (11 novembre 2026, 3 report della preview: corto italiano,
+- **Qualità** (23 novembre 2026, 5 report nuovi della preview: corto
+  italiano, lungo USA, primo film francese, film britannico girato, film
+  croato finanziato): 86 voci, 68 giuste sulla fonte, 4 sbagliate (2 link
+  morti, 1 fondo da un sito di elenchi, 1 "Who can apply" sbagliato), 14
+  non verificabili da qui; le 3 cause corrette il 24 novembre (vedi sopra),
+  poi 2 report di prova senza nessuno dei 3 errori. Nei 7 report 5 fondi su
+  19 venivano da siti non ufficiali (creativepathwayscanada.com, variety.com,
+  dossierdeprod.fr due volte, les-aides.fr): aggiunti alle liste, ma una
+  lista non sarà mai completa. Prima misura (11 novembre 2026, 3 report: corto italiano,
   lungometraggio francese, lungometraggio USA): 57 voci con fonte, 46
   giuste, 0 sbagliate, 11 non verificabili da qui. Ogni giro dà voci
   diverse; alcuni siti (Wix) a volte non mostrano i film: ricontrollare
