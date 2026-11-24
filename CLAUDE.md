@@ -193,6 +193,10 @@ sui festival.
   are missing, marked in red above.". Caselle alte quanto il testo di
   esempio (`fitPlaceholders`).
 - **Caricamento**: 5 dimensioni che avanzano (`startLoadingDims` e simili).
+  Mentre si fa il report completo, sotto le 5 aree una sola frase ("This
+  usually takes two or three minutes..."): niente cronometro in una pillola
+  con pallino che pulsa (Antonio: "sa di AI"). Cursore del budget 14px
+  piatto, senza anello bianco né ombra (prima 22px, "troppo grosso").
 - **Apertura del report** ("come A24"): nome del film senza virgolette,
   grande come un manifesto (`fitTitle`: una riga larga quanto l'apertura,
   24-168px; i titoli lunghi vanno a capo tra le parole in circa 3 righe),

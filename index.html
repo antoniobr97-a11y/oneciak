@@ -413,9 +413,9 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .budget-amount { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: var(--text); background: var(--cream); border-radius: var(--radius); box-shadow: inset 0 0 0 1px var(--border); }
 input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 34px; background: transparent; cursor: pointer; }
 input[type="range"]::-webkit-slider-runnable-track { height: 4px; background: var(--border); border-radius: 2px; }
-input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; margin-top: -9px; border-radius: 50%; background: var(--accent); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; margin-top: -5px; border-radius: 50%; background: var(--accent); border: 0; box-shadow: none; } /* small and flat: the 22px ball with a white ring looked like a UI kit (Antonio) */
 input[type="range"]::-moz-range-track { height: 4px; background: var(--border); border-radius: 2px; }
-input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
+input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: 0; box-shadow: none; }
 input[type="range"]:disabled { opacity: 0.4; cursor: not-allowed; }
 input[type="range"] { outline: none; }
 input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: 4px; }
@@ -476,9 +476,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .loading-dim.is-done .loading-dim-num::after { content: ''; display: block; width: 9px; height: 5px; margin-top: 2px; border-left: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); }
 @keyframes loadingDimPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0,0,0,0.18); } 50% { box-shadow: 0 0 0 5px rgba(0,0,0,0); } }
 .loading-dim-name { font-size: 15px; font-weight: 600; color: var(--text); }
-.loading-timer { margin-top: 28px; font-size: 13px; color: var(--muted-light); font-weight: 500; font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border-light); border-radius: 10px; padding: 6px 14px; }
-.loading-timer-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: loadingPulse 1.4s ease-in-out infinite; }
-@keyframes loadingPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+.loading-timer { margin-top: 28px; max-width: 40ch; font-size: 14px; line-height: 1.5; color: var(--muted); } /* one plain sentence: the running clock in a pill with a pulsing dot read as an AI chat (Antonio) */
 @media (prefers-reduced-motion: reduce) { .loading-dim.is-active .loading-dim-num { animation: none; } }
 
 /* ══════════════════════
@@ -907,7 +905,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #sec-loading .loading-dim.is-active, #sec-loading .loading-dim.is-done { opacity: 1; }
 #sec-loading .loading-dim.is-active .loading-dim-num { color: #ffc6a8; }
 #sec-loading .loading-dim.is-done .loading-dim-num { color: #7fd6a4; }
-#sec-loading .loading-timer { color: var(--on-night-2); border-color: rgba(255,255,255,0.18); }
+#sec-loading .loading-timer { color: var(--on-night-2); }
 #sec-loading .btn-primary { background: var(--on-night); color: var(--night); }
 
 /* LOADING: light display title, mono step numbers, no filled circles */
@@ -1116,7 +1114,6 @@ details.more .prose { margin-top: 12px; }
   .sample-banner a { color: inherit !important; }
   #sec-loading .loading-dim.is-active .loading-dim-num { color: #9a4520; }
   #sec-loading .loading-dim.is-done .loading-dim-num { color: var(--success); }
-  #sec-loading .loading-timer { border-color: rgba(20,18,16,0.14); }
 }
 
 @media (prefers-color-scheme: dark) and (hover: hover) and (pointer: fine) {
@@ -2083,38 +2080,14 @@ var POLL_MAX_ATTEMPTS = 75; // ~5 minutes — widened alongside the deeper repor
 function wait(ms) { return new Promise(function(resolve){ setTimeout(resolve, ms); }); }
 
 /* ── ELAPSED-TIME INDICATOR ── shows the wait is real progress, not a stall */
-var fullReportTimerHandle = null;
+/* While the full report is built: one plain sentence instead of a running
+   clock (measured on 23-24 Nov 2026: 2 to 2.5 minutes per report). */
 function startFullReportTimer() {
-  stopFullReportTimer();
   var el = document.getElementById('loadingTimer');
-  // The clock and the label live in separate spans, updated independently.
-  // If a browser's auto-translate feature is active, replacing the whole
-  // line's innerHTML every second (clock included) makes it re-translate
-  // that text every second too, which looks like it's flickering between
-  // languages. Only the clock (plain digits, nothing to translate) changes
-  // every second; the label text node is only touched when it actually
-  // changes (twice total over a full wait), so translation only reruns then.
-  el.innerHTML = '<span class="loading-timer-dot"></span><span id="loadingTimerClock">0:00</span> elapsed · <span id="loadingTimerLabel">Just started</span>';
-  var clockEl = document.getElementById('loadingTimerClock');
-  var labelEl = document.getElementById('loadingTimerLabel');
-  var startedAt = Date.now();
-  var lastLabel = 'Just started';
-  function render() {
-    var secs = Math.floor((Date.now() - startedAt) / 1000);
-    var m = Math.floor(secs / 60), s = secs % 60;
-    if (clockEl) clockEl.textContent = m + ':' + (s < 10 ? '0' : '') + s;
-    var label = secs < 20 ? 'Just started' : secs < 90 ? 'This can take a few minutes for a deeply detailed report' : 'Still working, perfectly normal. Feel free to close this page and check your email instead';
-    if (label !== lastLabel) {
-      if (labelEl) labelEl.textContent = label;
-      lastLabel = label;
-    }
-  }
-  render();
-  el.style.display = 'inline-flex';
-  fullReportTimerHandle = setInterval(render, 1000);
+  el.textContent = 'This usually takes two or three minutes. The report also arrives by email, so you can close this page.';
+  el.style.display = 'block';
 }
 function stopFullReportTimer() {
-  if (fullReportTimerHandle) { clearInterval(fullReportTimerHandle); fullReportTimerHandle = null; }
   var el = document.getElementById('loadingTimer');
   if (el) el.style.display = 'none';
 }
