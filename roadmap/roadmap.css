@@ -30,7 +30,7 @@ body::before {
 }
 a { color: inherit; }
 .wrap { max-width: 1240px; margin: 0 auto; padding: 0 40px; }
-.mono { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+.mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
 
 /* night header, same dissolve as the app */
 .g-hero { position: relative; overflow: hidden; color: var(--on-night);
@@ -74,7 +74,7 @@ a { color: inherit; }
 .g-btn { display: inline-block; margin-top: 18px; background: var(--text); color: var(--paper); font-weight: 500; font-size: 15px; padding: 15px 22px; border-radius: 10px; text-decoration: none; transition: transform .16s var(--ease); }
 .g-btn:active { transform: scale(0.97); }
 @media (hover: hover) and (pointer: fine) { .g-btn:hover { background: #2e2e2e; } }
-.g-disclaimer { margin-top: 22px; font-size: 13.5px !important; line-height: 1.6; color: var(--muted); }
+.g-disclaimer { margin-top: 22px; font-size: 14px !important; line-height: 1.6; color: var(--muted); }
 
 /* film roadmap (/roadmap/): stages in order, so the numbers carry the
    sequence; ticks are checkboxes saved on the device only */
@@ -83,8 +83,8 @@ a { color: inherit; }
 .rm-side ol { list-style: none; border-top: 1px solid var(--text); }
 .rm-side a { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 15px; line-height: 1.35; color: var(--text); text-decoration: none; transition: color .2s; }
 .rm-side a:active { transform: scale(0.98); }
-.rm-nav-n { font-family: var(--mono); font-size: 11px; color: var(--muted); }
-.rm-nav-c { font-family: var(--mono); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rm-nav-n { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.rm-nav-c { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .rm-side a.is-complete .rm-nav-c { color: #2f6b45; }
 .rm-side a.is-here .rm-nav-t { font-weight: 700; }
 @media (hover: hover) and (pointer: fine) { .rm-side a:hover .rm-nav-t { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; } }
@@ -92,13 +92,13 @@ a { color: inherit; }
 .rm-stage:first-child { padding-top: 0; }
 .rm-stage h2 { display: flex; align-items: baseline; gap: 14px; font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1.15; letter-spacing: -0.025em; }
 .rm-n { font-weight: 300; color: var(--ember-text); font-variant-numeric: tabular-nums; }
-.rm-count { display: block; margin-top: 6px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.rm-count { display: block; margin-top: 6px; font-family: var(--mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .rm-here { display: inline-block; margin-bottom: 12px; padding: 5px 10px; border-radius: 6px; background: #f3dccd; color: #7a3215; font-size: 14px; font-weight: 700; }
-.rm-done { margin-top: 14px; font-size: 17px; line-height: 1.6; }
+.rm-done { margin-top: 14px; font-size: 16px; line-height: 1.6; }
 .rm-done b { font-weight: 700; }
 .rm-jobs { list-style: none; margin-top: 20px; border-top: 1px solid var(--text); }
 .rm-jobs > li { padding: 16px 0; border-bottom: 1px solid var(--border); }
-.rm-jobs label { display: grid; grid-template-columns: 30px 1fr; cursor: pointer; font-size: 17px; line-height: 1.6; }
+.rm-jobs label { display: grid; grid-template-columns: 30px 1fr; cursor: pointer; font-size: 16px; line-height: 1.6; }
 .rm-jobs label b { font-weight: 700; }
 .rm-jobs label a { text-underline-offset: 3px; }
 .rm-jobs input { appearance: none; -webkit-appearance: none; width: 20px; height: 20px; margin-top: 4px; border: 1.5px solid rgba(22,22,22,0.55); border-radius: 5px; background: rgba(255,255,255,0.5); cursor: pointer; transition: background-color .15s, border-color .15s, transform .12s var(--ease); }
@@ -106,11 +106,11 @@ a { color: inherit; }
 .rm-jobs input:active { transform: scale(0.9); }
 .rm-jobs input:focus-visible { outline: 2px solid #e2622d; outline-offset: 2px; }
 .rm-jobs input:checked + span { color: var(--muted); }
-.rm-ev { margin: 12px 0 0 30px; padding-left: 14px; border-left: 1px solid #b4552b; font-size: 15.5px; line-height: 1.6; color: var(--text); }
-.rm-ev a { display: block; margin-top: 4px; font-size: 13.5px; color: var(--muted); text-underline-offset: 3px; }
+.rm-ev { margin: 12px 0 0 30px; padding-left: 14px; border-left: 1px solid #b4552b; font-size: 15px; line-height: 1.6; color: var(--text); }
+.rm-ev a { display: block; margin-top: 4px; font-size: 14px; color: var(--muted); text-underline-offset: 3px; }
 .rm-ev + .rm-ev { margin-top: 14px; }
 .rm-reset { margin-top: 40px; }
-.rm-reset button { font: inherit; font-size: 14.5px; color: var(--muted); background: none; border: 0; padding: 6px 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.rm-reset button { font: inherit; font-size: 15px; color: var(--muted); background: none; border: 0; padding: 6px 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .rm-reset button:active { transform: scale(0.98); }
 @media (hover: hover) and (pointer: fine) { .rm-reset button:hover { color: var(--text); } }
 @media (max-width: 960px) {
@@ -119,17 +119,17 @@ a { color: inherit; }
   .rm-side ol { display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; }
 }
 
-.g-foot { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-top: 80px; padding: 24px 0 36px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--muted); }
+.g-foot { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-top: 80px; padding: 24px 0 36px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); }
 .g-foot nav { display: flex; flex-wrap: wrap; gap: 0 18px; }
 .g-foot a { text-underline-offset: 2px; display: inline-block; padding: 6px 0; }
 
 @media (max-width: 640px) {
   .wrap { padding: 0 20px; }
   .g-head { padding-top: 56px; }
-  .g-head .lede { font-size: 16.5px; }
+  .g-head .lede { font-size: 16px; }
   .rm-side ol { grid-template-columns: minmax(0, 1fr); }
   .rm-stage h2 { font-size: 25px; }
-  .rm-jobs label { font-size: 16.5px; }
+  .rm-jobs label { font-size: 16px; }
   .rm-ev { margin-left: 0; }
 }
 

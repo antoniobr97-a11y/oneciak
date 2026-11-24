@@ -1,0 +1,111 @@
+// Every function of the site, on a phone (iPhone 13) and a computer (1280px):
+// menu and its questions, disclaimer, empty form (7 red fields), My Reports,
+// the sample report (Read more, each of the 5 areas, the blocks inside an
+// area, each step of "Your path", copy email, glossary, every item of the
+// index), PDF, calendar, roadmap (49 jobs, ticks kept, every drop-down), 404.
+// Run: NODE_PATH=/opt/node22/lib/node_modules node tests/functions.js [base url]
+// Base url: a local server on the repo (default http://localhost:8143/) or https://oneciak.com/.
+const { chromium, devices } = require('playwright'); const fs=require('fs');
+const BASE=process.argv[2]||'http://localhost:8143/'; const OUT=(process.env.OUT||require('os').tmpdir())+'/';
+let ok=0, ko=[];
+const T=(name,cond,info='')=>{ if(cond) ok++; else ko.push(name+(info?' ('+info+')':'')); };
+const barsBottom=p=>p.evaluate(()=>{ let m=0; for (const s of ['#sec-results .r-header','#areaNav']) { const e=document.querySelector(s); if(!e) continue; const cs=getComputedStyle(e); if(cs.opacity==='0'||cs.display==='none') continue; const r=e.getBoundingClientRect(); if(s==='#areaNav'&&innerWidth>=1100) continue; if(r.bottom>0&&r.top<200) m=Math.max(m,r.bottom);} return m; });
+const visibleUnderBars=async(p,sel,idx=0)=>{ const bb=await barsBottom(p); const t=await p.evaluate(([s,i])=>{const e=document.querySelectorAll(s)[i]; return e?e.getBoundingClientRect().top:null;},[sel,idx]); return {ok: t!==null && t>=bb-1 && t<innerHeightSafe(p), t, bb}; };
+function innerHeightSafe(){ return 2000; }
+(async()=>{ const b=await chromium.launch();
+for (const dev of ['tel','pc']) {
+ const ctx=await b.newContext(dev==='tel'?{...devices['iPhone 13'],acceptDownloads:true}:{viewport:{width:1280,height:900},acceptDownloads:true});
+ await ctx.grantPermissions(['clipboard-read','clipboard-write'],{origin:new URL(BASE).origin}).catch(()=>{});
+ const p=await ctx.newPage(); const errs=[]; p.on('pageerror',e=>errs.push(e.message));
+ const tap=async loc=>{ if(dev==='tel') await loc.tap(); else await loc.click(); };
+ const W=ms=>p.waitForTimeout(ms);
+ // HOME + MENU
+ await p.goto(BASE); await W(700);
+ await tap(p.locator('#hamburgerBtn')); await W(500);
+ T(dev+' menu si apre', await p.evaluate(()=>getComputedStyle(document.getElementById('menuOverlay')).visibility!=='hidden' && document.getElementById('menuOverlay').getBoundingClientRect().height>200));
+ const faq=p.locator('.menu-faq-item > summary'); const nf=await faq.count();
+ for (let i=0;i<nf;i++){ await tap(faq.nth(i)); await W(300); T(dev+' menu domanda '+(i+1)+' si apre', await p.evaluate(i=>document.querySelectorAll('.menu-faq-item')[i].open,i)); await tap(faq.nth(i)); await W(250); T(dev+' menu domanda '+(i+1)+' si chiude', await p.evaluate(i=>!document.querySelectorAll('.menu-faq-item')[i].open,i)); }
+ await tap(p.locator('.menu-close')); await W(400);
+ T(dev+' menu si chiude', await p.evaluate(()=>!document.getElementById('menuOverlay').classList.contains('open') && !document.getElementById('menuOverlay').classList.contains('is-open')));
+ // disclaimer
+ await tap(p.locator('.l-btn')); await W(300);
+ T(dev+' senza casella: avviso', await p.evaluate(()=>getComputedStyle(document.getElementById('termsError')).display!=='none'));
+ // FORM
+ await p.evaluate(()=>{document.getElementById('termsCheck').checked=true;}); await tap(p.locator('.l-btn')); await W(700);
+ T(dev+' modulo si apre', await p.evaluate(()=>document.getElementById('sec-form').getBoundingClientRect().height>300 && getComputedStyle(document.getElementById('sec-form')).display!=='none'));
+ const sub=p.locator('#sec-form .btn-primary').first(); await sub.scrollIntoViewIfNeeded(); await tap(sub); await W(900);
+ const red=await p.evaluate(()=>document.querySelectorAll('#sec-form .is-invalid').length); T(dev+' modulo vuoto: 7 caselle rosse', red===7, 'rosse '+red);
+ T(dev+' modulo vuoto: messaggio', await p.evaluate(()=>/fields are missing/.test(document.getElementById('sec-form').innerText)));
+ // MY REPORTS
+ await p.goto(BASE); await W(500); await p.evaluate(()=>openMyReports()); await W(500);
+ T(dev+' My Reports si apre con la casella email', await p.evaluate(()=>!!document.querySelector('#sec-myreports input[type=email]') && document.querySelector('#sec-myreports input[type=email]').offsetParent!==null));
+ // REPORT
+ await p.goto(BASE); await W(500); await tap(p.locator('.l-sheet')); await W(1300);
+ T(dev+' scheda Northbound apre il report', await p.evaluate(()=>document.getElementById('resultTitle').textContent.trim()==='Northbound'));
+ if (dev==='tel') { const more=p.locator('#heroMore'); if(await more.count()){ await tap(more); await W(300); T(dev+' Read more apre il riassunto', await p.evaluate(()=>document.getElementById('resultSubtitle').classList.contains('is-open'))); } else T(dev+' Read more presente',false); }
+ // areas: tap each, in order and back
+ const trig=p.locator('#accordionMenu .accordion-trigger');
+ for (const i of [0,1,2,3,4,2,0]) { await trig.nth(i).scrollIntoViewIfNeeded(); await W(200); await tap(trig.nth(i)); await W(1300);
+  const st=await p.evaluate(i=>[...document.querySelectorAll('#accordionMenu .accordion-body')].map((b,k)=>b.classList.contains('open')?k:null).filter(x=>x!==null),i);
+  T(dev+' area '+(i+1)+' si apre da sola', st.length===1&&st[0]===i, JSON.stringify(st));
+  const bb=await barsBottom(p); const t=await p.evaluate(i=>document.getElementById('acc-trigger-'+i).getBoundingClientRect().top,i);
+  T(dev+' area '+(i+1)+' titolo visibile sotto le barre', t>=bb-1 && t<400, 'titolo '+Math.round(t)+' barre '+Math.round(bb)); }
+ await tap(trig.nth(0)); await W(800); T(dev+' area 1 si richiude', await p.evaluate(()=>!document.getElementById('acc-body-0').classList.contains('open')));
+ // blocks inside an area
+ await tap(trig.nth(1)); await W(1200);
+ const inner=p.locator('#acc-body-1 details.rblock > summary'); const ni=await inner.count();
+ for (let k=0;k<ni;k++){ await inner.nth(k).scrollIntoViewIfNeeded(); await tap(inner.nth(k)); await W(900); const o=await p.evaluate(()=>[...document.querySelectorAll('#acc-body-1 details.rblock')].map((d,k)=>d.open?k:null).filter(x=>x!==null)); T(dev+' area 2 blocco '+(k+1)+' si apre da solo',o.length===1&&o[0]===k,JSON.stringify(o)); }
+ T(dev+' area 2 ha blocchi interni', ni>0, 'blocchi '+ni);
+ await tap(trig.nth(1)); await W(600);
+ // path steps
+ const steps=p.locator('#accordionMenu details.path-step > summary'); const ns=await steps.count();
+ for (let j=0;j<ns;j++){ await steps.nth(j).scrollIntoViewIfNeeded(); await W(200); await tap(steps.nth(j)); await W(1300);
+  const o=await p.evaluate(()=>[...document.querySelectorAll('details.path-step')].map((d,k)=>d.open?k:null).filter(x=>x!==null)); T(dev+' passo '+(j+1)+' si apre da solo',o.length===1&&o[0]===j,JSON.stringify(o));
+  const bb=await barsBottom(p); const t=await p.evaluate(j=>document.querySelectorAll('details.path-step > summary')[j].getBoundingClientRect().top,j); T(dev+' passo '+(j+1)+' titolo visibile',t>=bb-1&&t<400,'titolo '+Math.round(t)+' barre '+Math.round(bb));
+  const full=await p.evaluate(j=>{const l=document.querySelectorAll('details.path-step')[j].querySelector('.path-line'); return !l || (getComputedStyle(l).display!=='none' && l.scrollHeight<=l.clientHeight+1);},j); T(dev+' passo '+(j+1)+' frase intera da aperto',full);
+  if (j===1) { const cb=p.locator('details.path-step').nth(1).locator('.copy-btn').first(); if (await cb.count()){ await cb.scrollIntoViewIfNeeded(); await tap(cb); await W(300); const txt=await cb.textContent(); T(dev+' copia email', /Copied|Select/.test(txt), txt); } else T(dev+' bottone copia email presente', false); }
+  // inner blocks of this step one at a time
+ }
+ T(dev+' Your path ha 5 passi', ns===5, 'passi '+ns);
+ await tap(steps.nth(ns-1)); await W(500);
+ // glossary
+ const g=p.locator('.gl-term').first(); if (await g.count()){ const area=await p.evaluate(()=>{const t=document.querySelector('.gl-term'); const d=t.closest('details'); const a=t.closest('.accordion-body'); return d? 'd' : a? a.id : '';}); 
+  await p.evaluate(()=>{const t=document.querySelector('.gl-term'); const a=t.closest('.accordion-body'); if(a&&!a.classList.contains('open')) toggleAccordion(Number(a.id.replace('acc-body-',''))); const d=t.closest('details'); if(d) d.open=true;}); await W(1200);
+  await g.scrollIntoViewIfNeeded(); await tap(g); await W(400);
+  const pop=await p.evaluate(()=>{const e=document.querySelector('.gl-pop'); if(!e||getComputedStyle(e).display==='none') return null; const r=e.getBoundingClientRect(); return {l:r.left,r:r.right,t:r.top,b:r.bottom,w:innerWidth,h:innerHeight};});
+  T(dev+' glossario: la nuvoletta si apre dentro lo schermo', pop && pop.l>=0 && pop.r<=pop.w && pop.t>=0 && pop.b<=pop.h, JSON.stringify(pop));
+  await p.keyboard.press('Escape'); await W(300); T(dev+' glossario: Esc la chiude', await p.evaluate(()=>{const e=document.querySelector('.gl-pop'); return !e||getComputedStyle(e).display==='none'||!e.isConnected||e.hidden||getComputedStyle(e).opacity==='0';}));
+ } else T(dev+' glossario presente',false);
+ // Sections index: every item
+ await p.evaluate(()=>scrollTo(0,0)); await W(300);
+ const items=await p.evaluate(()=>document.querySelectorAll('#areaNav .an-item').length);
+ for (let k=0;k<items;k++){
+  if (dev==='tel') { await p.evaluate(()=>{const a=document.querySelector('#accordionMenu .r-areas-h'); scrollTo(0,a.getBoundingClientRect().top+scrollY+300);}); await W(600); await tap(p.locator('#areaNav .an-top')); await W(400); }
+  else { await p.evaluate(()=>{const a=document.querySelector('#accordionMenu .r-areas-h'); scrollTo(0,a.getBoundingClientRect().top+scrollY-50);}); await W(500); }
+  const it=p.locator('#areaNav .an-item').nth(k); const label=(await it.textContent()).trim();
+  await tap(it); await W(1500);
+  const r=await p.evaluate(k=>{const b=document.querySelectorAll('#areaNav .an-item')[k]; let el, open;
+    if (b.classList.contains('an-step')) { const j=+b.dataset.j; const d=document.querySelectorAll('details.path-step')[j]; el=d.querySelector('summary'); open=d.open; } else { const i=+b.dataset.i; el=document.getElementById('acc-trigger-'+i); open=document.getElementById('acc-body-'+i).classList.contains('open'); }
+    return {t:el.getBoundingClientRect().top, open};},k);
+  const bb=await barsBottom(p); T(dev+' indice "'+label+'" porta alla voce aperta', r.open && r.t>=bb-1 && r.t<400, 'titolo '+Math.round(r.t)+' barre '+Math.round(bb)+' aperta '+r.open);
+ }
+ T(dev+' indice ha 10 voci (5 aree + 5 passi)', items===10, 'voci '+items);
+ // PDF
+ await p.evaluate(()=>scrollTo(0,document.body.scrollHeight)); await W(400);
+ try { const [dl]=await Promise.all([p.waitForEvent('download',{timeout:30000}), tap(p.locator('.pdf-row button').first())]); const f=OUT+dev+'_report.pdf'; await dl.saveAs(f); const sz=fs.statSync(f).size; T(dev+' PDF si scarica',sz>100000,sz+' byte'); } catch(e){ T(dev+' PDF si scarica',false,e.message.slice(0,60)); }
+ const cal=await p.evaluate(()=>{const b=document.getElementById('calBtn'); return b && !b.hidden;});
+ if (cal) { try { const [dl]=await Promise.all([p.waitForEvent('download',{timeout:15000}), tap(p.locator('#calBtn'))]); const f=OUT+dev+'_cal.ics'; await dl.saveAs(f); const t=fs.readFileSync(f,'utf8'); T(dev+' calendario .ics con date', /BEGIN:VEVENT/.test(t), (t.match(/BEGIN:VEVENT/g)||[]).length+' date'); } catch(e){ T(dev+' calendario si scarica',false,e.message.slice(0,60)); } }
+ else { const fut=await p.evaluate(()=>{ const r=window.lastResult||{}; const now=Date.now(); return ['festival_calendar','lab_and_market_opportunities','financial_sources'].flatMap(k=>r[k]||[]).map(x=>String(x.deadline||'')).filter(d=>!/closed|not published/i.test(d)).filter(d=>{const t=Date.parse(d.replace(/^[A-Za-z]+,\s*/,'')); return t&&t>now;}); }); T(dev+' calendario nascosto solo senza date future', fut.length===0, fut.join('; ')); }
+ T(dev+' nessun errore JS', errs.length===0, errs.join(' | ').slice(0,200));
+ // ROADMAP
+ const r2=await ctx.newPage(); const e2=[]; r2.on('pageerror',e=>e2.push(e.message)); await r2.goto(BASE+'roadmap/'); await r2.waitForTimeout(600);
+ const cbx=r2.locator('input[type=checkbox]'); const nc=await cbx.count(); T(dev+' roadmap 49 lavori', nc===49, nc);
+ await cbx.nth(0).check(); await r2.reload(); await r2.waitForTimeout(500); T(dev+' roadmap la spunta resta dopo ricarica', await cbx.nth(0).isChecked()); await cbx.nth(0).uncheck();
+ const det=r2.locator('details > summary'); const nd=await det.count(); let dok=0; for(let i=0;i<nd;i++){ await det.nth(i).scrollIntoViewIfNeeded(); await (dev==='tel'?det.nth(i).tap():det.nth(i).click()); await r2.waitForTimeout(250); if(await r2.evaluate(i=>document.querySelectorAll('details')[i].open,i)) dok++; }
+ T(dev+' roadmap tendine si aprono', dok===nd, dok+'/'+nd); T(dev+' roadmap nessun errore JS', e2.length===0, e2.join('|'));
+ // 404, privacy, terms links
+ const r3=await ctx.newPage(); const res=await r3.goto(BASE+'pagina-che-non-esiste'); T(dev+' 404 mostra la pagina', (await r3.content()).includes('<h1'));
+ await ctx.close();
+}
+console.log('PROVE PASSATE',ok,'| FALLITE',ko.length); ko.forEach(k=>console.log('  NO:',k));
+await b.close();})();
