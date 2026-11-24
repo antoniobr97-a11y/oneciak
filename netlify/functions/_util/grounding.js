@@ -140,7 +140,7 @@ function keepFactualSentences(text, pageText) {
 // Sites that copy festival and fund listings from elsewhere and are often
 // out of date. They can show that something exists, but a deadline or
 // amount taken only from them is not shown.
-const AGGREGATORS = ['festagent.com', 'fundsforngos.org', 'vitrina.ai', 'scriptmatch.ai', 'asianfilmfestivals.com', 'indieshortsmag.com', 'mauxa.com', 'filmfreeway.com', 'festhome.com', 'withoutabox.com', 'shortfilmdepot.com', 'clickforfestivals.com', 'movibeta.com', 'caligari.com.ar', 'filmcane.com'];
+const AGGREGATORS = ['festagent.com', 'fundsforngos.org', 'vitrina.ai', 'scriptmatch.ai', 'asianfilmfestivals.com', 'indieshortsmag.com', 'mauxa.com', 'filmfreeway.com', 'festhome.com', 'withoutabox.com', 'shortfilmdepot.com', 'clickforfestivals.com', 'movibeta.com', 'caligari.com.ar', 'filmcane.com', 'creativepathwayscanada.com'];
 function isAggregator(url) {
   try {
     const host = new URL(url).hostname.toLowerCase();
@@ -376,12 +376,21 @@ function checkProse(value, pageText) {
 
 // Mutates `report` in place. `searchUrlsByField` maps each field to the URLs
 // returned by the search of the section that produced it.
+// A quote that starts mid-list ("soit par l'entreprise de production
+// déléguée", "or by the production company") is one of several ways in:
+// on its own it says "companies only" when the page also lets the
+// director apply (CNC, 23 November 2026). It cannot back "Who can apply".
+const FRAGMENT = /^["“'‘]?\s*(?:soit|ou|or|oppure|ovvero|o|oder|ili|bzw)\b/i;
+
 function applicantOf(item) {
   if (!item.rule_quote) return null;
+  if (FRAGMENT.test(item.rule_quote)) { item.rule_quote = null; return null; }
   const a = String(item.applicant || '').trim().toLowerCase();
   if (a === 'individual' || a === 'company' || a === 'either') return a[0].toUpperCase() + a.slice(1);
   return null;
 }
+
+const THIRD_PARTY = /\bthird[- ]party\b|\blisting (?:site|page)\b/i;
 
 async function groundReport(report, searchUrlsByField, today, fetcher, project) {
   stripMarkup(report);
@@ -491,7 +500,9 @@ async function groundReport(report, searchUrlsByField, today, fetcher, project) 
   // a Kansas project and "Before you can apply" was built on it).
   if (Array.isArray(report.financial_sources)) {
     const before = report.financial_sources.length;
-    report.financial_sources = report.financial_sources.filter(f => !isAggregator(f.source));
+    // The model sometimes says so itself ("This listing is from a
+    // third-party site, so confirm on the SFFILM site", 23 November 2026).
+    report.financial_sources = report.financial_sources.filter(f => !isAggregator(f.source) && !THIRD_PARTY.test(f.eligibility || ''));
     stats.aggregatorFunds = before - report.financial_sources.length;
     stats.kept -= before - report.financial_sources.length;
   }
@@ -519,6 +530,23 @@ async function groundReport(report, searchUrlsByField, today, fetcher, project) 
   return stats;
 }
 
+// Run after linkCheck: an entry whose source link is dead (linkCheck took
+// its url away) goes whole, since its "Source" line would open a missing
+// page (two sales agents, 23 November 2026). Funds that go take their
+// "Before you can apply" lines with them.
+function dropDeadSources(report) {
+  const fundsListed = (report.financial_sources || []).filter(f => f && f.name).map(f => f.name);
+  let dropped = 0;
+  Object.keys(LISTS).forEach(field => {
+    if (!Array.isArray(report[field])) return;
+    const before = report[field].length;
+    report[field] = report[field].filter(item => !item || !item.source || item.url);
+    dropped += before - report[field].length;
+  });
+  dropStepsForGoneFunds(report, fundsListed);
+  return dropped;
+}
+
 // For the preview's single comparable film and festival: kept only with a
 // searched source, and only the sentences whose numbers are on that page.
 async function groundOne(obj, set, prose, today, fetcher) {
@@ -532,4 +560,4 @@ async function groundOne(obj, set, prose, today, fetcher) {
   return out;
 }
 
-module.exports = { groundReport, groundOne, sourcedSet };
+module.exports = { groundReport, groundOne, sourcedSet, dropDeadSources };

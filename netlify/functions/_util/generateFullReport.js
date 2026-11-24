@@ -1,6 +1,6 @@
 const { normalizeScores, overallFromAreas } = require('./scores');
 const { callClaude, extractJSON } = require('./anthropic');
-const { groundReport } = require('./grounding');
+const { groundReport, dropDeadSources } = require('./grounding');
 const { applyFacts } = require('./verifiedFacts');
 const { allFullPrompts } = require('./reportPrompts');
 const { buildReportEmailHtml, sendReportEmail } = require('./email');
@@ -81,6 +81,8 @@ async function generateAndDeliverFullReport({ store, key, project, email, anthro
       // plausible hallucinations — strip any that don't actually resolve
       // before the report ever reaches screen, PDF, or email.
       await verifyReportLinks(merged);
+      const deadSources = dropDeadSources(merged);
+      if (deadSources) console.log('report', key, 'dead sources dropped', deadSources);
 
       const html = buildReportEmailHtml(project, merged, key, viewUrl);
       const emailResult = await sendReportEmail({
