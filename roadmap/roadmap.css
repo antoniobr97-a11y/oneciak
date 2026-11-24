@@ -30,7 +30,7 @@ body::before {
 }
 a { color: inherit; }
 .wrap { max-width: 1240px; margin: 0 auto; padding: 0 40px; }
-.mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+.mono { font-family: var(--mono); font-size: 13px; font-weight: 700; } /* labels are Carlito bold words, never uppercase */
 
 /* night header, same dissolve as the app */
 .g-hero { position: relative; overflow: hidden; color: var(--on-night);
@@ -54,6 +54,8 @@ a { color: inherit; }
 .g-nav { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; height: 68px; border-bottom: 1px solid rgba(255,255,255,0.10); }
 .g-logo { display: flex; align-items: center; gap: 9px; font-family: var(--display); font-weight: 600; font-size: 16px; text-decoration: none; }
 @media (pointer: coarse) { .g-logo { padding: 11px 0; margin: -11px 0; } }
+.g-logo { transition: transform 0.16s var(--ease); }
+.g-logo:active { transform: scale(0.97); }
 .g-nav-r { display: flex; align-items: center; gap: 24px; font-size: 14px; }
 .g-nav-r a:not(.g-cta) { color: var(--on-night-2); text-decoration: none; padding: 8px 0; }
 .g-cta { background: var(--on-night); color: var(--night); text-decoration: none; font-weight: 500; font-size: 14px; padding: 10px 16px; border-radius: 10px; transition: transform .16s var(--ease); display: inline-block; }
@@ -92,7 +94,7 @@ a { color: inherit; }
 .rm-stage:first-child { padding-top: 0; }
 .rm-stage h2 { display: flex; align-items: baseline; gap: 14px; font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1.15; letter-spacing: -0.025em; }
 .rm-n { font-weight: 300; color: var(--ember-text); font-variant-numeric: tabular-nums; }
-.rm-count { display: block; margin-top: 6px; font-family: var(--mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.rm-count { display: block; margin-top: 6px; font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--muted); }
 .rm-here { display: inline-block; margin-bottom: 12px; padding: 5px 10px; border-radius: 6px; background: #f3dccd; color: #7a3215; font-size: 14px; font-weight: 700; }
 .rm-done { margin-top: 14px; font-size: 16px; line-height: 1.6; }
 .rm-done b { font-weight: 700; }

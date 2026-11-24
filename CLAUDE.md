@@ -129,7 +129,12 @@ pulsante. Blocchi CSS "LIGHT AND DARK" in fondo a index.html e a
   `@media (hover: hover) and (pointer: fine)`; ogni cliccabile ha `:active`
   con `scale(...)`; su touch le aree piccole allargate a ~44px.
 - Niente etichette sopra i titoli né numeri decorativi: le etichette sono
-  parole in Carlito grassetto. Icone disegnate, mai simboli di testo.
+  parole in Carlito grassetto (anche in roadmap: via il maiuscolo spaziato,
+  24 novembre 2026). Icone disegnate, mai simboli di testo: frecce e Back
+  sono SVG `.ic` 12px, circa 6px dalla parola (prima erano ← → ✕).
+- Un elemento cliccabile con un'animazione d'entrata usa `backwards`, non
+  `both`: `both` teneva il transform e la scheda Northbound non reagiva né
+  al tocco né al mouse.
 - **Un solo segno, un solo stile di voto**: stesso pallino grigio in tutte
   le liste; voti sempre "X.X/10" nel colore del testo, colore solo sulla
   barretta (blocco CSS "ONE MARKER, ONE SCORE STYLE"); anche Strong, Moderate,
@@ -443,7 +448,9 @@ ogni passo, ogni voce dell'indice, glossario, copia email, PDF,
 calendario, roadmap, 404) e `node tests/pages.js [url]` (180 viste: ogni
 pagina × 6 larghezze × 3 schemi; errori, richieste fallite, pagina larga,
 testo azzurro, trattini lunghi, mezzi pixel). Se cambia una funzione, si
-aggiorna il programma nello stesso commit.
+aggiorna il programma nello stesso commit. Terzo programma, `tests/rules.js`:
+le regole di design (caratteri, `:active`, angoli 10px, maiuscolo,
+contrasto) su ogni vista.
 
 - **Giro sul sito vero**: home, menu, modulo, report di esempio tutto
   aperto, My Reports, roadmap, privacy, termini, 404 × larghezze 262, 320,
