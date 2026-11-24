@@ -160,9 +160,10 @@ sui festival.
 
 - **Home**: compatta. Navbar trasparente, poi vetro, poi chiara
   (`updateLandingNav()`). Scheda di vetro con i voti veri di Northbound,
-  fatta come l'apertura del report: titolo grande Geist 700 (fino a 48px),
-  sotto i crediti, voto 40px (prima titolo 26px e voto 56px: "piccolo qui,
-  un bestione una volta aperto"). Niente riga "No account needed". Nel menu
+  fatta come l'apertura del report: titolo Geist 700 (28-40px), sotto i
+  crediti, voto 40px (prima titolo 26px e voto 56px: "piccolo qui, un
+  bestione una volta aperto"). Il titolo della pagina resta il più grande
+  (40-86px, 12,5vw: 49px su un iPhone contro 31 della scheda). Niente riga "No account needed". Nel menu
   "How it works" è una frase sola, non righe che sembrano link. In
   fondo e nel menu solo Privacy Policy e Terms of Service; nel menu domande
   frequenti che si aprono come le righe del report.
@@ -198,7 +199,10 @@ sui festival.
   "Read more" su telefono); "Your film, area by area" (5 aree chiuse, una
   aperta alla volta, `toggleAccordion`); poi **"Your path"** (`buildPath`):
   una scaletta numerata di righe chiuse con i primi nomi già visibili
-  (`namesLine`): This week, Make a short first (solo lungometraggio e
+  (`namesLine`); chiusa, una riga mostra titolo e una riga grigia come
+  un'area chiusa (i nomi, o la frase tagliata a 2 righe se non ci sono
+  nomi; la frase intera quando si apre: sul telefono sembrava già aperta),
+  e il titolo "Your path" ha lo stesso spazio di "Your film, area by area": This week, Make a short first (solo lungometraggio e
   "First film", con le fonti di Stephen Follows), Find a producer ("Before
   you can apply", produttori, email da copiare; non c'è se il produttore
   c'è già), Find the money (non c'è da "Funded" in poi), Get seen

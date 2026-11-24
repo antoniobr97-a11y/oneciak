@@ -208,7 +208,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-hero-grid > * { min-width: 0; }
 .l-headline { overflow-wrap: break-word; }
 .l-headline {
-  font-family: var(--display); font-size: clamp(44px, 6.2vw, 86px);
+  font-family: var(--display); font-size: clamp(40px, 12.5vw, 86px);
   font-weight: 300; line-height: 0.98; letter-spacing: -0.045em; color: var(--on-night);
   animation: riseIn 0.7s 0.05s var(--ease) both;
 }
@@ -255,8 +255,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-sheet:focus-visible { outline: 2px solid var(--on-night); outline-offset: 4px; }
 /* The sample card reads like the report it opens: poster title, credits
    under it, the score no bigger than the title (Antonio: the title was small
-   here and huge once opened, the 5.0 too big). */
-.l-sheet-title { display: block; font-family: var(--display); font-weight: 700; font-size: clamp(28px, 11vw, 48px); line-height: 0.95; letter-spacing: -0.05em; overflow-wrap: break-word; }
+   here and huge once opened, the 5.0 too big), but smaller than the page's
+   own headline. */
+.l-sheet-title { display: block; font-family: var(--display); font-weight: 700; font-size: clamp(28px, 8vw, 40px); line-height: 0.95; letter-spacing: -0.05em; overflow-wrap: break-word; }
 .l-sheet-credits { display: block; margin-top: 10px; font-size: 14px; color: var(--on-night-2); }
 .l-sheet-score { display: flex; align-items: baseline; gap: 12px; margin-top: 22px; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.09); }
 .l-sheet-score .n { font-family: var(--display); font-size: 40px; font-weight: 300; letter-spacing: -0.04em; line-height: 1; }
@@ -781,6 +782,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .email-draft .copy-btn { width: auto; padding: 10px 16px; border: 1px solid currentColor; color: var(--text); }
 
 .rblocks { margin-top: 32px; border-bottom: 1px solid var(--border); }
+.r-path .rblocks { margin-top: 0; }
 .rblock { border-top: 1px solid var(--border); }
 .rblock summary { list-style: none; display: flex; align-items: baseline; gap: 10px; padding: 16px 2px; cursor: pointer; transition: transform 0.15s ease-out; }
 .rblock summary::-webkit-details-marker { display: none; }
@@ -793,7 +795,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .entry-note { font-size: 14px; line-height: 1.5; color: var(--muted); margin: 0 0 6px; }
 .r-plan-h { font-family: var(--display); font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); margin: 0 0 14px; }
 .path-step .ready-block { margin-top: 0; padding-top: 0; border-top: 0; }
-.r-areas-h { margin-top: 44px; }
+.r-areas-h, .r-path .r-plan-h { margin-top: 44px; }
 @media (hover: hover) and (pointer: fine) { .rblock summary:hover .rblock-label { color: #000; } }
 .rblock-body { padding: 0 2px 22px; }
 .rblock summary { flex-wrap: wrap; }
@@ -803,6 +805,12 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .path-main { display: block; min-width: 0; }
 .path-main .rblock-label { display: block; }
 .path-line { display: block; margin-top: 3px; font-size: 15px; line-height: 1.45; color: var(--text); }
+/* Closed, a step shows its title and one grey line, like a closed area
+   (Antonio: on the phone "Your path" looked already open). The names
+   stand for the step; a step without names shows its line, cut to two
+   lines. Opened, the whole line is there. */
+.path-step:not([open]) .path-line { font-size: 14px; color: var(--muted); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.path-step:not([open]) .has-names .path-line { display: none; }
 .path-step .rblock-names { display: -webkit-box; margin-top: 4px; }
 .path-step .rblock-body { padding-left: 36px; }
 @media (max-width: 600px) { .path-step .rblock-body { padding-left: 0; } }
@@ -2958,7 +2966,7 @@ function laterNote(k, project) {
 }
 function pathStep(n, title, line, names, body) {
   if (!body) return '';
-  return '<details class="rblock path-step"><summary><span class="path-n">'+n+'</span><span class="path-main"><span class="rblock-label">'+title+'</span>'+(line ? '<span class="path-line">'+esc(line)+'</span>' : '')+namesLine(names)+'</span><span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="rblock-body">'+body+'</div></details>';
+  return '<details class="rblock path-step"><summary><span class="path-n">'+n+'</span><span class="path-main'+((names || []).filter(Boolean).length ? ' has-names' : '')+'"><span class="rblock-label">'+title+'</span>'+(line ? '<span class="path-line">'+esc(line)+'</span>' : '')+namesLine(names)+'</span><span class="rblock-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="rblock-body">'+body+'</div></details>';
 }
 function buildPath(r, project) {
   project = project || {};
