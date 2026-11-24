@@ -255,7 +255,9 @@ sui festival.
   parola sulle fonti il 23 novembre 2026 (anche i 4 PDF, con `pdftotext`):
   Stephen Follows aveva cambiato due numeri sulle sue pagine (quote dei
   festival $25-45 e $37-67, 13,038 festival studiati), aggiornati. Si
-  raggiunge solo dal report (`STAGE_TO_ROADMAP`). CSS `roadmap/roadmap.css`
+  raggiunge dal report (`STAGE_TO_ROADMAP`) e dalla domanda "Where do I start
+  after my report?" del menu; il link nella barra della home su computer è
+  stato tolto il 24 novembre 2026 (telefono e computer uguali). CSS `roadmap/roadmap.css`
   allineato al sito. Se cambia una regola citata, ricontrollare.
 - `/guides/*` rimanda alla home (301 in `netlify.toml`).
 - **Traduttore del browser** permesso; solo i nomi propri (`.entry-name`,
