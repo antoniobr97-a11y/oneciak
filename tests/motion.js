@@ -8,6 +8,10 @@
 // you meant to make.
 // Run: NODE_PATH=/opt/node22/lib/node_modules node tests/motion.js https://oneciak.com/ http://localhost:8143/
 const { chromium } = require('playwright');
+// Opens a page, trying again up to 3 times: the live site sometimes takes more
+// than 30s to answer one request (seen 24 and 25 Nov 2026), and a network
+// hiccup must not read as a broken site.
+async function open(p, url) { for (let i = 1; ; i++) { try { return await p.goto(url, { timeout: 45000 }); } catch (e) { if (i >= 3) throw e; await p.waitForTimeout(3000 * i); } } }
 const [A, B] = [process.argv[2] || 'https://oneciak.com/', process.argv[3] || 'http://localhost:8143/'];
 const views = {
   home: async p => {},
@@ -19,7 +23,7 @@ const views = {
 };
 async function signature(browser, base, dev, view) {
   const ctx = await browser.newContext(dev === 'tel' ? { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true } : { viewport: { width: 1280, height: 900 } });
-  const p = await ctx.newPage(); await p.goto(base); await p.waitForTimeout(600); await views[view](p); await p.waitForTimeout(700);
+  const p = await ctx.newPage(); await open(p, base); await p.waitForTimeout(600); await views[view](p); await p.waitForTimeout(700);
   const out = await p.evaluate(() => {
     const m = {};
     document.querySelectorAll('body *').forEach(e => {

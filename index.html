@@ -108,7 +108,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  /* none, not 0.01ms: a 0.01ms transition on every property made the report
+     title measure itself mid-change and stay small (108px instead of 153px)
+     for anyone with "Reduce motion" on (25 Nov 2026). Nothing waits for
+     transitionend or animationend. */
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
 @keyframes riseIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 /* Opening a closed row (area or step of the path): short fade with a 4px drop, under 250ms, so the content does not just pop in. */

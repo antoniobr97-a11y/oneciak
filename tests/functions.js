@@ -6,6 +6,10 @@
 // Run: NODE_PATH=/opt/node22/lib/node_modules node tests/functions.js [base url]
 // Base url: a local server on the repo (default http://localhost:8143/) or https://oneciak.com/.
 const { chromium, devices } = require('playwright'); const fs=require('fs');
+// Opens a page, trying again up to 3 times: the live site sometimes takes more
+// than 30s to answer one request (seen 24 and 25 Nov 2026), and a network
+// hiccup must not read as a broken site.
+async function open(p, url) { for (let i = 1; ; i++) { try { return await p.goto(url, { timeout: 45000 }); } catch (e) { if (i >= 3) throw e; await p.waitForTimeout(3000 * i); } } }
 const BASE=process.argv[2]||'http://localhost:8143/'; const OUT=(process.env.OUT||require('os').tmpdir())+'/';
 let ok=0, ko=[];
 const T=(name,cond,info='')=>{ if(cond) ok++; else ko.push(name+(info?' ('+info+')':'')); };
@@ -20,7 +24,7 @@ for (const dev of ['tel','pc']) {
  const tap=async loc=>{ if(dev==='tel') await loc.tap(); else await loc.click(); };
  const W=ms=>p.waitForTimeout(ms);
  // HOME + MENU
- await p.goto(BASE); await W(700);
+ await open(p, BASE); await W(700);
  await tap(p.locator('#hamburgerBtn')); await W(500);
  T(dev+' menu si apre', await p.evaluate(()=>getComputedStyle(document.getElementById('menuOverlay')).visibility!=='hidden' && document.getElementById('menuOverlay').getBoundingClientRect().height>200));
  const faq=p.locator('.menu-faq-item > summary'); const nf=await faq.count();
@@ -37,10 +41,10 @@ for (const dev of ['tel','pc']) {
  const red=await p.evaluate(()=>document.querySelectorAll('#sec-form .is-invalid').length); T(dev+' modulo vuoto: 7 caselle rosse', red===7, 'rosse '+red);
  T(dev+' modulo vuoto: messaggio', await p.evaluate(()=>/fields are missing/.test(document.getElementById('sec-form').innerText)));
  // MY REPORTS
- await p.goto(BASE); await W(500); await p.evaluate(()=>openMyReports()); await W(500);
+ await open(p, BASE); await W(500); await p.evaluate(()=>openMyReports()); await W(500);
  T(dev+' My Reports si apre con la casella email', await p.evaluate(()=>!!document.querySelector('#sec-myreports input[type=email]') && document.querySelector('#sec-myreports input[type=email]').offsetParent!==null));
  // REPORT (the sample card's bars must have the report's colours)
- await p.goto(BASE); await W(500);
+ await open(p, BASE); await W(500);
  const cardBars=await p.evaluate(()=>[...document.querySelectorAll('.l-sheet-row .l-bar i')].map(i=>getComputedStyle(i).backgroundColor));
  await tap(p.locator('.l-sheet')); await W(1300);
  const repBars=await p.evaluate(()=>[...document.querySelectorAll('#accordionMenu .acc-bar i')].map(i=>getComputedStyle(i).backgroundColor));
@@ -102,15 +106,22 @@ for (const dev of ['tel','pc']) {
   await p.evaluate(()=>{const a=document.getElementById('acc-trigger-4'); scrollTo(0,a.getBoundingClientRect().top+scrollY-250);});
   const fr=[]; for(let k=0;k<8;k++){ fr.push(await p.evaluate(()=>parseFloat(getComputedStyle([...document.querySelectorAll('#areaNav .an-item')][4]).paddingLeft))); await W(45); }
   T(dev+' colonna del report: lo scivolamento è animato', fr.some(v=>v>0.5&&v<11.5), fr.map(v=>v.toFixed(1)).join(' '));
-  const f2=await ctx.newPage(); await f2.goto(BASE); await f2.evaluate(()=>{document.getElementById('termsCheck').checked=true;onStartClick();}); await f2.waitForTimeout(700);
+  const f2=await ctx.newPage(); await open(f2, BASE); await f2.evaluate(()=>{document.getElementById('termsCheck').checked=true;onStartClick();}); await f2.waitForTimeout(700);
   const formOn=await f2.evaluate(()=>{const e=document.querySelector('#formSteps li.on'); const c=getComputedStyle(e); return [c.fontSize,c.color,c.paddingTop,c.paddingLeft,c.borderBottomWidth,c.boxShadow].join(' | ');});
   const formOff=await f2.evaluate(()=>{const e=document.querySelector('#formSteps li:not(.on)'); const c=getComputedStyle(e); return [c.fontSize,c.color,c.paddingTop,c.paddingLeft,c.borderBottomWidth,c.boxShadow].join(' | ');});
   await f2.close();
   T(dev+' colonna del report uguale ai passi del modulo', repOn===formOn && repOff===formOff, repOn+' vs '+formOn);
  }
+ // the report title fills its column, also with "Reduce motion" on (25 Nov 2026:
+ // a 0.01ms transition on every property left it at 108px instead of 166px)
+ if (dev==='pc') for (const rm of ['no-preference','reduce']) {
+  const c3=await b.newContext({viewport:{width:1280,height:800},reducedMotion:rm}); const q=await c3.newPage(); await open(q, BASE); await q.waitForTimeout(300); await q.evaluate(()=>showSampleReport()); await q.waitForTimeout(1500);
+  const r=await q.evaluate(()=>{const t=document.getElementById('resultTitle'); const g=document.createRange(); g.selectNodeContents(t); return [Math.round(g.getBoundingClientRect().width), t.parentNode.clientWidth];});
+  T(dev+' titolo del report largo quanto la colonna ('+rm+')', r[0]>=r[1]*0.95 && r[0]<=r[1]+1, r[0]+' su '+r[1]); await c3.close();
+ }
  // the report's side column fits short laptop screens without a scroll bar
  if (dev==='pc') for (const [w,h] of [[1366,657],[1280,600],[1440,700]]) {
-  const c2=await b.newContext({viewport:{width:w,height:h}}); const q=await c2.newPage(); await q.goto(BASE); await q.evaluate(()=>showSampleReport()); await q.waitForTimeout(900);
+  const c2=await b.newContext({viewport:{width:w,height:h}}); const q=await c2.newPage(); await open(q, BASE); await q.evaluate(()=>showSampleReport()); await q.waitForTimeout(900);
   await q.evaluate(()=>{const a=document.querySelector('.r-areas-h'); scrollTo(0,a.getBoundingClientRect().top+scrollY+400);}); await q.waitForTimeout(700);
   const r=await q.evaluate(()=>{const n=document.getElementById('areaNav'); return [n.scrollHeight, n.clientHeight];});
   T(dev+' colonna del report intera su schermo '+w+'x'+h, r[0]<=r[1]+1, 'alta '+r[0]+' spazio '+r[1]); await c2.close();
@@ -123,14 +134,14 @@ for (const dev of ['tel','pc']) {
  else { const fut=await p.evaluate(()=>{ const r=window.lastResult||{}; const now=Date.now(); return ['festival_calendar','lab_and_market_opportunities','financial_sources'].flatMap(k=>r[k]||[]).map(x=>String(x.deadline||'')).filter(d=>!/closed|not published/i.test(d)).filter(d=>{const t=Date.parse(d.replace(/^[A-Za-z]+,\s*/,'')); return t&&t>now;}); }); T(dev+' calendario nascosto solo senza date future', fut.length===0, fut.join('; ')); }
  T(dev+' nessun errore JS', errs.length===0, errs.join(' | ').slice(0,200));
  // ROADMAP
- const r2=await ctx.newPage(); const e2=[]; r2.on('pageerror',e=>e2.push(e.message)); await r2.goto(BASE+'roadmap/'); await r2.waitForTimeout(600);
+ const r2=await ctx.newPage(); const e2=[]; r2.on('pageerror',e=>e2.push(e.message)); await open(r2, BASE+'roadmap/'); await r2.waitForTimeout(600);
  const cbx=r2.locator('input[type=checkbox]'); const nc=await cbx.count(); T(dev+' roadmap 49 lavori', nc===49, nc);
  await cbx.nth(0).check(); await r2.reload(); await r2.waitForTimeout(500); T(dev+' roadmap la spunta resta dopo ricarica', await cbx.nth(0).isChecked()); await cbx.nth(0).uncheck();
  const det=r2.locator('details > summary'); const nd=await det.count(); let dok=0; for(let i=0;i<nd;i++){ await det.nth(i).scrollIntoViewIfNeeded(); await (dev==='tel'?det.nth(i).tap():det.nth(i).click()); await r2.waitForTimeout(250); if(await r2.evaluate(i=>document.querySelectorAll('details')[i].open,i)) dok++; }
  T(dev+' roadmap tendine si aprono', dok===nd, dok+'/'+nd); T(dev+' roadmap nessun errore JS', e2.length===0, e2.join('|'));
  // 404, privacy, terms links
- const r3=await ctx.newPage(); const res=await r3.goto(BASE+'pagina-che-non-esiste'); T(dev+' 404 mostra la pagina', (await r3.content()).includes('<h1'));
+ const r3=await ctx.newPage(); const res=await open(r3, BASE+'pagina-che-non-esiste'); T(dev+' 404 mostra la pagina', (await r3.content()).includes('<h1'));
  await ctx.close();
 }
-console.log('PROVE PASSATE',ok,'| FALLITE',ko.length); ko.forEach(k=>console.log('  NO:',k));
+console.log('PROVE PASSATE',ok,'| FALLITE',ko.length); ko.forEach(k=>console.log('  NO:',k)); process.exitCode=ko.length?1:0;
 await b.close();})();
