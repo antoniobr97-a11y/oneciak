@@ -23,8 +23,11 @@ step "sintassi del server" bash -c 'for f in netlify/functions/*.js netlify/func
 [ "${1:-}" = "--quick" ] && { [ $fail -eq 0 ] && echo "TUTTO A POSTO (solo codice)" || echo "QUALCOSA NON PASSA"; exit $fail; }
 
 # the site in a browser, on a server started here
-PORT=8190; python3 -m http.server $PORT --bind 127.0.0.1 >"$OUT/server.log" 2>&1 & SRV=$!
+# a free port each time: two runs at once on a fixed port shared one server, and the first to end switched it off for the other
+PORT=$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1])')
+python3 -m http.server $PORT --bind 127.0.0.1 >"$OUT/server.log" 2>&1 & SRV=$!
 trap 'kill $SRV 2>/dev/null' EXIT; sleep 1
+kill -0 $SRV 2>/dev/null || { echo "il server locale non parte (dettagli in $OUT/server.log)"; exit 1; }
 L="http://127.0.0.1:$PORT/"
 step "funzioni" node tests/functions.js "$L"
 step "pagine" node tests/pages.js "$L"

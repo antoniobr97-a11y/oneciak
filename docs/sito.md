@@ -85,7 +85,7 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   fatta come l'apertura del report: titolo Geist 700 (28-40px), sotto i
   crediti, voto 40px (prima titolo 26px e voto 56px: "piccolo qui, un
   bestione una volta aperto"). Il titolo della pagina resta il più grande
-  (40-86px, 12,5vw: 49px su un iPhone contro 31 della scheda). Niente riga "No account needed". Nel menu
+  (40-86px, 12,5vw: 49px su un iPhone contro 31 della scheda). Niente riga "No account needed" né "No account required." accanto al bottone del modulo. Solo il voto, senza frase (sotto ci sono già le 5 aree). Nel menu
   "How it works" è una frase sola, non righe che sembrano link. In
   fondo e nel menu solo Privacy Policy e Terms of Service; nel menu domande
   frequenti che si aprono come le righe del report.
@@ -107,7 +107,7 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   grande come un manifesto (`fitTitle`: una riga larga quanto l'apertura,
   24-168px; i titoli lunghi vanno a capo tra le parole in circa 3 righe),
   sotto i crediti (genere · formato · paese · lingua) e la logline
-  (`setHeroTitle`), poi la scheda di vetro col voto (48px, 40px sul
+  (`setHeroTitle`), poi la scheda di vetro col voto e accanto "Average of the five areas" (prima la frase del modello di 3-5 parole, tolta perché "sa di AI"; stessa riga in anteprima, PDF e mail) (48px, 40px sul
   telefono: prima 64 e 52, "sproporzionato"). Stessa apertura nel PDF
   (copertina) e nella mail (titolo 30-96px, ridotto sotto i 520px). PDF e
   mail: titoli come parole in grassetto, niente rosso e verde, voti "X.X/10".
