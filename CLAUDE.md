@@ -519,6 +519,10 @@ bottoni principali, e nessun controllo se n'era accorto.
   rileggono revisori senza memoria della conversazione (`/egm:egm-review-loop`
   con `comprehension` e `design_critic`). Provato il 18 novembre 2026 sul
   piano della prova con 5 filmmaker: 2 problemi bloccanti trovati e corretti.
+- **Retro** e **writing-for-agents** (`.claude/skills/`, da github.com/
+  mattpocock/skills commit d653911, MIT; solo testo, retro parte solo se
+  chiamata): `/retro` a fine lavoro, cerca cosa cambiare perché gli errori
+  non si ripetano (controlli automatici prima di regole scritte).
 - **Emil Kowalski design-eng** (`.claude/skills/emil-design-eng`, commit
   c8a7962, MIT): regole per animazioni e tocco.
 - **Prove nel browser**: script Playwright a mano con
