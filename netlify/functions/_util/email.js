@@ -335,7 +335,7 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
       (project.logline ? '<div style="margin-top:10px;font-size:18px;line-height:1.45;color:#f2ede6">' + esc(project.logline) + '</div>' : '') +
       '<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:24px"><tr>' +
         '<td style="font-size:44px;line-height:1;font-weight:300;color:#f2ede6;letter-spacing:-0.03em;padding-right:14px">' + esc(score) + '<span style="font-size:18px;color:#d6cec3">/10</span></td>' +
-        (r.overall_label ? '<td style="font-size:15px;font-weight:600;color:#f2ede6;vertical-align:bottom;padding-bottom:4px">' + esc(r.overall_label) + '</td>' : '') +
+        '<td style="font-size:15px;color:#d6cec3;vertical-align:bottom;padding-bottom:4px">Average of the five areas</td>' +
       '</tr></table>' +
     '</td></tr>' +
     '<tr><td style="padding:26px 32px 6px">' +

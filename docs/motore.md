@@ -75,7 +75,7 @@ qualità misurata e come provarlo sulla preview #81.
   voto), con esempi area per area e tutta la scala; negli esempi JSON dei
   prompt nessun numero (un "6" lì faceva finire tutto tra 4,5 e 6).
   `_util/scores.js`: voti in numeri 1-10 (`normalizeScores`) e voto finale =
-  media delle 5 aree (`overallFromAreas`). Misurato il 16 novembre 2026 su 6
+  media delle 5 aree (`overallFromAreas`). Il modello non scrive più `overall_label` (la frase di 3-5 parole sotto il voto): tolta dai prompt il 25 novembre 2026. Misurato il 16 novembre 2026 su 6
   progetti diversi (2 giri ciascuno): prima 3,6-5,6, dopo 2,0-6,5, stabile
   entro 0,2. Nessun confronto con altri report ("più alto del 28% di 18
   progetti": erano quasi tutte prove, tolto). Niente previsioni di incasso
