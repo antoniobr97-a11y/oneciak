@@ -101,4 +101,5 @@ qualità misurata e come provarlo sulla preview #81.
   `deploy-preview-81--oneciak.netlify.app`, genera i report sulla preview.
   Ha commit "TEST ONLY": MAI su main né mergiata. Per aggiornarla: checkout
   dei file del motore dal branch di lavoro sopra
-  `origin/test-sourced-reports`. Mail di prova a `delivered+X@resend.dev`.
+  `origin/test-sourced-reports`, poi `tests/engine.js` sulla preview
+  (`docs/controlli.md`). Mail di prova a `delivered+X@resend.dev`.

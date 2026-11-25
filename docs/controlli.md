@@ -11,15 +11,20 @@ con `tests/publish.sh`); `/tests/*` è chiuso con 404 in `netlify.toml`.
 `tests/lint.js` legge il codice (simboli di testo, trattini lunghi,
 pillole, `transition: all`, `scale(0)`, misure fuori scala, hover fuori da
 `@media (hover: hover) and (pointer: fine)`); `tests/shots.js A B` fa il
-foglio di foto prima e dopo di ogni vista, da guardare con gli occhi. Gli
+foglio di foto prima e dopo di ogni vista, da guardare con gli occhi
+(anche fondo del modulo, anteprima, prima pagina del PDF e mail: la mail
+"prima" è `email.js` di `origin/main`; ogni foto aspetta la fine delle
+animazioni). Gli
 altri, anche da soli su un server locale o sul sito vero:
 `NODE_PATH=/opt/node22/lib/node_modules node tests/functions.js [url]`
 (160 prove su telefono e computer, compresa la colonna del report su
 schermi bassi e il titolo con "Riduci movimento": menu, modulo, ogni area, ogni blocco,
 ogni passo, ogni voce dell'indice, glossario, copia email, PDF,
-calendario, roadmap, 404) e `node tests/pages.js [url]` (240 viste: ogni
+calendario, roadmap, 404) e `node tests/pages.js [url]` (264 viste: ogni
 pagina × 8 schermi, compresi 1366x657 e 1280x600 × 3 schemi; errori, richieste fallite, pagina larga,
-testo azzurro, trattini lunghi, mezzi pixel). Se cambia una funzione, si
+testo azzurro, trattini lunghi, mezzi pixel; una richiesta fallita conta
+solo se fallisce anche riprovandola due volte). Ogni giro di `check.sh` usa una
+porta libera: due giri insieme sulla stessa porta si spegnevano il server. Se cambia una funzione, si
 aggiorna il programma nello stesso commit. Terzo e quarto, `tests/rules.js`
 (caratteri, `:active`, angoli 10px, maiuscolo, contrasto su ogni vista; in
 locale la 404 è quella di python, in Times) e `tests/press.js` (stessa
@@ -30,6 +35,14 @@ muoveva e ora salta): va lanciato prima di ogni pubblicazione che tocca il
 CSS. Nato dal 24 novembre 2026: il blocco ONE PRESS aveva tolto lo
 scivolamento alla colonna del report e la sfumatura dell'ombra ai 4
 bottoni principali, e nessun controllo se n'era accorto.
+
+Sesto, solo a mano e solo quando cambia il motore: `node tests/engine.js
+https://deploy-preview-81--oneciak.netlify.app/` (dopo aver aggiornato la
+preview, vedi `docs/motore.md`). Compila il modulo come un visitatore, chiede
+un'anteprima vera al motore (circa 0,025 $, 20 secondi) e controlla: 5 voti da
+1 a 10 con i testi, voto finale uguale alla media, film e festival solo con
+fonte controllata, niente errori a schermo né trattini lunghi. La risposta
+intera va in `$OUT/engine.json`. Sul sito vero si rifiuta di partire.
 
 - **Giro sul sito vero**: home, menu, modulo, report di esempio tutto
   aperto, My Reports, roadmap, privacy, termini, 404 × larghezze 262, 320,
