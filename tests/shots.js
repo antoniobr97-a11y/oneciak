@@ -19,6 +19,7 @@ const views = {
   'report apertura': report,
   'report aree': at('#accordionMenu .r-areas-h'),
   'report your path': at('#accordionMenu .r-path'),
+  caricamento: async p => { await p.evaluate(() => { showOnly('sec-loading'); document.getElementById('loadingTitle').textContent = 'Building your full report…'; startFullReportTimer(); }); await p.waitForTimeout(500); },
   'my reports': async p => { await p.evaluate(() => openMyReports()); await p.waitForTimeout(500); },
   roadmap: async p => { await open(p, p.url() + 'roadmap/'); await p.waitForTimeout(800); },
   privacy: async p => { await open(p, p.url() + 'privacy.html'); await p.waitForTimeout(500); }

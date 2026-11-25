@@ -463,25 +463,12 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
    to any app. Pacing is a plausible staged animation (not literal
    per-dimension telemetry — the API calls don't expose that granularity),
    timed to roughly match how long each flow actually takes. */
-.loading-dims { display: flex; flex-direction: column; gap: 4px; text-align: left; }
-.loading-dim {
-  display: flex; align-items: center; gap: 14px; padding: 10px 14px; border-radius: var(--radius);
-  opacity: 0.4; transition: opacity 0.4s var(--ease), background 0.4s var(--ease);
-}
-.loading-dim.is-active { opacity: 1; background: var(--cream); }
-.loading-dim.is-done { opacity: 0.75; }
-.loading-dim-num {
-  font-family: var(--sf); font-size: 13px; font-weight: 700; color: var(--muted); min-width: 26px; height: 26px;
-  border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  box-shadow: inset 0 0 0 1.5px var(--border); transition: color 0.3s var(--ease), background 0.3s var(--ease), box-shadow 0.3s var(--ease);
-}
-.loading-dim.is-active .loading-dim-num { color: #fff; background: var(--accent); box-shadow: none; animation: loadingDimPulse 1.6s ease-in-out infinite; }
-.loading-dim.is-done .loading-dim-num { color: #fff; background: var(--success); box-shadow: none; font-size: 0; }
-.loading-dim.is-done .loading-dim-num::after { content: ''; display: block; width: 9px; height: 5px; margin-top: 2px; border-left: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); }
-@keyframes loadingDimPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0,0,0,0.18); } 50% { box-shadow: 0 0 0 5px rgba(0,0,0,0); } }
-.loading-dim-name { font-size: 15px; font-weight: 600; color: var(--text); }
+/* The five areas, still: no dot that "advances" (it walked on a timer, not on
+   the real work, Antonio: "sa di AI"). Rows like the form's side steps. */
+.loading-dims { display: flex; flex-direction: column; text-align: left; border-top: 1px solid color-mix(in srgb, currentColor 14%, transparent); }
+.loading-dim { padding: 12px 0; border-bottom: 1px solid color-mix(in srgb, currentColor 14%, transparent); }
+
 .loading-timer { margin-top: 28px; max-width: 40ch; font-size: 14px; line-height: 1.5; color: var(--muted); } /* one plain sentence: the running clock in a pill with a pulsing dot read as an AI chat (Antonio) */
-@media (prefers-reduced-motion: reduce) { .loading-dim.is-active .loading-dim-num { animation: none; } }
 
 /* ══════════════════════
    RESULTS
@@ -905,32 +892,13 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #sec-loading .loading-title { color: var(--on-night); }
 #sec-loading .loading-desc { color: var(--on-night-2); }
 #sec-loading .loading-dim-name { color: var(--on-night); }
-#sec-loading .loading-dim.is-active { background: rgba(255,255,255,0.07); }
-#sec-loading .loading-dim-num { color: var(--on-night-2); }
-#sec-loading .loading-dim.is-done { opacity: 1; }
-#sec-loading .loading-dim { opacity: 0.55; }
-#sec-loading .loading-dim.is-active, #sec-loading .loading-dim.is-done { opacity: 1; }
-#sec-loading .loading-dim.is-active .loading-dim-num { color: #ffc6a8; }
-#sec-loading .loading-dim.is-done .loading-dim-num { color: #7fd6a4; }
 #sec-loading .loading-timer { color: var(--on-night-2); }
 #sec-loading .btn-primary { background: var(--on-night); color: var(--night); }
 
 /* LOADING: light display title, mono step numbers, no filled circles */
 .loading-wrap { max-width: 520px; }
 .loading-title { font-family: var(--display); font-size: clamp(30px, 5vw, 40px); font-weight: 700; letter-spacing: -0.03em; }
-.loading-dim { padding: 12px 14px; }
-.loading-dim.is-active { background: var(--field); }
-.loading-dim-num { font-family: var(--mono); font-size: 13px; font-weight: 400; letter-spacing: 0.06em; box-shadow: none; background: none; min-width: 26px; color: var(--muted); }
-.loading-dim.is-active .loading-dim-num { background: none; color: #b4552b; animation: none; }
-.loading-dim.is-done .loading-dim-num { background: none; color: var(--success); }
 .loading-dim-name { font-family: var(--display); font-size: 16px; font-weight: 500; letter-spacing: -0.01em; }
-.loading-dim .loading-dim-num { min-width: 0; width: 10px; height: 10px; margin-top: 7px; padding: 0; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; font-size: 0; }
-.loading-dim.is-active .loading-dim-num { background: currentColor; }
-.loading-dim.is-done .loading-dim-num { width: 12px; box-shadow: none; border-radius: 0; background: none; }
-.loading-dim { align-items: flex-start; }
-.loading-dim-num { height: auto; padding-top: 4px; justify-content: flex-start; }
-.loading-dim-name small { display: none; margin-top: 4px; font-family: var(--sf); font-size: 14px; font-weight: 400; line-height: 1.45; letter-spacing: 0; color: var(--on-night-2); }
-.loading-dim.is-active .loading-dim-name small { display: block; }
 @media (max-width: 640px) {
   #sec-results .r-hero, #sec-myreports .r-hero { padding: 108px 20px 200px; }
   #sec-results .r-main, #sec-myreports .r-main { padding-left: 20px; padding-right: 20px; }
@@ -1073,7 +1041,7 @@ details.more .prose { margin-top: 12px; }
   /* Small text slightly darker in light mode . */
   :root { --muted: #3a3a3a; --muted-light: #3a3a3a; --success: #0a5c2d; --danger: #8a2419; }
   .score-mid { color: #6e3f00; }
-  .tips-label, .an-top, .fs-col .fs-label, #sec-loading .loading-dim.is-active .loading-dim-num { color: #93391a !important; }
+  .tips-label, .an-top, .fs-col .fs-label { color: #93391a !important; }
   .exec-box.risk .exec-lead { color: var(--danger); }
   .exec-box.opp .exec-lead { color: var(--success); }
   .fs-col.red li::before { background: var(--danger); }
@@ -1097,7 +1065,6 @@ details.more .prose { margin-top: 12px; }
   .l-nav.is-light, .l-nav.is-scrolled, #sec-results .r-header.is-light, #sec-myreports .r-header.is-light, #sec-results .r-header.is-scrolled, #sec-myreports .r-header.is-scrolled, .f-header, .r-header { background: rgba(255,255,255,0.86); }
   .menu-header { background: rgba(255,255,255,0.9); }
   @media (max-width: 1099px) { .area-nav { background: rgba(255,255,255,0.97); } .area-nav.is-open .an-col { background: #ffffff; } }
-  #sec-loading .loading-dim.is-active { background: #f5f5f4; }
   .sample-banner { background: #f5f5f4; border-bottom: 1px solid var(--border-light); }
   .l-hero { padding-bottom: 120px; }
   #sec-results .r-hero, #sec-myreports .r-hero { padding-bottom: 56px; }
@@ -1119,8 +1086,6 @@ details.more .prose { margin-top: 12px; }
   #sec-results .back-btn, #sec-myreports .back-btn { background: rgba(255,255,255,0.45); border-color: rgba(20,18,16,0.18); }
   .overall-card { background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.4)); border-color: rgba(20,18,16,0.08) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.7) !important; }
   .sample-banner a { color: inherit !important; }
-  #sec-loading .loading-dim.is-active .loading-dim-num { color: #9a4520; }
-  #sec-loading .loading-dim.is-done .loading-dim-num { color: var(--success); }
 }
 
 @media (prefers-color-scheme: dark) and (hover: hover) and (pointer: fine) {
@@ -1174,8 +1139,7 @@ details.more .prose { margin-top: 12px; }
   @media (min-width: 1100px) { #areaNav .an-item.on { box-shadow: inset 2px 0 0 #f0a07c; } }
   .an-item.on::before { background: #f0a07c; }
 
-.tips-label, .an-top, .fs-col .fs-label, .loading-dim.is-active .loading-dim-num { color: #f0a07c; }
-  #sec-loading .loading-dim.is-active .loading-dim-num { color: #ffe0cf; }
+.tips-label, .an-top, .fs-col .fs-label { color: #f0a07c; }
   .l-hero, .menu-overlay, #sec-results, #sec-myreports, #sec-loading, .l-nav { --on-night-2: #b8b2ab; }
   .entry-lesson { border-left-color: rgba(240,160,124,0.6); }
   .score-mid { color: #f2b25c; }
@@ -1297,7 +1261,7 @@ details.more .prose { margin-top: 12px; }
   <section class="l-order" id="landingOrder">
     <div class="l-wrap">
       <footer class="l-foot">
-        <span>OneCiak, film market intelligence</span>
+        <span>OneCiak, a market report for your film</span>
         <nav><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></nav>
       </footer>
     </div>
@@ -1491,12 +1455,12 @@ details.more .prose { margin-top: 12px; }
   <div class="loading-wrap">
     <div class="loading-title" id="loadingTitle">Reading your project</div>
     <div class="loading-desc" id="loadingDesc">Scoring your project across the five areas.</div>
-    <div class="loading-dims" id="loadingDims" aria-hidden="true">
-      <div class="loading-dim" data-dim="0"><span class="loading-dim-num" aria-hidden="true"></span><span class="loading-dim-name">Creative Package<small>Is the logline strong, which attachments would move financiers.</small></span></div>
-      <div class="loading-dim" data-dim="1"><span class="loading-dim-num" aria-hidden="true"></span><span class="loading-dim-name">Financial Plan<small>Is the budget realistic, which funds and tax credits fit.</small></span></div>
-      <div class="loading-dim" data-dim="2"><span class="loading-dim-num" aria-hidden="true"></span><span class="loading-dim-name">Market &amp; Audience<small>Who watches films like this, how comparable titles did.</small></span></div>
-      <div class="loading-dim" data-dim="3"><span class="loading-dim-num" aria-hidden="true"></span><span class="loading-dim-name">Festival Strategy<small>Where to premiere first without burning your status.</small></span></div>
-      <div class="loading-dim" data-dim="4"><span class="loading-dim-num" aria-hidden="true"></span><span class="loading-dim-name">Distribution &amp; Revenue<small>Realistic routes to buyers, from festivals to streaming.</small></span></div>
+    <div class="loading-dims" id="loadingDims">
+      <div class="loading-dim"><span class="loading-dim-name">Creative package</span></div>
+      <div class="loading-dim"><span class="loading-dim-name">Financial plan</span></div>
+      <div class="loading-dim"><span class="loading-dim-name">Market and audience</span></div>
+      <div class="loading-dim"><span class="loading-dim-name">Festival strategy</span></div>
+      <div class="loading-dim"><span class="loading-dim-name">Distribution and revenue</span></div>
     </div>
     <div class="loading-timer" id="loadingTimer" style="display:none"></div>
     <button class="btn-primary" id="loadingRetryBtn" style="display:none;margin-top:20px;max-width:280px" onclick="retryLastAction()">Try again<svg class="ic" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8.5M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -1556,7 +1520,7 @@ details.more .prose { margin-top: 12px; }
     <div class="disclaimer-box" style="margin-top:14px">
       <div class="disclaimer-text"><strong>Legal Disclaimer:</strong> Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. OneCiak assumes no liability. Results are estimates and do not guarantee any outcome. OneCiak is not a licensed consulting firm.</div>
     </div>
-    <p class="footer-note">OneCiak, film market intelligence · oneciak.com · <a href="/privacy.html" style="text-decoration:underline;text-underline-offset:2px">Privacy Policy</a> · <a href="/terms.html" style="text-decoration:underline;text-underline-offset:2px">Terms of Service</a></p>
+    <p class="footer-note">OneCiak, a market report for your film · oneciak.com · <a href="/privacy.html" style="text-decoration:underline;text-underline-offset:2px">Privacy Policy</a> · <a href="/terms.html" style="text-decoration:underline;text-underline-offset:2px">Terms of Service</a></p>
   </div>
 </div>
 
@@ -2099,44 +2063,6 @@ function stopFullReportTimer() {
   if (el) el.style.display = 'none';
 }
 
-/* ── DIMENSION PROGRESS ── walks the loading screen through the same 5
-   numbered dimensions used everywhere else in the product, instead of a
-   generic spinner. Pacing is a plausible staged animation keyed to elapsed
-   time, not literal per-dimension telemetry (the underlying API calls run
-   in parallel and don't expose that granularity) — it still lands on the
-   right dimension by the time each flow realistically finishes. */
-var loadingDimHandle = null;
-function resetLoadingDims() {
-  if (loadingDimHandle) { clearInterval(loadingDimHandle); loadingDimHandle = null; }
-  document.querySelectorAll('#loadingDims .loading-dim').forEach(function (el) {
-    el.classList.remove('is-active', 'is-done');
-  });
-}
-function startLoadingDims(stageSeconds) {
-  resetLoadingDims();
-  var dims = document.querySelectorAll('#loadingDims .loading-dim');
-  var startedAt = Date.now();
-  function render() {
-    var secs = (Date.now() - startedAt) / 1000;
-    var stage = 0;
-    for (var i = 0; i < stageSeconds.length; i++) { if (secs >= stageSeconds[i]) stage = i + 1; }
-    stage = Math.min(stage, dims.length - 1);
-    dims.forEach(function (el, i) {
-      el.classList.toggle('is-done', i < stage);
-      el.classList.toggle('is-active', i === stage);
-    });
-  }
-  render();
-  loadingDimHandle = setInterval(render, 500);
-}
-function finishLoadingDims() {
-  if (loadingDimHandle) { clearInterval(loadingDimHandle); loadingDimHandle = null; }
-  document.querySelectorAll('#loadingDims .loading-dim').forEach(function (el) {
-    el.classList.remove('is-active');
-    el.classList.add('is-done');
-  });
-}
-
 async function generateFullReport() {
   if (!pendingFullReportAuth) return;
   var myGenId = ++fullReportGenerationId;
@@ -2149,10 +2075,9 @@ async function generateFullReport() {
   document.getElementById('againBtn').style.display = '';
   document.getElementById('loadingRetryBtn').style.display = 'none';
   document.getElementById('loadingTitle').textContent = 'Building your full report…';
-  document.getElementById('loadingDesc').textContent = 'Preparing a deeply detailed analysis. This can take a few minutes. Feel free to close this page: we\'ll email your full report the moment it\'s ready, and you can always come back here to view it.';
+  document.getElementById('loadingDesc').textContent = 'Your project is being read across these five areas, with real names and sources for each.';
   showOnly('sec-loading');
   startFullReportTimer();
-  startLoadingDims([15, 45, 100, 180]);
 
   for (var i = 0; i < POLL_MAX_ATTEMPTS; i++) {
     var existing = await checkReportReady(sessionId, token);
@@ -2162,7 +2087,6 @@ async function generateFullReport() {
       // delivered) — the stored record will never flip to "sent", so
       // continuing to poll would just say "almost there" forever.
       stopFullReportTimer();
-      resetLoadingDims();
       document.getElementById('loadingTitle').textContent = 'Something went wrong';
       document.getElementById('loadingDesc').textContent = 'We couldn\'t finish generating your report. Please start a new analysis and double-check your email address. If this keeps happening, contact info@oneciak.com.';
       document.getElementById('loadingRetryBtn').style.display = 'none';
@@ -2170,7 +2094,6 @@ async function generateFullReport() {
     }
     if (existing && existing.ready) {
       stopFullReportTimer();
-      finishLoadingDims();
       if (!isUsableReport(existing.report)) {
         // The server has already marked this generation "sent" — polling
         // again would just return the same incomplete data, so retrying
@@ -3115,12 +3038,10 @@ async function runAnalysis() {
   showOnly('sec-loading');
   document.getElementById('loadingTitle').textContent = 'Reading \u201C'+p.title+'\u201D';
   document.getElementById('loadingDesc').textContent = 'Scoring it across the five areas.';
-  startLoadingDims([3, 6, 9, 13]);
   try {
     var result = await callFullAPI(p);
     if (!isUsableReport(result)) throw new Error('The analysis came back incomplete. Please try again.');
     lastResult = result;
-    finishLoadingDims();
     showOnly('sec-results');
     renderFree(result, p.title);
     track('analysis_completed');
@@ -3188,9 +3109,8 @@ async function startFreeFullReport(email) {
   try {
     showOnly('sec-loading');
     document.getElementById('loadingTitle').textContent = 'Starting your full report…';
-    document.getElementById('loadingDesc').textContent = 'This can take a few minutes to generate. Feel free to close this page any time: we\'ll email it to "'+email+'" the moment it\'s ready.';
-    startLoadingDims([3, 6, 9, 13]);
-    var res = await fetch('/.netlify/functions/start-full-report', {
+    document.getElementById('loadingDesc').textContent = 'It also arrives by email at "'+email+'", so you can close this page.';
+      var res = await fetch('/.netlify/functions/start-full-report', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ project: p, email: email })
@@ -3407,7 +3327,7 @@ async function savePDF() {
     }
 
     if (isFullReport && (lastResult.talent_leverage || (lastResult.tax_incentive && (lastResult.tax_incentive.estimate || lastResult.tax_incentive.note)))) {
-      head('Talent leverage and tax incentive');
+      head('Your experience and tax incentives');
       if (lastResult.talent_leverage) ln(lastResult.talent_leverage,10,false,122,118,112);
       if (lastResult.tax_incentive && (lastResult.tax_incentive.estimate || lastResult.tax_incentive.note)) {
         ln('Tax Incentive'+(lastResult.tax_incentive.region?': '+lastResult.tax_incentive.region:'')+(lastResult.tax_incentive.estimate?': '+lastResult.tax_incentive.estimate:''),10,true);

@@ -203,7 +203,7 @@ function talentAndTaxHtml(talentLeverage, taxIncentive) {
   if (!talentLeverage && !(taxIncentive && (taxIncentive.estimate || taxIncentive.note))) return '';
   let h = '<div style="margin-top:10px">';
   if (talentLeverage) {
-    h += '<span style="font-size:14px;font-weight:700;color:#141210">Talent leverage</span>' +
+    h += '<span style="font-size:14px;font-weight:700;color:#141210">Your experience</span>' +
       '<p style="margin:6px 0 12px;font-size:13px;color:#161616;line-height:1.6">' + esc(talentLeverage) + '</p>';
   }
   if (taxIncentive && (taxIncentive.estimate || taxIncentive.note)) {
