@@ -20,13 +20,15 @@ Claude-Session: https://claude.ai/code/session_01KB7uckaFEVRn4u848AoGXr" || { gi
 for t in 1 2 3 4; do git push -q origin main-publish:main && break; sleep $((t*2)); done
 echo "Pubblicato: $(git log -1 --format=%h)"
 git checkout -q "$BRANCH"
-# the CDN can serve the old file with 200: wait until every published page is byte for byte the new one
+# the CDN can serve the old file with 200: wait until every published page is
+# the new one. Netlify rewrites links ("/privacy.html" becomes '/privacy'),
+# so lines holding a link are left out of the comparison.
 for f in "${FILES[@]}"; do
   case "$f" in *.html|*.css|*.js) ;; *) continue;; esac
   case "$f" in netlify/*|tests/*) continue;; esac
   url="https://oneciak.com/${f%index.html}"
   for i in $(seq 1 40); do
-    if curl -s "$url?x=$i$RANDOM" | cmp -s - "$f"; then echo "online: $f"; break; fi
+    if diff -q <(curl -s "$url?x=$i$RANDOM" | grep -v 'href=') <(grep -v 'href=' "$f") >/dev/null; then echo "online: $f"; break; fi
     [ $i -eq 40 ] && { echo "ATTENZIONE: $f non è ancora quello nuovo dopo 6 minuti"; exit 1; }
     sleep 10
   done
