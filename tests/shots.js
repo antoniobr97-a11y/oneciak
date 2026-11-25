@@ -39,7 +39,11 @@ const views = {
   'PDF copertina': async (p, which, dev) => { await report(p); await p.evaluate(() => scrollTo(0, document.body.scrollHeight)); await p.waitForTimeout(400);
     const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), p.locator('.pdf-row button').first().click()]);
     const f = path.join(OUT, `${dev}-pdf-${which}.pdf`); await dl.saveAs(f); execSync(`pdftoppm -png -r 60 -f 1 -l 1 -singlefile "${f}" "${f}"`); return fs.readFileSync(f + '.png'); },
-  mail: async (p, which) => { await report(p); const d = await p.evaluate(() => [lastProject, lastResult]); await p.setContent(mailBuilder(which)(d[0], d[1], 'x')); await p.waitForTimeout(600); },
+  // The mail asks oneciak.com for its title font: the browser gave it on the live site and blocked it on
+  // the local copy (another origin), so the same mail looked changed. Both now get it from /fonts here.
+  mail: async (p, which) => { await report(p); const d = await p.evaluate(() => [lastProject, lastResult]); const m = await p.context().newPage();
+    await m.route('https://oneciak.com/fonts/**', r => r.fulfill({ path: path.join(REPO, new URL(r.request().url()).pathname), headers: { 'access-control-allow-origin': '*', 'content-type': 'font/woff2' } }));
+    await m.setContent(mailBuilder(which)(d[0], d[1], 'x'), { waitUntil: 'networkidle' }); await m.evaluate(() => document.fonts.ready); await m.waitForTimeout(300); return m.screenshot(); },
   roadmap: async p => { await open(p, p.url() + 'roadmap/'); await p.waitForTimeout(800); },
   privacy: async p => { await open(p, p.url() + 'privacy.html'); await p.waitForTimeout(500); }
 };
