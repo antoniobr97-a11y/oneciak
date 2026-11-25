@@ -4,15 +4,19 @@
 // sentence (glossary, citations) are listed as "testo" and not scaled.
 // Run: NODE_PATH=/opt/node22/lib/node_modules node tests/press.js [url]
 const { chromium, devices } = require('playwright');
+// Opens a page, trying again up to 3 times: the live site sometimes takes more
+// than 30s to answer one request (seen 24 and 25 Nov 2026), and a network
+// hiccup must not read as a broken site.
+async function open(p, url) { for (let i = 1; ; i++) { try { return await p.goto(url, { timeout: 45000 }); } catch (e) { if (i >= 3) throw e; await p.waitForTimeout(3000 * i); } } }
 const BASE=process.argv[2]||'http://localhost:8143/';
 (async()=>{ const b=await chromium.launch(); const rows={};
 for (const [dev,opt] of [['tel',{...devices['iPhone 13']}],['pc',{viewport:{width:1280,height:900}}]]) {
  const ctx=await b.newContext(opt); const p=await ctx.newPage(); const cdp=await ctx.newCDPSession(p); await cdp.send('DOM.enable'); await cdp.send('CSS.enable');
- const views=[['home',async()=>{await p.goto(BASE);}],['menu',async()=>{await p.goto(BASE); await p.evaluate(()=>openMenu());}],
-  ['modulo',async()=>{await p.goto(BASE); await p.evaluate(()=>{document.getElementById('termsCheck').checked=true;onStartClick();});}],
-  ['myreports',async()=>{await p.goto(BASE); await p.evaluate(()=>openMyReports());}],
-  ['report',async()=>{await p.goto(BASE); await p.evaluate(()=>showSampleReport()); await p.waitForTimeout(700); await p.evaluate(()=>{document.querySelectorAll('#sec-results details').forEach(d=>d.open=true); for(let i=0;i<5;i++){const x=document.getElementById('acc-body-'+i); x&&x.classList.add('open');} document.getElementById('areaNav').classList.add('is-on','is-open');});}],
-  ['roadmap',async()=>{await p.goto(BASE+'roadmap/');}],['privacy',async()=>{await p.goto(BASE+'privacy.html');}]];
+ const views=[['home',async()=>{await open(p, BASE);}],['menu',async()=>{await open(p, BASE); await p.evaluate(()=>openMenu());}],
+  ['modulo',async()=>{await open(p, BASE); await p.evaluate(()=>{document.getElementById('termsCheck').checked=true;onStartClick();});}],
+  ['myreports',async()=>{await open(p, BASE); await p.evaluate(()=>openMyReports());}],
+  ['report',async()=>{await open(p, BASE); await p.evaluate(()=>showSampleReport()); await p.waitForTimeout(700); await p.evaluate(()=>{document.querySelectorAll('#sec-results details').forEach(d=>d.open=true); for(let i=0;i<5;i++){const x=document.getElementById('acc-body-'+i); x&&x.classList.add('open');} document.getElementById('areaNav').classList.add('is-on','is-open');});}],
+  ['roadmap',async()=>{await open(p, BASE+'roadmap/');}],['privacy',async()=>{await open(p, BASE+'privacy.html');}]];
  for (const [v,go] of views) { await go(); await p.waitForTimeout(1500);
   const list=await p.evaluate(()=>{ const out=[]; document.querySelectorAll('button, a, summary, [role=button]').forEach((e,i)=>{ if(!e.getClientRects().length) return; const cs=getComputedStyle(e); if(cs.display==='inline'&&e.tagName==='A') return; e.setAttribute('data-pk',i); out.push(i); }); return out; });
   const doc=await cdp.send('DOM.getDocument',{depth:-1});

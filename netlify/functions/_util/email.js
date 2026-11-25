@@ -42,7 +42,7 @@ function section(title, score, verdict, detail, flags, strengths, tips, plan, ex
         t.links.forEach(l => {
           if (!l) return;
           html += l.url
-            ? '<p style="margin:2px 0 0 14px;font-size:13px"><a href="' + esc(l.url) + '" style="color:#141210">' + esc(l.label) + ' →</a></p>'
+            ? '<p style="margin:2px 0 0 14px;font-size:13px"><a href="' + esc(l.url) + '" style="color:#141210">' + esc(l.label) + '</a></p>'
             : '<p style="margin:2px 0 0 14px;font-size:13px;color:#5c5852">' + esc(l.label) + '</p>';
         });
       }

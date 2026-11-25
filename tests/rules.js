@@ -5,18 +5,22 @@
 // for big titles). Run: NODE_PATH=/opt/node22/lib/node_modules node tests/rules.js [url]
 // On a local python server the 404 page is python's own (Times New Roman).
 const { chromium, devices } = require('playwright');
+// Opens a page, trying again up to 3 times: the live site sometimes takes more
+// than 30s to answer one request (seen 24 and 25 Nov 2026), and a network
+// hiccup must not read as a broken site.
+async function open(p, url) { for (let i = 1; ; i++) { try { return await p.goto(url, { timeout: 45000 }); } catch (e) { if (i >= 3) throw e; await p.waitForTimeout(3000 * i); } } }
 const BASE=process.argv[2]||'http://localhost:8143/';
 (async()=>{ const b=await chromium.launch(); const found={};
 const add=(k,v)=>{ (found[k]=found[k]||new Set()).add(v); };
 for (const [dev,opt] of [['tel',{...devices['iPhone 13']}],['pc',{viewport:{width:1280,height:900}}]]) for (const sc of ['light','dark','no-preference']) {
  const ctx=await b.newContext({...opt,colorScheme:sc}); const p=await ctx.newPage(); const cdp=await ctx.newCDPSession(p);
  await cdp.send('DOM.enable'); await cdp.send('CSS.enable');
- const views=[['home',async()=>{await p.goto(BASE);}],['menu',async()=>{await p.goto(BASE); await p.evaluate(()=>{openMenu();document.querySelectorAll('.menu-faq-item').forEach(d=>d.open=true);});}],
-  ['modulo',async()=>{await p.goto(BASE); await p.evaluate(()=>{document.getElementById('termsCheck').checked=true;onStartClick();});}],
-  ['myreports',async()=>{await p.goto(BASE); await p.evaluate(()=>openMyReports());}],
-  ['report',async()=>{await p.goto(BASE); await p.evaluate(()=>{showSampleReport();}); await p.waitForTimeout(700); await p.evaluate(()=>{document.querySelectorAll('#sec-results details').forEach(d=>d.open=true); for(let i=0;i<5;i++){const x=document.getElementById('acc-body-'+i); x&&x.classList.add('open');}});}],
-  ['roadmap',async()=>{await p.goto(BASE+'roadmap/'); await p.evaluate(()=>document.querySelectorAll('details').forEach(d=>d.open=true));}],
-  ['privacy',async()=>{await p.goto(BASE+'privacy.html');}],['terms',async()=>{await p.goto(BASE+'terms.html');}],['404',async()=>{await p.goto(BASE+'nope');}]];
+ const views=[['home',async()=>{await open(p, BASE);}],['menu',async()=>{await open(p, BASE); await p.evaluate(()=>{openMenu();document.querySelectorAll('.menu-faq-item').forEach(d=>d.open=true);});}],
+  ['modulo',async()=>{await open(p, BASE); await p.evaluate(()=>{document.getElementById('termsCheck').checked=true;onStartClick();});}],
+  ['myreports',async()=>{await open(p, BASE); await p.evaluate(()=>openMyReports());}],
+  ['report',async()=>{await open(p, BASE); await p.evaluate(()=>{showSampleReport();}); await p.waitForTimeout(700); await p.evaluate(()=>{document.querySelectorAll('#sec-results details').forEach(d=>d.open=true); for(let i=0;i<5;i++){const x=document.getElementById('acc-body-'+i); x&&x.classList.add('open');}});}],
+  ['roadmap',async()=>{await open(p, BASE+'roadmap/'); await p.evaluate(()=>document.querySelectorAll('details').forEach(d=>d.open=true));}],
+  ['privacy',async()=>{await open(p, BASE+'privacy.html');}],['terms',async()=>{await open(p, BASE+'terms.html');}],['404',async()=>{await open(p, BASE+'nope');}]];
  for (const [v,go] of views) { await go(); await p.waitForTimeout(600);
   const r=await p.evaluate(()=>{ const out={fonts:[],corners:[],upper:[],contrast:[],clickables:[]};
    const lum=c=>{const m=c.match(/[\d.]+/g).map(Number); const f=x=>{x/=255;return x<=0.03928?x/12.92:Math.pow((x+0.055)/1.055,2.4)}; return [0.2126*f(m[0])+0.7152*f(m[1])+0.0722*f(m[2]), m[3]===undefined?1:m[3]];};
@@ -40,5 +44,13 @@ for (const [dev,opt] of [['tel',{...devices['iPhone 13']}],['pc',{viewport:{widt
     if(after[0]===before) add('senza :active',dev+' '+v+': '+after[1]); } }
  }
  await ctx.close(); }
-for (const k of Object.keys(found)) { console.log('== '+k+' ('+found[k].size+')'); [...found[k]].slice(0,400).forEach(x=>console.log('   '+x)); }
+// Words in a sentence, form labels and fields are not buttons: listed, not failures.
+const TEXT=/: (A |LABEL|INPUT|checkbox-label|inline |gl-term)/;
+const local=/localhost|127\.0\.0\.1/.test(BASE);
+let bad=0;
+for (const k of Object.keys(found)) { const items=[...found[k]];
+  const real = k.startsWith('font ') ? (/^font (Geist|Carlito)$/.test(k) ? [] : items.filter(v=>!(local&&v==='404')))
+    : k==='senza :active' ? items.filter(x=>!TEXT.test(x)) : items;
+  bad+=real.length; console.log('== '+k+' ('+items.length+(real.length!==items.length?', di cui da correggere '+real.length:'')+')'); real.slice(0,60).forEach(x=>console.log('   '+x)); }
+console.log(bad?('REGOLE DI DESIGN VIOLATE: '+bad):'REGOLE DI DESIGN A POSTO (caratteri, pressione, angoli, maiuscolo, contrasto)'); process.exitCode=bad?1:0;
 await b.close();})();
