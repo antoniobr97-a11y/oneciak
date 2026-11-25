@@ -25,7 +25,7 @@ function section(title, score, verdict, detail, flags, strengths, tips, plan, ex
   html += '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px"><tr>';
   html += '<td style="font-size:18px;font-weight:700;color:#141210;letter-spacing:-0.01em">' + esc(title) + '</td>';
   if (score !== null && score !== undefined) {
-    html += '<td align="right" style="font-size:13px;color:#5c5852;white-space:nowrap"><b style="font-size:17px;color:#141210">' + esc(Number(score).toFixed(1)) + '</b>/10</td>';
+    html += '<td align="right" style="font-size:13px;color:#5c5852;white-space:nowrap"><b style="font-size:18px;color:#141210">' + esc(Number(score).toFixed(1)) + '</b>/10</td>';
   }
   html += '</tr></table>';
   if (verdict) html += '<p style="margin:0 0 8px;font-size:14px;color:#161616;font-weight:600">' + esc(verdict) + '</p>';
@@ -42,8 +42,8 @@ function section(title, score, verdict, detail, flags, strengths, tips, plan, ex
         t.links.forEach(l => {
           if (!l) return;
           html += l.url
-            ? '<p style="margin:2px 0 0 14px;font-size:12px"><a href="' + esc(l.url) + '" style="color:#141210">' + esc(l.label) + ' →</a></p>'
-            : '<p style="margin:2px 0 0 14px;font-size:12px;color:#5c5852">' + esc(l.label) + '</p>';
+            ? '<p style="margin:2px 0 0 14px;font-size:13px"><a href="' + esc(l.url) + '" style="color:#141210">' + esc(l.label) + '</a></p>'
+            : '<p style="margin:2px 0 0 14px;font-size:13px;color:#5c5852">' + esc(l.label) + '</p>';
         });
       }
     });
@@ -70,7 +70,7 @@ function sourceHtml(item) {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(item.checked || '');
   const when = m ? ' · checked ' + Number(m[3]) + ' ' + MONTHS[Number(m[2]) - 1] + ' ' + m[1] : '';
   // A rule quoted word for word (kept by grounding.js only if it is on the page).
-  const quote = item.rule_quote ? '<br><span style="font-size:12px;color:#5c5852">The rule, word for word:</span> <i style="font-size:13px;color:#161616">\u201C' + esc(item.rule_quote) + '\u201D</i>' : '';
+  const quote = item.rule_quote ? '<br><span style="font-size:13px;color:#5c5852">The rule, word for word:</span> <i style="font-size:13px;color:#161616">\u201C' + esc(item.rule_quote) + '\u201D</i>' : '';
   return quote + '<br><a href="' + esc(item.source) + '" style="font-family:Calibri,Carlito,Arial,sans-serif;font-size:13px;color:#6b665f;text-decoration:underline">Source: ' + esc(host) + esc(when) + '</a>';
 }
 function stated(v, item) {
@@ -106,15 +106,15 @@ function producersHtml(list, email) {
   const items = (list || []).filter(Boolean);
   if (!items.length) return '';
   let h = '<div style="margin-top:16px">' + label('Producers to contact');
-  items.forEach(p => { h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(p.name) + '</b>' + (p.country ? ' (' + esc(p.country) + ')' : '') + '<br><span style="font-size:12px;color:#5c5852">Produced: ' + esc(p.film) + (p.year ? ' (' + esc(p.year) + ')' : '') + (p.why ? ' · ' + esc(p.why) : '') + (p.approach_quote && p.approach_url ? '<br>How they take projects, word for word: \u201C' + esc(p.approach_quote) + '\u201D <a href="' + esc(p.approach_url) + '" style="color:#6b665f;text-decoration:underline">their page</a>' : '<br>How they take projects: not found on their site. Ask before you send a script.') + '</span>' + sourceHtml(p) + '</p>'; });
-  if (email) h += '<p style="margin:14px 0 0;font-size:12px;font-weight:700;color:#5c5852">A first email you can adapt</p><p style="margin:6px 0 0;padding:10px 12px;background:#f4f1ec;border-radius:8px;font-size:13px;line-height:1.6;color:#161616;white-space:pre-wrap">' + esc(email) + '</p>';
+  items.forEach(p => { h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(p.name) + '</b>' + (p.country ? ' (' + esc(p.country) + ')' : '') + '<br><span style="font-size:13px;color:#5c5852">Produced: ' + esc(p.film) + (p.year ? ' (' + esc(p.year) + ')' : '') + (p.why ? ' · ' + esc(p.why) : '') + (p.approach_quote && p.approach_url ? '<br>How they take projects, word for word: \u201C' + esc(p.approach_quote) + '\u201D <a href="' + esc(p.approach_url) + '" style="color:#6b665f;text-decoration:underline">their page</a>' : '<br>How they take projects: not found on their site. Ask before you send a script.') + '</span>' + sourceHtml(p) + '</p>'; });
+  if (email) h += '<p style="margin:14px 0 0;font-size:13px;font-weight:700;color:#5c5852">A first email you can adapt</p><p style="margin:6px 0 0;padding:10px 12px;background:#f4f1ec;border-radius:8px;font-size:13px;line-height:1.6;color:#161616;white-space:pre-wrap">' + esc(email) + '</p>';
   return h + '</div>';
 }
 
 function fundingSourcesHtml(sources) {
   if (!sources || !sources.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#141210">Funding sources</span>';
-  sources.forEach(f => { if (!f) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.name) + '</b> (' + esc(f.type) + ')' + (f.amount ? ' · ' + esc(f.amount) : '') + '<br><span style="font-size:12px;color:#5c5852">' + (APPLICANT[f.applicant] ? 'Who can apply: ' + esc(APPLICANT[f.applicant]) + ' · ' : '') + 'Deadline: ' + esc(stated(f.deadline, f)) + ' · ' + esc(f.eligibility) + '</span>' + sourceHtml(f) + '</p>'; });
+  sources.forEach(f => { if (!f) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.name) + '</b> (' + esc(f.type) + ')' + (f.amount ? ' · ' + esc(f.amount) : '') + '<br><span style="font-size:13px;color:#5c5852">' + (APPLICANT[f.applicant] ? 'Who can apply: ' + esc(APPLICANT[f.applicant]) + ' · ' : '') + 'Deadline: ' + esc(stated(f.deadline, f)) + ' · ' + esc(f.eligibility) + '</span>' + sourceHtml(f) + '</p>'; });
   h += '</div>';
   return h;
 }
@@ -122,7 +122,7 @@ function fundingSourcesHtml(sources) {
 function comparablesHtml(comps) {
   if (!comps || !comps.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#141210">Comparable films</span>';
-  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b>' + (c.year ? ' (' + esc(c.year) + ')' : '') + (c.budget ? ' · Budget: ' + esc(c.budget) : '') + (c.result ? '. ' + esc(c.result) : '') + (c.match ? '<br><span style="font-size:12px;color:#5c5852">In common: ' + esc(c.match) + '</span>' : '') + '<br><span style="font-size:12px;color:#5c5852">' + esc(c.lesson) + '</span>' + sourceHtml(c) + '</p>'; });
+  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b>' + (c.year ? ' (' + esc(c.year) + ')' : '') + (c.budget ? ' · Budget: ' + esc(c.budget) : '') + (c.result ? '. ' + esc(c.result) : '') + (c.match ? '<br><span style="font-size:13px;color:#5c5852">In common: ' + esc(c.match) + '</span>' : '') + '<br><span style="font-size:13px;color:#5c5852">' + esc(c.lesson) + '</span>' + sourceHtml(c) + '</p>'; });
   h += '</div>';
   return h;
 }
@@ -130,7 +130,7 @@ function comparablesHtml(comps) {
 function platformsHtml(platforms) {
   if (!platforms || !platforms.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#141210">Platform priority</span>';
-  platforms.forEach(pl => { if (!pl) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(pl.priority) + ':</b> ' + esc(pl.name) + '<br><span style="font-size:12px;color:#5c5852">' + esc(pl.reason) + '</span>' + sourceHtml(pl) + '</p>'; });
+  platforms.forEach(pl => { if (!pl) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(pl.priority) + ':</b> ' + esc(pl.name) + '<br><span style="font-size:13px;color:#5c5852">' + esc(pl.reason) + '</span>' + sourceHtml(pl) + '</p>'; });
   h += '</div>';
   return h;
 }
@@ -162,10 +162,10 @@ function marketingStrategyHtml(ms) {
   if (ms.pre_release && ms.pre_release.length) {
     ms.pre_release.forEach(a => { if (a) h += '<p style="margin:2px 0 0;font-size:13px;color:#5c5852">• ' + esc(a) + '</p>'; });
   }
-  if (ms.social_strategy) h += '<p style="margin:6px 0 0;font-size:12px;color:#5c5852"><b style="color:#161616">Social:</b> ' + esc(ms.social_strategy) + '</p>';
-  if (ms.community) h += '<p style="margin:4px 0 0;font-size:12px;color:#5c5852"><b style="color:#161616">Community:</b> ' + esc(ms.community) + '</p>';
-  if (ms.press) h += '<p style="margin:4px 0 0;font-size:12px;color:#5c5852"><b style="color:#161616">Press:</b> ' + esc(ms.press) + '</p>';
-  if (ms.budget_estimate) h += '<p style="margin:4px 0 0;font-size:12px;color:#5c5852"><b style="color:#161616">Marketing Budget:</b> ' + esc(ms.budget_estimate) + '</p>';
+  if (ms.social_strategy) h += '<p style="margin:6px 0 0;font-size:13px;color:#5c5852"><b style="color:#161616">Social:</b> ' + esc(ms.social_strategy) + '</p>';
+  if (ms.community) h += '<p style="margin:4px 0 0;font-size:13px;color:#5c5852"><b style="color:#161616">Community:</b> ' + esc(ms.community) + '</p>';
+  if (ms.press) h += '<p style="margin:4px 0 0;font-size:13px;color:#5c5852"><b style="color:#161616">Press:</b> ' + esc(ms.press) + '</p>';
+  if (ms.budget_estimate) h += '<p style="margin:4px 0 0;font-size:13px;color:#5c5852"><b style="color:#161616">Marketing Budget:</b> ' + esc(ms.budget_estimate) + '</p>';
   h += '</div>';
   return h;
 }
@@ -178,7 +178,7 @@ function labeledTextHtml(label, text) {
 function labOpportunitiesHtml(labs) {
   if (!labs || !labs.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#141210">Labs and market opportunities</span>';
-  labs.forEach(l => { if (!l) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(l.name) + '</b>' + (l.deadline ? ' · Deadline: ' + esc(l.deadline) : '') + '<br><span style="font-size:12px;color:#5c5852">' + esc(l.fit) + '</span>' + sourceHtml(l) + '</p>'; });
+  labs.forEach(l => { if (!l) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(l.name) + '</b>' + (l.deadline ? ' · Deadline: ' + esc(l.deadline) : '') + '<br><span style="font-size:13px;color:#5c5852">' + esc(l.fit) + '</span>' + sourceHtml(l) + '</p>'; });
   h += '</div>';
   return h;
 }
@@ -186,7 +186,7 @@ function labOpportunitiesHtml(labs) {
 function keyCrewHtml(crew) {
   if (!crew || !crew.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#141210">Key crew recommendations</span>';
-  crew.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.role) + '</b><br><span style="font-size:13px;color:#161616">' + esc(c.profile) + '</span><br><span style="font-size:12px;color:#5c5852">' + esc(c.why) + '</span></p>'; });
+  crew.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.role) + '</b><br><span style="font-size:13px;color:#161616">' + esc(c.profile) + '</span><br><span style="font-size:13px;color:#5c5852">' + esc(c.why) + '</span></p>'; });
   h += '</div>';
   return h;
 }
@@ -194,7 +194,7 @@ function keyCrewHtml(crew) {
 function cautionaryCompsHtml(comps) {
   if (!comps || !comps.length) return '';
   let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#141210">Cautionary comparables</span>';
-  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b>' + (c.year ? ' (' + esc(c.year) + ')' : '') + (c.budget ? ' · Budget: ' + esc(c.budget) : '') + (c.what_went_wrong ? '<br><span style="font-size:12px;color:#161616">' + esc(c.what_went_wrong) + '</span>' : '') + '<br><span style="font-size:12px;color:#5c5852">' + esc(c.lesson) + '</span>' + sourceHtml(c) + '</p>'; });
+  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b>' + (c.year ? ' (' + esc(c.year) + ')' : '') + (c.budget ? ' · Budget: ' + esc(c.budget) : '') + (c.what_went_wrong ? '<br><span style="font-size:13px;color:#161616">' + esc(c.what_went_wrong) + '</span>' : '') + '<br><span style="font-size:13px;color:#5c5852">' + esc(c.lesson) + '</span>' + sourceHtml(c) + '</p>'; });
   h += '</div>';
   return h;
 }
@@ -203,13 +203,13 @@ function talentAndTaxHtml(talentLeverage, taxIncentive) {
   if (!talentLeverage && !(taxIncentive && (taxIncentive.estimate || taxIncentive.note))) return '';
   let h = '<div style="margin-top:10px">';
   if (talentLeverage) {
-    h += '<span style="font-size:14px;font-weight:700;color:#141210">Talent leverage</span>' +
+    h += '<span style="font-size:14px;font-weight:700;color:#141210">Your experience</span>' +
       '<p style="margin:6px 0 12px;font-size:13px;color:#161616;line-height:1.6">' + esc(talentLeverage) + '</p>';
   }
   if (taxIncentive && (taxIncentive.estimate || taxIncentive.note)) {
     h += '<span style="font-size:14px;font-weight:700;color:#141210">Tax incentive' + (taxIncentive.region ? ': ' + esc(taxIncentive.region) : '') + '</span>' +
       (taxIncentive.estimate ? '<p style="margin:6px 0 0;font-size:13px;font-weight:700;color:#161616">' + esc(taxIncentive.estimate) + '</p>' : '') +
-      (taxIncentive.note ? '<p style="margin:2px 0 0;font-size:12px;color:#5c5852">' + esc(taxIncentive.note) + sourceHtml(taxIncentive) + '</p>' : '');
+      (taxIncentive.note ? '<p style="margin:2px 0 0;font-size:13px;color:#5c5852">' + esc(taxIncentive.note) + sourceHtml(taxIncentive) + '</p>' : '');
   }
   h += '</div>';
   return h;
@@ -250,14 +250,14 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
 
   if (r.festival_calendar && r.festival_calendar.length) {
     let fc = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Festival Calendar</span>';
-    r.festival_calendar.forEach(f => { if (!f) return; fc += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.festival) + '</b> · ' + esc(f.source ? 'Deadline: ' + stated(f.deadline, f) : f.deadline) + '<br><span style="font-size:12px;color:#5c5852">' + esc(f.fit) + '</span>' + sourceHtml(f) + '</p>'; });
+    r.festival_calendar.forEach(f => { if (!f) return; fc += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.festival) + '</b> · ' + esc(f.source ? 'Deadline: ' + stated(f.deadline, f) : f.deadline) + '<br><span style="font-size:13px;color:#5c5852">' + esc(f.fit) + '</span>' + sourceHtml(f) + '</p>'; });
     fc += '</td></tr>';
     body += fc;
   }
 
   if (r.sales_agents && r.sales_agents.length) {
     let sa = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Sales Agents</span>';
-    r.sales_agents.forEach(a => { if (!a) return; sa += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(a.name) + '</b>' + (a.focus ? ' <span style="font-size:12px;color:#5c5852">&middot; ' + esc(a.focus) + '</span>' : '') + '<br><span style="font-size:12px;color:#5c5852">' + esc(a.why) + '</span>' + sourceHtml(a) + '</p>'; });
+    r.sales_agents.forEach(a => { if (!a) return; sa += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(a.name) + '</b>' + (a.focus ? ' <span style="font-size:13px;color:#5c5852">&middot; ' + esc(a.focus) + '</span>' : '') + '<br><span style="font-size:13px;color:#5c5852">' + esc(a.why) + '</span>' + sourceHtml(a) + '</p>'; });
     sa += '</td></tr>';
     body += sa;
   }
@@ -332,10 +332,10 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
       // phone (under 520px) scaled to its narrower column.
       '<div class="oc-title" style="margin-top:34px;word-break:break-word;font-family:Geist,\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:' + titleSize + 'px;line-height:0.92;font-weight:700;color:#f2ede6;letter-spacing:-0.045em">' + esc(title) + '</div>' +
       (credits ? '<div style="margin-top:14px;font-size:14px;color:#d6cec3">' + esc(credits) + '</div>' : '') +
-      (project.logline ? '<div style="margin-top:10px;font-size:17px;line-height:1.45;color:#f2ede6">' + esc(project.logline) + '</div>' : '') +
+      (project.logline ? '<div style="margin-top:10px;font-size:18px;line-height:1.45;color:#f2ede6">' + esc(project.logline) + '</div>' : '') +
       '<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:24px"><tr>' +
-        '<td style="font-size:44px;line-height:1;font-weight:300;color:#f2ede6;letter-spacing:-0.03em;padding-right:14px">' + esc(score) + '<span style="font-size:17px;color:#d6cec3">/10</span></td>' +
-        (r.overall_label ? '<td style="font-size:15px;font-weight:600;color:#f2ede6;vertical-align:bottom;padding-bottom:4px">' + esc(r.overall_label) + '</td>' : '') +
+        '<td style="font-size:44px;line-height:1;font-weight:300;color:#f2ede6;letter-spacing:-0.03em;padding-right:14px">' + esc(score) + '<span style="font-size:18px;color:#d6cec3">/10</span></td>' +
+        '<td style="font-size:15px;color:#d6cec3;vertical-align:bottom;padding-bottom:4px">Average of the five areas</td>' +
       '</tr></table>' +
     '</td></tr>' +
     '<tr><td style="padding:26px 32px 6px">' +
@@ -346,7 +346,7 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
     '<tr><td style="padding:0 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">' + body + '</table></td></tr>' +
     '<tr><td style="padding:26px 32px 30px;border-top:1px solid #e4ded6">' +
     '<a href="' + esc(viewUrl) + '" style="display:inline-block;background:#140d10;color:#f2ede6;text-decoration:none;font-size:14px;font-weight:600;border-radius:10px;padding:13px 22px">View on oneciak.com</a>' +
-    '<p style="margin:22px 0 0;font-size:11px;line-height:1.6;color:#6b665f">Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. OneCiak assumes no liability. Results are estimates and do not guarantee any outcome.</p>' +
+    '<p style="margin:22px 0 0;font-size:13px;line-height:1.6;color:#6b665f">Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. OneCiak assumes no liability. Results are estimates and do not guarantee any outcome.</p>' +
     '</td></tr>' +
     '</table></td></tr></table></body></html>';
 }
