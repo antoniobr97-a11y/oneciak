@@ -22,6 +22,7 @@ for (const [w,hh] of [[262,860],[320,860],[393,860],[430,860],[1280,860],[1600,8
  await p.evaluate(()=>{document.getElementById('termsCheck').checked=true; onStartClick();}); await p.waitForTimeout(600); await chk('modulo');
  await p.evaluate(()=>{const b=document.querySelector('#sec-form .btn-primary'); b&&b.click();}); await p.waitForTimeout(500); await chk('modulo rosso');
  await p.evaluate(()=>openMyReports()); await p.waitForTimeout(400); await chk('my reports');
+ await p.evaluate(()=>{ showOnly('sec-loading'); startFullReportTimer(); }); await p.waitForTimeout(300); await chk('caricamento');
  await open(p, BASE); await p.evaluate(()=>showSampleReport()); await p.waitForTimeout(800);
  await p.evaluate(()=>{document.querySelectorAll('#sec-results details').forEach(d=>d.open=true); for(let i=0;i<5;i++){const b=document.getElementById('acc-body-'+i); b&&b.classList.add('open');}}); await p.waitForTimeout(300); await chk('report tutto aperto');
  for (const u of ['roadmap/','privacy.html','terms.html','nope']) { await open(p, BASE+u); await p.waitForTimeout(400); await p.evaluate(()=>document.querySelectorAll('details').forEach(d=>d.open=true)); await chk(u); }

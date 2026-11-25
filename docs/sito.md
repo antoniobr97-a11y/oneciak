@@ -96,7 +96,9 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   la pagina sale al primo vuoto senza cursore, sotto il bottone "N fields
   are missing, marked in red above.". Caselle alte quanto il testo di
   esempio (`fitPlaceholders`).
-- **Caricamento**: 5 dimensioni che avanzano (`startLoadingDims` e simili).
+- **Caricamento**: le 5 aree ferme, righe come i passi del modulo (prima un
+  pallino "avanzava" a tempo, non col lavoro vero: Antonio, "sa di AI"),
+  sotto una frase vera; nomi con le maiuscole come nel report.
   Mentre si fa il report completo, sotto le 5 aree una sola frase ("This
   usually takes two or three minutes..."): niente cronometro in una pillola
   con pallino che pulsa (Antonio: "sa di AI"). Cursore del budget 14px

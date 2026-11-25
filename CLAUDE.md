@@ -105,7 +105,9 @@ d'archivio, logo gigante nel footer; più di 5 aree; il PDF di una pagina; il
 pulsante "Next" tra le aree; contatti sparsi dentro le aree; scritte rosse
 sotto le caselle; le guide; roadmap o guide in fondo alla home; un riquadro
 glossario; colori diversi per pallini e voti; serie TV; documentari;
-etichette "Tier A/B/C" sui festival; cronometro dell'attesa in una pillola.
+etichette "Tier A/B/C" sui festival; cronometro dell'attesa in una pillola;
+un caricamento che finge di avanzare; gergo da marketing ("market intelligence",
+"leverage").
 
 ## Dove trovare il resto
 
