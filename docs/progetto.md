@@ -56,6 +56,11 @@ art. 7. Scheda per l'avvocato: claude.ai/artifact/Y776k28X7HyxzMxcQgNXDX.
   Antonio scrive "pubblica"), "punto della situazione"
   (sito in breve, cosa è cambiato dal git log di main, 3 cose da "Cosa
   manca") e 3 post come Artifact privato (bozze: li pubblica Antonio).
+  Il primo lunedì del mese cerca anche skill nuove (Antonio, 25 novembre
+  2026: trovarle da soli, "robe serie", non da TikTok): al massimo 3, solo se
+  risolvono un problema che abbiamo avuto, autore riconoscibile, licenza MIT
+  o Apache, aggiornate da meno di 3 mesi, lette tutte e provate su un caso
+  nostro fuori dal repo; si installano solo col sì di Antonio.
   Se cambiano i controlli, aggiornare anche il suo testo.
 - r/Screenwriting vieta contenuti AI, r/Filmmakers vieta i post solo-link.
 
