@@ -108,6 +108,13 @@ for (const dev of ['tel','pc']) {
   await f2.close();
   T(dev+' colonna del report uguale ai passi del modulo', repOn===formOn && repOff===formOff, repOn+' vs '+formOn);
  }
+ // the report's side column fits short laptop screens without a scroll bar
+ if (dev==='pc') for (const [w,h] of [[1366,657],[1280,600],[1440,700]]) {
+  const c2=await b.newContext({viewport:{width:w,height:h}}); const q=await c2.newPage(); await q.goto(BASE); await q.evaluate(()=>showSampleReport()); await q.waitForTimeout(900);
+  await q.evaluate(()=>{const a=document.querySelector('.r-areas-h'); scrollTo(0,a.getBoundingClientRect().top+scrollY+400);}); await q.waitForTimeout(700);
+  const r=await q.evaluate(()=>{const n=document.getElementById('areaNav'); return [n.scrollHeight, n.clientHeight];});
+  T(dev+' colonna del report intera su schermo '+w+'x'+h, r[0]<=r[1]+1, 'alta '+r[0]+' spazio '+r[1]); await c2.close();
+ }
  // PDF
  await p.evaluate(()=>scrollTo(0,document.body.scrollHeight)); await W(400);
  try { const [dl]=await Promise.all([p.waitForEvent('download',{timeout:30000}), tap(p.locator('.pdf-row button').first())]); const f=OUT+dev+'_report.pdf'; await dl.saveAs(f); const sz=fs.statSync(f).size; T(dev+' PDF si scarica',sz>100000,sz+' byte'); } catch(e){ T(dev+' PDF si scarica',false,e.message.slice(0,60)); }
