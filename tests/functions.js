@@ -32,10 +32,10 @@ for (const dev of ['tel','pc']) {
  await tap(p.locator('.menu-close')); await W(400);
  T(dev+' menu si chiude', await p.evaluate(()=>!document.getElementById('menuOverlay').classList.contains('open') && !document.getElementById('menuOverlay').classList.contains('is-open')));
  // disclaimer
- await tap(p.locator('.l-btn')); await W(300);
+ await tap(p.locator('#sec-landing .l-btn')); await W(300);
  T(dev+' senza casella: avviso', await p.evaluate(()=>getComputedStyle(document.getElementById('termsError')).display!=='none'));
  // FORM
- await p.evaluate(()=>{document.getElementById('termsCheck').checked=true;}); await tap(p.locator('.l-btn')); await W(700);
+ await p.evaluate(()=>{document.getElementById('termsCheck').checked=true;}); await tap(p.locator('#sec-landing .l-btn')); await W(700);
  T(dev+' modulo si apre', await p.evaluate(()=>document.getElementById('sec-form').getBoundingClientRect().height>300 && getComputedStyle(document.getElementById('sec-form')).display!=='none'));
  const sub=p.locator('#sec-form .btn-primary').first(); await sub.scrollIntoViewIfNeeded(); await tap(sub); await W(900);
  const red=await p.evaluate(()=>document.querySelectorAll('#sec-form .is-invalid').length); T(dev+' modulo vuoto: 7 caselle rosse', red===7, 'rosse '+red);
@@ -127,7 +127,10 @@ for (const dev of ['tel','pc']) {
   const c2=await b.newContext({viewport:{width:w,height:h}}); const q=await c2.newPage(); await open(q, BASE); await q.evaluate(()=>showSampleReport()); await q.waitForTimeout(900);
   await q.evaluate(()=>{const a=document.querySelector('.r-areas-h'); scrollTo(0,a.getBoundingClientRect().top+scrollY+400);}); await q.waitForTimeout(700);
   const r=await q.evaluate(()=>{const n=document.getElementById('areaNav'); return [n.scrollHeight, n.clientHeight];});
-  T(dev+' colonna del report intera su schermo '+w+'x'+h, r[0]<=r[1]+1, 'alta '+r[0]+' spazio '+r[1]); await c2.close();
+  T(dev+' colonna del report intera su schermo '+w+'x'+h, r[0]<=r[1]+1, 'alta '+r[0]+' spazio '+r[1]);
+  await q.evaluate(()=>scrollTo(0,document.body.scrollHeight)); await q.waitForTimeout(500);
+  const ov=await q.evaluate(()=>{const n=document.getElementById('areaNav').getBoundingClientRect(), f=document.querySelector('#sec-results .r-foot').getBoundingClientRect(); return [Math.round(n.bottom), Math.round(f.top)];});
+  T(dev+' colonna del report sopra il piè di pagina '+w+'x'+h, ov[0]<=ov[1], 'colonna finisce a '+ov[0]+', piè di pagina da '+ov[1]); await c2.close();
  }
  // PDF
  await p.evaluate(()=>scrollTo(0,document.body.scrollHeight)); await W(400);

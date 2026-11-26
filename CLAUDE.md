@@ -71,7 +71,7 @@ typo quando è frustrato: non vuol dire che vuole un tono più formale.
 ## Controllare e pubblicare
 
 - **Controlli**: `tests/check.sh` lancia tutto su un server locale (regole
-  nel codice, sintassi, 168 prove di funzioni, 264 viste, regole di design,
+  nel codice, sintassi, 171 prove di funzioni, 264 viste, regole di design,
   pressione dei tasti, movimenti rispetto al sito vero, foto prima e dopo
   da guardare con gli occhi). `tests/check.sh --quick`: solo il codice, in
   pochi secondi. Dopo ogni modifica, prima di dire che è fatta. Se cambia
