@@ -10,13 +10,19 @@ solo le decisioni principali e la lista dei bocciati.
 **Chiaro e scuro seguono il dispositivo** (`prefers-color-scheme`), niente
 pulsante. Blocchi CSS "LIGHT AND DARK" in fondo a index.html e a
 `roadmap/roadmap.css`; anche privacy, termini, 404.
-- **Scuro**: nero prugna `--night:#140d10`. UNA luce fissa allo schermo
-  (`body::before`): petrolio a sinistra, rosso in basso a destra, grana.
-- **Chiaro**: bianco `#ffffff`, stessa composizione (petrolio `#407381` a
-  bassa opacità, rosso morbido), niente grana. Testo grigio piccolo
-  `#3a3a3a`, rosso errori `#8a2419`.
-- **Senza preferenza**: hero scuro con bagliori ambra/arancio/rosso/vino e
-  petrolio, sfumatura `in oklab` verso la carta `--paper:#f4f1ec`.
+- **Solo bianco e nero** (Antonio, 26 novembre 2026: "non voglio
+  assolutamente più colori"): niente bagliori, niente accenti, niente rosso e
+  verde, niente toni caldi. Ogni colore è un grigio esatto (R=G=B).
+  `--danger` e `--success` valgono come il testo: errori e conferme si
+  capiscono dalle parole. Le etichette che erano colorate ("What to do",
+  "Red flags", "Sections") sono in grassetto nel colore del testo; barre dei
+  voti, linea dell'indice e dei passi del modulo in `currentColor` (nere di
+  giorno, bianche di notte). Vale per sito, roadmap, privacy, termini, 404,
+  PDF e mail.
+- **Scuro**: nero `--night:#0f0f0f`, testo `#eeeeee`, grana leggera.
+- **Chiaro**: bianco `#ffffff`, testo `#161616`, testo piccolo `#3a3a3a`.
+- **Senza preferenza**: hero nero che sfuma (`in oklab`) verso la carta
+  `--paper:#f1f1f1`.
 - **Font** in `/fonts` (niente Google Fonts, CSP `font-src 'self'`): titoli
   **Geist**, il resto **Carlito** (`size-adjust: 112%`). PDF:
   `carlito-*-pdf.ttf`, `geist-700-pdf.ttf`, `geist-300-pdf.ttf` (pacchetto
@@ -45,12 +51,9 @@ pulsante. Blocchi CSS "LIGHT AND DARK" in fondo a index.html e a
   `both`: `both` teneva il transform e la scheda Northbound non reagiva né
   al tocco né al mouse.
 - **Un solo segno, un solo stile di voto**: stesso pallino grigio in tutte
-  le liste; voti sempre "X.X/10" nel colore del testo, colore solo sulla
-  barretta (blocco CSS "ONE MARKER, ONE SCORE STYLE"); anche Strong, Moderate,
-  Weak sotto i voti delle aree sono grigi. Le barre della scheda in home
-  hanno gli stessi colori del report (`bar-high/mid/low` da `scoreColor`;
-  prima erano a mano, arancio sul 6.5 e bianco sul 4.5: Antonio se n'è
-  accorto, i controlli no; ora `tests/functions.js` lo prova).
+  le liste; voti sempre "X.X/10" e barrette nel colore del testo (blocco CSS
+  "ONE MARKER, ONE SCORE STYLE"); Strong, Moderate, Weak grigi. Le barre della
+  scheda in home uguali a quelle del report (`tests/functions.js` lo prova).
 - **Movimento** (regole di Emil Kowalski, `.claude/skills/emil-design-eng`):
   `--ease: cubic-bezier(0.23, 1, 0.32, 1)` anche in roadmap, privacy,
   termini; aperture 220 ms con `openIn`, freccia che gira; niente
@@ -92,9 +95,9 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
 - **Modulo**: niente card, sezioni separate da una linea. Solo
   lungometraggi e cortometraggi di finzione. "Where you are": fase
   (obbligatoria), chi produce, durata, già mostrato. Campi a 16px su touch.
-  Campi obbligatori vuoti (`REQUIRED`, 7): solo bordo rosso (`markMissing`),
+  Campi obbligatori vuoti (`REQUIRED`, 7): solo un bordo (`markMissing`),
   la pagina sale al primo vuoto senza cursore, sotto il bottone "N fields
-  are missing, marked in red above.". Caselle alte quanto il testo di
+  are missing, marked above.". Caselle alte quanto il testo di
   esempio (`fitPlaceholders`).
 - **Bottoni principali** tutti della misura del bottone della home (240x51 px, testo 15px, angoli 10px, larghezza minima 240px): Analyze your project, menu, Analyze my project, Email me the full report, Analyze another project, Send, Try again, Send me a sign-in link. Una regola sola (`:is(...)` vicino a `.row-panel`), prova in `functions.js` (Antonio, 26 novembre 2026: "fai grandi tutti i bottoni uguali").
 - **Caricamento** (anteprima e report completo): titolo su una riga
@@ -190,7 +193,7 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   appaiono; misurato a 1100, 1280, 1600: 0 scarti su 30 colpi di rotella). Le
   voci sono righe identiche ai passi del modulo (Antonio: "la stessa identica
   cosa"): linea tra le righe, quella attuale si accende, scivola di 12px e
-  prende la linea arancio in 0.3s; `tests/functions.js` le confronta col
+  prende la linea nel colore del testo in 0.3s; `tests/functions.js` le confronta col
   modulo e controlla che lo scivolamento sia animato (il blocco ONE PRESS
   l'aveva tolto: per `#areaNav` la transizione resta 0.3s). Sugli schermi
   bassi da portatile (1366x657 nel browser) le righe si stringono fino a 6px

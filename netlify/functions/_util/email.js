@@ -8,7 +8,7 @@ function esc(s) {
 // Labels are plain words in bold, like the site; one grey dot for every
 // list (no red or green, no caps).
 function label(text) {
-  return '<p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#141210">' + esc(text) + '</p>';
+  return '<p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#121212">' + esc(text) + '</p>';
 }
 
 // Label + dotted rows, same as the lists on the site. Nothing if the list is empty.
@@ -16,20 +16,20 @@ function dotList(name, items) {
   items = (items || []).filter(Boolean);
   if (!items.length) return '';
   let html = '<div style="margin-top:16px">' + label(name);
-  items.forEach(t => { html += '<p style="margin:0 0 8px;padding-left:14px;text-indent:-14px;font-size:13px;line-height:1.55;color:#161616"><span style="color:#8a857e">&bull;</span>&nbsp;&nbsp;' + esc(t) + '</p>'; });
+  items.forEach(t => { html += '<p style="margin:0 0 8px;padding-left:14px;text-indent:-14px;font-size:13px;line-height:1.55;color:#161616"><span style="color:#868686">&bull;</span>&nbsp;&nbsp;' + esc(t) + '</p>'; });
   return html + '</div>';
 }
 
 function section(title, score, verdict, detail, flags, strengths, tips, plan, extra) {
-  let html = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6">';
+  let html = '<tr><td style="padding:28px 0;border-top:1px solid #dfdfdf">';
   html += '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px"><tr>';
-  html += '<td style="font-size:18px;font-weight:700;color:#141210;letter-spacing:-0.01em">' + esc(title) + '</td>';
+  html += '<td style="font-size:18px;font-weight:700;color:#121212;letter-spacing:-0.01em">' + esc(title) + '</td>';
   if (score !== null && score !== undefined) {
-    html += '<td align="right" style="font-size:13px;color:#5c5852;white-space:nowrap"><b style="font-size:18px;color:#141210">' + esc(Number(score).toFixed(1)) + '</b>/10</td>';
+    html += '<td align="right" style="font-size:13px;color:#595959;white-space:nowrap"><b style="font-size:18px;color:#121212">' + esc(Number(score).toFixed(1)) + '</b>/10</td>';
   }
   html += '</tr></table>';
   if (verdict) html += '<p style="margin:0 0 8px;font-size:14px;color:#161616;font-weight:600">' + esc(verdict) + '</p>';
-  if (detail) html += '<p style="margin:0 0 12px;font-size:13px;line-height:1.7;color:#3d3935">' + esc(detail) + '</p>';
+  if (detail) html += '<p style="margin:0 0 12px;font-size:13px;line-height:1.7;color:#3a3a3a">' + esc(detail) + '</p>';
   html += dotList('Red flags', flags);
   html += dotList('Strengths', strengths);
   if (tips && tips.length) {
@@ -42,15 +42,15 @@ function section(title, score, verdict, detail, flags, strengths, tips, plan, ex
         t.links.forEach(l => {
           if (!l) return;
           html += l.url
-            ? '<p style="margin:2px 0 0 14px;font-size:13px"><a href="' + esc(l.url) + '" style="color:#141210">' + esc(l.label) + '</a></p>'
-            : '<p style="margin:2px 0 0 14px;font-size:13px;color:#5c5852">' + esc(l.label) + '</p>';
+            ? '<p style="margin:2px 0 0 14px;font-size:13px"><a href="' + esc(l.url) + '" style="color:#121212">' + esc(l.label) + '</a></p>'
+            : '<p style="margin:2px 0 0 14px;font-size:13px;color:#595959">' + esc(l.label) + '</p>';
         });
       }
     });
     html += '</div>';
   }
   if (plan && plan.length) {
-    html += '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#141210">Action plan</span>';
+    html += '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#121212">Action plan</span>';
     const tags = ['30 days', '60 days', '90 days'];
     plan.forEach((a, i) => { html += '<p style="margin:4px 0 0;font-size:13px;color:#161616"><b>' + (tags[i] || '') + ':</b> ' + esc(String(a || '').replace(/^(30|60|90)\s*days?:?\s*/i, '')) + '</p>'; });
     html += '</div>';
@@ -70,8 +70,8 @@ function sourceHtml(item) {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(item.checked || '');
   const when = m ? ' · checked ' + Number(m[3]) + ' ' + MONTHS[Number(m[2]) - 1] + ' ' + m[1] : '';
   // A rule quoted word for word (kept by grounding.js only if it is on the page).
-  const quote = item.rule_quote ? '<br><span style="font-size:13px;color:#5c5852">The rule, word for word:</span> <i style="font-size:13px;color:#161616">\u201C' + esc(item.rule_quote) + '\u201D</i>' : '';
-  return quote + '<br><a href="' + esc(item.source) + '" style="font-family:Calibri,Carlito,Arial,sans-serif;font-size:13px;color:#6b665f;text-decoration:underline">Source: ' + esc(host) + esc(when) + '</a>';
+  const quote = item.rule_quote ? '<br><span style="font-size:13px;color:#595959">The rule, word for word:</span> <i style="font-size:13px;color:#161616">\u201C' + esc(item.rule_quote) + '\u201D</i>' : '';
+  return quote + '<br><a href="' + esc(item.source) + '" style="font-family:Calibri,Carlito,Arial,sans-serif;font-size:13px;color:#676767;text-decoration:underline">Source: ' + esc(host) + esc(when) + '</a>';
 }
 function stated(v, item) {
   return (v == null || v === '') ? (item && item.source ? 'not published on the source, check before planning' : '') : v;
@@ -85,8 +85,8 @@ function beforeApplyHtml(b) {
   const miss = ((b && b.missing) || []).filter(Boolean), steps = ((b && b.steps) || []).filter(Boolean);
   if (!miss.length) return '';
   let h = '<div style="margin-top:16px">' + label('Before you can apply');
-  miss.forEach((m, i) => { h += '<p style="margin:0 0 10px;padding-left:14px;text-indent:-14px;font-size:13px;line-height:1.55;color:#161616"><span style="color:#8a857e">&bull;</span>&nbsp;&nbsp;<b>' + esc(m) + '</b>' + (steps[i] ? '<br>' + esc(steps[i]) : '') + '</p>'; });
-  steps.slice(miss.length).forEach(x => { h += '<p style="margin:0 0 10px;padding-left:14px;text-indent:-14px;font-size:13px;line-height:1.55;color:#161616"><span style="color:#8a857e">&bull;</span>&nbsp;&nbsp;' + esc(x) + '</p>'; });
+  miss.forEach((m, i) => { h += '<p style="margin:0 0 10px;padding-left:14px;text-indent:-14px;font-size:13px;line-height:1.55;color:#161616"><span style="color:#868686">&bull;</span>&nbsp;&nbsp;<b>' + esc(m) + '</b>' + (steps[i] ? '<br>' + esc(steps[i]) : '') + '</p>'; });
+  steps.slice(miss.length).forEach(x => { h += '<p style="margin:0 0 10px;padding-left:14px;text-indent:-14px;font-size:13px;line-height:1.55;color:#161616"><span style="color:#868686">&bull;</span>&nbsp;&nbsp;' + esc(x) + '</p>'; });
   return h + '</div>';
 }
 
@@ -94,9 +94,9 @@ function beforeApplyHtml(b) {
 function nextStepHtml(n) {
   if (!n || !n.action) return '';
   const ready = (n.ready || []).filter(Boolean);
-  return '<tr><td style="padding:24px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Your next step</span>' +
+  return '<tr><td style="padding:24px 0;border-top:1px solid #dfdfdf"><span style="font-size:16px;font-weight:700;color:#121212">Your next step</span>' +
     '<p style="margin:10px 0 0;font-size:15px;line-height:1.55;color:#161616">' + esc(n.action) + '</p>' +
-    (n.why ? '<p style="margin:8px 0 0;font-size:13px;line-height:1.55;color:#5c5852">' + esc(n.why) + '</p>' : '') +
+    (n.why ? '<p style="margin:8px 0 0;font-size:13px;line-height:1.55;color:#595959">' + esc(n.why) + '</p>' : '') +
     (ready.length ? '<p style="margin:10px 0 0;font-size:13px;line-height:1.6;color:#161616"><b>Have ready:</b> ' + ready.map(esc).join(' · ') + '</p>' : '') +
     '</td></tr>';
 }
@@ -106,31 +106,31 @@ function producersHtml(list, email) {
   const items = (list || []).filter(Boolean);
   if (!items.length) return '';
   let h = '<div style="margin-top:16px">' + label('Producers to contact');
-  items.forEach(p => { h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(p.name) + '</b>' + (p.country ? ' (' + esc(p.country) + ')' : '') + '<br><span style="font-size:13px;color:#5c5852">Produced: ' + esc(p.film) + (p.year ? ' (' + esc(p.year) + ')' : '') + (p.why ? ' · ' + esc(p.why) : '') + (p.approach_quote && p.approach_url ? '<br>How they take projects, word for word: \u201C' + esc(p.approach_quote) + '\u201D <a href="' + esc(p.approach_url) + '" style="color:#6b665f;text-decoration:underline">their page</a>' : '<br>How they take projects: not found on their site. Ask before you send a script.') + '</span>' + sourceHtml(p) + '</p>'; });
-  if (email) h += '<p style="margin:14px 0 0;font-size:13px;font-weight:700;color:#5c5852">A first email you can adapt</p><p style="margin:6px 0 0;padding:10px 12px;background:#f4f1ec;border-radius:8px;font-size:13px;line-height:1.6;color:#161616;white-space:pre-wrap">' + esc(email) + '</p>';
+  items.forEach(p => { h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(p.name) + '</b>' + (p.country ? ' (' + esc(p.country) + ')' : '') + '<br><span style="font-size:13px;color:#595959">Produced: ' + esc(p.film) + (p.year ? ' (' + esc(p.year) + ')' : '') + (p.why ? ' · ' + esc(p.why) : '') + (p.approach_quote && p.approach_url ? '<br>How they take projects, word for word: \u201C' + esc(p.approach_quote) + '\u201D <a href="' + esc(p.approach_url) + '" style="color:#676767;text-decoration:underline">their page</a>' : '<br>How they take projects: not found on their site. Ask before you send a script.') + '</span>' + sourceHtml(p) + '</p>'; });
+  if (email) h += '<p style="margin:14px 0 0;font-size:13px;font-weight:700;color:#595959">A first email you can adapt</p><p style="margin:6px 0 0;padding:10px 12px;background:#f1f1f1;border-radius:8px;font-size:13px;line-height:1.6;color:#161616;white-space:pre-wrap">' + esc(email) + '</p>';
   return h + '</div>';
 }
 
 function fundingSourcesHtml(sources) {
   if (!sources || !sources.length) return '';
-  let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#141210">Funding sources</span>';
-  sources.forEach(f => { if (!f) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.name) + '</b> (' + esc(f.type) + ')' + (f.amount ? ' · ' + esc(f.amount) : '') + '<br><span style="font-size:13px;color:#5c5852">' + (APPLICANT[f.applicant] ? 'Who can apply: ' + esc(APPLICANT[f.applicant]) + ' · ' : '') + 'Deadline: ' + esc(stated(f.deadline, f)) + ' · ' + esc(f.eligibility) + '</span>' + sourceHtml(f) + '</p>'; });
+  let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#121212">Funding sources</span>';
+  sources.forEach(f => { if (!f) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.name) + '</b> (' + esc(f.type) + ')' + (f.amount ? ' · ' + esc(f.amount) : '') + '<br><span style="font-size:13px;color:#595959">' + (APPLICANT[f.applicant] ? 'Who can apply: ' + esc(APPLICANT[f.applicant]) + ' · ' : '') + 'Deadline: ' + esc(stated(f.deadline, f)) + ' · ' + esc(f.eligibility) + '</span>' + sourceHtml(f) + '</p>'; });
   h += '</div>';
   return h;
 }
 
 function comparablesHtml(comps) {
   if (!comps || !comps.length) return '';
-  let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#141210">Comparable films</span>';
-  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b>' + (c.year ? ' (' + esc(c.year) + ')' : '') + (c.budget ? ' · Budget: ' + esc(c.budget) : '') + (c.result ? '. ' + esc(c.result) : '') + (c.match ? '<br><span style="font-size:13px;color:#5c5852">In common: ' + esc(c.match) + '</span>' : '') + '<br><span style="font-size:13px;color:#5c5852">' + esc(c.lesson) + '</span>' + sourceHtml(c) + '</p>'; });
+  let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#121212">Comparable films</span>';
+  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b>' + (c.year ? ' (' + esc(c.year) + ')' : '') + (c.budget ? ' · Budget: ' + esc(c.budget) : '') + (c.result ? '. ' + esc(c.result) : '') + (c.match ? '<br><span style="font-size:13px;color:#595959">In common: ' + esc(c.match) + '</span>' : '') + '<br><span style="font-size:13px;color:#595959">' + esc(c.lesson) + '</span>' + sourceHtml(c) + '</p>'; });
   h += '</div>';
   return h;
 }
 
 function platformsHtml(platforms) {
   if (!platforms || !platforms.length) return '';
-  let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#141210">Platform priority</span>';
-  platforms.forEach(pl => { if (!pl) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(pl.priority) + ':</b> ' + esc(pl.name) + '<br><span style="font-size:13px;color:#5c5852">' + esc(pl.reason) + '</span>' + sourceHtml(pl) + '</p>'; });
+  let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#121212">Platform priority</span>';
+  platforms.forEach(pl => { if (!pl) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(pl.priority) + ':</b> ' + esc(pl.name) + '<br><span style="font-size:13px;color:#595959">' + esc(pl.reason) + '</span>' + sourceHtml(pl) + '</p>'; });
   h += '</div>';
   return h;
 }
@@ -139,16 +139,16 @@ function pitchAssessmentHtml(pa) {
   if (!pa) return '';
   let h = '<div style="margin-top:10px">';
   if (pa.thirty_second_pitch) {
-    h += '<span style="font-size:14px;font-weight:700;color:#141210">30-Second Pitch</span>' +
+    h += '<span style="font-size:14px;font-weight:700;color:#121212">30-Second Pitch</span>' +
       '<p style="margin:6px 0 12px;font-size:13px;color:#161616;font-style:italic;line-height:1.6">"' + esc(pa.thirty_second_pitch) + '"</p>';
   }
   if (pa.logline_improved) {
-    h += '<span style="font-size:14px;font-weight:700;color:#141210">Logline assessment' + (pa.logline_score ? ' · ' + esc(pa.logline_score) + '/10' : '') + '</span>';
-    if (pa.logline_issues) h += '<p style="margin:6px 0 0;font-size:13px;color:#5c5852;line-height:1.6">' + esc(pa.logline_issues) + '</p>';
+    h += '<span style="font-size:14px;font-weight:700;color:#121212">Logline assessment' + (pa.logline_score ? ' · ' + esc(pa.logline_score) + '/10' : '') + '</span>';
+    if (pa.logline_issues) h += '<p style="margin:6px 0 0;font-size:13px;color:#595959;line-height:1.6">' + esc(pa.logline_issues) + '</p>';
     h += '<p style="margin:4px 0 12px;font-size:13px;color:#161616;font-weight:700;line-height:1.6">Improved: ' + esc(pa.logline_improved) + '</p>';
   }
   if (pa.pitch_deck_checklist && pa.pitch_deck_checklist.length) {
-    h += '<span style="font-size:14px;font-weight:700;color:#141210">Pitch deck checklist</span>';
+    h += '<span style="font-size:14px;font-weight:700;color:#121212">Pitch deck checklist</span>';
     pa.pitch_deck_checklist.forEach(item => { if (item) h += '<p style="margin:4px 0 0;font-size:13px;color:#161616">☐ ' + esc(item) + '</p>'; });
   }
   h += '</div>';
@@ -157,44 +157,44 @@ function pitchAssessmentHtml(pa) {
 
 function marketingStrategyHtml(ms) {
   if (!ms) return '';
-  let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#141210">Marketing strategy</span>';
+  let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#121212">Marketing strategy</span>';
   if (ms.overview) h += '<p style="margin:6px 0 10px;font-size:13px;color:#161616;line-height:1.6">' + esc(ms.overview) + '</p>';
   if (ms.pre_release && ms.pre_release.length) {
-    ms.pre_release.forEach(a => { if (a) h += '<p style="margin:2px 0 0;font-size:13px;color:#5c5852">• ' + esc(a) + '</p>'; });
+    ms.pre_release.forEach(a => { if (a) h += '<p style="margin:2px 0 0;font-size:13px;color:#595959">• ' + esc(a) + '</p>'; });
   }
-  if (ms.social_strategy) h += '<p style="margin:6px 0 0;font-size:13px;color:#5c5852"><b style="color:#161616">Social:</b> ' + esc(ms.social_strategy) + '</p>';
-  if (ms.community) h += '<p style="margin:4px 0 0;font-size:13px;color:#5c5852"><b style="color:#161616">Community:</b> ' + esc(ms.community) + '</p>';
-  if (ms.press) h += '<p style="margin:4px 0 0;font-size:13px;color:#5c5852"><b style="color:#161616">Press:</b> ' + esc(ms.press) + '</p>';
-  if (ms.budget_estimate) h += '<p style="margin:4px 0 0;font-size:13px;color:#5c5852"><b style="color:#161616">Marketing Budget:</b> ' + esc(ms.budget_estimate) + '</p>';
+  if (ms.social_strategy) h += '<p style="margin:6px 0 0;font-size:13px;color:#595959"><b style="color:#161616">Social:</b> ' + esc(ms.social_strategy) + '</p>';
+  if (ms.community) h += '<p style="margin:4px 0 0;font-size:13px;color:#595959"><b style="color:#161616">Community:</b> ' + esc(ms.community) + '</p>';
+  if (ms.press) h += '<p style="margin:4px 0 0;font-size:13px;color:#595959"><b style="color:#161616">Press:</b> ' + esc(ms.press) + '</p>';
+  if (ms.budget_estimate) h += '<p style="margin:4px 0 0;font-size:13px;color:#595959"><b style="color:#161616">Marketing Budget:</b> ' + esc(ms.budget_estimate) + '</p>';
   h += '</div>';
   return h;
 }
 
 function labeledTextHtml(label, text) {
   if (!text) return '';
-  return '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#141210">' + esc(label) + '</span><p style="margin:6px 0 0;font-size:13px;color:#161616;line-height:1.6">' + esc(text) + '</p></div>';
+  return '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#121212">' + esc(label) + '</span><p style="margin:6px 0 0;font-size:13px;color:#161616;line-height:1.6">' + esc(text) + '</p></div>';
 }
 
 function labOpportunitiesHtml(labs) {
   if (!labs || !labs.length) return '';
-  let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#141210">Labs and market opportunities</span>';
-  labs.forEach(l => { if (!l) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(l.name) + '</b>' + (l.deadline ? ' · Deadline: ' + esc(l.deadline) : '') + '<br><span style="font-size:13px;color:#5c5852">' + esc(l.fit) + '</span>' + sourceHtml(l) + '</p>'; });
+  let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#121212">Labs and market opportunities</span>';
+  labs.forEach(l => { if (!l) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(l.name) + '</b>' + (l.deadline ? ' · Deadline: ' + esc(l.deadline) : '') + '<br><span style="font-size:13px;color:#595959">' + esc(l.fit) + '</span>' + sourceHtml(l) + '</p>'; });
   h += '</div>';
   return h;
 }
 
 function keyCrewHtml(crew) {
   if (!crew || !crew.length) return '';
-  let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#141210">Key crew recommendations</span>';
-  crew.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.role) + '</b><br><span style="font-size:13px;color:#161616">' + esc(c.profile) + '</span><br><span style="font-size:13px;color:#5c5852">' + esc(c.why) + '</span></p>'; });
+  let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#121212">Key crew recommendations</span>';
+  crew.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.role) + '</b><br><span style="font-size:13px;color:#161616">' + esc(c.profile) + '</span><br><span style="font-size:13px;color:#595959">' + esc(c.why) + '</span></p>'; });
   h += '</div>';
   return h;
 }
 
 function cautionaryCompsHtml(comps) {
   if (!comps || !comps.length) return '';
-  let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#141210">Cautionary comparables</span>';
-  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b>' + (c.year ? ' (' + esc(c.year) + ')' : '') + (c.budget ? ' · Budget: ' + esc(c.budget) : '') + (c.what_went_wrong ? '<br><span style="font-size:13px;color:#161616">' + esc(c.what_went_wrong) + '</span>' : '') + '<br><span style="font-size:13px;color:#5c5852">' + esc(c.lesson) + '</span>' + sourceHtml(c) + '</p>'; });
+  let h = '<div style="margin-top:10px"><span style="font-size:14px;font-weight:700;color:#121212">Cautionary comparables</span>';
+  comps.forEach(c => { if (!c) return; h += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(c.title) + '</b>' + (c.year ? ' (' + esc(c.year) + ')' : '') + (c.budget ? ' · Budget: ' + esc(c.budget) : '') + (c.what_went_wrong ? '<br><span style="font-size:13px;color:#161616">' + esc(c.what_went_wrong) + '</span>' : '') + '<br><span style="font-size:13px;color:#595959">' + esc(c.lesson) + '</span>' + sourceHtml(c) + '</p>'; });
   h += '</div>';
   return h;
 }
@@ -203,13 +203,13 @@ function talentAndTaxHtml(talentLeverage, taxIncentive) {
   if (!talentLeverage && !(taxIncentive && (taxIncentive.estimate || taxIncentive.note))) return '';
   let h = '<div style="margin-top:10px">';
   if (talentLeverage) {
-    h += '<span style="font-size:14px;font-weight:700;color:#141210">Your experience</span>' +
+    h += '<span style="font-size:14px;font-weight:700;color:#121212">Your experience</span>' +
       '<p style="margin:6px 0 12px;font-size:13px;color:#161616;line-height:1.6">' + esc(talentLeverage) + '</p>';
   }
   if (taxIncentive && (taxIncentive.estimate || taxIncentive.note)) {
-    h += '<span style="font-size:14px;font-weight:700;color:#141210">Tax incentive' + (taxIncentive.region ? ': ' + esc(taxIncentive.region) : '') + '</span>' +
+    h += '<span style="font-size:14px;font-weight:700;color:#121212">Tax incentive' + (taxIncentive.region ? ': ' + esc(taxIncentive.region) : '') + '</span>' +
       (taxIncentive.estimate ? '<p style="margin:6px 0 0;font-size:13px;font-weight:700;color:#161616">' + esc(taxIncentive.estimate) + '</p>' : '') +
-      (taxIncentive.note ? '<p style="margin:2px 0 0;font-size:13px;color:#5c5852">' + esc(taxIncentive.note) + sourceHtml(taxIncentive) + '</p>' : '');
+      (taxIncentive.note ? '<p style="margin:2px 0 0;font-size:13px;color:#595959">' + esc(taxIncentive.note) + sourceHtml(taxIncentive) + '</p>' : '');
   }
   h += '</div>';
   return h;
@@ -235,35 +235,35 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
   body += section('Distribution and revenue', r.distribution_score, r.distribution_verdict, r.distribution_detail, r.distribution_flags, r.distribution_strengths, r.distribution_tips, r.distribution_action_plan, platformsHtml(r.distribution_platforms) + labeledTextHtml('Self-Distribution Playbook', r.self_distribution_playbook));
 
   if (r.roadmap && r.roadmap.length) {
-    let rm = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Roadmap</span>';
+    let rm = '<tr><td style="padding:28px 0;border-top:1px solid #dfdfdf"><span style="font-size:16px;font-weight:700;color:#121212">Roadmap</span>';
     r.roadmap.forEach((s, i) => { if (!s) return; rm += '<p style="margin:10px 0 0;font-size:13px;color:#161616"><b>' + (i + 1) + '. ' + esc(s.phase) + ':</b> ' + esc(s.action) + '</p>'; });
     rm += '</td></tr>';
     body += rm;
   }
 
   if (r.international_markets && r.international_markets.length) {
-    let im = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">International Markets</span>';
+    let im = '<tr><td style="padding:28px 0;border-top:1px solid #dfdfdf"><span style="font-size:16px;font-weight:700;color:#121212">International Markets</span>';
     r.international_markets.forEach(m => { if (!m) return; im += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(m.country) + ':</b> ' + esc(m.reason) + '</p>'; });
     im += '</td></tr>';
     body += im;
   }
 
   if (r.festival_calendar && r.festival_calendar.length) {
-    let fc = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Festival Calendar</span>';
-    r.festival_calendar.forEach(f => { if (!f) return; fc += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.festival) + '</b> · ' + esc(f.source ? 'Deadline: ' + stated(f.deadline, f) : f.deadline) + '<br><span style="font-size:13px;color:#5c5852">' + esc(f.fit) + '</span>' + sourceHtml(f) + '</p>'; });
+    let fc = '<tr><td style="padding:28px 0;border-top:1px solid #dfdfdf"><span style="font-size:16px;font-weight:700;color:#121212">Festival Calendar</span>';
+    r.festival_calendar.forEach(f => { if (!f) return; fc += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(f.festival) + '</b> · ' + esc(f.source ? 'Deadline: ' + stated(f.deadline, f) : f.deadline) + '<br><span style="font-size:13px;color:#595959">' + esc(f.fit) + '</span>' + sourceHtml(f) + '</p>'; });
     fc += '</td></tr>';
     body += fc;
   }
 
   if (r.sales_agents && r.sales_agents.length) {
-    let sa = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Sales Agents</span>';
-    r.sales_agents.forEach(a => { if (!a) return; sa += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(a.name) + '</b>' + (a.focus ? ' <span style="font-size:13px;color:#5c5852">&middot; ' + esc(a.focus) + '</span>' : '') + '<br><span style="font-size:13px;color:#5c5852">' + esc(a.why) + '</span>' + sourceHtml(a) + '</p>'; });
+    let sa = '<tr><td style="padding:28px 0;border-top:1px solid #dfdfdf"><span style="font-size:16px;font-weight:700;color:#121212">Sales Agents</span>';
+    r.sales_agents.forEach(a => { if (!a) return; sa += '<p style="margin:8px 0 0;font-size:13px;color:#161616"><b>' + esc(a.name) + '</b>' + (a.focus ? ' <span style="font-size:13px;color:#595959">&middot; ' + esc(a.focus) + '</span>' : '') + '<br><span style="font-size:13px;color:#595959">' + esc(a.why) + '</span>' + sourceHtml(a) + '</p>'; });
     sa += '</td></tr>';
     body += sa;
   }
 
   if (r.risk_assessment && ((r.risk_assessment.top_risks && r.risk_assessment.top_risks.length) || (r.risk_assessment.mitigation && r.risk_assessment.mitigation.length))) {
-    let ra = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Risk Assessment</span>';
+    let ra = '<tr><td style="padding:28px 0;border-top:1px solid #dfdfdf"><span style="font-size:16px;font-weight:700;color:#121212">Risk Assessment</span>';
     ra += dotList('Top risks', r.risk_assessment.top_risks);
     ra += dotList('How to reduce them', r.risk_assessment.mitigation);
     ra += '</td></tr>';
@@ -271,48 +271,48 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
   }
 
   if (r.awards_qualification_strategy) {
-    body += '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Awards Qualification Strategy</span>' +
+    body += '<tr><td style="padding:28px 0;border-top:1px solid #dfdfdf"><span style="font-size:16px;font-weight:700;color:#121212">Awards Qualification Strategy</span>' +
       '<p style="margin:10px 0 0;font-size:13px;color:#161616;line-height:1.7">' + esc(r.awards_qualification_strategy) + '</p></td></tr>';
   }
 
   if (r.legal_and_rights_considerations) {
-    body += '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Legal &amp; Rights Considerations</span>' +
+    body += '<tr><td style="padding:28px 0;border-top:1px solid #dfdfdf"><span style="font-size:16px;font-weight:700;color:#121212">Legal &amp; Rights Considerations</span>' +
       '<p style="margin:10px 0 0;font-size:13px;color:#161616;line-height:1.7">' + esc(r.legal_and_rights_considerations) + '</p></td></tr>';
   }
 
   if (r.revenue_projection && r.sources_checked) {
     // Scenarios in words: no data backs a currency forecast.
     const rs = r.revenue_projection;
-    let rv = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Revenue Scenarios</span>';
+    let rv = '<tr><td style="padding:28px 0;border-top:1px solid #dfdfdf"><span style="font-size:16px;font-weight:700;color:#121212">Revenue Scenarios</span>';
     if (rs.total_realistic) rv += '<p style="margin:10px 0 0;font-size:13px;color:#161616;line-height:1.7">' + esc(rs.total_realistic) + '</p>';
     [['Theatrical', rs.theatrical], ['Streaming (SVOD)', rs.streaming_svod], ['VOD / AVOD', rs.vod_avod], ['TV Rights', rs.tv_rights], ['International', rs.international]]
-      .forEach(([label, v]) => { if (v) rv += '<p style="margin:10px 0 0;font-size:13px;color:#161616;line-height:1.6"><b>' + esc(label) + ':</b> <span style="color:#3d3935">' + esc(v) + '</span></p>'; });
-    if (rs.breakeven_note) rv += '<p style="margin:10px 0 0;font-size:13px;color:#3d3935;line-height:1.6">' + esc(rs.breakeven_note) + '</p>';
+      .forEach(([label, v]) => { if (v) rv += '<p style="margin:10px 0 0;font-size:13px;color:#161616;line-height:1.6"><b>' + esc(label) + ':</b> <span style="color:#3a3a3a">' + esc(v) + '</span></p>'; });
+    if (rs.breakeven_note) rv += '<p style="margin:10px 0 0;font-size:13px;color:#3a3a3a;line-height:1.6">' + esc(rs.breakeven_note) + '</p>';
     rv += '</td></tr>';
     body += rv;
   } else if (r.revenue_projection) {
     const rp = r.revenue_projection;
-    let rv = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Revenue Projection</span>';
+    let rv = '<tr><td style="padding:28px 0;border-top:1px solid #dfdfdf"><span style="font-size:16px;font-weight:700;color:#121212">Revenue Projection</span>';
     [['Theatrical', rp.theatrical], ['Streaming (SVOD)', rp.streaming_svod], ['VOD / AVOD', rp.vod_avod], ['TV Rights', rp.tv_rights], ['International', rp.international]]
-      .forEach(([label, v]) => { if (v) rv += '<p style="margin:8px 0 0;font-size:13px;color:#161616;display:flex;justify-content:space-between"><span>' + esc(label) + '</span><span style="color:#5c5852">' + esc(v) + '</span></p>'; });
-    if (rp.total_realistic) rv += '<p style="margin:12px 0 0;font-size:14px;font-weight:700;color:#141210">Total realistic: ' + esc(rp.total_realistic) + '</p>';
-    if (rp.breakeven_note) rv += '<p style="margin:6px 0 0;font-size:13px;color:#3d3935">' + esc(rp.breakeven_note) + '</p>';
+      .forEach(([label, v]) => { if (v) rv += '<p style="margin:8px 0 0;font-size:13px;color:#161616;display:flex;justify-content:space-between"><span>' + esc(label) + '</span><span style="color:#595959">' + esc(v) + '</span></p>'; });
+    if (rp.total_realistic) rv += '<p style="margin:12px 0 0;font-size:14px;font-weight:700;color:#121212">Total realistic: ' + esc(rp.total_realistic) + '</p>';
+    if (rp.breakeven_note) rv += '<p style="margin:6px 0 0;font-size:13px;color:#3a3a3a">' + esc(rp.breakeven_note) + '</p>';
     rv += '</td></tr>';
     body += rv;
   }
 
   if (r.business_plan_summary) {
     const bp = r.business_plan_summary;
-    let bps = '<tr><td style="padding:28px 0;border-top:1px solid #e4ded6"><span style="font-size:16px;font-weight:700;color:#141210">Business Plan Summary</span>';
+    let bps = '<tr><td style="padding:28px 0;border-top:1px solid #dfdfdf"><span style="font-size:16px;font-weight:700;color:#121212">Business Plan Summary</span>';
     if (bp.executive_summary) bps += '<p style="margin:10px 0 0;font-size:13px;color:#161616;line-height:1.7">' + esc(bp.executive_summary) + '</p>';
-    if (bp.the_ask) bps += '<p style="margin:12px 0 0;padding:10px 14px;background:#efeae3;border-radius:10px;font-size:13px;color:#161616"><b>The Ask:</b> ' + esc(bp.the_ask) + '</p>';
+    if (bp.the_ask) bps += '<p style="margin:12px 0 0;padding:10px 14px;background:#ebebeb;border-radius:10px;font-size:13px;color:#161616"><b>The Ask:</b> ' + esc(bp.the_ask) + '</p>';
     [['Market Opportunity', bp.market_opportunity], ['Competitive Advantage', bp.competitive_advantage], ['Use of Funds', bp.use_of_funds], ['Team & Experience', bp.team_and_experience]]
-      .forEach(([label, v]) => { if (v) bps += '<p style="margin:12px 0 0;font-size:14px;font-weight:700;color:#141210">' + esc(label) + '</p><p style="margin:4px 0 0;font-size:13px;color:#161616;line-height:1.6">' + esc(v) + '</p>'; });
+      .forEach(([label, v]) => { if (v) bps += '<p style="margin:12px 0 0;font-size:14px;font-weight:700;color:#121212">' + esc(label) + '</p><p style="margin:4px 0 0;font-size:13px;color:#161616;line-height:1.6">' + esc(v) + '</p>'; });
     if (bp.key_milestones && bp.key_milestones.length) {
-      bps += '<p style="margin:14px 0 0;font-size:14px;font-weight:700;color:#141210">Key milestones</p>';
+      bps += '<p style="margin:14px 0 0;font-size:14px;font-weight:700;color:#121212">Key milestones</p>';
       bp.key_milestones.forEach(m => { if (m) bps += '<p style="margin:6px 0 0;font-size:13px;color:#161616">• ' + esc(m) + '</p>'; });
     }
-    if (bp.risk_summary) bps += '<p style="margin:14px 0 0;font-size:14px;font-weight:700;color:#141210">Biggest risk</p><p style="margin:4px 0 0;font-size:13px;color:#161616">' + esc(bp.risk_summary) + '</p>';
+    if (bp.risk_summary) bps += '<p style="margin:14px 0 0;font-size:14px;font-weight:700;color:#121212">Biggest risk</p><p style="margin:4px 0 0;font-size:13px;color:#161616">' + esc(bp.risk_summary) + '</p>';
     bps += '</td></tr>';
     body += bps;
   }
@@ -321,21 +321,21 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
   // image, because Gmail strips SVG and Outlook ignores CSS gradients; the
   // night bgcolor is the fallback), then the report on warm paper.
   const FONT = "Calibri,Carlito,-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
-  return '<!doctype html><html><head><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><style>@font-face{font-family:Geist;font-weight:100 900;src:url(https://oneciak.com/fonts/geist-latin-wght-normal.woff2) format(\'woff2\')}@media (max-width:520px){.oc-title{font-size:' + Math.max(30, Math.floor(titleSize * 0.56)) + 'px !important}}</style></head><body style="margin:0;padding:0;background:#f4f1ec;font-family:' + FONT + '">' +
-    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1ec;padding:28px 0">' +
+  return '<!doctype html><html><head><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><style>@font-face{font-family:Geist;font-weight:100 900;src:url(https://oneciak.com/fonts/geist-latin-wght-normal.woff2) format(\'woff2\')}@media (max-width:520px){.oc-title{font-size:' + Math.max(30, Math.floor(titleSize * 0.56)) + 'px !important}}</style></head><body style="margin:0;padding:0;background:#f1f1f1;font-family:' + FONT + '">' +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1f1f1;padding:28px 0">' +
     '<tr><td align="center">' +
-    '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;border-radius:14px;overflow:hidden;background:#fbf9f6">' +
-    '<tr><td bgcolor="#140d10" background="https://oneciak.com/email-header.jpg" style="background:#140d10 url(https://oneciak.com/email-header.jpg) center top / cover no-repeat;padding:28px 32px 30px">' +
-      '<div style="font-size:15px;font-weight:700;color:#f2ede6;letter-spacing:-0.01em">OneCiak</div>' +
+    '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;border-radius:14px;overflow:hidden;background:#f9f9f9">' +
+    '<tr><td bgcolor="#0f0f0f" background="https://oneciak.com/email-header.jpg" style="background:#0f0f0f url(https://oneciak.com/email-header.jpg) center top / cover no-repeat;padding:28px 32px 30px">' +
+      '<div style="font-size:15px;font-weight:700;color:#eeeeee;letter-spacing:-0.01em">OneCiak</div>' +
       // The film's name like a poster, as on the site: as wide as the 536px
       // column allows (about 0.55em per letter in bold), 30 to 96px; on a
       // phone (under 520px) scaled to its narrower column.
-      '<div class="oc-title" style="margin-top:34px;word-break:break-word;font-family:Geist,\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:' + titleSize + 'px;line-height:0.92;font-weight:700;color:#f2ede6;letter-spacing:-0.045em">' + esc(title) + '</div>' +
-      (credits ? '<div style="margin-top:14px;font-size:14px;color:#d6cec3">' + esc(credits) + '</div>' : '') +
-      (project.logline ? '<div style="margin-top:10px;font-size:18px;line-height:1.45;color:#f2ede6">' + esc(project.logline) + '</div>' : '') +
+      '<div class="oc-title" style="margin-top:34px;word-break:break-word;font-family:Geist,\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:' + titleSize + 'px;line-height:0.92;font-weight:700;color:#eeeeee;letter-spacing:-0.045em">' + esc(title) + '</div>' +
+      (credits ? '<div style="margin-top:14px;font-size:14px;color:#cfcfcf">' + esc(credits) + '</div>' : '') +
+      (project.logline ? '<div style="margin-top:10px;font-size:18px;line-height:1.45;color:#eeeeee">' + esc(project.logline) + '</div>' : '') +
       '<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:24px"><tr>' +
-        '<td style="font-size:44px;line-height:1;font-weight:300;color:#f2ede6;letter-spacing:-0.03em;padding-right:14px">' + esc(score) + '<span style="font-size:18px;color:#d6cec3">/10</span></td>' +
-        '<td style="font-size:15px;color:#d6cec3;vertical-align:bottom;padding-bottom:4px">Average of the five areas</td>' +
+        '<td style="font-size:44px;line-height:1;font-weight:300;color:#eeeeee;letter-spacing:-0.03em;padding-right:14px">' + esc(score) + '<span style="font-size:18px;color:#cfcfcf">/10</span></td>' +
+        '<td style="font-size:15px;color:#cfcfcf;vertical-align:bottom;padding-bottom:4px">Average of the five areas</td>' +
       '</tr></table>' +
     '</td></tr>' +
     '<tr><td style="padding:26px 32px 6px">' +
@@ -344,9 +344,9 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
     (r.biggest_opportunity ? '<p style="margin:10px 0 0;font-size:14px;line-height:1.6;color:#161616"><b>Biggest opportunity.</b> ' + esc(r.biggest_opportunity) + '</p>' : '') +
     '</td></tr>' +
     '<tr><td style="padding:0 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">' + body + '</table></td></tr>' +
-    '<tr><td style="padding:26px 32px 30px;border-top:1px solid #e4ded6">' +
-    '<a href="' + esc(viewUrl) + '" style="display:inline-block;background:#140d10;color:#f2ede6;text-decoration:none;font-size:14px;font-weight:600;border-radius:10px;padding:13px 22px">View on oneciak.com</a>' +
-    '<p style="margin:22px 0 0;font-size:13px;line-height:1.6;color:#6b665f">Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. OneCiak assumes no liability. Results are estimates and do not guarantee any outcome.</p>' +
+    '<tr><td style="padding:26px 32px 30px;border-top:1px solid #dfdfdf">' +
+    '<a href="' + esc(viewUrl) + '" style="display:inline-block;background:#0f0f0f;color:#eeeeee;text-decoration:none;font-size:14px;font-weight:600;border-radius:10px;padding:13px 22px">View on oneciak.com</a>' +
+    '<p style="margin:22px 0 0;font-size:13px;line-height:1.6;color:#676767">Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. OneCiak assumes no liability. Results are estimates and do not guarantee any outcome.</p>' +
     '</td></tr>' +
     '</table></td></tr></table></body></html>';
 }

@@ -7,7 +7,7 @@
 <title>OneCiak · Find producers, funds and festivals for your film</title>
 <meta name="description" content="Does your film have a market? A free market analysis of your project across five areas: creative package, financing, audience, festivals and distribution.">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#140d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0f0f0f" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://oneciak.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="OneCiak">
@@ -42,31 +42,31 @@
 :root {
   --sf: 'Carlito', Calibri, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
   --white: #ffffff;
-  --cream: #ede8e1;
-  --paper: #f4f1ec;
-  --border: #d9d3cb;
-  --border-light: #e5dfd7;
+  --cream: #e9e9e9;
+  --paper: #f1f1f1;
+  --border: #d4d4d4;
+  --border-light: #e0e0e0;
   /* night: the landing hero, a dark room before the projector starts */
-  --night: #140d10;
-  --on-night: #f2ede6;
-  --on-night-2: #a5a09a;
+  --night: #0f0f0f;
+  --on-night: #eeeeee;
+  --on-night-2: #a1a1a1;
   /* form fields: a tint of the ground, not a white box on top of it */
-  --field: rgba(20,18,16,0.045);
-  --field-hover: rgba(20,18,16,0.07);
+  --field: rgba(18,18,18,0.045);
+  --field-hover: rgba(18,18,18,0.07);
   --display: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
   --mono: 'Carlito', Calibri, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; /* small data in Carlito too (Antonio) */
   --text: #161616;
   --ink: #000000;
-  --muted: #5c5c5c; /* at least 4.5:1 even on the most saturated point of the hero's orange wash */
+  --muted: #5c5c5c; /* at least 4.5:1 on every background */
   --muted-light: #606060; /* same contrast reason as --muted */
   --accent: #000000;
   --accent-hover: #2e2e2e;
   --accent-press: #000000;
   --accent-wash: #ececec;
-  --danger: #b13225; /* same contrast reason as --muted */
-  --danger-wash: #fdf1ef;
-  --success: #0f7a3d;
-  --success-wash: #eef8f1;
+  --danger: var(--text); /* no colours (Antonio, 26 Nov 2026): errors and confirmations in the text's colour, said by their words */
+  --danger-wash: #f4f4f4;
+  --success: var(--text);
+  --success-wash: #f4f4f4;
   --radius: 12px;
   --radius-lg: 18px;
   --radius-xl: 28px;
@@ -80,19 +80,15 @@ body { font-family: var(--sf); background: var(--paper); color: var(--text); min
 /* Ambient background: a barely-there gradient wash for depth + a fine grain
    texture, both purely decorative (pointer-events:none, negative z-index)
    so they never intercept clicks or sit above real content. Kept
-   intentionally subtle and monochrome/warm-neutral — a splash of color
-   here would clash with the site's black/white editorial look. Easy to
+   intentionally subtle and grey only: the site is black and white. Easy to
    remove entirely: delete this rule and the two ::before/::after rules
    below, nothing else references them. */
 body::before {
   content: ''; position: fixed; inset: 0; z-index: -2; pointer-events: none;
   /* Satin, not paper (chosen by Antonio from his reference):
-     broad soft sheen, light top right, warm shade low left, a darker fold
-     bottom right. Lopsided on purpose. */
+     a broad soft sheen, light top right. */
   background:
-    radial-gradient(ellipse 1100px 700px at 78% 22%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.18) 45%, transparent 75%),
-    radial-gradient(ellipse 1300px 900px at 8% 70%, rgba(196,128,96,0.16) 0%, rgba(196,128,96,0.06) 45%, transparent 75%),
-    radial-gradient(ellipse 900px 600px at 100% 105%, rgba(150,96,84,0.14) 0%, rgba(150,96,84,0.04) 50%, transparent 78%);
+    radial-gradient(ellipse 1100px 700px at 78% 22%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.18) 45%, transparent 75%);
 }
 body::after {
   content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.22;
@@ -147,17 +143,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   height: 64px; padding: 0 max(40px, calc((100vw - 1240px) / 2 + 40px));
   display: flex; align-items: center; justify-content: space-between;
-  background: rgba(20,13,16,0); color: var(--on-night);
+  background: rgba(15,15,15,0); color: var(--on-night);
   border-bottom: 1px solid rgba(255,255,255,0.08);
   transition: background 0.35s var(--ease), color 0.35s var(--ease), border-color 0.35s var(--ease);
 }
-.l-nav.is-scrolled { background: rgba(20,13,16,0.72); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); }
-.l-nav.is-light { background: rgba(244,241,236,0.84); color: var(--text); border-bottom-color: rgba(20,18,16,0.07); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); }
+.l-nav.is-scrolled { background: rgba(15,15,15,0.72); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); }
+.l-nav.is-light { background: rgba(241,241,241,0.84); color: var(--text); border-bottom-color: rgba(18,18,18,0.07); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); }
 .l-logo { font-family: var(--display); font-size: 16px; font-weight: 600; color: inherit; letter-spacing: -0.01em; display: inline-flex; align-items: center; gap: 9px; cursor: pointer; }
 .l-logo svg path, .l-logo svg rect { fill: currentColor; }
 .l-nav-right { display: flex; align-items: center; gap: 26px; }
 .l-nav-reports { font-size: 14px; font-weight: 500; color: inherit; text-decoration: none; white-space: nowrap; padding: 8px 14px; border-radius: 10px; border: 1px solid currentColor; border-color: rgba(255,255,255,0.22); transition: border-color 0.35s var(--ease), background 0.2s; }
-.l-nav.is-light .l-nav-reports { border-color: rgba(20,18,16,0.18); }
+.l-nav.is-light .l-nav-reports { border-color: rgba(18,18,18,0.18); }
 .l-nav .hamburger { background: none; }
 .l-nav .hamburger span { background: currentColor; }
 .l-nav.is-light .hamburger { background: none; }
@@ -167,25 +163,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
    no copy ever sits on the mid-tone and loses contrast. */
 .l-hero {
   position: relative; overflow: hidden; color: var(--on-night);
-  background: linear-gradient(180deg, var(--night) 0, var(--night) calc(100% - 300px), #201e1c calc(100% - 230px), #4a4643 calc(100% - 165px), #908c86 calc(100% - 100px), #d5d0ca calc(100% - 45px), var(--paper) 100%);
+  background: linear-gradient(180deg, var(--night) 0, var(--night) calc(100% - 300px), #1e1e1e calc(100% - 230px), #474747 calc(100% - 165px), #8d8d8d calc(100% - 100px), #d1d1d1 calc(100% - 45px), var(--paper) 100%);
   /* Chosen by Antonio: the same long dissolve, interpolated in
-     oklab so the midpoint stays warm instead of passing through muddy grey.
+     oklab so the midpoint stays even.
      Browsers without 'in oklab' keep the stepped gradient above. */
-  background: linear-gradient(in oklab 180deg, var(--night) 0, var(--night) calc(100% - 280px), rgb(244 241 236 / 0) 100%);
+  background: linear-gradient(in oklab 180deg, var(--night) 0, var(--night) calc(100% - 280px), rgb(241 241 241 / 0) 100%);
   padding-bottom: 270px;
 }
-/* Ember glow, deliberately lopsided: one dominant warm source top-right,
-   a small plum one low on the left. Never mirrored. */
-.l-hero::before, #sec-results .r-hero::before, #sec-myreports .r-hero::before, #sec-loading::before {
-  content: ''; position: absolute; inset: 0; pointer-events: none;
-  background:
-    radial-gradient(75% 55% at 108% -6%, rgba(235,137,63,0.95) 0%, rgba(236,88,40,0.85) 22%, rgba(225,36,31,0.7) 38%, rgba(139,25,33,0.45) 52%, rgba(36,18,24,0) 70%),
-    radial-gradient(60% 38% at -12% 58%, rgba(24,43,48,0.95) 0%, rgba(24,43,48,0.6) 40%, rgba(24,43,48,0) 72%),
-    radial-gradient(55% 30% at 112% 78%, rgba(225,36,31,0.55) 0%, rgba(139,25,33,0.3) 40%, rgba(36,18,24,0) 70%);
-}
-/* Palette from Antonio's reference: amber #eb893f,
-   orange #ec5828, red #e1241f, wine #8b1921, petrol #182b30 on a plum-black
-   night. Glows sit at the edges so the text column stays on dark ground. */
+/* No glows: black and white only (Antonio, 26 Nov 2026: "non voglio
+   assolutamente più colori"). */
 .l-hero::after, #sec-results .r-hero::after, #sec-myreports .r-hero::after, #sec-loading::after {
   content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.22; mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 1.1 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -193,7 +179,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 /* No seam where the night meets the paper: the dissolve ends
    transparent, so the page's own paper grain shows through instead of a
-   flat cream band, and the glows and the film grain fade out before the
+   flat band, and the film grain fades out before the
    bottom edge instead of being cut by it. */
 .l-hero::before, .l-hero::after, #sec-results .r-hero::before, #sec-results .r-hero::after, #sec-myreports .r-hero::before, #sec-myreports .r-hero::after {
   -webkit-mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 220px), transparent 100%);
@@ -222,8 +208,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-terms input[type="checkbox"]:checked { background: var(--on-night); border-color: var(--on-night); }
 .l-terms input[type="checkbox"]:checked::after { transform: rotate(-45deg) scale(1); opacity: 1; }
 .l-terms input[type="checkbox"]:focus-visible { outline: 2px solid var(--on-night); outline-offset: 3px; }
-.l-terms label { font-size: 13px; color: #9b9690; line-height: 1.55; cursor: pointer; font-weight: 400; margin: 0; letter-spacing: 0; }
-.l-terms-error { display: none; font-size: 13px; color: #f0a07c; font-weight: 500; margin-top: 10px; }
+.l-terms label { font-size: 13px; color: #979797; line-height: 1.55; cursor: pointer; font-weight: 400; margin: 0; letter-spacing: 0; }
+.l-terms-error { display: none; font-size: 13px; color: #b4b4b4; font-weight: 500; margin-top: 10px; }
 .l-btn {
   display: inline-flex; align-items: center; gap: 10px;
   padding: 15px 22px; background: var(--on-night); color: var(--night);
@@ -239,7 +225,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
    the static sample report (showSampleReport), not invented ones. */
 .l-sheet {
   display: block; width: 100%; text-align: left; font: inherit; cursor: pointer;
-  background: linear-gradient(180deg, rgba(20,13,16,0.55), rgba(20,13,16,0.35));
+  background: linear-gradient(180deg, rgba(15,15,15,0.55), rgba(15,15,15,0.35));
   -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
   color: var(--on-night); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
@@ -299,10 +285,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
    page dimming rather than a white sheet sliding over it. Two short
    sections, hairlines, no cards. */
 .menu-overlay { position: fixed; inset: 0; z-index: 200; background: var(--night); color: var(--on-night); display: none; flex-direction: column; padding: 0; overflow-y: auto; }
-.menu-overlay::before { content: ''; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(70% 45% at 110% -8%, rgba(235,137,63,0.7) 0%, rgba(225,36,31,0.45) 35%, rgba(139,25,33,0.25) 52%, rgba(36,18,24,0) 70%), radial-gradient(50% 35% at -12% 85%, rgba(24,43,48,0.8) 0%, rgba(24,43,48,0) 70%); }
 .menu-overlay.open { display: flex; animation: menuIn 0.28s var(--ease) both; }
 @keyframes menuIn { from { opacity: 0; } to { opacity: 1; } }
-.menu-header { flex-shrink: 0; position: sticky; top: 0; z-index: 1; padding: 0 max(40px, calc((100vw - 1240px) / 2 + 40px)); height: 64px; display: flex; align-items: center; justify-content: space-between; background: rgba(20,13,16,0.9); border-bottom: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.menu-header { flex-shrink: 0; position: sticky; top: 0; z-index: 1; padding: 0 max(40px, calc((100vw - 1240px) / 2 + 40px)); height: 64px; display: flex; align-items: center; justify-content: space-between; background: rgba(15,15,15,0.9); border-bottom: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
 .menu-logo { font-family: var(--display); font-size: 16px; font-weight: 600; color: var(--on-night); display: inline-flex; align-items: center; gap: 9px; cursor: pointer; }
 .menu-logo svg path, .menu-logo svg rect { fill: currentColor; }
 .menu-close { position: relative; background: none; border: none; border-radius: 0; width: 34px; height: 34px; margin-right: -6px; font-size: 0; color: var(--on-night); cursor: pointer; transition: opacity 0.2s, transform 0.15s; }
@@ -343,8 +328,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
    FORM
 ══════════════════════ */
 .f-header {
-  background: rgba(244,241,236,0.82); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid rgba(20,18,16,0.06);
+  background: rgba(241,241,241,0.82); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(18,18,18,0.06);
   padding: 0 24px; height: 52px;
   display: flex; align-items: center; justify-content: space-between;
   position: sticky; top: 0; z-index: 100;
@@ -362,7 +347,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 /* FORM: no white boxes on the ground. Sections are separated by a hair
    line and a mono number; fields are a tint of the paper itself. */
 #sec-form { position: relative; }
-#sec-form::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 280px; background: linear-gradient(180deg, rgba(20,13,16,0.07), rgba(20,13,16,0)); pointer-events: none; }
+#sec-form::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 280px; background: linear-gradient(180deg, rgba(15,15,15,0.07), rgba(15,15,15,0)); pointer-events: none; }
 .f-main { position: relative; max-width: 1240px; margin: 0 auto; padding: 64px 40px 120px; display: grid; grid-template-columns: 0.75fr 1.25fr; gap: 72px; align-items: start; }
 .f-side { position: sticky; top: 104px; }
 .f-title { font-family: var(--display); font-size: clamp(38px, 4.2vw, 52px); font-weight: 300; line-height: 1; margin-top: 0; letter-spacing: -0.035em; color: var(--text); }
@@ -371,7 +356,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .f-steps { list-style: none; margin-top: 40px; border-top: 1px solid var(--border); }
 .f-steps li { display: flex; gap: 14px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); transition: color 0.3s var(--ease); }
 .f-steps li.on { color: var(--text); }
-.f-steps li.on { box-shadow: inset 2px 0 0 #b4552b; padding-left: 12px; }
+.f-steps li.on { box-shadow: inset 2px 0 0 currentColor; padding-left: 12px; }
 .f-steps li { transition: color 0.3s var(--ease), padding-left 0.3s var(--ease), box-shadow 0.3s var(--ease); }
 #sec-form .card { background: transparent; box-shadow: none; border: 0; border-radius: 0; padding: 0 0 44px; margin-bottom: 44px; border-bottom: 1px solid var(--border); }
 #sec-form .card-title { display: flex; gap: 14px; align-items: baseline; font-family: var(--display); font-size: 24px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 28px; color: var(--text); }
@@ -380,10 +365,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   background-color: var(--field); box-shadow: inset 0 0 0 1px transparent; border-radius: 10px; padding: 14px 16px; font-size: 15px;
   transition: background-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
-/* #655e57: 5.2:1 on the field tint, 4.9:1 on its hover state */
-#sec-form input::placeholder, :is(#sec-form, .issue-form) textarea::placeholder { color: #655e57; }
+/* #5f5f5f: 5.2:1 on the field tint, 4.9:1 on its hover state */
+#sec-form input::placeholder, :is(#sec-form, .issue-form) textarea::placeholder { color: #5f5f5f; }
 @media (hover: hover) and (pointer: fine) { #sec-form input[type="text"]:hover, :is(#sec-form, .issue-form) select:hover, :is(#sec-form, .issue-form) textarea:hover { background-color: var(--field-hover); } }
-#sec-form input[type="text"]:focus, :is(#sec-form, .issue-form) select:focus, :is(#sec-form, .issue-form) textarea:focus { background-color: rgba(255,255,255,0.6); box-shadow: inset 0 0 0 1px rgba(214,120,76,0.6), 0 0 0 4px rgba(214,120,76,0.12); }
+#sec-form input[type="text"]:focus, :is(#sec-form, .issue-form) select:focus, :is(#sec-form, .issue-form) textarea:focus { background-color: rgba(255,255,255,0.6); box-shadow: inset 0 0 0 1px rgba(143,143,143,0.6), 0 0 0 4px rgba(143,143,143,0.12); }
 #sec-form .disclaimer-box { background: none; padding: 0; margin: 0 0 24px; }
 #sec-form .btn-primary { background: var(--text); }
 #sec-form .error-box { margin-top: 16px; }
@@ -412,7 +397,7 @@ input[type="text"], input[type="email"], select, textarea {
 input:focus, select:focus, textarea:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); background: var(--white); }
 input[type="range"]:focus { box-shadow: none; }
 textarea { resize: vertical; min-height: 92px; line-height: 1.55; }
-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236e6e73' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; cursor: pointer; }
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236f6f6f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; cursor: pointer; }
 
 /* ── BUDGET SLIDER ── */
 .budget-row { display: flex; gap: 10px; margin-bottom: 10px; }
@@ -464,8 +449,8 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
    RESULTS
 ══════════════════════ */
 .r-header {
-  background: rgba(244,241,236,0.82); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid rgba(20,18,16,0.06);
+  background: rgba(241,241,241,0.82); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(18,18,18,0.06);
   padding: 0 24px; height: 52px;
   display: flex; align-items: center; justify-content: space-between;
   position: sticky; top: 0; z-index: 100;
@@ -515,16 +500,12 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .exec-box-text { font-size: 13px; color: var(--text); line-height: 1.55; font-weight: 400; }
 
 /* Dynamic colors */
-.score-high { color: var(--success); }
-.score-mid  { color: #965800; } /* 5.05:1 on --paper */
-.score-low  { color: var(--danger); }
-.bar-high { background: var(--success); }
-.bar-mid  { background: #d98c00; }
-.bar-low  { background: var(--danger); }
+.score-high, .score-mid, .score-low { color: inherit; }
+.bar-high, .bar-mid, .bar-low { background: currentColor; } /* black by day, white by night: no colours (Antonio, 26 Nov 2026) */
 
 .flag-item { font-size: 14px; line-height: 1.55; padding: 11px 14px; border-radius: var(--radius); margin-bottom: 7px; border-left: none; }
-.flag-item.red { background: var(--danger-wash); color: #7a2318; }
-.flag-item.green { background: var(--success-wash); color: #17432f; }
+.flag-item.red { background: var(--danger-wash); color: #3c3c3c; }
+.flag-item.green { background: var(--success-wash); color: #343434; }
 
 /* TIPS */
 .tips-block { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border-light); }
@@ -605,18 +586,18 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
    display type, mono labels, and no boxed cards sitting on the ground.
 ══════════════════════ */
 #sec-results .r-header, #sec-myreports .r-header { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; border-bottom-color: rgba(255,255,255,0.08); }
-#sec-results .r-header.is-scrolled, #sec-myreports .r-header.is-scrolled { background: rgba(20,13,16,0.72); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); }
+#sec-results .r-header.is-scrolled, #sec-myreports .r-header.is-scrolled { background: rgba(15,15,15,0.72); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); }
 #sec-results .r-header, #sec-myreports .r-header { z-index: 100; color: var(--on-night); border-bottom-color: rgba(255,255,255,0.08); height: 64px; transition: background 0.35s var(--ease), color 0.35s var(--ease), border-color 0.35s var(--ease); }
-#sec-results .r-header.is-light, #sec-myreports .r-header.is-light { background: rgba(244,241,236,0.84); color: var(--text); border-bottom-color: rgba(20,18,16,0.07); }
+#sec-results .r-header.is-light, #sec-myreports .r-header.is-light { background: rgba(241,241,241,0.84); color: var(--text); border-bottom-color: rgba(18,18,18,0.07); }
 .r-logo { font-family: var(--display); font-size: 16px; color: inherit; }
 .r-logo svg path, .r-logo svg rect, .f-logo svg path, .f-logo svg rect { fill: currentColor; }
 .f-logo { font-family: var(--display); font-size: 16px; }
-#sec-results .back-btn, #sec-myreports .back-btn { color: inherit; font-weight: 500; padding: 8px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.22); background: rgba(20,13,16,0.62); transition: background 0.3s var(--ease), border-color 0.3s var(--ease), color 0.3s var(--ease); }
-#sec-results .r-header.is-light .back-btn, #sec-myreports .r-header.is-light .back-btn { background: transparent; border-color: rgba(20,18,16,0.18); }
+#sec-results .back-btn, #sec-myreports .back-btn { color: inherit; font-weight: 500; padding: 8px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.22); background: rgba(15,15,15,0.62); transition: background 0.3s var(--ease), border-color 0.3s var(--ease), color 0.3s var(--ease); }
+#sec-results .r-header.is-light .back-btn, #sec-myreports .r-header.is-light .back-btn { background: transparent; border-color: rgba(18,18,18,0.18); }
 #sec-results .r-hero, #sec-myreports .r-hero {
   color: var(--on-night); position: relative;
-  background: linear-gradient(180deg, var(--night) 0, var(--night) calc(100% - 260px), #201e1c calc(100% - 200px), #4a4643 calc(100% - 145px), #908c86 calc(100% - 88px), #d5d0ca calc(100% - 40px), var(--paper) 100%);
-  background: linear-gradient(in oklab 180deg, var(--night) 0, var(--night) calc(100% - 250px), rgb(244 241 236 / 0) 100%);
+  background: linear-gradient(180deg, var(--night) 0, var(--night) calc(100% - 260px), #1e1e1e calc(100% - 200px), #474747 calc(100% - 145px), #8d8d8d calc(100% - 88px), #d1d1d1 calc(100% - 40px), var(--paper) 100%);
+  background: linear-gradient(in oklab 180deg, var(--night) 0, var(--night) calc(100% - 250px), rgb(241 241 241 / 0) 100%);
   padding: 128px 24px 220px; margin-top: -64px;
 }
 #sec-results .r-hero-inner, #sec-myreports .r-hero-inner { position: relative; z-index: 1; }
@@ -674,7 +655,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .unlock-field label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: var(--text); }
 .unlock-field input { width: 100%; font: inherit; font-size: 16px; color: var(--text); background: var(--field); border: 0; border-radius: 10px; padding: 14px 16px; outline: none; transition: background 0.2s, box-shadow 0.2s; }
 @media (hover: hover) and (pointer: fine) { .unlock-field input:hover { background: var(--field-hover); } }
-.unlock-field input:focus { background: rgba(255,255,255,0.6); box-shadow: inset 0 0 0 1px rgba(214,120,76,0.55), 0 0 0 4px rgba(214,120,76,0.12); }
+.unlock-field input:focus { background: rgba(255,255,255,0.6); box-shadow: inset 0 0 0 1px rgba(143,143,143,0.55), 0 0 0 4px rgba(143,143,143,0.12); }
 .unlock .checkbox-row { max-width: 560px; text-align: left; }
 .unlock .btn-unlock { background: var(--text); margin-top: 6px; }
 @media (max-width: 600px) { .unlock-title { font-size: 24px; } .unlock-field { max-width: none; } }
@@ -686,9 +667,9 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #sec-myreports .r-title { font-size: clamp(36px, 5vw, 56px); max-width: 16ch; }
 .myreports-signin .field { margin-bottom: 18px; }
 #sec-myreports input[type="email"] { background-color: var(--field); box-shadow: inset 0 0 0 1px transparent; border-radius: 10px; padding: 14px 16px; font-size: 15px; transition: background-color 0.2s var(--ease), box-shadow 0.2s var(--ease); }
-#sec-myreports input[type="email"]::placeholder { color: #655e57; }
+#sec-myreports input[type="email"]::placeholder { color: #5f5f5f; }
 @media (hover: hover) and (pointer: fine) { #sec-myreports input[type="email"]:hover { background-color: var(--field-hover); } }
-#sec-myreports input[type="email"]:focus { background-color: rgba(255,255,255,0.6); box-shadow: inset 0 0 0 1px rgba(214,120,76,0.6), 0 0 0 4px rgba(214,120,76,0.12); }
+#sec-myreports input[type="email"]:focus { background-color: rgba(255,255,255,0.6); box-shadow: inset 0 0 0 1px rgba(143,143,143,0.6), 0 0 0 4px rgba(143,143,143,0.12); }
 #sec-myreports label { font-weight: 500; font-size: 14px; margin-bottom: 9px; }
 .mr-btn { width: auto; padding: 15px 24px; background: var(--text); }
 .mr-status { margin-top: 14px; font-size: 14px; line-height: 1.5; }
@@ -704,12 +685,11 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 @media (max-width: 640px) { .mr-row { grid-template-columns: 1fr 20px; gap: 4px 12px; } .mr-date { grid-column: 1 / -1; } }
 
 /* Open accordion content sits on the paper itself: no white panel. Risk vs
-   strength is carried by a thin coloured rule and the label, not by pink
-   and green boxes. */
+   strength is carried by the label, not by coloured boxes. */
 .accordion-body { background: transparent; padding: 4px 4px 32px 46px; }
 .flag-item, .flag-item.red, .flag-item.green { background: none; border-radius: 0; padding: 4px 0 4px 16px; margin-bottom: 12px; color: var(--text); }
-.flag-item.red { border-left: 1px solid rgba(177,50,37,0.75); }
-.flag-item.green { border-left: 1px solid rgba(15,122,61,0.75); }
+.flag-item.red { border-left: 1px solid rgba(86,86,86,0.75); }
+.flag-item.green { border-left: 1px solid rgba(83,83,83,0.75); }
 .exec-row { gap: 24px; }
 .tips-block { border-top-color: var(--border); }
 @media (max-width: 640px) { .accordion-body { padding-left: 4px; } }
@@ -725,21 +705,21 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .fs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); }
 .fs-col ul { list-style: none; margin: 0; padding: 0; }
 .fs-col li { font-size: 15px; line-height: 1.55; color: var(--text); padding: 2px 0 2px 14px; margin-bottom: 12px; }
-.fs-col.red li { border-left: 1px solid rgba(177,50,37,0.75); }
-.fs-col.green li { border-left: 1px solid rgba(15,122,61,0.75); }
+.fs-col.red li { border-left: 1px solid rgba(86,86,86,0.75); }
+.fs-col.green li { border-left: 1px solid rgba(83,83,83,0.75); }
 .fs-label { font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
 @media (max-width: 760px) { .fs-grid { grid-template-columns: 1fr; gap: 8px; } }
 
 .tips-block { margin-top: 28px; padding-top: 24px; }
-.tips-label { font-family: var(--mono); font-size: 13px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: #b4552b; margin-bottom: 14px; }
-.fs-col .fs-label { color: #b4552b; }
+.tips-label { font-family: var(--mono); font-size: 13px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+.fs-col .fs-label { color: var(--text); font-weight: 700; }
 .tips-list { list-style: none; margin: 0; padding: 0; counter-reset: tip; max-width: 70ch; }
 .tips-list li { position: relative; padding: 0 0 0 26px; margin-bottom: 16px; }
-.tips-list li::before { content: ''; position: absolute; left: 0; top: 0.8em; width: 12px; height: 1.5px; background: #b4552b; }
+.tips-list li::before { content: ''; position: absolute; left: 0; top: 0.8em; width: 12px; height: 1.5px; background: currentColor; }
 .tips-list .tip-text { padding-left: 0; font-size: 15px; line-height: 1.6; margin-bottom: 0; }
 .ready-list { list-style: none; margin: 0; padding: 0; max-width: 70ch; }
 .ready-list li { position: relative; padding: 0 0 0 26px; margin-bottom: 16px; font-size: 15px; line-height: 1.6; }
-.ready-list li::before { content: ''; position: absolute; left: 1px; top: 0.5em; width: 8px; height: 8px; border: 1.5px solid #b4552b; border-radius: 2px; }
+.ready-list li::before { content: ''; position: absolute; left: 1px; top: 0.5em; width: 8px; height: 8px; border: 1.5px solid currentColor; border-radius: 2px; }
 .ready-miss { display: block; font-weight: 700; color: var(--text); }
 .ready-how { display: block; color: var(--text); }
 .next-why { font-size: 15px; line-height: 1.55; color: var(--muted); max-width: 62ch; margin: 0 0 14px; }
@@ -796,7 +776,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .fact-v { font-size: 15px; font-weight: 700; color: var(--success); line-height: 1.4; }
 .fact-v.is-muted { color: var(--text); font-weight: 400; }
 .entry-text { margin-top: 10px; font-size: 15px; line-height: 1.6; color: var(--muted); }
-.entry-lesson { margin-top: 10px; font-size: 15px; line-height: 1.6; color: var(--text); padding-left: 12px; border-left: 1px solid #b4552b; }
+.entry-lesson { margin-top: 10px; font-size: 15px; line-height: 1.6; color: var(--text); padding-left: 12px; border-left: 1px solid currentColor; }
 .entry-sub { margin-top: 4px; font-size: 13px; line-height: 1.5; color: var(--muted); }
 .entry-quote { margin: 12px 0 0; }
 .entry-quote blockquote { margin-top: 4px; font-size: 15px; line-height: 1.55; font-style: italic; color: var(--text); }
@@ -825,7 +805,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .an-item.on { color: var(--text); padding-left: 20px; }
 /* The marker is a real 2px line, not a box-shadow: Safari drew the shadow as
    lines across the whole row. */
-.an-item::before { content: ''; position: absolute; left: -1px; top: 5px; bottom: 5px; width: 2px; border-radius: 1px; background: #b4552b; opacity: 0; transition: opacity 0.3s var(--ease); }
+.an-item::before { content: ''; position: absolute; left: -1px; top: 5px; bottom: 5px; width: 2px; border-radius: 1px; background: currentColor; opacity: 0; transition: opacity 0.3s var(--ease); }
 .an-item.on::before { opacity: 1; }
 .an-score { font-size: 13px; color: var(--muted); margin-left: auto; padding-left: 10px; font-variant-numeric: tabular-nums; }
 .an-col { display: none; }
@@ -838,24 +818,24 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   .area-nav::-webkit-scrollbar { display: none; }
   /* Rows exactly like the form's side steps (Antonio: "la stessa identica
      cosa"): a line between rows, the current one lights up, slides 12px and
-     takes the rust line, in 0.3s. */
+     takes a line in the text's colour, in 0.3s. */
   #areaNav .an-areas { border-left: 0; border-top: 1px solid var(--border); margin: 0 0 18px; }
   /* 12px like the form; on short laptop screens (1366x657 inside the
      browser) the rows tighten so the whole column fits without a scroll bar. */
   #areaNav .an-item { padding: clamp(6px, calc((100vh - 440px) / 20), 12px) 0; border-bottom: 1px solid var(--border); transition: transform 160ms var(--ease), opacity 160ms var(--ease), background-color 160ms var(--ease), border-color 160ms var(--ease), color 0.3s var(--ease), padding-left 0.3s var(--ease), box-shadow 0.3s var(--ease); }
-  #areaNav .an-item.on { padding-left: 12px; box-shadow: inset 2px 0 0 #b4552b; }
+  #areaNav .an-item.on { padding-left: 12px; box-shadow: inset 2px 0 0 currentColor; }
   #areaNav .an-item::before { display: none; }
   .an-col { display: block; }
   .an-bar { display: none; }
   @media (hover: hover) and (pointer: fine) { .an-sec:hover, .an-item:hover { color: var(--text); } }
 }
 @media (max-width: 1099px) {
-  .area-nav { top: 64px; left: 0; right: 0; transform: translateY(-6px); background: rgba(244,241,236,0.94); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); overflow: hidden; } /* hidden: its content never widens the page */
+  .area-nav { top: 64px; left: 0; right: 0; transform: translateY(-6px); background: rgba(241,241,241,0.94); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); overflow: hidden; } /* hidden: its content never widens the page */
   .area-nav.is-on { transform: none; }
   .an-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 928px; margin: 0 auto; padding: 10px 24px; font-size: 14px; color: var(--text); }
   .an-cur { display: flex; align-items: baseline; min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .an-cur .an-score { margin-left: 10px; padding-left: 0; }
-  .an-top { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; font-size: 14px; font-weight: 700; color: #b4552b; padding: 6px 0 6px 8px; }
+  .an-top { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; font-size: 14px; font-weight: 700; color: var(--text); padding: 6px 0 6px 8px; }
   .an-top svg { transition: transform 0.2s var(--ease); }
   .area-nav.is-open .an-top svg { transform: rotate(180deg); }
   /* The list opens inside the bar, which grows: nothing hangs outside the
@@ -927,7 +907,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 /* ── Report reading, phones first ──
    Antonio on iPhone: too heavy, lines and windows on both sides. The point
    of each block comes first and the long argument is one tap away; lists
-   use a small coloured dot instead of a vertical rule; one bar at the top. */
+   use a small dot instead of a vertical rule; one bar at the top. */
 details.more { margin-top: 6px; }
 details.more > summary { list-style: none; cursor: pointer; display: inline-block; padding: 6px 0; font-size: 15px; color: var(--text); text-decoration: underline; text-decoration-color: rgba(22,22,22,0.3); text-underline-offset: 3px; }
 details.more > summary::-webkit-details-marker { display: none; }
@@ -939,8 +919,6 @@ details.more .prose { margin-top: 12px; }
 @media (hover: hover) and (pointer: fine) { details.more > summary:hover { text-decoration-color: currentColor; } }
 .fs-col li, .fs-col.red li, .fs-col.green li { border-left: 0; position: relative; padding: 0 0 0 16px; }
 .fs-col li::before { content: ''; position: absolute; left: 1px; top: 0.62em; width: 6px; height: 6px; border-radius: 50%; }
-.fs-col.red li::before { background: #b13225; }
-.fs-col.green li::before { background: #0f7a3d; }
 .exec-box { background: none; border: 0; border-radius: 0; padding: 0; } /* risk and opportunity in the text's colour, like the PDF and the mail: no red and green (Antonio, 26 Nov 2026) */
 .tips-block { margin-top: 22px; }
 #overallScore { margin-bottom: 22px; }
@@ -951,7 +929,7 @@ details.more .prose { margin-top: 12px; }
   body.rh-hidden .area-nav { top: 0; }
   #resultSubtitle { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
   #resultSubtitle.is-open { display: block; }
-  .r-more { margin-top: 6px; padding: 6px 0; border: 0; background: none; font: inherit; font-size: 14px; color: var(--on-night); text-decoration: underline; text-decoration-color: rgba(242,237,230,0.4); text-underline-offset: 3px; cursor: pointer; }
+  .r-more { margin-top: 6px; padding: 6px 0; border: 0; background: none; font: inherit; font-size: 14px; color: var(--on-night); text-decoration: underline; text-decoration-color: rgba(238,238,238,0.4); text-underline-offset: 3px; cursor: pointer; }
 
 .accordion-score-label { display: none; }
 }
@@ -1006,66 +984,52 @@ details.more .prose { margin-top: 12px; }
 
 /* ══════════════════════
    LIGHT AND DARK (Antonio): the site follows the device.
-   Light mode is light everywhere, the home hero included, with the same
-   amber/red/petrol glows made soft and kept to the edges. Dark mode is the
-   night everywhere, the analysis included, with the glows fixed at the
-   edges while reading. Without a preference the rules above apply.
+   Light mode is white everywhere, the home hero included; dark mode is the
+   night everywhere, the analysis included. Black and white only, no glows
+   (Antonio, 26 Nov 2026). Without a preference the rules above apply.
 ══════════════════════ */
 @media (prefers-color-scheme: light) {
   /* the "night" surfaces become the paper: same components, inverted tokens */
-  .l-hero, .l-nav, .menu-overlay, #sec-results, #sec-myreports, #sec-loading { --night: #ffffff; --on-night: #161616; --on-night-2: #47423e; }
+  .l-hero, .l-nav, .menu-overlay, #sec-results, #sec-myreports, #sec-loading { --night: #ffffff; --on-night: #161616; --on-night-2: #434343; }
   /* white means white (Antonio): no satin sheen, no grain, no cream */
   /* fields are solid, so the colour at the edges never shows through them */
   #sec-form input[type="text"]:focus, :is(#sec-form, .issue-form) select:focus, :is(#sec-form, .issue-form) textarea:focus, .unlock-field input:focus, #sec-myreports input[type="email"]:focus { background-color: #ffffff; }
-  :root { --paper: #ffffff; --cream: #f5f5f4; --border: #e2e0dd; --border-light: #ecebe9; --field: #f4f4f3; --field-hover: #ededec; }
+  :root { --paper: #ffffff; --cream: #f5f5f5; --border: #e0e0e0; --border-light: #ebebeb; --field: #f4f4f4; --field-hover: #ededed; }
   body { background: #ffffff; }
   /* Small text slightly darker in light mode . */
-  :root { --muted: #3a3a3a; --muted-light: #3a3a3a; --success: #0a5c2d; --danger: #8a2419; }
-  .score-mid { color: #6e3f00; }
-  .tips-label, .an-top, .fs-col .fs-label { color: #93391a !important; }
-  .fs-col.red li::before { background: var(--danger); }
-  .fs-col.green li::before { background: var(--success); }
+  :root { --muted: #3a3a3a; --muted-light: #3a3a3a; }
   .l-hero, #sec-results .r-hero, #sec-myreports .r-hero, #sec-loading { background: transparent; }
   .l-hero::before, #sec-results .r-hero::before, #sec-myreports .r-hero::before, #sec-loading::before,
   .l-hero::after, #sec-results .r-hero::after, #sec-myreports .r-hero::after, #sec-loading::after { display: none; }
   .menu-overlay { background: #ffffff; }
-  .menu-overlay::before { display: block; position: fixed; inset: 0; background:
-      radial-gradient(46% 40% at -10% 62%, rgba(64,115,129,0.30) 0%, rgba(64,115,129,0.13) 45%, rgba(64,115,129,0) 75%),
-      radial-gradient(30% 20% at 106% 102%, rgba(225,36,31,0.14) 0%, rgba(139,25,33,0.05) 45%, rgba(255,255,255,0) 75%); }
-  /* Same harmony as dark mode (Antonio): petrol on the left,
-     red low on the right, fixed to the screen, soft on white. The petrol is
-     the dark mode's own hue (192 deg, same saturation) made lighter, since
-     the near-black #182b30 reads as a grey smudge on white. */
-  body::before { display: block; background:
-      radial-gradient(46% 40% at -10% 62%, rgba(64,115,129,0.30) 0%, rgba(64,115,129,0.13) 45%, rgba(64,115,129,0) 75%),
-      radial-gradient(30% 20% at 106% 102%, rgba(225,36,31,0.14) 0%, rgba(139,25,33,0.05) 45%, rgba(255,255,255,0) 75%); -webkit-mask-image: none; mask-image: none; }
+  body::before { display: none; }
   body::after { display: none; }
   #sec-form::before { display: none; }
   .l-nav.is-light, .l-nav.is-scrolled, #sec-results .r-header.is-light, #sec-myreports .r-header.is-light, #sec-results .r-header.is-scrolled, #sec-myreports .r-header.is-scrolled, .f-header, .r-header { background: rgba(255,255,255,0.86); }
   .menu-header { background: rgba(255,255,255,0.9); }
   @media (max-width: 1099px) { .area-nav { background: rgba(255,255,255,0.97); } .area-nav.is-open .an-col { background: #ffffff; } }
-  .sample-banner { background: #f5f5f4; border-bottom: 1px solid var(--border-light); }
+  .sample-banner { background: #f5f5f5; border-bottom: 1px solid var(--border-light); }
   .l-hero { padding-bottom: 120px; }
   #sec-results .r-hero, #sec-myreports .r-hero { padding-bottom: 56px; }
-  .l-nav { border-bottom-color: rgba(20,18,16,0.07); }
-  .l-nav-reports { border-color: rgba(20,18,16,0.18); }
+  .l-nav { border-bottom-color: rgba(18,18,18,0.07); }
+  .l-nav-reports { border-color: rgba(18,18,18,0.18); }
   @media (hover: hover) and (pointer: fine) { .l-btn:hover, .menu-cta:hover { background: #000; } }
   .again-btn { background: var(--text); color: #fff; }
   .again-btn:focus-visible { outline-color: var(--text); }
-  .l-terms input[type="checkbox"] { border-color: rgba(20,18,16,0.3); background: rgba(255,255,255,0.5); }
-  .l-terms label { color: #3a3a3a; } /* stays over 4.5:1 where the warm glow reaches the text on phones */
+  .l-terms input[type="checkbox"] { border-color: rgba(18,18,18,0.3); background: rgba(255,255,255,0.5); }
+  .l-terms label { color: #3a3a3a; }
   .l-terms-error { color: var(--danger); }
 
-.l-sheet { background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.42)); border-color: rgba(20,18,16,0.08); box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 18px 40px -24px rgba(90,40,20,0.25); }
-  @media (hover: hover) and (pointer: fine) { .l-sheet:hover { border-color: rgba(20,18,16,0.16); } }
-  .l-sheet-score, .l-sheet-row { border-bottom-color: rgba(20,18,16,0.08); }
-  .l-bar { background: rgba(20,18,16,0.1); }
-  .menu-header { border-bottom-color: rgba(20,18,16,0.07); }
-  .menu-faq-item:first-of-type { border-top-color: rgba(20,18,16,0.14); }
-  .menu-faq-item { border-bottom-color: rgba(20,18,16,0.08); }
-  #sec-results .r-header, #sec-myreports .r-header { border-bottom-color: rgba(20,18,16,0.07); }
-  #sec-results .back-btn, #sec-myreports .back-btn { background: rgba(255,255,255,0.45); border-color: rgba(20,18,16,0.18); }
-  .overall-card { background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.4)); border-color: rgba(20,18,16,0.08) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.7) !important; }
+.l-sheet { background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.42)); border-color: rgba(18,18,18,0.08); box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 18px 40px -24px rgba(53,53,53,0.25); }
+  @media (hover: hover) and (pointer: fine) { .l-sheet:hover { border-color: rgba(18,18,18,0.16); } }
+  .l-sheet-score, .l-sheet-row { border-bottom-color: rgba(18,18,18,0.08); }
+  .l-bar { background: rgba(18,18,18,0.1); }
+  .menu-header { border-bottom-color: rgba(18,18,18,0.07); }
+  .menu-faq-item:first-of-type { border-top-color: rgba(18,18,18,0.14); }
+  .menu-faq-item { border-bottom-color: rgba(18,18,18,0.08); }
+  #sec-results .r-header, #sec-myreports .r-header { border-bottom-color: rgba(18,18,18,0.07); }
+  #sec-results .back-btn, #sec-myreports .back-btn { background: rgba(255,255,255,0.45); border-color: rgba(18,18,18,0.18); }
+  .overall-card { background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.4)); border-color: rgba(18,18,18,0.08) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.7) !important; }
   .sample-banner a { color: inherit !important; }
 }
 
@@ -1074,65 +1038,47 @@ details.more .prose { margin-top: 12px; }
 }
 @media (prefers-color-scheme: dark) {
   #sec-form input.is-invalid, #sec-form select.is-invalid, #sec-form textarea.is-invalid,
-  #sec-form input.is-invalid:focus, #sec-form select.is-invalid:focus, #sec-form textarea.is-invalid:focus { box-shadow: inset 0 0 0 1.5px #ff9a87; }
+  #sec-form input.is-invalid:focus, #sec-form select.is-invalid:focus, #sec-form textarea.is-invalid:focus { box-shadow: inset 0 0 0 1.5px #b6b6b6; }
   :root {
-    --paper: #140d10; --text: #f2ede6; --ink: #f2ede6;
-    --accent: #f2ede6; --accent-hover: #ffffff; --accent-press: #f2ede6; --accent-wash: rgba(255,255,255,0.08);
-    --muted: #b3aca4; --muted-light: #b3aca4;
+    --paper: #0f0f0f; --text: #eeeeee; --ink: #eeeeee;
+    --accent: #eeeeee; --accent-hover: #ffffff; --accent-press: #eeeeee; --accent-wash: rgba(255,255,255,0.08);
+    --muted: #adadad; --muted-light: #adadad;
     --border: rgba(255,255,255,0.13); --border-light: rgba(255,255,255,0.08);
     --cream: rgba(255,255,255,0.05); --white: rgba(255,255,255,0.05);
     --field: rgba(255,255,255,0.06); --field-hover: rgba(255,255,255,0.09);
-    --success: #74d6a0; --danger: #ff9a87; --danger-wash: rgba(255,154,135,0.1); --success-wash: rgba(116,214,160,0.1);
+    --success: var(--on-night); --danger: var(--on-night); --danger-wash: rgba(182,182,182,0.1); --success-wash: rgba(179,179,179,0.1);
   }
   html { color-scheme: dark; }
   input, select, textarea { color-scheme: dark !important; }
   body { background: var(--night); }
-  /* the glows stay at the edges while the page scrolls; the hero keeps its own, stronger ones on top */
-  body::before {
-    background:
-      radial-gradient(46% 40% at -10% 62%, rgba(24,43,48,0.9) 0%, rgba(24,43,48,0.45) 45%, rgba(24,43,48,0) 75%),
-      radial-gradient(40% 30% at 104% 96%, rgba(225,36,31,0.34) 0%, rgba(139,25,33,0.18) 45%, rgba(20,13,16,0) 75%);
-  }
+  body::before { display: none; }
   body::after { mix-blend-mode: overlay; }
-  /* One light everywhere (Antonio, from his phone: "qui è
-     stupendo il nostro colore"): petrol on the left, red low on the right,
-     fixed to the screen. The headers are clear so the same light shows
-     through. */
   .l-hero, #sec-results .r-hero, #sec-myreports .r-hero, #sec-loading { background: transparent; }
   .l-hero::before, #sec-results .r-hero::before, #sec-myreports .r-hero::before, #sec-loading::before,
   .l-hero::after, #sec-results .r-hero::after, #sec-myreports .r-hero::after, #sec-loading::after { display: none; }
-  .menu-overlay::before { background:
-      radial-gradient(46% 40% at -10% 62%, rgba(24,43,48,0.9) 0%, rgba(24,43,48,0.45) 45%, rgba(24,43,48,0) 75%),
-      radial-gradient(40% 30% at 104% 96%, rgba(225,36,31,0.34) 0%, rgba(139,25,33,0.18) 45%, rgba(20,13,16,0) 75%); }
   ::selection { background: var(--on-night); color: var(--night); }
   /* no light band at the end of the headers: the dissolve now ends on the night */
   .l-hero { padding-bottom: 120px; }
   #sec-results .r-hero, #sec-myreports .r-hero { padding-bottom: 56px; }
-  .l-nav.is-light { background: rgba(20,13,16,0.72); color: var(--on-night); border-bottom-color: rgba(255,255,255,0.08); }
+  .l-nav.is-light { background: rgba(15,15,15,0.72); color: var(--on-night); border-bottom-color: rgba(255,255,255,0.08); }
   .l-nav.is-light .l-nav-reports { border-color: rgba(255,255,255,0.22); }
-  #sec-results .r-header.is-light, #sec-myreports .r-header.is-light { background: rgba(20,13,16,0.72); color: var(--on-night); border-bottom-color: rgba(255,255,255,0.08); }
-  #sec-results .r-header.is-light .back-btn, #sec-myreports .r-header.is-light .back-btn { background: rgba(20,13,16,0.62); border-color: rgba(255,255,255,0.22); }
-  .f-header { background: rgba(20,13,16,0.82); border-bottom-color: rgba(255,255,255,0.08); }
+  #sec-results .r-header.is-light, #sec-myreports .r-header.is-light { background: rgba(15,15,15,0.72); color: var(--on-night); border-bottom-color: rgba(255,255,255,0.08); }
+  #sec-results .r-header.is-light .back-btn, #sec-myreports .r-header.is-light .back-btn { background: rgba(15,15,15,0.62); border-color: rgba(255,255,255,0.22); }
+  .f-header { background: rgba(15,15,15,0.82); border-bottom-color: rgba(255,255,255,0.08); }
   #sec-form::before { background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0)); }
-  @media (max-width: 1099px) { .area-nav { background: rgba(20,13,16,0.96); } .area-nav.is-open .an-col { background: #140d10; } }
-  /* rust labels lighten on the night */
-  .f-steps li.on { box-shadow: inset 2px 0 0 #f0a07c; }
-  @media (min-width: 1100px) { #areaNav .an-item.on { box-shadow: inset 2px 0 0 #f0a07c; } }
-  .an-item.on::before { background: #f0a07c; }
+  @media (max-width: 1099px) { .area-nav { background: rgba(15,15,15,0.96); } .area-nav.is-open .an-col { background: #0f0f0f; } }
 
-.tips-label, .an-top, .fs-col .fs-label { color: #f0a07c; }
-  .l-hero, .menu-overlay, #sec-results, #sec-myreports, #sec-loading, .l-nav { --on-night-2: #b8b2ab; }
-  .entry-lesson { border-left-color: rgba(240,160,124,0.6); }
-  .score-mid { color: #f2b25c; }
-  .bar-mid { background: #f2b25c; }
+.tips-label, .an-top, .fs-col .fs-label { color: var(--on-night); }
+  .l-hero, .menu-overlay, #sec-results, #sec-myreports, #sec-loading, .l-nav { --on-night-2: #b3b3b3; }
+  .entry-lesson { border-left-color: rgba(180,180,180,0.6); }
   .flag-item { color: var(--text); }
   .btn-primary, .btn-unlock, #sec-form .btn-primary, .unlock .btn-unlock { background: var(--on-night); color: var(--night); }
   @media (hover: hover) and (pointer: fine) { .btn-primary:hover, .btn-unlock:hover { background: #fff; } }
   .tip-link { color: var(--text); }
-  details.more > summary { text-decoration-color: rgba(242,237,230,0.4); }
-  input::placeholder, textarea::placeholder, #sec-form input::placeholder, #sec-form textarea::placeholder, #sec-myreports input[type="email"]::placeholder { color: #8f8880; }
+  details.more > summary { text-decoration-color: rgba(238,238,238,0.4); }
+  input::placeholder, textarea::placeholder, #sec-form input::placeholder, #sec-form textarea::placeholder, #sec-myreports input[type="email"]::placeholder { color: #898989; }
   #sec-form input[type="text"]:focus, :is(#sec-form, .issue-form) select:focus, :is(#sec-form, .issue-form) textarea:focus, .unlock-field input:focus, #sec-myreports input[type="email"]:focus { background-color: rgba(255,255,255,0.08); }
-  select option { color: #141210; background: #f2ede6; }
+  select option { color: #121212; background: #eeeeee; }
 }
 /* GLOSSARY ON THE WORD: the first time a term appears in each part of the
    report it is underlined with dots; a tap opens its meaning in a small
@@ -1143,7 +1089,7 @@ details.more .prose { margin-top: 12px; }
 .gl-term:active { background: color-mix(in srgb, currentColor 10%, transparent); }
 .gl-term[aria-expanded="true"] { text-decoration-style: solid; }
 .gl-pop { position: absolute; z-index: 300; width: max-content; max-width: min(320px, calc(100vw - 32px)); padding: 12px 14px 13px; border-radius: 10px;
-  background: #161616; color: #f4f1ec; font-family: var(--sf); font-size: 14px; line-height: 1.5; box-shadow: 0 10px 28px rgba(0,0,0,0.22);
+  background: #161616; color: #f1f1f1; font-family: var(--sf); font-size: 14px; line-height: 1.5; box-shadow: 0 10px 28px rgba(0,0,0,0.22);
   transform-origin: var(--ax) 0; animation: popIn 0.16s var(--ease) both; }
 .gl-pop.is-above { transform-origin: var(--ax) 100%; }
 .gl-pop b { display: block; margin-bottom: 3px; font-weight: 700; }
@@ -1151,12 +1097,11 @@ details.more .prose { margin-top: 12px; }
 .gl-pop.is-below::before { top: -5px; }
 .gl-pop.is-above::before { bottom: -5px; }
 @keyframes popIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
-@media (prefers-color-scheme: dark) { .gl-pop { background: #f2ede6; color: #140d10; box-shadow: 0 10px 28px rgba(0,0,0,0.5); } }
+@media (prefers-color-scheme: dark) { .gl-pop { background: #eeeeee; color: #0f0f0f; box-shadow: 0 10px 28px rgba(0,0,0,0.5); } }
 /* ONE MARKER, ONE SCORE STYLE (Antonio: "troppi pallini, riquadri
    e punteggi diversi"). Every list in the report uses the same small dot in the
-   muted text colour; the plan keeps its order but loses the orange rings and the
-   line. Area scores are written like the overall score (same colour as the text,
-   always X.X/10); the colour of the bar alone says weak, moderate or strong. */
+   muted text colour. Area scores are written like the overall score (same colour
+   as the text, always X.X/10); the bar is the text's colour too. */
 .tips-list li::before, .ready-list li::before, .fs-col li::before, .fs-col.red li::before, .fs-col.green li::before {
   content: ''; position: absolute; left: 2px; top: 0.66em; width: 5px; height: 5px; border: 0; border-radius: 50%; background: currentColor; opacity: 0.45;
 }
@@ -1831,7 +1776,7 @@ async function submitReportIssue() {
     var data = await res.json().catch(function () { return {}; });
     if (!res.ok) throw new Error((data && data.error) || 'Could not send your report right now.');
     statusEl.textContent = 'Thanks, we\'ll look into it.';
-    statusEl.style.color = '#0f7a3d';
+    statusEl.style.color = '';
     document.getElementById('reportIssueMessage').value = '';
     btn.disabled = false;
     btn.textContent = 'Send';
@@ -1894,7 +1839,7 @@ async function requestLogin() {
     var data = await res.json().catch(function () { return {}; });
     if (!res.ok) throw new Error((data && data.error) || 'Could not send the sign-in link right now.');
     status.textContent = 'Check your inbox: we\'ve sent a sign-in link to ' + email + '.';
-    status.style.color = '#0f7a3d';
+    status.style.color = '';
   } catch (e) {
     status.textContent = e.message || 'Could not send the sign-in link right now. Please try again later.';
     status.style.color = 'var(--danger)';
@@ -3017,7 +2962,7 @@ async function runAnalysis() {
   var p = getProject();
   var miss = markMissing();
   if (miss.count || !p.budget) {
-    showError(!miss.count ? 'Please set a budget, or tick "I\'m not sure yet".' : miss.count === 1 ? 'One field is missing, marked in red above.' : miss.count+' fields are missing, marked in red above.');
+    showError(!miss.count ? 'Please set a budget, or tick "I\'m not sure yet".' : miss.count === 1 ? 'One field is missing, marked above.' : miss.count+' fields are missing, marked above.');
     if (miss.first) {
       var y = miss.first.closest('.field').getBoundingClientRect().top + window.scrollY - 90;
       window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
@@ -3199,7 +3144,7 @@ async function savePDF() {
       doc.setTextColor(r!==undefined?r:26, g!==undefined?g:25, b!==undefined?b:22);
       doc.splitTextToSize(noDash(txt||''),maxW).forEach(function(l){ if(y>272){doc.addPage();y=22;} doc.text(l,margin,y); y+=(sz||11)*0.52; }); y+=2;
     }
-    function hr() { y+=3; doc.setDrawColor(226,224,219); doc.line(margin,y,doc.internal.pageSize.getWidth()-margin,y); y+=7; }
+    function hr() { y+=3; doc.setDrawColor(224,224,224); doc.line(margin,y,doc.internal.pageSize.getWidth()-margin,y); y+=7; }
 
     // Section heading: a plain word in Carlito bold, like the site.
     function head(txt) { if (y > 250) { doc.addPage(); y = 22; } y += 3; ln(txt,13,true); y += 1; }
@@ -3209,7 +3154,7 @@ async function savePDF() {
     var pageW = doc.internal.pageSize.getWidth();
     ln('OneCiak',10,true,122,118,112);
     y += 14;
-    doc.setFont(doc.displayFont,'bold'); doc.setTextColor(26,25,22);
+    doc.setFont(doc.displayFont,'bold'); doc.setTextColor(25,25,25);
     var title = noDash(lastProject.title||''), tSize = 100;
     doc.setFontSize(tSize);
     var track = function(sz){ return -sz*0.045*0.3528; };
@@ -3230,13 +3175,13 @@ async function savePDF() {
     if (credits.length) ln(credits.join(' \u00B7 '),11,false,90,86,80);
     if (lastProject.logline) { y += 1; ln(lastProject.logline,14,false); }
     y += 8;
-    doc.setFont(doc.displayFont,'normal'); doc.setFontSize(48); doc.setTextColor(26,25,22);
+    doc.setFont(doc.displayFont,'normal'); doc.setFontSize(48); doc.setTextColor(25,25,25);
     var sc = Number(lastResult.overall_score||0).toFixed(1);
     doc.text(sc, margin, y + 14);
     var scW = doc.getTextWidth(sc);
-    doc.setFontSize(18); doc.setTextColor(122,118,112); doc.text('/10', margin + scW + 1, y + 14);
-    doc.setFont(doc.pdfFont,'normal'); doc.setFontSize(13); doc.setTextColor(26,25,22);
-    doc.setTextColor(122,118,112); doc.text('Average of the five areas', margin + scW + 16, y + 12);
+    doc.setFontSize(18); doc.setTextColor(119,119,119); doc.text('/10', margin + scW + 1, y + 14);
+    doc.setFont(doc.pdfFont,'normal'); doc.setFontSize(13); doc.setTextColor(25,25,25);
+    doc.setTextColor(119,119,119); doc.text('Average of the five areas', margin + scW + 16, y + 12);
     y += 24;
     hr();
     if (!isFullReport || !lastResult.executive_summary) { ln(lastResult.overall_summary||'',11,false,60,58,54); hr(); }
@@ -3248,7 +3193,7 @@ async function savePDF() {
       if(lastResult.biggest_opportunity) ln('Biggest opportunity. '+lastResult.biggest_opportunity,10,false);
       var ns = lastResult.next_step;
       if (isFullReport && ns && ns.action) {
-        y+=2; head('Your next step'); ln(ns.action,10,false,26,25,22);
+        y+=2; head('Your next step'); ln(ns.action,10,false,25,25,25);
         if (ns.why) ln(ns.why,9,false,122,118,112);
         var nsReady = (ns.ready||[]).filter(Boolean);
         if (nsReady.length) ln('Have ready: '+nsReady.join(' · '),9,false,70,68,64);
@@ -3306,7 +3251,7 @@ async function savePDF() {
         if (p.source) ln(pdfSource(p),8,false,150,148,145);
         y+=1;
       });
-      if (lastResult.producer_email) { ln('A first email you can adapt',9,true); ln(lastResult.producer_email,9,false,26,25,22); }
+      if (lastResult.producer_email) { ln('A first email you can adapt',9,true); ln(lastResult.producer_email,9,false,25,25,25); }
       hr();
     }
     if (isFullReport && lastResult.financial_sources && lastResult.financial_sources.length) {
@@ -3315,7 +3260,7 @@ async function savePDF() {
         if (!f) return;
         ln((f.name||'')+' ('+(f.type||'')+')'+(f.amount?' · '+f.amount:''),10,true);
         ln((APPLICANT[f.applicant] ? 'Who can apply: '+APPLICANT[f.applicant]+' · ' : '')+'Deadline: '+notStated(f.deadline, f.source ? 'not published on the source, check before planning' : '')+' · '+(f.eligibility||''),9,false,122,118,112);
-        if (f.source && f.rule_quote) ln('The rule, word for word: \u201C'+f.rule_quote+'\u201D',9,false,26,25,22);
+        if (f.source && f.rule_quote) ln('The rule, word for word: \u201C'+f.rule_quote+'\u201D',9,false,25,25,25);
         if (f.source) ln(pdfSource(f),8,false,150,148,145);
         y+=1;
       });
@@ -3440,7 +3385,7 @@ async function savePDF() {
         if (!f) return;
         ln((f.festival||'')+' · '+(f.source ? 'Deadline: '+notStated(f.deadline, 'not published on the source, check before planning') : (f.deadline||'')),10,true);
         ln(f.fit||'',9,false,122,118,112);
-        if (f.source && f.rule_quote) ln('The rule, word for word: \u201C'+f.rule_quote+'\u201D',9,false,26,25,22);
+        if (f.source && f.rule_quote) ln('The rule, word for word: \u201C'+f.rule_quote+'\u201D',9,false,25,25,25);
         if (f.source) ln(pdfSource(f),8,false,150,148,145);
         y+=1;
       });
@@ -3452,9 +3397,9 @@ async function savePDF() {
       lastResult.lab_and_market_opportunities.forEach(function(l){
         if (!l) return;
         ln(l.name||'',10,true);
-        if (l.source) ln('Deadline: '+notStated(l.deadline, 'not published on the source, check before planning'),9,false,26,25,22);
+        if (l.source) ln('Deadline: '+notStated(l.deadline, 'not published on the source, check before planning'),9,false,25,25,25);
         ln(l.fit||'',9,false,122,118,112);
-        if (l.source && l.rule_quote) ln('The rule, word for word: \u201C'+l.rule_quote+'\u201D',9,false,26,25,22);
+        if (l.source && l.rule_quote) ln('The rule, word for word: \u201C'+l.rule_quote+'\u201D',9,false,25,25,25);
         if (l.source) ln(pdfSource(l),8,false,150,148,145);
         y+=1;
       });

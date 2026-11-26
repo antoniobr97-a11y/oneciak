@@ -27,6 +27,10 @@ for (const f of files) {
 
     // 1. icons are drawn: no text arrows or crosses in what the page shows
     if (/[←→✕×✓]|&larr;|&rarr;|&times;/.test(line)) say(f, n, 'simbolo di testo al posto di un\'icona disegnata (.ic)', raw);
+    // 1b. black and white only (Antonio, 26 Nov 2026): every colour a grey with R=G=B, anywhere in the file
+    for (const m of line.matchAll(/(?<![\w&])(?:#|%23)([0-9a-fA-F]{6}|[0-9a-fA-F]{3})(?![\w-])/g)) { const h = m[1].length === 3 ? m[1].replace(/./g, c => c + c) : m[1]; if (!(h.slice(0, 2) === h.slice(2, 4) && h.slice(2, 4) === h.slice(4, 6))) say(f, n, `colore non grigio (#${m[1]})`, raw); }
+    for (const m of line.matchAll(/rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)/g)) if (!(m[1] === m[2] && m[2] === m[3])) say(f, n, `colore non grigio (rgb ${m[1]} ${m[2]} ${m[3]})`, raw);
+    for (const m of line.matchAll(/set(?:Text|Fill|Draw)Color\((\d+),\s*(\d+),\s*(\d+)\)/g)) if (!(m[1] === m[2] && m[2] === m[3])) say(f, n, 'colore non grigio nel PDF', raw);
     // 2. long dashes never reach the page
     if (/—|&mdash;/.test(line) && !/noDash|replace\(/.test(line)) say(f, n, 'trattino lungo', raw);
     if (inStyle) {

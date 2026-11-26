@@ -91,7 +91,8 @@ typo quando è frustrato: non vuol dire che vuole un tono più formale.
 Chiaro e scuro seguono il dispositivo; titoli **Geist**, il resto
 **Carlito** (font in `/fonts`, niente Google Fonts). Una sola scala di
 caratteri (24, 18, 15, 14, 13; 16 per menu e roadmap), un solo segno per le
-liste, voti "X.X/10" nel colore del testo con il colore solo sulla barretta,
+liste, **solo bianco e nero** (nessun colore, nemmeno su voti, barre ed
+errori: dal 26 novembre 2026), voti "X.X/10",
 una sola pressione dei tasti (0.97 bottoni, 0.99 righe, 160 ms `--ease`),
 icone disegnate. Le regole che una macchina legge stanno in `tests/lint.js`
 e `tests/rules.js`. Tutti i dettagli (colori, movimento, pagine, flusso,
