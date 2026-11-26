@@ -19,6 +19,16 @@ h = open('index.html').read()
 print("\n".join(re.findall(r'<script(?![^>]*(?:src|ld\+json))[^>]*>(.*?)</script>', h, re.S)))
 PY
 step "sintassi della pagina" node --check "$OUT/page.js"
+# images too: black and white only (lint.js reads code, not pixels; the mail header and the share image kept glows until 26 Nov 2026)
+step "immagini in bianco e nero" python3 -c "
+import subprocess,sys
+from PIL import Image
+bad=[]
+for f in subprocess.run(['git','ls-files','*.png','*.jpg','*.jpeg','*.webp','*.gif','*.ico'],capture_output=True,text=True).stdout.split():
+    if f.startswith(('.claude/','tests/')): continue
+    im=Image.open(f).convert('RGB'); n=sum(1 for r,g,b in im.getdata() if max(r,g,b)-min(r,g,b)>8)
+    if n: bad.append(f+' ('+str(n)+' pixel colorati)')
+print('\\n'.join(bad) if bad else 'IMMAGINI IN BIANCO E NERO'); sys.exit(1 if bad else 0)"
 step "sintassi del server" bash -c 'for f in netlify/functions/*.js netlify/functions/_util/*.js tests/*.js; do node --check "$f" || exit 1; done; echo "tutti i file del server si leggono"'
 [ "${1:-}" = "--quick" ] && { [ $fail -eq 0 ] && echo "TUTTO A POSTO (solo codice)" || echo "QUALCOSA NON PASSA"; exit $fail; }
 

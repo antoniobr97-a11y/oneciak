@@ -325,7 +325,7 @@ function buildReportEmailHtml(project, r, sessionId, viewUrlOverride) {
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1f1f1;padding:28px 0">' +
     '<tr><td align="center">' +
     '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;border-radius:14px;overflow:hidden;background:#f9f9f9">' +
-    '<tr><td bgcolor="#0f0f0f" background="https://oneciak.com/email-header.jpg" style="background:#0f0f0f url(https://oneciak.com/email-header.jpg) center top / cover no-repeat;padding:28px 32px 30px">' +
+    '<tr><td bgcolor="#0f0f0f" style="background:#0f0f0f;padding:28px 32px 30px">' +
       '<div style="font-size:15px;font-weight:700;color:#eeeeee;letter-spacing:-0.01em">OneCiak</div>' +
       // The film's name like a poster, as on the site: as wide as the 536px
       // column allows (about 0.55em per letter in bold), 30 to 96px; on a

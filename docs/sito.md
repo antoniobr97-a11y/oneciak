@@ -9,7 +9,10 @@ riproposte. La storia sta in git.
 
 - **Solo bianco e nero** ("non voglio assolutamente più colori", 26
   novembre 2026): ogni colore è un grigio esatto (R=G=B), anche in roadmap,
-  privacy, termini, 404, PDF e mail; `tests/lint.js` blocca il resto. Niente
+  privacy, termini, 404, PDF, mail e immagini; `tests/lint.js` blocca i
+  colori nel codice, `check.sh` i pixel colorati nelle immagini.
+  `og-image.png` (anteprima dei link) rifatta in bianco e nero;
+  `email-header.jpg` è nero pieno e resta solo per le mail già inviate. Niente
   bagliori né accenti. `--danger` e `--success` valgono come il testo:
   errori e conferme si capiscono dalle parole. Etichette in grassetto nel
   colore del testo; barre dei voti, linea dell'indice e dei passi del
