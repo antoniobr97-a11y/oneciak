@@ -155,6 +155,11 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   "Shooting"), le aree Festival e Distribuzione si aprono con "For later:
   your film is not shot yet, so this is the plan for when it is finished."
   (`laterNote`), nel report e nell'anteprima.
+- **Logline e riassunto** larghi quanto titolo e scheda del voto (prima 46 e
+  62 caratteri, "allarga il testo, tutto più omogeneo").
+- **Biggest risk, Biggest opportunity, Your next step**: parole in grassetto
+  nel colore del testo, niente rosso e verde (c'erano dal 26 ottobre;
+  tolti il 26 novembre 2026, come già nel PDF e nella mail).
 - **Riassunto sotto il voto**: 15px grigio come il resto del report (era 18px
   come la logline bianca sopra: bianco e grigio alla stessa misura sembravano
   un errore, Antonio 26 novembre 2026).

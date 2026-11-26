@@ -511,12 +511,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   border-left: none;
 }
 .exec-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.exec-box { padding: 16px 18px; border-radius: var(--radius); border: none; background: var(--white); }
-.exec-box.risk { background: var(--danger-wash); }
-.exec-box.opp  { background: var(--success-wash); }
 .exec-lead { font-weight: 700; }
-.exec-box.risk .exec-lead { color: #9c2a1f; }
-.exec-box.opp .exec-lead { color: #0c6b35; }
 .exec-box-text { font-size: 13px; color: var(--text); line-height: 1.55; font-weight: 400; }
 
 /* Dynamic colors */
@@ -626,13 +621,13 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 }
 #sec-results .r-hero-inner, #sec-myreports .r-hero-inner { position: relative; z-index: 1; }
 .r-title { font-family: var(--display); font-size: clamp(40px, 6vw, 72px); font-weight: 700; letter-spacing: -0.035em; line-height: 1; color: var(--on-night); margin-bottom: 20px; }
-.r-summary { font-size: 15px; line-height: 1.6; color: var(--on-night-2); max-width: 62ch; margin-top: 10px; } /* the report's own voice, at the size of the rest of the report: at 18px like the logline above, white and grey read as a mistake (Antonio) */
+.r-summary { font-size: 15px; line-height: 1.6; color: var(--on-night-2); margin-top: 10px; } /* the report's own voice, at the size of the rest of the report: at 18px like the logline above, white and grey read as a mistake (Antonio) */
 /* The film's name set like a poster (Antonio, 12 Nov 2026: "come A24"):
    as wide as the column, sized by fitTitle(); its credits and logline
    under it, the way a one-sheet bills a film. */
 #sec-results .r-title { font-size: clamp(48px, 12vw, 168px); letter-spacing: -0.055em; line-height: 0.88; margin: 0 0 22px; text-wrap: balance; }
 .r-credits { font-size: 15px; line-height: 1.5; color: var(--on-night-2); margin: 0; }
-.r-logline { font-size: 18px; line-height: 1.45; color: var(--on-night); max-width: 46ch; margin: 14px 0 0; }
+.r-logline { font-size: 18px; line-height: 1.45; color: var(--on-night); margin: 14px 0 0; } /* as wide as the title and the score card above and below (Antonio: "allarga il testo, tutto più omogeneo") */
 #overallScore { margin-top: 36px; }
 .overall-card {
   background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.07) !important;
@@ -651,9 +646,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .exec-card, .accordion-wrap, .pdf-card { background: transparent; box-shadow: none !important; border: 0 !important; border-radius: 0; padding-left: 0; padding-right: 0; }
 .exec-card { padding-top: 0; padding-bottom: 8px; margin-bottom: 28px; }
 .tips-label { font-family: var(--mono); font-size: 13px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; }
-.exec-box { border-radius: 10px; }
-.exec-box.risk { background: rgba(177,50,37,0.07); }
-.exec-box.opp { background: rgba(15,122,61,0.07); }
 #accordionMenu { margin-top: 28px; }
 .accordion-wrap { margin-top: 0; border-top: 1px solid var(--text) !important; overflow: visible; }
 .accordion-item { border-bottom: 1px solid var(--border); }
@@ -718,9 +710,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .flag-item, .flag-item.red, .flag-item.green { background: none; border-radius: 0; padding: 4px 0 4px 16px; margin-bottom: 12px; color: var(--text); }
 .flag-item.red { border-left: 1px solid rgba(177,50,37,0.75); }
 .flag-item.green { border-left: 1px solid rgba(15,122,61,0.75); }
-.exec-box, .exec-box.risk, .exec-box.opp { background: none; border-radius: 0; padding: 2px 0 2px 16px; }
-.exec-box.risk { border-left: 1px solid rgba(177,50,37,0.75); }
-.exec-box.opp { border-left: 1px solid rgba(15,122,61,0.75); }
 .exec-row { gap: 24px; }
 .tips-block { border-top-color: var(--border); }
 @media (max-width: 640px) { .accordion-body { padding-left: 4px; } }
@@ -952,7 +941,7 @@ details.more .prose { margin-top: 12px; }
 .fs-col li::before { content: ''; position: absolute; left: 1px; top: 0.62em; width: 6px; height: 6px; border-radius: 50%; }
 .fs-col.red li::before { background: #b13225; }
 .fs-col.green li::before { background: #0f7a3d; }
-.exec-box, .exec-box.risk, .exec-box.opp { border-left: 0; padding: 0; }
+.exec-box { background: none; border: 0; border-radius: 0; padding: 0; } /* risk and opportunity in the text's colour, like the PDF and the mail: no red and green (Antonio, 26 Nov 2026) */
 .tips-block { margin-top: 22px; }
 #overallScore { margin-bottom: 22px; }
 @media (max-width: 640px) {
@@ -1034,8 +1023,6 @@ details.more .prose { margin-top: 12px; }
   :root { --muted: #3a3a3a; --muted-light: #3a3a3a; --success: #0a5c2d; --danger: #8a2419; }
   .score-mid { color: #6e3f00; }
   .tips-label, .an-top, .fs-col .fs-label { color: #93391a !important; }
-  .exec-box.risk .exec-lead { color: var(--danger); }
-  .exec-box.opp .exec-lead { color: var(--success); }
   .fs-col.red li::before { background: var(--danger); }
   .fs-col.green li::before { background: var(--success); }
   .l-hero, #sec-results .r-hero, #sec-myreports .r-hero, #sec-loading { background: transparent; }
@@ -1138,10 +1125,6 @@ details.more .prose { margin-top: 12px; }
   .entry-lesson { border-left-color: rgba(240,160,124,0.6); }
   .score-mid { color: #f2b25c; }
   .bar-mid { background: #f2b25c; }
-  .exec-box.risk .exec-lead { color: #ff9a87; }
-  .exec-box.opp .exec-lead { color: #74d6a0; }
-  .exec-box.risk { border-left-color: rgba(255,154,135,0.7); }
-  .exec-box.opp { border-left-color: rgba(116,214,160,0.7); }
   .flag-item { color: var(--text); }
   .btn-primary, .btn-unlock, #sec-form .btn-primary, .unlock .btn-unlock { background: var(--on-night); color: var(--night); }
   @media (hover: hover) and (pointer: fine) { .btn-primary:hover, .btn-unlock:hover { background: #fff; } }
@@ -2523,7 +2506,11 @@ function goToArea(i) {
    phones that depends on the direction: going down the header slides away
    and only the area bar stays; going up the header comes back above it. */
 function scrollUnderBars(el) {
-  var target = el.getBoundingClientRect().top + window.scrollY;
+  // offsetTop, not getBoundingClientRect: an area not yet revealed still sits
+  // 28px low (it rises as it appears), and a tap in the index then left its
+  // title 28px under the bars once it settled (26 Nov 2026)
+  var target = 0;
+  for (var e = el; e; e = e.offsetParent) target += e.offsetTop;
   var to = target - 64 - 12;
   if (window.innerWidth < 1100) {
     // What counts is the way the page will move, not where the title is: a

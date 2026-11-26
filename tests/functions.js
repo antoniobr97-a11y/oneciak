@@ -129,6 +129,8 @@ for (const dev of ['tel','pc']) {
   await q.evaluate(()=>{document.getElementById('termsCheck').checked=true; onStartClick();}); await q.waitForTimeout(600); await m('#sec-form .btn-primary');
   await q.evaluate(()=>showSampleReport()); await q.waitForTimeout(800); await q.evaluate(()=>{isSampleReport=false; renderFree(JSON.parse(JSON.stringify(lastResult)), lastProject.title); document.getElementById('againBtn').style.display='';}); await q.waitForTimeout(500);
   await m('#upgradeSection .btn-unlock'); await m('#againBtn');
+  const leads=await q.evaluate(()=>[...document.querySelectorAll('.exec-card .exec-lead')].map(e=>getComputedStyle(e).color)); const txt=await q.evaluate(()=>getComputedStyle(document.querySelector('.exec-box-text')).color);
+  T(dev+' rischio, opportunità e prossimo passo nel colore del testo', leads.length===3 && leads.every(c=>c===txt), leads.join(' | ')+' testo '+txt);
   await q.evaluate(()=>openMyReports()); await q.waitForTimeout(400); await m('#loginSubmitBtn');
   T(dev+' bottoni principali tutti uguali a quello della home', sz.every(x=>x===sz[0]), sz.join(' | ')); await q.close(); }
  // the loading title on one line on a computer, also with a long film name (Antonio, 26 Nov 2026)
