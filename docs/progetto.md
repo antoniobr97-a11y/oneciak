@@ -10,7 +10,7 @@
   Follows, 19 agosto 2026); in Italia senza società di produzione niente
   fondi per sviluppo e produzione; "Your first film will probably be
   funded" (Follows, 28 ottobre 2026). Da qui "Before you can apply", "Make
-  a short first", produttori e calendario.
+  a short first", produttori e scadenze.
 - Ricerca dell'11 novembre 2026 (report nello scratchpad, non nel repo):
   l'ostacolo principale è il produttore; molti produttori non leggono
   progetti non richiesti; nessuno fa gratis quello che fa OneCiak

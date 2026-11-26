@@ -17,10 +17,10 @@ foglio di foto prima e dopo di ogni vista, da guardare con gli occhi
 animazioni). Gli
 altri, anche da soli su un server locale o sul sito vero:
 `NODE_PATH=/opt/node22/lib/node_modules node tests/functions.js [url]`
-(170 prove su telefono e computer, compresa la colonna del report su
+(168 prove su telefono e computer, compresa la colonna del report su
 schermi bassi e il titolo con "Riduci movimento": menu, modulo, ogni area, ogni blocco,
 ogni passo, ogni voce dell'indice, glossario, copia email, PDF,
-calendario, roadmap, 404) e `node tests/pages.js [url]` (264 viste: ogni
+Report a problem, roadmap, 404) e `node tests/pages.js [url]` (264 viste: ogni
 pagina × 8 schermi, compresi 1366x657 e 1280x600 × 3 schemi; errori, richieste fallite, pagina larga,
 testo azzurro, trattini lunghi, mezzi pixel; una richiesta fallita conta
 solo se fallisce anche riprovandola due volte). Ogni giro di `check.sh` usa una
@@ -51,7 +51,7 @@ intera va in `$OUT/engine.json`. Sul sito vero si rifiuta di partire.
   lunghi, testi affiancati non allineati.
 - **Funzioni**: modulo vuoto (7 caselle rosse), glossario, scaletta che
   cambia col progetto (primo film, produttore presente, finanziato, corto),
-  copia email, PDF, calendario (link Google e file .ics, su un report con due date future) e "Report a problem", menu "Sections" (ogni
+  copia email, PDF, "Report a problem" (solo nei report veri), menu "Sections" (ogni
   area da più punti, telefono e computer), un'analisi vera su
   `/.netlify/functions/analyze` (NON start-full-report).
 - **Codice della pagina**: estrarre lo script di index.html e passarlo a

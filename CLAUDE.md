@@ -18,7 +18,7 @@ risponde a tre domande: 1) Il mio film sta in piedi? (voto su storia, soldi,
 pubblico, festival, distribuzione, e per ognuna cosa non va e cosa fare);
 2) Cosa faccio adesso? (una sola azione per questa settimana); 3) A chi mi
 rivolgo? (nomi veri: produttori con l'email già pronta, fondi con chi può
-fare domanda, festival con le scadenze nel calendario). Ogni nome viene da
+fare domanda, festival con le scadenze). Ogni nome viene da
 una pagina trovata e controllata; date, cifre e citazioni restano solo se
 sono scritte lì. Senza fonte la voce non compare.
 
@@ -71,7 +71,7 @@ typo quando è frustrato: non vuol dire che vuole un tono più formale.
 ## Controllare e pubblicare
 
 - **Controlli**: `tests/check.sh` lancia tutto su un server locale (regole
-  nel codice, sintassi, 170 prove di funzioni, 264 viste, regole di design,
+  nel codice, sintassi, 168 prove di funzioni, 264 viste, regole di design,
   pressione dei tasti, movimenti rispetto al sito vero, foto prima e dopo
   da guardare con gli occhi). `tests/check.sh --quick`: solo il codice, in
   pochi secondi. Dopo ogni modifica, prima di dire che è fatta. Se cambia
