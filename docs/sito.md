@@ -146,6 +146,9 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   "Shooting"), le aree Festival e Distribuzione si aprono con "For later:
   your film is not shot yet, so this is the plan for when it is finished."
   (`laterNote`), nel report e nell'anteprima.
+- **Riassunto sotto il voto**: 15px grigio come il resto del report (era 18px
+  come la logline bianca sopra: bianco e grigio alla stessa misura sembravano
+  un errore, Antonio 26 novembre 2026).
 - **Anteprima**: titolo, voto, riassunto, 5 aree, rischio, opportunità,
   prossimo passo ("Your next step." in grassetto accanto al testo, 15px come
   il resto: prima 18px grassetto, "perché il font è più grande?"),
