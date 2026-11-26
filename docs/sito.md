@@ -96,10 +96,13 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   la pagina sale al primo vuoto senza cursore, sotto il bottone "N fields
   are missing, marked in red above.". Caselle alte quanto il testo di
   esempio (`fitPlaceholders`).
-- **Caricamento**: le 5 aree ferme, righe come i passi del modulo (prima un
-  pallino "avanzava" a tempo, non col lavoro vero: Antonio, "sa di AI"),
-  sotto una frase vera; nomi con le maiuscole come nel report.
-  Mentre si fa il report completo, sotto le 5 aree una sola frase ("This
+- **Caricamento** (anteprima e report completo): titolo, una frase, una
+  linea sottile con un tratto che la attraversa (`.loading-line`, 1,6 s,
+  `--ease`): dice "sto lavorando", mai una percentuale, perché il
+  progresso vero non si conosce (una barra che si riempie fingerebbe). Prima
+  un pallino "avanzava" a tempo ("sa di AI"), poi le 5 aree ferme
+  ("sembra tutto fermo", Antonio 26 novembre 2026).
+  Mentre si fa il report completo, sotto la linea una sola frase ("This
   usually takes two or three minutes..."): niente cronometro in una pillola
   con pallino che pulsa (Antonio: "sa di AI"). Cursore del budget 14px
   piatto, senza anello bianco né ombra (prima 22px, "troppo grosso").
@@ -144,7 +147,12 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   your film is not shot yet, so this is the plan for when it is finished."
   (`laterNote`), nel report e nell'anteprima.
 - **Anteprima**: titolo, voto, riassunto, 5 aree, rischio, opportunità,
-  prossimo passo, richiesta del report completo.
+  prossimo passo ("Your next step." in grassetto accanto al testo, 15px come
+  il resto: prima 18px grassetto, "perché il font è più grande?"),
+  richiesta del report completo (una frase sola), poi due bottoni uguali,
+  "Download this preview" e "Analyze another project" (prima un testo che
+  "non sembrava nemmeno un tasto", più una nota ripetuta sul report
+  completo). Le frasi accanto alle caselle sono a peso normale.
 - **Indice** (`mountReportNav`, `REPORT_PARTS`): "Does my film stand up?"
   con le 5 aree e il voto, poi "Your path" con i passi del report (presi
   dalle righe della pagina; `goToStep` apre la riga come un tocco; la barra

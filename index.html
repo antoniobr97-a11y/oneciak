@@ -445,7 +445,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .guide-box-body dd { color: var(--muted); margin: 2px 0 0; }
 .checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
 .checkbox-row input[type="checkbox"] { width: 17px; height: 17px; margin-top: 2px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
-.checkbox-label { font-size: 13px; color: var(--muted); line-height: 1.6; cursor: pointer; }
+.checkbox-label { font-size: 13px; font-weight: 400; color: var(--muted); line-height: 1.6; cursor: pointer; } /* a sentence, not a field name: the generic label weight (600) made the terms read heavy */
 .inline-error { display: none; font-size: 13px; color: var(--danger); font-weight: 500; margin-bottom: 10px; }
 
 /* ══════════════════════
@@ -455,16 +455,12 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .loading-wrap { text-align: left; padding: 40px 24px; max-width: 420px; width: 100%; position: relative; z-index: 1; }
 .loading-title { font-family: var(--sf); font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 12px; letter-spacing: -0.02em; }
 .loading-desc { font-size: 15px; color: var(--muted); font-weight: 400; line-height: 1.6; max-width: 420px; margin: 0 0 36px; }
-/* Dimension progress — walks through the same 01-05 numbering used on the
-   landing page and results accordion, so the wait itself previews the
-   product's own structure instead of a generic spinner that could belong
-   to any app. Pacing is a plausible staged animation (not literal
-   per-dimension telemetry — the API calls don't expose that granularity),
-   timed to roughly match how long each flow actually takes. */
-/* The five areas, still: no dot that "advances" (it walked on a timer, not on
-   the real work, Antonio: "sa di AI"). Rows like the form's side steps. */
-.loading-dims { display: flex; flex-direction: column; text-align: left; border-top: 1px solid color-mix(in srgb, currentColor 14%, transparent); }
-.loading-dim { padding: 12px 0; border-bottom: 1px solid color-mix(in srgb, currentColor 14%, transparent); }
+/* One thin line with a segment that runs across it: it says "working" and
+   never a percentage, because the real progress is not known (a bar that
+   fills would be a fake). The five still rows looked frozen (Antonio). */
+.loading-line { height: 2px; border-radius: 2px; overflow: hidden; background: color-mix(in srgb, currentColor 14%, transparent); }
+.loading-line span { display: block; width: 32%; height: 100%; border-radius: 2px; background: currentColor; animation: loading-run 1.6s var(--ease) infinite; }
+@keyframes loading-run { from { transform: translateX(-100%); } to { transform: translateX(313%); } } /* 313% of a 32% segment ends just past the right edge: further, it waited unseen */
 
 .loading-timer { margin-top: 28px; max-width: 40ch; font-size: 14px; line-height: 1.5; color: var(--muted); } /* one plain sentence: the running clock in a pill with a pulsing dot read as an AI chat (Antonio) */
 
@@ -664,8 +660,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .pdf-row button { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; white-space: normal; padding: 14px 16px; background: var(--field); color: var(--text); font-weight: 500; }
 .pdf-row button small { font-size: 13px; font-weight: 400; color: var(--muted); }
 @media (hover: hover) and (pointer: fine) { .pdf-row button:hover { background: var(--field-hover); } }
-.pdf-note { margin-top: 12px; font-size: 13px; color: var(--muted); line-height: 1.5; }
-.pdf-card + .btn-secondary { width: auto; padding: 14px 0; text-align: left; display: block; }
 /* Full report request: no card, a hairline and a mono label like every
    other section, text on the left, field in the same tint as the form. */
 .unlock { border-top: 1px solid var(--border); margin-top: 36px; padding-top: 24px; }
@@ -807,7 +801,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .entry-sub { margin-top: 4px; font-size: 13px; line-height: 1.5; color: var(--muted); }
 .entry-quote { margin: 12px 0 0; }
 .entry-quote blockquote { margin-top: 4px; font-size: 15px; line-height: 1.55; font-style: italic; color: var(--text); }
-.the-ask { margin: 24px 0 8px; display: flex; flex-direction: column; gap: 6px; font-size: 18px; font-weight: 700; line-height: 1.45; color: var(--text); max-width: 62ch; }
+.the-ask { margin: 20px 0 8px; font-size: 15px; line-height: 1.55; color: var(--text); max-width: 62ch; } /* same lead word as Biggest risk; 18px bold read bigger than the rest of the report (Antonio) */
 .entry .src-line { margin-top: 10px; }
 
 .sub-k { font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
@@ -888,14 +882,13 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #sec-loading { background: var(--night); color: var(--on-night); overflow: hidden; }
 #sec-loading .loading-title { color: var(--on-night); }
 #sec-loading .loading-desc { color: var(--on-night-2); }
-#sec-loading .loading-dim-name { color: var(--on-night); }
+#sec-loading .loading-line { color: var(--on-night); }
 #sec-loading .loading-timer { color: var(--on-night-2); }
 #sec-loading .btn-primary { background: var(--on-night); color: var(--night); }
 
 /* LOADING: light display title, mono step numbers, no filled circles */
 .loading-wrap { max-width: 520px; }
 .loading-title { font-family: var(--display); font-size: clamp(30px, 5vw, 40px); font-weight: 700; letter-spacing: -0.03em; }
-.loading-dim-name { font-family: var(--display); font-size: 16px; font-weight: 500; letter-spacing: -0.01em; }
 @media (max-width: 640px) {
   #sec-results .r-hero, #sec-myreports .r-hero { padding: 108px 20px 200px; }
   #sec-results .r-main, #sec-myreports .r-main { padding-left: 20px; padding-right: 20px; }
@@ -1452,13 +1445,7 @@ details.more .prose { margin-top: 12px; }
   <div class="loading-wrap">
     <div class="loading-title" id="loadingTitle">Reading your project</div>
     <div class="loading-desc" id="loadingDesc">Scoring your project across the five areas.</div>
-    <div class="loading-dims" id="loadingDims">
-      <div class="loading-dim"><span class="loading-dim-name">Creative package</span></div>
-      <div class="loading-dim"><span class="loading-dim-name">Financial plan</span></div>
-      <div class="loading-dim"><span class="loading-dim-name">Market and audience</span></div>
-      <div class="loading-dim"><span class="loading-dim-name">Festival strategy</span></div>
-      <div class="loading-dim"><span class="loading-dim-name">Distribution and revenue</span></div>
-    </div>
+    <div class="loading-line" aria-hidden="true"><span></span></div>
     <div class="loading-timer" id="loadingTimer" style="display:none"></div>
     <button class="btn-primary" id="loadingRetryBtn" style="display:none;margin-top:20px;max-width:280px" onclick="retryLastAction()">Try again<svg class="ic" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8.5M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
@@ -1507,13 +1494,12 @@ details.more .prose { margin-top: 12px; }
       <div class="pdf-row">
         <button onclick="savePDF()"><span id="pdfMainLabel">Download this preview</span><small id="pdfMainSub">PDF, all sections</small></button>
         <button onclick="saveCalendar()" id="calBtn" hidden><span>Add the deadlines to your calendar</span><small id="calSub"></small></button>
+        <button id="againBtn" onclick="goLanding()"><span>Analyze another project</span><small>Start a new analysis</small></button>
       </div>
-      <p class="pdf-note" id="pdfNote">The full report is not included here, it arrives by email.</p>
       <div class="success-msg" id="pdfSuccess">PDF saved. Check your downloads.</div>
       <div class="success-msg" id="calSuccess">Calendar file saved. Open it to add the dates to your calendar.</div>
       <div class="inline-error" id="pdfError" role="alert" style="margin-top:12px"></div>
     </div>
-    <button class="btn-secondary" id="againBtn" onclick="goLanding()">Analyze another project</button>
     <div class="disclaimer-box" style="margin-top:14px">
       <div class="disclaimer-text"><strong>Legal Disclaimer:</strong> Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. OneCiak assumes no liability. Results are estimates and do not guarantee any outcome. OneCiak is not a licensed consulting firm.</div>
     </div>
@@ -2072,7 +2058,7 @@ async function generateFullReport() {
   document.getElementById('againBtn').style.display = '';
   document.getElementById('loadingRetryBtn').style.display = 'none';
   document.getElementById('loadingTitle').textContent = 'Building your full report…';
-  document.getElementById('loadingDesc').textContent = 'Your project is being read across these five areas, with real names and sources for each.';
+  document.getElementById('loadingDesc').textContent = 'Your project is being read across the five areas, with real names and sources for each.';
   showOnly('sec-loading');
   startFullReportTimer();
 
@@ -2128,7 +2114,6 @@ function retryLastAction() {
 function setPdfLabels() {
   document.getElementById('pdfMainLabel').textContent = isFullReport ? 'Download the full report' : 'Download this preview';
   document.getElementById('pdfMainSub').textContent = isFullReport ? 'PDF, every area and the business plan page' : 'PDF, all sections';
-  document.getElementById('pdfNote').style.display = isFullReport ? 'none' : 'block';
 }
 function scoreColor(s) { return s >= 7 ? 'high' : s >= 5 ? 'mid' : 'low'; }
 
@@ -2155,7 +2140,7 @@ function renderFree(r, title) {
       '<div class="exec-box risk"><p class="exec-box-text"><b class="exec-lead">Biggest risk.</b> '+esc(r.biggest_risk)+'</p></div>'+
       '<div class="exec-box opp"><p class="exec-box-text"><b class="exec-lead">Biggest opportunity.</b> '+esc(r.biggest_opportunity)+'</p></div>'+
       '</div>' : '')+
-    (r.next_step ? '<div class="the-ask"><span class="fact-k">Your next step</span>'+esc(r.next_step)+'</div>' : '')+
+    (r.next_step ? '<p class="the-ask"><b class="exec-lead">Your next step.</b> '+esc(r.next_step)+'</p>' : '')+
     '</div>';
 
   // Free accordion — same structure, limited content + blurred preview
@@ -2213,7 +2198,7 @@ function renderFree(r, title) {
   document.getElementById('upgradeSection').innerHTML =
     '<div class="unlock">'+
     '<h3 class="unlock-title">Get the full report by email, free.</h3>'+
-    '<p class="unlock-desc">Each of the five areas in depth, then a step by step path: producers, funds, festivals and sales agents, each with the page it came from. It takes a few minutes to write, so we email it to you when it\'s ready.</p>'+
+    '<p class="unlock-desc">Producers, funds, festivals and sales agents for your film, each with the page it came from. It arrives by email in a few minutes.</p>'+
     '<div class="field unlock-field"><label for="fullReportEmail">Your email</label><input type="email" id="fullReportEmail" placeholder="you@example.com" autocomplete="email" inputmode="email"></div>'+
     '<div class="checkbox-row"><input type="checkbox" id="fullTerms"><label class="checkbox-label" for="fullTerms">I understand this is AI-generated analysis for informational purposes only. Not professional, legal or financial advice. OneCiak is not a licensed consulting firm.</label></div>'+
     '<div class="inline-error" id="unlockError">Please accept the terms to continue.</div>'+
