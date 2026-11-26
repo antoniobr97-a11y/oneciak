@@ -502,6 +502,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 /* Dynamic colors */
 .score-high, .score-mid, .score-low { color: inherit; }
 .bar-high, .bar-mid, .bar-low { background: currentColor; } /* black by day, white by night: no colours (Antonio, 26 Nov 2026) */
+.acc-bar i { color: var(--text); } .l-bar i { color: var(--on-night); } /* the text's own colour, so the home card's bars and the report's match (the trigger's #000 made them differ) */
 
 .flag-item { font-size: 14px; line-height: 1.55; padding: 11px 14px; border-radius: var(--radius); margin-bottom: 7px; border-left: none; }
 .flag-item.red { background: var(--danger-wash); color: #3c3c3c; }
