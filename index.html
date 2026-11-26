@@ -385,7 +385,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 @media (hover: hover) and (pointer: fine) { #sec-form input[type="text"]:hover, :is(#sec-form, .issue-form) select:hover, :is(#sec-form, .issue-form) textarea:hover { background-color: var(--field-hover); } }
 #sec-form input[type="text"]:focus, :is(#sec-form, .issue-form) select:focus, :is(#sec-form, .issue-form) textarea:focus { background-color: rgba(255,255,255,0.6); box-shadow: inset 0 0 0 1px rgba(214,120,76,0.6), 0 0 0 4px rgba(214,120,76,0.12); }
 #sec-form .disclaimer-box { background: none; padding: 0; margin: 0 0 24px; }
-#sec-form .btn-primary { width: auto; padding: 15px 24px; background: var(--text); }
+#sec-form .btn-primary { background: var(--text); }
 #sec-form .error-box { margin-top: 16px; }
 /* Missing required fields are marked on the field itself
    (Antonio: show which box is empty, not only a message under the button). */
@@ -582,13 +582,22 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 /* The home's start button, at the end of the report (Antonio: "nello stessa
    maniera del bottone nella home"); dark on the light page. */
 .again-btn { margin: 4px 0 0; }
+/* ONE SIZE for every main button: the home's start button (Antonio, 26 Nov
+   2026: "fai grandi tutti i bottoni uguali come il bottone dell'analisi nella
+   home"). Same height, text and corners, and one width so two buttons on the
+   same page read as a pair. Colours stay with each button's own rules. */
+:is(#sec-landing .l-btn, .menu-cta, #sec-form .btn-primary, #upgradeSection .btn-unlock, #againBtn, #sec-results .issue-send, #loadingRetryBtn, #loginSubmitBtn) {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  width: auto; min-width: 240px; max-width: 100%; padding: 15px 22px; border-radius: 10px;
+  font-family: var(--sf); font-size: 15px; font-weight: 500; line-height: 1.4; letter-spacing: -0.01em;
+}
 /* Under the row of buttons, what "Report a problem" opens: the form (it was a closed box with a long question, Antonio:
    "non mi piace, piuttosto un pulsante aiuto"). */
 .row-panel { margin-top: 16px; max-width: 560px; font-size: 14px; line-height: 1.6; color: var(--text); }
 .row-panel[hidden] { display: none; }
 .row-panel > p { color: var(--muted); margin: 0 0 12px; }
 .issue-form select, .issue-form textarea { display: block; width: 100%; margin-bottom: 10px; }
-.issue-send { width: auto; padding: 13px 20px; background: var(--text); font-size: 15px; }
+.issue-send { background: var(--text); }
 .issue-status { margin-top: 8px; font-size: 13px; }
 @media (min-width: 641px) { .pdf-row { display: grid; grid-template-columns: repeat(2, minmax(0, 280px)); } .pdf-card .pdf-row button { width: 100%; } } /* two per row, like the rest of the report's grid */
 .pdf-row button { width: 100%; padding: 13px 20px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--sf); font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background 0.2s, transform 0.15s ease-out; }
@@ -675,8 +684,8 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 @media (hover: hover) and (pointer: fine) { .unlock-field input:hover { background: var(--field-hover); } }
 .unlock-field input:focus { background: rgba(255,255,255,0.6); box-shadow: inset 0 0 0 1px rgba(214,120,76,0.55), 0 0 0 4px rgba(214,120,76,0.12); }
 .unlock .checkbox-row { max-width: 560px; text-align: left; }
-.unlock .btn-unlock { width: auto; padding: 15px 22px; background: var(--text); margin-top: 6px; }
-@media (max-width: 600px) { .unlock-title { font-size: 24px; } .unlock .btn-unlock { width: 100%; } .unlock-field { max-width: none; } }
+.unlock .btn-unlock { background: var(--text); margin-top: 6px; }
+@media (max-width: 600px) { .unlock-title { font-size: 24px; } .unlock-field { max-width: none; } }
 .tip-link { background: var(--field); }
 /* MY REPORTS: same header as results; sign-in is a plain field on the
    paper, the list is hairline rows (date, title, arrow), not boxes. */
@@ -1442,7 +1451,7 @@ details.more .prose { margin-top: 12px; }
     <div class="loading-desc" id="loadingDesc">Scoring your project across the five areas.</div>
     <div class="loading-line" aria-hidden="true"><span></span></div>
     <div class="loading-timer" id="loadingTimer" style="display:none"></div>
-    <button class="btn-primary" id="loadingRetryBtn" style="display:none;margin-top:20px;max-width:280px" onclick="retryLastAction()">Try again<svg class="ic" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8.5M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="btn-primary" id="loadingRetryBtn" style="display:none;margin-top:20px" onclick="retryLastAction()">Try again<svg class="ic" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8.5M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
 </div>
 

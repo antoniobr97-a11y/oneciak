@@ -96,6 +96,7 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   la pagina sale al primo vuoto senza cursore, sotto il bottone "N fields
   are missing, marked in red above.". Caselle alte quanto il testo di
   esempio (`fitPlaceholders`).
+- **Bottoni principali** tutti della misura del bottone della home (240x51 px, testo 15px, angoli 10px, larghezza minima 240px): Analyze your project, menu, Analyze my project, Email me the full report, Analyze another project, Send, Try again, Send me a sign-in link. Una regola sola (`:is(...)` vicino a `.row-panel`), prova in `functions.js` (Antonio, 26 novembre 2026: "fai grandi tutti i bottoni uguali").
 - **Caricamento** (anteprima e report completo): titolo su una riga
   (`setLoadingTitle`/`fitLoadingTitle`: 40px, più piccolo se il nome del
   film non ci sta, fino a 24px; sul telefono un nome lungo va a capo;
