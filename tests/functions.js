@@ -2,7 +2,7 @@
 // menu and its questions, disclaimer, empty form (7 red fields), My Reports,
 // the sample report (Read more, each of the 5 areas, the blocks inside an
 // area, each step of "Your path", copy email, glossary, every item of the
-// index), PDF, calendar, roadmap (49 jobs, ticks kept, every drop-down), 404.
+// index), PDF, Report a problem, roadmap (49 jobs, ticks kept, every drop-down), 404.
 // Run: NODE_PATH=/opt/node22/lib/node_modules node tests/functions.js [base url]
 // Base url: a local server on the repo (default http://localhost:8143/) or https://oneciak.com/.
 const { chromium, devices } = require('playwright'); const fs=require('fs');
@@ -32,23 +32,26 @@ for (const dev of ['tel','pc']) {
  await tap(p.locator('.menu-close')); await W(400);
  T(dev+' menu si chiude', await p.evaluate(()=>!document.getElementById('menuOverlay').classList.contains('open') && !document.getElementById('menuOverlay').classList.contains('is-open')));
  // disclaimer
- await tap(p.locator('.l-btn')); await W(300);
+ await tap(p.locator('#sec-landing .l-btn')); await W(300);
  T(dev+' senza casella: avviso', await p.evaluate(()=>getComputedStyle(document.getElementById('termsError')).display!=='none'));
  // FORM
- await p.evaluate(()=>{document.getElementById('termsCheck').checked=true;}); await tap(p.locator('.l-btn')); await W(700);
+ await p.evaluate(()=>{document.getElementById('termsCheck').checked=true;}); await tap(p.locator('#sec-landing .l-btn')); await W(700);
  T(dev+' modulo si apre', await p.evaluate(()=>document.getElementById('sec-form').getBoundingClientRect().height>300 && getComputedStyle(document.getElementById('sec-form')).display!=='none'));
  const sub=p.locator('#sec-form .btn-primary').first(); await sub.scrollIntoViewIfNeeded(); await tap(sub); await W(900);
  const red=await p.evaluate(()=>document.querySelectorAll('#sec-form .is-invalid').length); T(dev+' modulo vuoto: 7 caselle rosse', red===7, 'rosse '+red);
  T(dev+' modulo vuoto: messaggio', await p.evaluate(()=>/fields are missing/.test(document.getElementById('sec-form').innerText)));
+ const pn=await p.evaluate(()=>{ const c=document.getElementById('country'), l=document.getElementById('language'), o=[c.value,l.value]; c.value='italy'; l.value='english/ arabic'; const r=getProject(); c.value=o[0]; l.value=o[1]; return r.country+' | '+r.language; }); T(dev+' paese e lingua con la maiuscola', pn==='Italy | English / Arabic', pn);
  // MY REPORTS
  await open(p, BASE); await W(500); await p.evaluate(()=>openMyReports()); await W(500);
  T(dev+' My Reports si apre con la casella email', await p.evaluate(()=>!!document.querySelector('#sec-myreports input[type=email]') && document.querySelector('#sec-myreports input[type=email]').offsetParent!==null));
  // REPORT (the sample card's bars must have the report's colours)
  await open(p, BASE); await W(500);
  const cardBars=await p.evaluate(()=>[...document.querySelectorAll('.l-sheet-row .l-bar i')].map(i=>getComputedStyle(i).backgroundColor));
+ const cardNum=await p.evaluate(()=>getComputedStyle(document.querySelector('.l-sheet-score .n')).fontSize);
  await tap(p.locator('.l-sheet')); await W(1300);
  const repBars=await p.evaluate(()=>[...document.querySelectorAll('#accordionMenu .acc-bar i')].map(i=>getComputedStyle(i).backgroundColor));
  T(dev+' barre della scheda come quelle del report', JSON.stringify(cardBars)===JSON.stringify(repBars), JSON.stringify(cardBars)+' vs '+JSON.stringify(repBars));
+ const repNum=await p.evaluate(()=>getComputedStyle(document.querySelector('#overallScore .overall-num')).fontSize); T(dev+' voto della scheda grande come quello del report', cardNum===repNum, cardNum+' vs '+repNum);
  T(dev+' scheda Northbound apre il report', await p.evaluate(()=>document.getElementById('resultTitle').textContent.trim()==='Northbound'));
  if (dev==='tel') { const more=p.locator('#heroMore'); if(await more.count()){ await tap(more); await W(300); T(dev+' Read more apre il riassunto', await p.evaluate(()=>document.getElementById('resultSubtitle').classList.contains('is-open'))); } else T(dev+' Read more presente',false); }
  // areas: tap each, in order and back
@@ -124,14 +127,24 @@ for (const dev of ['tel','pc']) {
   const c2=await b.newContext({viewport:{width:w,height:h}}); const q=await c2.newPage(); await open(q, BASE); await q.evaluate(()=>showSampleReport()); await q.waitForTimeout(900);
   await q.evaluate(()=>{const a=document.querySelector('.r-areas-h'); scrollTo(0,a.getBoundingClientRect().top+scrollY+400);}); await q.waitForTimeout(700);
   const r=await q.evaluate(()=>{const n=document.getElementById('areaNav'); return [n.scrollHeight, n.clientHeight];});
-  T(dev+' colonna del report intera su schermo '+w+'x'+h, r[0]<=r[1]+1, 'alta '+r[0]+' spazio '+r[1]); await c2.close();
+  T(dev+' colonna del report intera su schermo '+w+'x'+h, r[0]<=r[1]+1, 'alta '+r[0]+' spazio '+r[1]);
+  await q.evaluate(()=>scrollTo(0,document.body.scrollHeight)); await q.waitForTimeout(500);
+  const ov=await q.evaluate(()=>{const n=document.getElementById('areaNav').getBoundingClientRect(), f=document.querySelector('#sec-results .r-foot').getBoundingClientRect(); return [Math.round(n.bottom), Math.round(f.top)];});
+  T(dev+' colonna del report sopra il piè di pagina '+w+'x'+h, ov[0]<=ov[1], 'colonna finisce a '+ov[0]+', piè di pagina da '+ov[1]); await c2.close();
  }
  // PDF
  await p.evaluate(()=>scrollTo(0,document.body.scrollHeight)); await W(400);
  try { const [dl]=await Promise.all([p.waitForEvent('download',{timeout:30000}), tap(p.locator('.pdf-row button').first())]); const f=OUT+dev+'_report.pdf'; await dl.saveAs(f); const sz=fs.statSync(f).size; T(dev+' PDF si scarica',sz>100000,sz+' byte'); } catch(e){ T(dev+' PDF si scarica',false,e.message.slice(0,60)); }
- const cal=await p.evaluate(()=>{const b=document.getElementById('calBtn'); return b && !b.hidden;});
- if (cal) { try { const [dl]=await Promise.all([p.waitForEvent('download',{timeout:15000}), tap(p.locator('#calBtn'))]); const f=OUT+dev+'_cal.ics'; await dl.saveAs(f); const t=fs.readFileSync(f,'utf8'); T(dev+' calendario .ics con date', /BEGIN:VEVENT/.test(t), (t.match(/BEGIN:VEVENT/g)||[]).length+' date'); } catch(e){ T(dev+' calendario si scarica',false,e.message.slice(0,60)); } }
- else { const fut=await p.evaluate(()=>{ const r=window.lastResult||{}; const now=Date.now(); return ['festival_calendar','lab_and_market_opportunities','financial_sources'].flatMap(k=>r[k]||[]).map(x=>String(x.deadline||'')).filter(d=>!/closed|not published/i.test(d)).filter(d=>{const t=Date.parse(d.replace(/^[A-Za-z]+,\s*/,'')); return t&&t>now;}); }); T(dev+' calendario nascosto solo senza date future', fut.length===0, fut.join('; ')); }
+ // "Report a problem", on a real full report only (the sample has no report to report against)
+ { const q=await ctx.newPage(); await open(q, BASE); await q.evaluate(()=>showSampleReport()); await q.waitForTimeout(900);
+  T(dev+' esempio: niente Report a problem', await q.evaluate(()=>document.getElementById('helpBtn').hidden));
+  await q.evaluate(()=>{ isSampleReport=false; renderFull(lastResult, lastProject.title); }); await q.waitForTimeout(900);
+  await q.evaluate(()=>document.querySelector('.pdf-card').scrollIntoView({block:'center'})); await q.waitForTimeout(400);
+  await tap(q.locator('#helpBtn')); await q.waitForTimeout(300);
+  T(dev+' Report a problem apre il modulo', await q.evaluate(()=>!document.getElementById('issuePanel').hidden && document.getElementById('helpBtn').getAttribute('aria-expanded')==='true'));
+  await tap(q.locator('#helpBtn')); await q.waitForTimeout(300);
+  T(dev+' Report a problem si richiude', await q.evaluate(()=>document.getElementById('issuePanel').hidden));
+  await q.close(); }
  T(dev+' nessun errore JS', errs.length===0, errs.join(' | ').slice(0,200));
  // ROADMAP
  const r2=await ctx.newPage(); const e2=[]; r2.on('pageerror',e=>e2.push(e.message)); await open(r2, BASE+'roadmap/'); await r2.waitForTimeout(600);

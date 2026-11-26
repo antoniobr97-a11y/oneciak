@@ -3,7 +3,7 @@
 // something looks right, only whether it changed. Views that changed are
 // listed and put first. Writes OUT/foto-prima-dopo.png and .html.
 // Run: OUT=dir NODE_PATH=/opt/node22/lib/node_modules node tests/shots.js https://oneciak.com/ http://localhost:8143/
-const { chromium, devices } = require('playwright'); const fs = require('fs'); const path = require('path');
+const { chromium, devices } = require('playwright'); const fs = require('fs'); const path = require('path'); const { execSync } = require('child_process');
 // Opens a page, trying again up to 3 times: the live site sometimes takes more
 // than 30s to answer one request (seen 24 and 25 Nov 2026), and a network
 // hiccup must not read as a broken site.
@@ -12,15 +12,38 @@ const [A, B] = [process.argv[2] || 'https://oneciak.com/', process.argv[3] || 'h
 const OUT = process.env.OUT || require('os').tmpdir(); fs.mkdirSync(OUT, { recursive: true });
 const report = async p => { await p.evaluate(() => showSampleReport()); await p.waitForTimeout(1200); };
 const at = sel => async p => { await report(p); await p.evaluate(s => { const e = document.querySelector(s); scrollTo(0, e.getBoundingClientRect().top + scrollY - 120); }, sel); await p.waitForTimeout(900); };
+// Waits until no animation is still running: a photo taken mid-animation once
+// showed a home bar empty when it was fine (25 Nov 2026).
+const settle = async p => { for (let i = 0; i < 30; i++) { if (await p.evaluate(() => document.getAnimations().every(a => a.playState !== 'running'))) return; await p.waitForTimeout(100); } };
+// The mail is built on the server, not by the page: "prima" is email.js as on
+// origin/main (what is online), "dopo" the copy in this folder.
+const REPO = path.resolve(__dirname, '..'); const UTIL = path.join(REPO, 'netlify/functions/_util/');
+function mailBuilder(which) {
+  if (which === 1) return require(UTIL + 'email.js').buildReportEmailHtml;
+  const f = path.join(OUT, 'email-main.js');
+  fs.writeFileSync(f, execSync('git show origin/main:netlify/functions/_util/email.js', { cwd: REPO }).toString().replace(/require\('\.\//g, "require('" + UTIL));
+  return require(f).buildReportEmailHtml;
+}
 const views = {
   home: async p => {},
   menu: async p => { await p.evaluate(() => openMenu()); await p.waitForTimeout(500); },
   modulo: async p => { await p.evaluate(() => { document.getElementById('termsCheck').checked = true; onStartClick(); }); await p.waitForTimeout(700); },
+  'modulo fondo': async p => { await p.evaluate(() => { document.getElementById('termsCheck').checked = true; onStartClick(); }); await p.waitForTimeout(700); await p.evaluate(() => document.querySelector('.f-submit').scrollIntoView({ block: 'center' })); await p.waitForTimeout(400); },
+  anteprima: async p => { await report(p); await p.evaluate(() => { renderFree(JSON.parse(JSON.stringify(lastResult)), lastProject.title); scrollTo(0, 0); }); await p.waitForTimeout(900); },
   'report apertura': report,
   'report aree': at('#accordionMenu .r-areas-h'),
   'report your path': at('#accordionMenu .r-path'),
   caricamento: async p => { await p.evaluate(() => { showOnly('sec-loading'); document.getElementById('loadingTitle').textContent = 'Building your full report…'; startFullReportTimer(); }); await p.waitForTimeout(500); },
   'my reports': async p => { await p.evaluate(() => openMyReports()); await p.waitForTimeout(500); },
+  // a view that returns a picture itself (PDF page, mail) replaces the screenshot
+  'PDF copertina': async (p, which, dev) => { await report(p); await p.evaluate(() => scrollTo(0, document.body.scrollHeight)); await p.waitForTimeout(400);
+    const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), p.locator('.pdf-row button').first().click()]);
+    const f = path.join(OUT, `${dev}-pdf-${which}.pdf`); await dl.saveAs(f); execSync(`pdftoppm -png -r 60 -f 1 -l 1 -singlefile "${f}" "${f}"`); return fs.readFileSync(f + '.png'); },
+  // The mail asks oneciak.com for its title font: the browser gave it on the live site and blocked it on
+  // the local copy (another origin), so the same mail looked changed. Both now get it from /fonts here.
+  mail: async (p, which) => { await report(p); const d = await p.evaluate(() => [lastProject, lastResult]); const m = await p.context().newPage();
+    await m.route('https://oneciak.com/fonts/**', r => r.fulfill({ path: path.join(REPO, new URL(r.request().url()).pathname), headers: { 'access-control-allow-origin': '*', 'content-type': 'font/woff2' } }));
+    await m.setContent(mailBuilder(which)(d[0], d[1], 'x'), { waitUntil: 'networkidle' }); await m.evaluate(() => document.fonts.ready); await m.waitForTimeout(300); return m.screenshot(); },
   roadmap: async p => { await open(p, p.url() + 'roadmap/'); await p.waitForTimeout(800); },
   privacy: async p => { await open(p, p.url() + 'privacy.html'); await p.waitForTimeout(500); }
 };
@@ -29,10 +52,10 @@ const views = {
   for (const [dev, opt] of [['telefono', { ...devices['iPhone 13'], deviceScaleFactor: 1 }], ['computer', { viewport: { width: 1280, height: 800 } }]]) {
     for (const [name, go] of Object.entries(views)) {
       const pics = [];
-      for (const base of [A, B]) {
-        const ctx = await b.newContext({ ...opt, colorScheme: 'dark', reducedMotion: 'reduce' }); const p = await ctx.newPage();
-        await open(p, base); await p.waitForTimeout(1500); await go(p); await p.waitForTimeout(400);
-        pics.push(await p.screenshot()); await ctx.close();
+      for (const [which, base] of [A, B].entries()) {
+        const ctx = await b.newContext({ ...opt, colorScheme: 'dark', reducedMotion: 'reduce', acceptDownloads: true }); const p = await ctx.newPage();
+        await open(p, base); await p.waitForTimeout(1500); const own = await go(p, which, dev); await settle(p); await p.waitForTimeout(400);
+        pics.push(own || await p.screenshot()); await ctx.close();
       }
       const same = Buffer.compare(pics[0], pics[1]) === 0;
       const f = n => `${dev}-${name.replace(/ /g, '_')}-${n}.png`;

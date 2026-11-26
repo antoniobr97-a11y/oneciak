@@ -44,8 +44,7 @@ qualità misurata e come provarlo sulla preview #81.
   piattaforme** (`checkListed`): solo se la pagina contiene il nome.
 - **Scadenze** (`closingDateIn`): conta la data dopo "until", "deadline",
   "by", "entro". Anche laboratori e mercati: passata "Closed (...)",
-  assente "Not published on the source, check before planning"; finiscono
-  nel calendario. Aggregatori (`AGGREGATORS`): il nome resta, scadenze,
+  assente "Not published on the source, check before planning". Aggregatori (`AGGREGATORS`): il nome resta, scadenze,
   cifre e citazioni no; un fondo trovato solo su un aggregatore viene tolto
   e con lui le righe di "Before you can apply" che lo nominano
   (`dropStepsForGoneFunds`, che toglie anche quelle dei fondi scartati da
@@ -101,4 +100,5 @@ qualità misurata e come provarlo sulla preview #81.
   `deploy-preview-81--oneciak.netlify.app`, genera i report sulla preview.
   Ha commit "TEST ONLY": MAI su main né mergiata. Per aggiornarla: checkout
   dei file del motore dal branch di lavoro sopra
-  `origin/test-sourced-reports`. Mail di prova a `delivered+X@resend.dev`.
+  `origin/test-sourced-reports`, poi `tests/engine.js` sulla preview
+  (`docs/controlli.md`). Mail di prova a `delivered+X@resend.dev`.

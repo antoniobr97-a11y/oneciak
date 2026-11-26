@@ -256,8 +256,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-sheet-title { display: block; font-family: var(--display); font-weight: 700; font-size: clamp(28px, 8vw, 40px); line-height: 0.95; letter-spacing: -0.05em; overflow-wrap: break-word; }
 .l-sheet-credits { display: block; margin-top: 10px; font-size: 14px; color: var(--on-night-2); }
 .l-sheet-score { display: flex; align-items: baseline; gap: 12px; margin-top: 22px; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.09); }
-.l-sheet-score .n { font-family: var(--display); font-size: 40px; font-weight: 300; letter-spacing: -0.04em; line-height: 1; }
-.l-sheet-score .n small { font-size: 18px; color: var(--on-night-2); }
+.l-sheet-score .n { font-family: var(--display); font-size: 32px; font-weight: 300; letter-spacing: -0.04em; line-height: 1; }
+.l-sheet-score .n small { font-size: 15px; color: var(--on-night-2); }
 .l-sheet-rows { display: block; }
 .l-sheet-row { display: grid; grid-template-columns: 1fr 96px 26px; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.09); font-size: 14px; }
 .l-sheet-row { align-items: start; }
@@ -286,6 +286,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-foot a { color: inherit; text-underline-offset: 2px; display: inline-block; padding: 6px 0; } /* 27px tall: easier to tap */
 .l-foot nav { display: flex; flex-wrap: wrap; gap: 0 18px; }
 .l-foot nav a { white-space: nowrap; }
+/* The report ends on the home's footer, set apart by its line (Antonio, like
+   the end of an Apple page): the legal line as small print, then OneCiak and
+   the two legal pages. */
+.r-foot-legal { flex: 0 0 100%; margin: 0 0 4px; line-height: 1.6; }
+.r-foot-legal[hidden] { display: none; }
+.r-foot { max-width: 928px; margin: 0 auto; padding: 0 24px; } /* out of the report's column, at the end of the page, as wide as the index and the report together (Antonio: "deve essere un piè di pagina") */
+@media (min-width: 1100px) { .r-foot { max-width: 880px; padding-left: 0; padding-right: 0; } }
+@media (max-width: 640px) { .r-foot { padding: 0 20px; } }
 
 /* MENU OVERLAY: the same night as the hero, so opening it feels like the
    page dimming rather than a white sheet sliding over it. Two short
@@ -368,14 +376,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 #sec-form .card { background: transparent; box-shadow: none; border: 0; border-radius: 0; padding: 0 0 44px; margin-bottom: 44px; border-bottom: 1px solid var(--border); }
 #sec-form .card-title { display: flex; gap: 14px; align-items: baseline; font-family: var(--display); font-size: 24px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 28px; color: var(--text); }
 #sec-form label { font-weight: 500; font-size: 14px; margin-bottom: 9px; }
-#sec-form input[type="text"], #sec-form input[type="email"], #sec-form select, #sec-form textarea {
+#sec-form input[type="text"], #sec-form input[type="email"], :is(#sec-form, .issue-form) select, :is(#sec-form, .issue-form) textarea {
   background-color: var(--field); box-shadow: inset 0 0 0 1px transparent; border-radius: 10px; padding: 14px 16px; font-size: 15px;
   transition: background-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
 /* #655e57: 5.2:1 on the field tint, 4.9:1 on its hover state */
-#sec-form input::placeholder, #sec-form textarea::placeholder { color: #655e57; }
-@media (hover: hover) and (pointer: fine) { #sec-form input[type="text"]:hover, #sec-form select:hover, #sec-form textarea:hover { background-color: var(--field-hover); } }
-#sec-form input[type="text"]:focus, #sec-form select:focus, #sec-form textarea:focus { background-color: rgba(255,255,255,0.6); box-shadow: inset 0 0 0 1px rgba(214,120,76,0.6), 0 0 0 4px rgba(214,120,76,0.12); }
+#sec-form input::placeholder, :is(#sec-form, .issue-form) textarea::placeholder { color: #655e57; }
+@media (hover: hover) and (pointer: fine) { #sec-form input[type="text"]:hover, :is(#sec-form, .issue-form) select:hover, :is(#sec-form, .issue-form) textarea:hover { background-color: var(--field-hover); } }
+#sec-form input[type="text"]:focus, :is(#sec-form, .issue-form) select:focus, :is(#sec-form, .issue-form) textarea:focus { background-color: rgba(255,255,255,0.6); box-shadow: inset 0 0 0 1px rgba(214,120,76,0.6), 0 0 0 4px rgba(214,120,76,0.12); }
 #sec-form .disclaimer-box { background: none; padding: 0; margin: 0 0 24px; }
 #sec-form .btn-primary { width: auto; padding: 15px 24px; background: var(--text); }
 #sec-form .error-box { margin-top: 16px; }
@@ -431,21 +439,9 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .disclaimer-text { font-size: 13px; color: var(--muted); line-height: 1.7; }
 .disclaimer-text strong { color: var(--text); font-weight: 600; }
 
-/* Closed box at the end of a real report: "Found an outdated link or a mistake?" */
-.guide-box { border: 1px solid var(--border-light); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
-.guide-box summary { list-style: none; cursor: pointer; padding: 14px 17px; font-size: 14px; font-weight: 600; color: var(--text); display: flex; align-items: center; justify-content: space-between; background: var(--cream); }
-.guide-box summary::-webkit-details-marker { display: none; }
-.guide-box summary::after { content: ''; width: 6px; height: 6px; margin: 0 3px 4px 12px; flex-shrink: 0; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg); transition: transform 0.25s var(--ease); }
-.guide-box[open] summary::after { transform: translateY(4px) rotate(225deg); }
-.guide-box-body { padding: 16px 17px; font-size: 14px; color: var(--text); line-height: 1.7; }
-.guide-box-body p { margin-bottom: 10px; }
-.guide-box-body p:last-child { margin-bottom: 0; }
-.guide-box-body dt { font-weight: 600; color: var(--text); margin-top: 10px; }
-.guide-box-body dt:first-child { margin-top: 0; }
-.guide-box-body dd { color: var(--muted); margin: 2px 0 0; }
 .checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
 .checkbox-row input[type="checkbox"] { width: 17px; height: 17px; margin-top: 2px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
-.checkbox-label { font-size: 13px; color: var(--muted); line-height: 1.6; cursor: pointer; }
+.checkbox-label { font-size: 13px; font-weight: 400; color: var(--muted); line-height: 1.6; cursor: pointer; } /* a sentence, not a field name: the generic label weight (600) made the terms read heavy */
 .inline-error { display: none; font-size: 13px; color: var(--danger); font-weight: 500; margin-bottom: 10px; }
 
 /* ══════════════════════
@@ -455,16 +451,12 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .loading-wrap { text-align: left; padding: 40px 24px; max-width: 420px; width: 100%; position: relative; z-index: 1; }
 .loading-title { font-family: var(--sf); font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 12px; letter-spacing: -0.02em; }
 .loading-desc { font-size: 15px; color: var(--muted); font-weight: 400; line-height: 1.6; max-width: 420px; margin: 0 0 36px; }
-/* Dimension progress — walks through the same 01-05 numbering used on the
-   landing page and results accordion, so the wait itself previews the
-   product's own structure instead of a generic spinner that could belong
-   to any app. Pacing is a plausible staged animation (not literal
-   per-dimension telemetry — the API calls don't expose that granularity),
-   timed to roughly match how long each flow actually takes. */
-/* The five areas, still: no dot that "advances" (it walked on a timer, not on
-   the real work, Antonio: "sa di AI"). Rows like the form's side steps. */
-.loading-dims { display: flex; flex-direction: column; text-align: left; border-top: 1px solid color-mix(in srgb, currentColor 14%, transparent); }
-.loading-dim { padding: 12px 0; border-bottom: 1px solid color-mix(in srgb, currentColor 14%, transparent); }
+/* One thin line with a segment that runs across it: it says "working" and
+   never a percentage, because the real progress is not known (a bar that
+   fills would be a fake). The five still rows looked frozen (Antonio). */
+.loading-line { height: 2px; border-radius: 2px; overflow: hidden; background: color-mix(in srgb, currentColor 14%, transparent); }
+.loading-line span { display: block; width: 32%; height: 100%; border-radius: 2px; background: currentColor; animation: loading-run 1.6s var(--ease) infinite; }
+@keyframes loading-run { from { transform: translateX(-100%); } to { transform: translateX(313%); } } /* 313% of a 32% segment ends just past the right edge: further, it waited unseen */
 
 .loading-timer { margin-top: 28px; max-width: 40ch; font-size: 14px; line-height: 1.5; color: var(--muted); } /* one plain sentence: the running clock in a pill with a pulsing dot read as an AI chat (Antonio) */
 
@@ -587,11 +579,21 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .pdf-card { background: var(--cream); border: none; border-radius: var(--radius-lg); padding: 24px 22px; margin-bottom: 16px; margin-top: 28px; }
 .pdf-row { display: flex; gap: 9px; }
 .pdf-row button[hidden] { display: none; }
-@media (min-width: 641px) { .pdf-card .pdf-row button { width: auto; min-width: 280px; } }
+/* The home's start button, at the end of the report (Antonio: "nello stessa
+   maniera del bottone nella home"); dark on the light page. */
+.again-btn { margin: 4px 0 0; }
+/* Under the row of buttons, what "Report a problem" opens: the form (it was a closed box with a long question, Antonio:
+   "non mi piace, piuttosto un pulsante aiuto"). */
+.row-panel { margin-top: 16px; max-width: 560px; font-size: 14px; line-height: 1.6; color: var(--text); }
+.row-panel[hidden] { display: none; }
+.row-panel > p { color: var(--muted); margin: 0 0 12px; }
+.issue-form select, .issue-form textarea { display: block; width: 100%; margin-bottom: 10px; }
+.issue-send { width: auto; padding: 13px 20px; background: var(--text); font-size: 15px; }
+.issue-status { margin-top: 8px; font-size: 13px; }
+@media (min-width: 641px) { .pdf-row { display: grid; grid-template-columns: repeat(2, minmax(0, 280px)); } .pdf-card .pdf-row button { width: 100%; } } /* two per row, like the rest of the report's grid */
 .pdf-row button { width: 100%; padding: 13px 20px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--sf); font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background 0.2s, transform 0.15s ease-out; }
 @media (hover: hover) and (pointer: fine) { .pdf-row button:hover { background: var(--accent-hover); } }
 .success-msg { background: var(--success-wash); border: none; border-radius: var(--radius); padding: 12px 16px; font-size: 14px; color: var(--success); margin-top: 11px; display: none; text-align: center; }
-.footer-note { text-align: center; font-size: 13px; color: var(--muted-light); padding-top: 24px; line-height: 1.7; font-weight: 400; }
 
 /* ══════════════════════
    RESULTS / LOADING
@@ -615,7 +617,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 }
 #sec-results .r-hero-inner, #sec-myreports .r-hero-inner { position: relative; z-index: 1; }
 .r-title { font-family: var(--display); font-size: clamp(40px, 6vw, 72px); font-weight: 700; letter-spacing: -0.035em; line-height: 1; color: var(--on-night); margin-bottom: 20px; }
-.r-summary { font-size: 18px; line-height: 1.55; color: var(--on-night-2); max-width: 60ch; }
+.r-summary { font-size: 15px; line-height: 1.6; color: var(--on-night-2); max-width: 62ch; margin-top: 10px; } /* the report's own voice, at the size of the rest of the report: at 18px like the logline above, white and grey read as a mistake (Antonio) */
 /* The film's name set like a poster (Antonio, 12 Nov 2026: "come A24"):
    as wide as the column, sized by fitTitle(); its credits and logline
    under it, the way a one-sheet bills a film. */
@@ -629,8 +631,8 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
 }
 .overall-sublabel { font-size: 15px; color: var(--on-night-2); } /* a plain fact, not the model's three-word verdict ("Promising intimate concept, underdeveloped" read as AI, Antonio) */
-.overall-num { font-family: var(--display); font-size: 48px; font-weight: 300; letter-spacing: -0.04em; color: var(--on-night) !important; }
-.overall-num .denom { font-family: var(--display); font-size: 18px; font-weight: 300; color: var(--on-night-2); }
+.overall-num { font-family: var(--display); font-size: 32px; font-weight: 300; letter-spacing: -0.04em; color: var(--on-night) !important; } /* 32px on every screen and on the home card: 48 then 40 still read too big (Antonio, 26 Nov 2026) */
+.overall-num .denom { font-family: var(--display); font-size: 15px; font-weight: 300; color: var(--on-night-2); }
 #overallScore > div:last-child:not(.overall-card) { color: var(--on-night-2) !important; font-weight: 400 !important; padding: 0 !important; margin-top: 14px !important; font-size: 13px !important; }
 /* the night hero above is the "header"; the body starts right at the dissolve */
 /* body column lines up exactly with the header text: same max width plus
@@ -643,9 +645,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .exec-box { border-radius: 10px; }
 .exec-box.risk { background: rgba(177,50,37,0.07); }
 .exec-box.opp { background: rgba(15,122,61,0.07); }
-.guide-box { border: 0; border-top: 1px solid var(--border); border-radius: 0; margin-bottom: 0; background: transparent; }
-.guide-box summary { background: transparent; padding: 16px 0; font-weight: 500; }
-.guide-box-body { padding: 0 0 18px; }
 #accordionMenu { margin-top: 28px; }
 .accordion-wrap { margin-top: 0; border-top: 1px solid var(--text) !important; overflow: visible; }
 .accordion-item { border-bottom: 1px solid var(--border); }
@@ -661,11 +660,10 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #accordionMenu .accordion-score-wrap { min-width: 76px; }
 @media (max-width: 640px) { .acc-bar { flex-basis: 56px; margin: 0 2px; } #accordionMenu .accordion-score-wrap { min-width: 62px; } }
 .pdf-card { border-top: 1px solid var(--border) !important; padding-top: 24px; margin-top: 36px; }
+#upgradeSection:empty + .pdf-card { border-top: 0 !important; padding-top: 0; margin-top: 32px; } /* full report: the path above already ends on a line; two lines with a gap between read as a hole */
 .pdf-row button { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; white-space: normal; padding: 14px 16px; background: var(--field); color: var(--text); font-weight: 500; }
 .pdf-row button small { font-size: 13px; font-weight: 400; color: var(--muted); }
 @media (hover: hover) and (pointer: fine) { .pdf-row button:hover { background: var(--field-hover); } }
-.pdf-note { margin-top: 12px; font-size: 13px; color: var(--muted); line-height: 1.5; }
-.pdf-card + .btn-secondary { width: auto; padding: 14px 0; text-align: left; display: block; }
 /* Full report request: no card, a hairline and a mono label like every
    other section, text on the left, field in the same tint as the form. */
 .unlock { border-top: 1px solid var(--border); margin-top: 36px; padding-top: 24px; }
@@ -679,8 +677,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .unlock .checkbox-row { max-width: 560px; text-align: left; }
 .unlock .btn-unlock { width: auto; padding: 15px 22px; background: var(--text); margin-top: 6px; }
 @media (max-width: 600px) { .unlock-title { font-size: 24px; } .unlock .btn-unlock { width: 100%; } .unlock-field { max-width: none; } }
-#sec-results .disclaimer-box, #sec-myreports .disclaimer-box { background: none; padding: 0; }
-#sec-results .footer-note { text-align: left; }
 .tip-link { background: var(--field); }
 /* MY REPORTS: same header as results; sign-in is a plain field on the
    paper, the list is hairline rows (date, title, arrow), not boxes. */
@@ -787,7 +783,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .path-step .rblock-body { padding-left: 36px; }
 @media (max-width: 600px) { .path-step .rblock-body { padding-left: 0; } }
 .path-step .sub-k { display: block; margin: 6px 0 10px; }
-.r-path .r-road { margin-top: 28px; }
 .rblock-names { order: 3; flex-basis: 100%; margin-top: 2px; font-size: 14px; line-height: 1.45; color: var(--muted); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
  /* the phase name carries the step, the detail reads lighter */
 .rblock[open] > .rblock-body { animation: openIn 0.22s var(--ease) both; }
@@ -807,20 +802,13 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .entry-sub { margin-top: 4px; font-size: 13px; line-height: 1.5; color: var(--muted); }
 .entry-quote { margin: 12px 0 0; }
 .entry-quote blockquote { margin-top: 4px; font-size: 15px; line-height: 1.55; font-style: italic; color: var(--text); }
-.the-ask { margin: 24px 0 8px; display: flex; flex-direction: column; gap: 6px; font-size: 18px; font-weight: 700; line-height: 1.45; color: var(--text); max-width: 62ch; }
+.the-ask { margin: 20px 0 8px; font-size: 15px; line-height: 1.55; color: var(--text); max-width: 62ch; } /* same lead word as Biggest risk; 18px bold read bigger than the rest of the report (Antonio) */
 .entry .src-line { margin-top: 10px; }
 
 .sub-k { font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
 .sub-k:first-child { margin-top: 0; }
 .pitch { margin: 0; padding-left: 14px; border-left: 1px solid var(--muted); font-size: 15px; line-height: 1.65; font-style: italic; color: var(--text); max-width: 66ch; }
 
-.r-road { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: baseline; margin: 0 0 36px; padding: 14px 2px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); color: var(--text); text-decoration: none; transition: transform 0.15s ease-out; }
-.accordion-wrap + .r-road { margin-top: 28px; }
-#upgradeSection + .guide-box { margin-top: 32px; }
-.r-road-k { font-size: 14px; color: var(--muted); }
-.r-road-t { font-size: 15px; font-weight: 700; }
-.r-road-d { grid-column: 2; font-size: 14px; line-height: 1.5; color: var(--muted); text-decoration: underline; text-decoration-color: rgba(22,22,22,0.3); text-underline-offset: 3px; }
-@media (hover: hover) and (pointer: fine) { .r-road:hover .r-road-d { color: var(--text); text-decoration-color: currentColor; } }
 
 /* REPORT INDEX: the three questions the report answers plus the plan, with the
    five areas and their scores under "Does my film stand up?". Wide screens: a
@@ -888,19 +876,17 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #sec-loading { background: var(--night); color: var(--on-night); overflow: hidden; }
 #sec-loading .loading-title { color: var(--on-night); }
 #sec-loading .loading-desc { color: var(--on-night-2); }
-#sec-loading .loading-dim-name { color: var(--on-night); }
+#sec-loading .loading-line { color: var(--on-night); }
 #sec-loading .loading-timer { color: var(--on-night-2); }
 #sec-loading .btn-primary { background: var(--on-night); color: var(--night); }
 
 /* LOADING: light display title, mono step numbers, no filled circles */
 .loading-wrap { max-width: 520px; }
 .loading-title { font-family: var(--display); font-size: clamp(30px, 5vw, 40px); font-weight: 700; letter-spacing: -0.03em; }
-.loading-dim-name { font-family: var(--display); font-size: 16px; font-weight: 500; letter-spacing: -0.01em; }
 @media (max-width: 640px) {
   #sec-results .r-hero, #sec-myreports .r-hero { padding: 108px 20px 200px; }
   #sec-results .r-main, #sec-myreports .r-main { padding-left: 20px; padding-right: 20px; }
   .overall-card { padding: 20px; }
-  .overall-num { font-size: 40px; }
 }
 
 /* ══════════════════════
@@ -1015,10 +1001,10 @@ details.more .prose { margin-top: 12px; }
 :is(.l-btn, .menu-cta, .btn-primary, .btn-unlock, .btn-secondary, .copy-btn, .back-btn, .l-nav-reports, .hamburger, .menu-close, .an-top, .an-item, .an-sec, .r-more, .l-logo, .menu-logo, .f-logo, .r-logo, .pdf-row button, .src-line, .l-foot a, .menu-legal a, .sample-banner a, .tip-link, #loadingRetryBtn, #sec-results .back-btn, #sec-myreports .back-btn):active { transform: scale(0.97); }
 .menu-legal a, .sample-banner a { display: inline-block; }
 #areaNav :is(.an-item, .an-sec) { transition: transform 160ms var(--ease), opacity 160ms var(--ease), background-color 160ms var(--ease), border-color 160ms var(--ease), color 0.3s var(--ease), padding-left 0.3s var(--ease), box-shadow 0.3s var(--ease); }
-:is(.accordion-trigger, details > summary, .l-sheet, .r-road, .mr-row, #sec-results details > summary, #menuOverlay details > summary) {
+:is(.accordion-trigger, details > summary, .l-sheet, .mr-row, #sec-results details > summary, #menuOverlay details > summary) {
   transition-property: transform, background-color, border-color, color; transition-duration: 160ms; transition-timing-function: var(--ease);
 }
-:is(.accordion-trigger, details > summary, .l-sheet, .r-road, .mr-row, #sec-results details > summary, #menuOverlay details > summary):active { transform: scale(0.99); }
+:is(.accordion-trigger, details > summary, .l-sheet, .mr-row, #sec-results details > summary, #menuOverlay details > summary):active { transform: scale(0.99); }
 
 /* ══════════════════════
    LIGHT AND DARK (Antonio): the site follows the device.
@@ -1032,7 +1018,7 @@ details.more .prose { margin-top: 12px; }
   .l-hero, .l-nav, .menu-overlay, #sec-results, #sec-myreports, #sec-loading { --night: #ffffff; --on-night: #161616; --on-night-2: #47423e; }
   /* white means white (Antonio): no satin sheen, no grain, no cream */
   /* fields are solid, so the colour at the edges never shows through them */
-  #sec-form input[type="text"]:focus, #sec-form select:focus, #sec-form textarea:focus, .unlock-field input:focus, #sec-myreports input[type="email"]:focus { background-color: #ffffff; }
+  #sec-form input[type="text"]:focus, :is(#sec-form, .issue-form) select:focus, :is(#sec-form, .issue-form) textarea:focus, .unlock-field input:focus, #sec-myreports input[type="email"]:focus { background-color: #ffffff; }
   :root { --paper: #ffffff; --cream: #f5f5f4; --border: #e2e0dd; --border-light: #ecebe9; --field: #f4f4f3; --field-hover: #ededec; }
   body { background: #ffffff; }
   /* Small text slightly darker in light mode . */
@@ -1068,6 +1054,8 @@ details.more .prose { margin-top: 12px; }
   .l-nav { border-bottom-color: rgba(20,18,16,0.07); }
   .l-nav-reports { border-color: rgba(20,18,16,0.18); }
   @media (hover: hover) and (pointer: fine) { .l-btn:hover, .menu-cta:hover { background: #000; } }
+  .again-btn { background: var(--text); color: #fff; }
+  .again-btn:focus-visible { outline-color: var(--text); }
   .l-terms input[type="checkbox"] { border-color: rgba(20,18,16,0.3); background: rgba(255,255,255,0.5); }
   .l-terms label { color: #3a3a3a; } /* stays over 4.5:1 where the warm glow reaches the text on phones */
   .l-terms-error { color: var(--danger); }
@@ -1149,9 +1137,9 @@ details.more .prose { margin-top: 12px; }
   .btn-primary, .btn-unlock, #sec-form .btn-primary, .unlock .btn-unlock { background: var(--on-night); color: var(--night); }
   @media (hover: hover) and (pointer: fine) { .btn-primary:hover, .btn-unlock:hover { background: #fff; } }
   .tip-link { color: var(--text); }
-  details.more > summary, .r-road-d { text-decoration-color: rgba(242,237,230,0.4); }
+  details.more > summary { text-decoration-color: rgba(242,237,230,0.4); }
   input::placeholder, textarea::placeholder, #sec-form input::placeholder, #sec-form textarea::placeholder, #sec-myreports input[type="email"]::placeholder { color: #8f8880; }
-  #sec-form input[type="text"]:focus, #sec-form select:focus, #sec-form textarea:focus, .unlock-field input:focus, #sec-myreports input[type="email"]:focus { background-color: rgba(255,255,255,0.08); }
+  #sec-form input[type="text"]:focus, :is(#sec-form, .issue-form) select:focus, :is(#sec-form, .issue-form) textarea:focus, .unlock-field input:focus, #sec-myreports input[type="email"]:focus { background-color: rgba(255,255,255,0.08); }
   select option { color: #141210; background: #f2ede6; }
 }
 /* GLOSSARY ON THE WORD: the first time a term appears in each part of the
@@ -1452,13 +1440,7 @@ details.more .prose { margin-top: 12px; }
   <div class="loading-wrap">
     <div class="loading-title" id="loadingTitle">Reading your project</div>
     <div class="loading-desc" id="loadingDesc">Scoring your project across the five areas.</div>
-    <div class="loading-dims" id="loadingDims">
-      <div class="loading-dim"><span class="loading-dim-name">Creative package</span></div>
-      <div class="loading-dim"><span class="loading-dim-name">Financial plan</span></div>
-      <div class="loading-dim"><span class="loading-dim-name">Market and audience</span></div>
-      <div class="loading-dim"><span class="loading-dim-name">Festival strategy</span></div>
-      <div class="loading-dim"><span class="loading-dim-name">Distribution and revenue</span></div>
-    </div>
+    <div class="loading-line" aria-hidden="true"><span></span></div>
     <div class="loading-timer" id="loadingTimer" style="display:none"></div>
     <button class="btn-primary" id="loadingRetryBtn" style="display:none;margin-top:20px;max-width:280px" onclick="retryLastAction()">Try again<svg class="ic" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8.5M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
@@ -1486,39 +1468,32 @@ details.more .prose { margin-top: 12px; }
 
     <div id="accordionMenu" class="reveal" style="display:none"></div>
     <div id="upgradeSection"></div>
-    <div class="guide-box reveal" id="reportIssueBox" style="display:none">
-      <details>
-        <summary>Found an outdated link or a mistake in this report? Let us know</summary>
-        <div class="guide-box-body">
-          <p style="margin-top:0">We automatically check that every link in this report works before sending it, but if something still slipped through (a dead link, a festival date that's already passed, anything else), telling us helps us fix it fast.</p>
-          <select id="reportIssueCategory" style="width:100%;margin-bottom:8px;padding:8px">
-            <option value="A link doesn't work">A link doesn't work</option>
-            <option value="A date or deadline is wrong">A date or deadline is wrong</option>
-            <option value="Something else">Something else</option>
-          </select>
-          <textarea id="reportIssueMessage" rows="3" maxlength="2000" placeholder="What's wrong? (e.g. which section, what you found)" style="width:100%;box-sizing:border-box;margin-bottom:8px;padding:8px;font-family:inherit"></textarea>
-          <button type="button" class="btn-secondary" onclick="submitReportIssue()" id="reportIssueSubmitBtn">Send</button>
-          <div id="reportIssueStatus" style="margin-top:8px;font-size:13px"></div>
-        </div>
-      </details>
-    </div>
-
     <div class="pdf-card reveal">
       <div class="pdf-row">
         <button onclick="savePDF()"><span id="pdfMainLabel">Download this preview</span><small id="pdfMainSub">PDF, all sections</small></button>
-        <button onclick="saveCalendar()" id="calBtn" hidden><span>Add the deadlines to your calendar</span><small id="calSub"></small></button>
+        <button onclick="togglePanel('issuePanel', this)" id="helpBtn" aria-expanded="false" aria-controls="issuePanel" hidden><span>Report a problem</span><small>A link that fails, a date that is wrong</small></button>
       </div>
-      <p class="pdf-note" id="pdfNote">The full report is not included here, it arrives by email.</p>
+      <div class="row-panel issue-form" id="issuePanel" hidden>
+        <p>Every link is checked before the report is sent, but a page can change. Tell us what you found and we fix it.</p>
+        <select id="reportIssueCategory" aria-label="What kind of problem">
+          <option value="A link doesn't work">A link doesn't work</option>
+          <option value="A date or deadline is wrong">A date or deadline is wrong</option>
+          <option value="Something else">Something else</option>
+        </select>
+        <textarea id="reportIssueMessage" rows="3" maxlength="2000" aria-label="What's wrong" placeholder="What's wrong? (e.g. which section, what you found)"></textarea>
+        <button type="button" class="btn-unlock issue-send" onclick="submitReportIssue()" id="reportIssueSubmitBtn">Send</button>
+        <div id="reportIssueStatus" class="issue-status"></div>
+      </div>
       <div class="success-msg" id="pdfSuccess">PDF saved. Check your downloads.</div>
-      <div class="success-msg" id="calSuccess">Calendar file saved. Open it to add the dates to your calendar.</div>
       <div class="inline-error" id="pdfError" role="alert" style="margin-top:12px"></div>
     </div>
-    <button class="btn-secondary" id="againBtn" onclick="goLanding()">Analyze another project</button>
-    <div class="disclaimer-box" style="margin-top:14px">
-      <div class="disclaimer-text"><strong>Legal Disclaimer:</strong> Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. OneCiak assumes no liability. Results are estimates and do not guarantee any outcome. OneCiak is not a licensed consulting firm.</div>
-    </div>
-    <p class="footer-note">OneCiak, a market report for your film · oneciak.com · <a href="/privacy.html" style="text-decoration:underline;text-underline-offset:2px">Privacy Policy</a> · <a href="/terms.html" style="text-decoration:underline;text-underline-offset:2px">Terms of Service</a></p>
+    <button class="l-btn again-btn" id="againBtn" onclick="goLanding()">Analyze another project</button>
   </div>
+  <footer class="r-foot"><div class="l-foot">
+    <p class="r-foot-legal" id="resultsDisclaimer">Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. OneCiak assumes no liability. Results are estimates and do not guarantee any outcome. OneCiak is not a licensed consulting firm.</p>
+    <span>OneCiak, a market report for your film</span>
+    <nav><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></nav>
+  </div></footer>
 </div>
 
 <div id="sec-myreports" style="display:none">
@@ -1780,6 +1755,20 @@ function getGenre() {
 }
 
 /* ── PROJECT ── */
+/* Country and language as names ("italy" -> "Italy", "english/ arabic" ->
+   "English / Arabic"); words typed with capitals stay as typed. Same as
+   properName in netlify/functions/_util/project.js. */
+function properName(s) {
+  if (s === 'Not specified') return s;                       // the form's own default, compared elsewhere
+  return String(s).replace(/\s*\/\s*/g, ' / ').replace(/\s*,\s*/g, ', ').replace(/\s+/g, ' ').trim()
+    .replace(/[^\s\/,()-]+/g, function (w, i) {
+      if (w !== w.toLowerCase()) return w;                     // typed with capitals: kept (USA, McAllen)
+      if (i > 0 && /^(of|and|the|da|di|del|della|de|e|y)$/.test(w)) return w;
+      var m = /^([dl]')(.+)$/.exec(w);                          // d'ivoire -> d'Ivoire
+      if (m) return m[1] + m[2].charAt(0).toUpperCase() + m[2].slice(1);
+      return w.charAt(0).toUpperCase() + w.slice(1);
+    });
+}
 function getProject() {
   return {
     title:      document.getElementById('title').value.trim(),
@@ -1789,8 +1778,8 @@ function getProject() {
     budget:     getBudgetValue(),
     audience:   document.getElementById('audience').value,
     distrib:    document.getElementById('distrib').value,
-    country:    document.getElementById('country').value.trim() || 'Not specified',
-    language:   document.getElementById('language').value.trim() || 'Not specified',
+    country:    properName(document.getElementById('country').value) || 'Not specified',
+    language:   properName(document.getElementById('language').value) || 'Not specified',
     experience: document.getElementById('experience').value || 'Not specified',
     stage:      document.getElementById('stage').value,
     producer:   document.getElementById('producer').value || 'Not specified',
@@ -2072,7 +2061,7 @@ async function generateFullReport() {
   document.getElementById('againBtn').style.display = '';
   document.getElementById('loadingRetryBtn').style.display = 'none';
   document.getElementById('loadingTitle').textContent = 'Building your full report…';
-  document.getElementById('loadingDesc').textContent = 'Your project is being read across these five areas, with real names and sources for each.';
+  document.getElementById('loadingDesc').textContent = 'Your project is being read across the five areas, with real names and sources for each.';
   showOnly('sec-loading');
   startFullReportTimer();
 
@@ -2126,9 +2115,12 @@ function retryLastAction() {
 
 // The main PDF holds whatever is on screen: the preview, or the full report.
 function setPdfLabels() {
+  document.getElementById('issuePanel').hidden = true; document.getElementById('helpBtn').setAttribute('aria-expanded', 'false');
+  if (!isFullReport) document.getElementById('helpBtn').hidden = true;
   document.getElementById('pdfMainLabel').textContent = isFullReport ? 'Download the full report' : 'Download this preview';
   document.getElementById('pdfMainSub').textContent = isFullReport ? 'PDF, every area and the business plan page' : 'PDF, all sections';
-  document.getElementById('pdfNote').style.display = isFullReport ? 'none' : 'block';
+  // the preview already says it in the box to tick above, a few lines up: once per page, never twice (Antonio)
+  document.getElementById('resultsDisclaimer').hidden = !isFullReport;
 }
 function scoreColor(s) { return s >= 7 ? 'high' : s >= 5 ? 'mid' : 'low'; }
 
@@ -2155,7 +2147,7 @@ function renderFree(r, title) {
       '<div class="exec-box risk"><p class="exec-box-text"><b class="exec-lead">Biggest risk.</b> '+esc(r.biggest_risk)+'</p></div>'+
       '<div class="exec-box opp"><p class="exec-box-text"><b class="exec-lead">Biggest opportunity.</b> '+esc(r.biggest_opportunity)+'</p></div>'+
       '</div>' : '')+
-    (r.next_step ? '<div class="the-ask"><span class="fact-k">Your next step</span>'+esc(r.next_step)+'</div>' : '')+
+    (r.next_step ? '<p class="the-ask"><b class="exec-lead">Your next step.</b> '+esc(r.next_step)+'</p>' : '')+
     '</div>';
 
   // Free accordion — same structure, limited content + blurred preview
@@ -2205,15 +2197,14 @@ function renderFree(r, title) {
   });
   html += '</div>';
 
-  document.getElementById('accordionMenu').innerHTML = html + execCard + roadmapBlock(lastProject);
+  document.getElementById('accordionMenu').innerHTML = html + execCard;
   document.getElementById('accordionMenu').style.display = 'block';
   mountReportNav(freeSections);
-  setCalendarButton(null);
 
   document.getElementById('upgradeSection').innerHTML =
     '<div class="unlock">'+
     '<h3 class="unlock-title">Get the full report by email, free.</h3>'+
-    '<p class="unlock-desc">Each of the five areas in depth, then a step by step path: producers, funds, festivals and sales agents, each with the page it came from. It takes a few minutes to write, so we email it to you when it\'s ready.</p>'+
+    '<p class="unlock-desc">Producers, funds, festivals and sales agents for your film, each with the page it came from. It arrives by email in a few minutes.</p>'+
     '<div class="field unlock-field"><label for="fullReportEmail">Your email</label><input type="email" id="fullReportEmail" placeholder="you@example.com" autocomplete="email" inputmode="email"></div>'+
     '<div class="checkbox-row"><input type="checkbox" id="fullTerms"><label class="checkbox-label" for="fullTerms">I understand this is AI-generated analysis for informational purposes only. Not professional, legal or financial advice. OneCiak is not a licensed consulting firm.</label></div>'+
     '<div class="inline-error" id="unlockError">Please accept the terms to continue.</div>'+
@@ -2312,7 +2303,7 @@ function renderFull(r, title) {
 
   // Only a real, persisted full report has a session_id/token to flag an
   // issue against — hide it for the fictional sample report entirely.
-  document.getElementById('reportIssueBox').style.display = isSampleReport ? 'none' : 'block';
+  document.getElementById('helpBtn').hidden = !!isSampleReport;
   document.getElementById('reportIssueMessage').value = '';
   document.getElementById('reportIssueStatus').textContent = '';
   document.getElementById('reportIssueSubmitBtn').disabled = false;
@@ -2368,7 +2359,6 @@ function renderFull(r, title) {
 
   // Does my film stand up (the five areas), then the path to make it.
   document.getElementById('accordionMenu').innerHTML = html + buildPath(r, lastProject);
-  setCalendarButton(r);
   document.getElementById('accordionMenu').style.display = 'block';
   mountReportNav(sections);
   document.getElementById('upgradeSection').innerHTML = '';
@@ -2513,14 +2503,6 @@ function accScore(score) {
 }
 /* Link to the film roadmap (/roadmap/) at the stage the project is at, so
    the report connects to the full list of jobs for that stage. */
-var ROADMAP_STAGES = ['Idea and script', 'Rights and company', 'Budget and schedule', 'Financing', 'Pre-production', 'Shooting', 'Post-production', 'Festivals', 'Sales and release'];
-var STAGE_TO_ROADMAP = { 'Idea / treatment': 1, 'Writing the script': 1, 'Script ready, looking for funding': 4, 'Funded, preparing to shoot': 5, 'Shooting': 6, 'In post-production': 7, 'Finished': 8 };
-function roadmapBlock(project) {
-  var n = project && STAGE_TO_ROADMAP[project.stage];
-  if (!n) return '<a class="r-road" href="/roadmap/"><span class="r-road-k">Film roadmap</span><span class="r-road-t">Every job between your idea and your release</span><span class="r-road-d">Nine stages, with the rules that apply quoted from official sources</span></a>';
-  var note = n === 4 ? 'Funders check rights and budget first, stages 2 and 3' : 'Every job in this stage, with the rules that apply quoted from official sources';
-  return '<a class="r-road" href="/roadmap/#stage-'+n+'"><span class="r-road-k">Your stage</span><span class="r-road-t">'+n+' of 9 · '+ROADMAP_STAGES[n-1]+'</span><span class="r-road-d">'+note+'</span></a>';
-}
 function goToArea(i) {
   var body = document.getElementById('acc-body-'+i);
   var trigger = document.getElementById('acc-trigger-'+i);
@@ -2650,7 +2632,11 @@ function mountReportNav(sections) {
     if (window.innerWidth >= 1100 && parts.length) {
       var y = 0, e = parts[0].el;
       while (e) { y += e.offsetTop; e = e.offsetParent; }
-      nav.style.top = Math.max(112, Math.round(y - window.scrollY)) + 'px';
+      var top = Math.max(112, Math.round(y - window.scrollY));
+      // and at the end it rides up with the page footer, never over it
+      var foot = host.querySelector('.r-foot');
+      if (foot) top = Math.min(top, Math.round(foot.getBoundingClientRect().top - 40 - nav.offsetHeight));
+      nav.style.top = top + 'px';
     }
     else nav.style.top = '';
   };
@@ -2907,7 +2893,7 @@ function buildPath(r, project) {
   if (agents.length) steps.push(['Find who sells it', 'Sales agents to approach when the film is ready.', agents.map(function(a){ return a.name; }), agentsBody(agents)]);
   var h = '', n = 0;
   steps.forEach(function(st){ var row = pathStep(n + 1, st[0], st[1], st[2], st[3]); if (row) { n++; h += row; } });
-  return h ? '<section class="r-path"><h2 class="r-plan-h">Your path</h2><div class="rblocks">'+h+'</div>'+roadmapBlock(project)+'</section>' : '';
+  return h ? '<section class="r-path"><h2 class="r-plan-h">Your path</h2><div class="rblocks">'+h+'</div></section>' : '';
 }
 /* How a producer takes projects: its own sentence, on its own site, word
    for word (grounding.js, checkApproach), with the page it is on. */
@@ -3537,67 +3523,9 @@ async function savePDF() {
   } catch(e) { pdfFail('The PDF could not be created. Try again, and check that your browser allows downloads.'); }
 }
 
-/* DEADLINES TO THE CALENDAR. The report is read once, the
-   deadlines come later: the future fund and festival dates go into an .ics
-   file the filmmaker's own calendar opens, with a reminder a week before.
-   Built in the browser, nothing is sent or stored anywhere. */
-var MONTHS = ['january','february','march','april','may','june','july','august','september','october','november','december'];
-function deadlineEvents(r) {
-  var out = [], today = new Date(); today.setHours(0,0,0,0);
-  function add(list, nameKey, kind) {
-    (list || []).forEach(function(it){
-      if (!it || !it.deadline || isClosed(it.deadline)) return;
-      var re = /\b(\d{1,2}) (January|February|March|April|May|June|July|August|September|October|November|December) (\d{4})\b/gi, m;
-      while ((m = re.exec(String(it.deadline)))) {
-        var d = new Date(Number(m[3]), MONTHS.indexOf(m[2].toLowerCase()), Number(m[1]));
-        if (d >= today) out.push({ date: d, title: kind+': '+it[nameKey], note: String(it.deadline), url: it.source || it.url || '' });
-      }
-    });
-  }
-  add(r && r.financial_sources, 'name', 'Fund deadline');
-  add(r && r.festival_calendar, 'festival', 'Festival deadline');
-  add(r && r.lab_and_market_opportunities, 'name', 'Lab deadline');
-  return out.sort(function(a, b){ return a.date - b.date; });
+function togglePanel(id, btn) {
+  var p = document.getElementById(id); p.hidden = !p.hidden; btn.setAttribute('aria-expanded', String(!p.hidden));
 }
-function setCalendarButton(r) {
-  var btn = document.getElementById('calBtn');
-  var n = r ? deadlineEvents(r).length : 0;
-  btn.hidden = !n;
-  if (n) document.getElementById('calSub').textContent = (n === 1 ? '1 upcoming date' : n+' upcoming dates')+', with a reminder a week before';
-}
-function icsText(s) { return String(s).replace(/\\/g, '\\\\').replace(/[,;]/g, function(c){ return '\\'+c; }).replace(/\n/g, '\\n'); }
-function icsDate(d) { return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'); }
-function saveCalendar() {
-  var ev = deadlineEvents(lastResult);
-  if (!ev.length) return;
-  var stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z');
-  var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//OneCiak//Report deadlines//EN', 'CALSCALE:GREGORIAN'];
-  ev.forEach(function(e, i){
-    var next = new Date(e.date); next.setDate(next.getDate() + 1);
-    lines.push('BEGIN:VEVENT', 'UID:'+icsDate(e.date)+'-'+i+'-'+stamp+'@oneciak.com', 'DTSTAMP:'+stamp,
-      'DTSTART;VALUE=DATE:'+icsDate(e.date), 'DTEND;VALUE=DATE:'+icsDate(next),
-      'SUMMARY:'+icsText(e.title), 'DESCRIPTION:'+icsText('As the source states it: '+e.note+'. Check the official page before applying.'+(e.url ? ' '+e.url : '')),
-      (e.url ? 'URL:'+e.url : ''), 'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:'+icsText(e.title), 'TRIGGER:-P7D', 'END:VALARM', 'END:VEVENT');
-  });
-  lines.push('END:VCALENDAR');
-  // RFC 5545: lines over 75 octets are folded (CRLF + space); 60 characters
-  // keeps accented text under the limit.
-  var body = lines.filter(Boolean).map(function(l){
-    var parts = [];
-    while (l.length > 60) { parts.push(l.slice(0, 60)); l = l.slice(60); }
-    parts.push(l);
-    return parts.join('\r\n ');
-  }).join('\r\n')+'\r\n';
-  var blob = new Blob([body], { type: 'text/calendar' });
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'OneCiak-deadlines-'+String((lastProject && lastProject.title) || 'report').replace(/\s+/g, '-')+'.ics';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
-  document.getElementById('calSuccess').style.display = 'block';
-  setTimeout(function(){ document.getElementById('calSuccess').style.display = 'none'; }, 4000);
-}
-
 function showError(msg) { var b=document.getElementById('errorBox'); b.textContent=msg; b.style.display='block'; }
 function hideError() { document.getElementById('errorBox').style.display='none'; }
 

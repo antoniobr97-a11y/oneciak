@@ -83,7 +83,7 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
 - **Home**: compatta. Navbar trasparente, poi vetro, poi chiara
   (`updateLandingNav()`). Scheda di vetro con i voti veri di Northbound,
   fatta come l'apertura del report: titolo Geist 700 (28-40px), sotto i
-  crediti, voto 40px (prima titolo 26px e voto 56px: "piccolo qui, un
+  crediti, voto 32px come nel report (prima titolo 26px e voto 56px: "piccolo qui, un
   bestione una volta aperto"). Il titolo della pagina resta il più grande
   (40-86px, 12,5vw: 49px su un iPhone contro 31 della scheda). Niente riga "No account needed" né "No account required." accanto al bottone del modulo. Solo il voto, senza frase (sotto ci sono già le 5 aree). Nel menu
   "How it works" è una frase sola, non righe che sembrano link. In
@@ -96,10 +96,13 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   la pagina sale al primo vuoto senza cursore, sotto il bottone "N fields
   are missing, marked in red above.". Caselle alte quanto il testo di
   esempio (`fitPlaceholders`).
-- **Caricamento**: le 5 aree ferme, righe come i passi del modulo (prima un
-  pallino "avanzava" a tempo, non col lavoro vero: Antonio, "sa di AI"),
-  sotto una frase vera; nomi con le maiuscole come nel report.
-  Mentre si fa il report completo, sotto le 5 aree una sola frase ("This
+- **Caricamento** (anteprima e report completo): titolo, una frase, una
+  linea sottile con un tratto che la attraversa (`.loading-line`, 1,6 s,
+  `--ease`): dice "sto lavorando", mai una percentuale, perché il
+  progresso vero non si conosce (una barra che si riempie fingerebbe). Prima
+  un pallino "avanzava" a tempo ("sa di AI"), poi le 5 aree ferme
+  ("sembra tutto fermo", Antonio 26 novembre 2026).
+  Mentre si fa il report completo, sotto la linea una sola frase ("This
   usually takes two or three minutes..."): niente cronometro in una pillola
   con pallino che pulsa (Antonio: "sa di AI"). Cursore del budget 14px
   piatto, senza anello bianco né ombra (prima 22px, "troppo grosso").
@@ -107,8 +110,8 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   grande come un manifesto (`fitTitle`: una riga larga quanto l'apertura,
   24-168px; i titoli lunghi vanno a capo tra le parole in circa 3 righe),
   sotto i crediti (genere · formato · paese · lingua) e la logline
-  (`setHeroTitle`), poi la scheda di vetro col voto e accanto "Average of the five areas" (prima la frase del modello di 3-5 parole, tolta perché "sa di AI"; stessa riga in anteprima, PDF e mail) (48px, 40px sul
-  telefono: prima 64 e 52, "sproporzionato"). Stessa apertura nel PDF
+  (`setHeroTitle`), poi la scheda di vetro col voto e accanto "Average of the five areas" (prima la frase del modello di 3-5 parole, tolta perché "sa di AI"; stessa riga in anteprima, PDF e mail) (32px ovunque, come la scheda della home: prima 64 e 52,
+  "sproporzionato", poi 48 e 40, "troppo grande"). Stessa apertura nel PDF
   (copertina) e nella mail (titolo 30-96px, ridotto sotto i 520px). PDF e
   mail: titoli come parole in grassetto, niente rosso e verde, voti "X.X/10".
 - **Aprire e chiudere** (aree, righe di "Your path", blocchi dentro
@@ -134,8 +137,13 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   "First film", con le fonti di Stephen Follows), Find a producer ("Before
   you can apply", produttori, email da copiare; non c'è se il produttore
   c'è già), Find the money (non c'è da "Funded" in poi), Get seen
-  (festival, laboratori, mercati), Find who sells it; sotto, il link alla
-  roadmap. In fondo PDF e calendario (.ics, nascosto senza date future).
+  (festival, laboratori, mercati), Find who sells it. In fondo una griglia di bottoni, due
+  per riga: PDF e "Report a problem" (solo nei report veri: apre il modulo
+  per segnalare, prima un riquadro chiuso con una domanda lunga); sotto,
+  fuori dalla griglia, "Analyze another project" fatto come il bottone della
+  home (scuro sulla pagina chiara). Niente calendario (tolto il 26 novembre
+  2026, non piaceva ad Antonio) e niente riga "Your stage 1 of 9" verso la
+  roadmap (un clic in più).
   Solo nel PDF: piano a fasi, rischio/opportunità, marketing, budget,
   legale, piano a 90 giorni. Antonio: "una scaletta già presentata da noi,
   non mille bottoni e mille link".
@@ -143,8 +151,23 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   "Shooting"), le aree Festival e Distribuzione si aprono con "For later:
   your film is not shot yet, so this is the plan for when it is finished."
   (`laterNote`), nel report e nell'anteprima.
+- **Riassunto sotto il voto**: 15px grigio come il resto del report (era 18px
+  come la logline bianca sopra: bianco e grigio alla stessa misura sembravano
+  un errore, Antonio 26 novembre 2026).
 - **Anteprima**: titolo, voto, riassunto, 5 aree, rischio, opportunità,
-  prossimo passo, richiesta del report completo.
+  prossimo passo ("Your next step." in grassetto accanto al testo, 15px come
+  il resto: prima 18px grassetto, "perché il font è più grande?"),
+  richiesta del report completo (una frase sola), poi "Download this
+  preview" e "Analyze another project" come il bottone della home (prima un
+  testo che "non sembrava nemmeno un tasto", più una nota ripetuta sul
+  report completo). Le frasi accanto alle caselle sono a peso normale. Il report
+  finisce col piè di pagina della home (`.r-foot` con dentro `.l-foot`, fuori
+  dalla colonna del report, largo quanto indice e report insieme, come in
+  fondo alle pagine Apple; su computer l'indice sale con la pagina e si
+  ferma 40px sopra, `place()`): la frase legale in piccolo, poi
+  "OneCiak, a market report for your film" e Privacy e Terms. La frase legale
+  solo nel report completo: nell'anteprima la casella da spuntare dice già
+  la stessa cosa (una volta per pagina, mai doppia).
 - **Indice** (`mountReportNav`, `REPORT_PARTS`): "Does my film stand up?"
   con le 5 aree e il voto, poi "Your path" con i passi del report (presi
   dalle righe della pagina; `goToStep` apre la riga come un tocco; la barra
@@ -185,8 +208,9 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   parola sulle fonti il 23 novembre 2026 (anche i 4 PDF, con `pdftotext`):
   Stephen Follows aveva cambiato due numeri sulle sue pagine (quote dei
   festival $25-45 e $37-67, 13,038 festival studiati), aggiornati. Si
-  raggiunge dal report (`STAGE_TO_ROADMAP`) e dalla domanda "Where do I start
-  after my report?" del menu; il link nella barra della home su computer è
+  raggiunge dalla domanda "Where do I start after my report?" del menu (dal
+  report tolta il 26 novembre 2026: la riga "Your stage 1 of 9" era un clic
+  in più, Antonio "non voglio mille clic"); il link nella barra della home su computer è
   stato tolto il 24 novembre 2026 (telefono e computer uguali). CSS `roadmap/roadmap.css`
   allineato al sito. Se cambia una regola citata, ricontrollare.
 - `/guides/*` rimanda alla home (301 in `netlify.toml`).
