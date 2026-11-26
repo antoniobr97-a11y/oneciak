@@ -571,6 +571,9 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .pdf-card { background: var(--cream); border: none; border-radius: var(--radius-lg); padding: 24px 22px; margin-bottom: 16px; margin-top: 28px; }
 .pdf-row { display: flex; gap: 9px; }
 .pdf-row button[hidden] { display: none; }
+/* The home's start button, at the end of the report (Antonio: "nello stessa
+   maniera del bottone nella home"); dark on the light page. */
+.again-btn { margin: 4px 0 32px; }
 /* Under the row of buttons, what "Report a problem" opens: the form (it was a closed box with a long question, Antonio:
    "non mi piace, piuttosto un pulsante aiuto"). */
 .row-panel { margin-top: 16px; max-width: 560px; font-size: 14px; line-height: 1.6; color: var(--text); }
@@ -579,7 +582,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .issue-form select, .issue-form textarea { display: block; width: 100%; margin-bottom: 10px; }
 .issue-send { width: auto; padding: 13px 20px; background: var(--text); font-size: 15px; }
 .issue-status { margin-top: 8px; font-size: 13px; }
-@media (min-width: 641px) { .pdf-row { display: grid; grid-template-columns: repeat(2, minmax(0, 280px)); } .pdf-card .pdf-row button { width: 100%; } } /* two per row: three buttons (PDF, report a problem, another project) in one row went off the right edge */
+@media (min-width: 641px) { .pdf-row { display: grid; grid-template-columns: repeat(2, minmax(0, 280px)); } .pdf-card .pdf-row button { width: 100%; } } /* two per row, like the rest of the report's grid */
 .pdf-row button { width: 100%; padding: 13px 20px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--sf); font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background 0.2s, transform 0.15s ease-out; }
 @media (hover: hover) and (pointer: fine) { .pdf-row button:hover { background: var(--accent-hover); } }
 .success-msg { background: var(--success-wash); border: none; border-radius: var(--radius); padding: 12px 16px; font-size: 14px; color: var(--success); margin-top: 11px; display: none; text-align: center; }
@@ -650,6 +653,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #accordionMenu .accordion-score-wrap { min-width: 76px; }
 @media (max-width: 640px) { .acc-bar { flex-basis: 56px; margin: 0 2px; } #accordionMenu .accordion-score-wrap { min-width: 62px; } }
 .pdf-card { border-top: 1px solid var(--border) !important; padding-top: 24px; margin-top: 36px; }
+#upgradeSection:empty + .pdf-card { border-top: 0 !important; padding-top: 0; margin-top: 32px; } /* full report: the path above already ends on a line; two lines with a gap between read as a hole */
 .pdf-row button { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; white-space: normal; padding: 14px 16px; background: var(--field); color: var(--text); font-weight: 500; }
 .pdf-row button small { font-size: 13px; font-weight: 400; color: var(--muted); }
 @media (hover: hover) and (pointer: fine) { .pdf-row button:hover { background: var(--field-hover); } }
@@ -774,7 +778,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .path-step .rblock-body { padding-left: 36px; }
 @media (max-width: 600px) { .path-step .rblock-body { padding-left: 0; } }
 .path-step .sub-k { display: block; margin: 6px 0 10px; }
-.r-path .r-road { margin-top: 28px; }
 .rblock-names { order: 3; flex-basis: 100%; margin-top: 2px; font-size: 14px; line-height: 1.45; color: var(--muted); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
  /* the phase name carries the step, the detail reads lighter */
 .rblock[open] > .rblock-body { animation: openIn 0.22s var(--ease) both; }
@@ -801,12 +804,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .sub-k:first-child { margin-top: 0; }
 .pitch { margin: 0; padding-left: 14px; border-left: 1px solid var(--muted); font-size: 15px; line-height: 1.65; font-style: italic; color: var(--text); max-width: 66ch; }
 
-.r-road { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: baseline; margin: 0 0 36px; padding: 14px 2px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); color: var(--text); text-decoration: none; transition: transform 0.15s ease-out; }
-.accordion-wrap + .r-road { margin-top: 28px; }
-.r-road-k { font-size: 14px; color: var(--muted); }
-.r-road-t { font-size: 15px; font-weight: 700; }
-.r-road-d { grid-column: 2; font-size: 14px; line-height: 1.5; color: var(--muted); text-decoration: underline; text-decoration-color: rgba(22,22,22,0.3); text-underline-offset: 3px; }
-@media (hover: hover) and (pointer: fine) { .r-road:hover .r-road-d { color: var(--text); text-decoration-color: currentColor; } }
 
 /* REPORT INDEX: the three questions the report answers plus the plan, with the
    five areas and their scores under "Does my film stand up?". Wide screens: a
@@ -999,10 +996,10 @@ details.more .prose { margin-top: 12px; }
 :is(.l-btn, .menu-cta, .btn-primary, .btn-unlock, .btn-secondary, .copy-btn, .back-btn, .l-nav-reports, .hamburger, .menu-close, .an-top, .an-item, .an-sec, .r-more, .l-logo, .menu-logo, .f-logo, .r-logo, .pdf-row button, .src-line, .l-foot a, .menu-legal a, .sample-banner a, .tip-link, #loadingRetryBtn, #sec-results .back-btn, #sec-myreports .back-btn):active { transform: scale(0.97); }
 .menu-legal a, .sample-banner a { display: inline-block; }
 #areaNav :is(.an-item, .an-sec) { transition: transform 160ms var(--ease), opacity 160ms var(--ease), background-color 160ms var(--ease), border-color 160ms var(--ease), color 0.3s var(--ease), padding-left 0.3s var(--ease), box-shadow 0.3s var(--ease); }
-:is(.accordion-trigger, details > summary, .l-sheet, .r-road, .mr-row, #sec-results details > summary, #menuOverlay details > summary) {
+:is(.accordion-trigger, details > summary, .l-sheet, .mr-row, #sec-results details > summary, #menuOverlay details > summary) {
   transition-property: transform, background-color, border-color, color; transition-duration: 160ms; transition-timing-function: var(--ease);
 }
-:is(.accordion-trigger, details > summary, .l-sheet, .r-road, .mr-row, #sec-results details > summary, #menuOverlay details > summary):active { transform: scale(0.99); }
+:is(.accordion-trigger, details > summary, .l-sheet, .mr-row, #sec-results details > summary, #menuOverlay details > summary):active { transform: scale(0.99); }
 
 /* ══════════════════════
    LIGHT AND DARK (Antonio): the site follows the device.
@@ -1052,6 +1049,8 @@ details.more .prose { margin-top: 12px; }
   .l-nav { border-bottom-color: rgba(20,18,16,0.07); }
   .l-nav-reports { border-color: rgba(20,18,16,0.18); }
   @media (hover: hover) and (pointer: fine) { .l-btn:hover, .menu-cta:hover { background: #000; } }
+  .again-btn { background: var(--text); color: #fff; }
+  .again-btn:focus-visible { outline-color: var(--text); }
   .l-terms input[type="checkbox"] { border-color: rgba(20,18,16,0.3); background: rgba(255,255,255,0.5); }
   .l-terms label { color: #3a3a3a; } /* stays over 4.5:1 where the warm glow reaches the text on phones */
   .l-terms-error { color: var(--danger); }
@@ -1133,7 +1132,7 @@ details.more .prose { margin-top: 12px; }
   .btn-primary, .btn-unlock, #sec-form .btn-primary, .unlock .btn-unlock { background: var(--on-night); color: var(--night); }
   @media (hover: hover) and (pointer: fine) { .btn-primary:hover, .btn-unlock:hover { background: #fff; } }
   .tip-link { color: var(--text); }
-  details.more > summary, .r-road-d { text-decoration-color: rgba(242,237,230,0.4); }
+  details.more > summary { text-decoration-color: rgba(242,237,230,0.4); }
   input::placeholder, textarea::placeholder, #sec-form input::placeholder, #sec-form textarea::placeholder, #sec-myreports input[type="email"]::placeholder { color: #8f8880; }
   #sec-form input[type="text"]:focus, :is(#sec-form, .issue-form) select:focus, :is(#sec-form, .issue-form) textarea:focus, .unlock-field input:focus, #sec-myreports input[type="email"]:focus { background-color: rgba(255,255,255,0.08); }
   select option { color: #141210; background: #f2ede6; }
@@ -1468,7 +1467,6 @@ details.more .prose { margin-top: 12px; }
       <div class="pdf-row">
         <button onclick="savePDF()"><span id="pdfMainLabel">Download this preview</span><small id="pdfMainSub">PDF, all sections</small></button>
         <button onclick="togglePanel('issuePanel', this)" id="helpBtn" aria-expanded="false" aria-controls="issuePanel" hidden><span>Report a problem</span><small>A link that fails, a date that is wrong</small></button>
-        <button id="againBtn" onclick="goLanding()"><span>Analyze another project</span><small>Start a new analysis</small></button>
       </div>
       <div class="row-panel issue-form" id="issuePanel" hidden>
         <p>Every link is checked before the report is sent, but a page can change. Tell us what you found and we fix it.</p>
@@ -1484,6 +1482,7 @@ details.more .prose { margin-top: 12px; }
       <div class="success-msg" id="pdfSuccess">PDF saved. Check your downloads.</div>
       <div class="inline-error" id="pdfError" role="alert" style="margin-top:12px"></div>
     </div>
+    <button class="l-btn again-btn" id="againBtn" onclick="goLanding()">Analyze another project</button>
     <div class="disclaimer-box" id="resultsDisclaimer" style="margin-top:14px">
       <div class="disclaimer-text"><strong>Legal Disclaimer:</strong> Analysis generated by AI for informational purposes only. Not professional, legal or financial advice. OneCiak assumes no liability. Results are estimates and do not guarantee any outcome. OneCiak is not a licensed consulting firm.</div>
     </div>
@@ -2192,7 +2191,7 @@ function renderFree(r, title) {
   });
   html += '</div>';
 
-  document.getElementById('accordionMenu').innerHTML = html + execCard + roadmapBlock(lastProject);
+  document.getElementById('accordionMenu').innerHTML = html + execCard;
   document.getElementById('accordionMenu').style.display = 'block';
   mountReportNav(freeSections);
 
@@ -2498,14 +2497,6 @@ function accScore(score) {
 }
 /* Link to the film roadmap (/roadmap/) at the stage the project is at, so
    the report connects to the full list of jobs for that stage. */
-var ROADMAP_STAGES = ['Idea and script', 'Rights and company', 'Budget and schedule', 'Financing', 'Pre-production', 'Shooting', 'Post-production', 'Festivals', 'Sales and release'];
-var STAGE_TO_ROADMAP = { 'Idea / treatment': 1, 'Writing the script': 1, 'Script ready, looking for funding': 4, 'Funded, preparing to shoot': 5, 'Shooting': 6, 'In post-production': 7, 'Finished': 8 };
-function roadmapBlock(project) {
-  var n = project && STAGE_TO_ROADMAP[project.stage];
-  if (!n) return '<a class="r-road" href="/roadmap/"><span class="r-road-k">Film roadmap</span><span class="r-road-t">Every job between your idea and your release</span><span class="r-road-d">Nine stages, with the rules that apply quoted from official sources</span></a>';
-  var note = n === 4 ? 'Funders check rights and budget first, stages 2 and 3' : 'Every job in this stage, with the rules that apply quoted from official sources';
-  return '<a class="r-road" href="/roadmap/#stage-'+n+'"><span class="r-road-k">Your stage</span><span class="r-road-t">'+n+' of 9 · '+ROADMAP_STAGES[n-1]+'</span><span class="r-road-d">'+note+'</span></a>';
-}
 function goToArea(i) {
   var body = document.getElementById('acc-body-'+i);
   var trigger = document.getElementById('acc-trigger-'+i);
@@ -2892,7 +2883,7 @@ function buildPath(r, project) {
   if (agents.length) steps.push(['Find who sells it', 'Sales agents to approach when the film is ready.', agents.map(function(a){ return a.name; }), agentsBody(agents)]);
   var h = '', n = 0;
   steps.forEach(function(st){ var row = pathStep(n + 1, st[0], st[1], st[2], st[3]); if (row) { n++; h += row; } });
-  return h ? '<section class="r-path"><h2 class="r-plan-h">Your path</h2><div class="rblocks">'+h+'</div>'+roadmapBlock(project)+'</section>' : '';
+  return h ? '<section class="r-path"><h2 class="r-plan-h">Your path</h2><div class="rblocks">'+h+'</div></section>' : '';
 }
 /* How a producer takes projects: its own sentence, on its own site, word
    for word (grounding.js, checkApproach), with the page it is on. */

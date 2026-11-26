@@ -137,11 +137,13 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   "First film", con le fonti di Stephen Follows), Find a producer ("Before
   you can apply", produttori, email da copiare; non c'è se il produttore
   c'è già), Find the money (non c'è da "Funded" in poi), Get seen
-  (festival, laboratori, mercati), Find who sells it; sotto, il link alla
-  roadmap. In fondo una griglia di bottoni, due per riga: PDF, "Report a problem"
-  (solo nei report veri: apre il modulo per segnalare, prima un riquadro
-  chiuso con una domanda lunga) e "Analyze another project". Niente
-  calendario: tolto il 26 novembre 2026, non piaceva ad Antonio.
+  (festival, laboratori, mercati), Find who sells it. In fondo una griglia di bottoni, due
+  per riga: PDF e "Report a problem" (solo nei report veri: apre il modulo
+  per segnalare, prima un riquadro chiuso con una domanda lunga); sotto,
+  fuori dalla griglia, "Analyze another project" fatto come il bottone della
+  home (scuro sulla pagina chiara). Niente calendario (tolto il 26 novembre
+  2026, non piaceva ad Antonio) e niente riga "Your stage 1 of 9" verso la
+  roadmap (un clic in più).
   Solo nel PDF: piano a fasi, rischio/opportunità, marketing, budget,
   legale, piano a 90 giorni. Antonio: "una scaletta già presentata da noi,
   non mille bottoni e mille link".
@@ -155,10 +157,10 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
 - **Anteprima**: titolo, voto, riassunto, 5 aree, rischio, opportunità,
   prossimo passo ("Your next step." in grassetto accanto al testo, 15px come
   il resto: prima 18px grassetto, "perché il font è più grande?"),
-  richiesta del report completo (una frase sola), poi due bottoni uguali,
-  "Download this preview" e "Analyze another project" (prima un testo che
-  "non sembrava nemmeno un tasto", più una nota ripetuta sul report
-  completo). Le frasi accanto alle caselle sono a peso normale. Il riquadro
+  richiesta del report completo (una frase sola), poi "Download this
+  preview" e "Analyze another project" come il bottone della home (prima un
+  testo che "non sembrava nemmeno un tasto", più una nota ripetuta sul
+  report completo). Le frasi accanto alle caselle sono a peso normale. Il riquadro
   "Legal Disclaimer" solo nel report completo: nell'anteprima la casella da
   spuntare dice già la stessa cosa (una volta per pagina, mai doppia).
 - **Indice** (`mountReportNav`, `REPORT_PARTS`): "Does my film stand up?"
@@ -201,8 +203,9 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   parola sulle fonti il 23 novembre 2026 (anche i 4 PDF, con `pdftotext`):
   Stephen Follows aveva cambiato due numeri sulle sue pagine (quote dei
   festival $25-45 e $37-67, 13,038 festival studiati), aggiornati. Si
-  raggiunge dal report (`STAGE_TO_ROADMAP`) e dalla domanda "Where do I start
-  after my report?" del menu; il link nella barra della home su computer è
+  raggiunge dalla domanda "Where do I start after my report?" del menu (dal
+  report tolta il 26 novembre 2026: la riga "Your stage 1 of 9" era un clic
+  in più, Antonio "non voglio mille clic"); il link nella barra della home su computer è
   stato tolto il 24 novembre 2026 (telefono e computer uguali). CSS `roadmap/roadmap.css`
   allineato al sito. Se cambia una regola citata, ricontrollare.
 - `/guides/*` rimanda alla home (301 in `netlify.toml`).
