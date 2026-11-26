@@ -15,6 +15,8 @@ errore sfugge ai programmi, si aggiunge la prova che l'avrebbe trovato.
   di testo al posto delle icone, trattini lunghi, pillole, `transition:
   all`, `scale(0)`, misure fuori scala, hover fuori da `@media (hover:
   hover) and (pointer: fine)`.
+- **Immagini** (in `check.sh`): nessun pixel colorato nelle immagini del
+  sito (`og-image.png`, icone, `email-header.jpg`).
 - **`functions.js [url]`**: ogni funzione su telefono e computer: menu,
   modulo, ogni area, blocco, passo e voce dell'indice, glossario, copia
   email, PDF, Report a problem, bottoni principali tutti uguali, colonna
