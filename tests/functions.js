@@ -132,9 +132,19 @@ for (const dev of ['tel','pc']) {
  // PDF
  await p.evaluate(()=>scrollTo(0,document.body.scrollHeight)); await W(400);
  try { const [dl]=await Promise.all([p.waitForEvent('download',{timeout:30000}), tap(p.locator('.pdf-row button').first())]); const f=OUT+dev+'_report.pdf'; await dl.saveAs(f); const sz=fs.statSync(f).size; T(dev+' PDF si scarica',sz>100000,sz+' byte'); } catch(e){ T(dev+' PDF si scarica',false,e.message.slice(0,60)); }
- const cal=await p.evaluate(()=>{const b=document.getElementById('calBtn'); return b && !b.hidden;});
- if (cal) { try { const [dl]=await Promise.all([p.waitForEvent('download',{timeout:15000}), tap(p.locator('#calBtn'))]); const f=OUT+dev+'_cal.ics'; await dl.saveAs(f); const t=fs.readFileSync(f,'utf8'); T(dev+' calendario .ics con date', /BEGIN:VEVENT/.test(t), (t.match(/BEGIN:VEVENT/g)||[]).length+' date'); } catch(e){ T(dev+' calendario si scarica',false,e.message.slice(0,60)); } }
- else { const fut=await p.evaluate(()=>{ const r=window.lastResult||{}; const now=Date.now(); return ['festival_calendar','lab_and_market_opportunities','financial_sources'].flatMap(k=>r[k]||[]).map(x=>String(x.deadline||'')).filter(d=>!/closed|not published/i.test(d)).filter(d=>{const t=Date.parse(d.replace(/^[A-Za-z]+,\s*/,'')); return t&&t>now;}); }); T(dev+' calendario nascosto solo senza date future', fut.length===0, fut.join('; ')); }
+ // calendar and "Report a problem", on a real full report: the sample has no future date and no report to
+ // report against, so this one gets two future deadlines (until 26 Nov 2026 this test never ran)
+ { const q=await ctx.newPage(); await open(q, BASE); await q.evaluate(()=>showSampleReport()); await q.waitForTimeout(900);
+  await q.evaluate(()=>{ isSampleReport=false; lastResult.financial_sources[0].deadline='Applications close 15 March 2099'; lastResult.festival_calendar[0].deadline='Late deadline 2 February 2099'; renderFull(lastResult, lastProject.title); }); await q.waitForTimeout(900);
+  await q.evaluate(()=>document.querySelector('.pdf-card').scrollIntoView({block:'center'})); await q.waitForTimeout(400);
+  await tap(q.locator('#calBtn')); await q.waitForTimeout(400);
+  const g=await q.evaluate(()=>[...document.querySelectorAll('#calList a')].filter(a=>/^https:\/\/calendar\.google\.com\/calendar\/render\?action=TEMPLATE&text=.+&dates=\d{8}\/\d{8}/.test(a.href)).length);
+  T(dev+' calendario: una data per riga con il link Google', g===2, g+' link');
+  try { const [dl]=await Promise.all([q.waitForEvent('download',{timeout:15000}), tap(q.locator('#calPanel .link-btn'))]); const f=OUT+dev+'_cal.ics'; await dl.saveAs(f); const t=fs.readFileSync(f,'utf8'); T(dev+' calendario: file .ics con le date', (t.match(/BEGIN:VEVENT/g)||[]).length===2 && /TRIGGER:-P7D/.test(t), (t.match(/BEGIN:VEVENT/g)||[]).length+' date'); } catch(e){ T(dev+' calendario: file .ics',false,e.message.slice(0,60)); }
+  await tap(q.locator('#helpBtn')); await q.waitForTimeout(300);
+  T(dev+' Report a problem apre il modulo e chiude il calendario', await q.evaluate(()=>!document.getElementById('issuePanel').hidden && document.getElementById('calPanel').hidden));
+  await q.close(); }
+ if (await p.evaluate(()=>document.getElementById('calBtn').hidden)) { const fut=await p.evaluate(()=>{ const r=window.lastResult||{}; const now=Date.now(); return ['festival_calendar','lab_and_market_opportunities','financial_sources'].flatMap(k=>r[k]||[]).map(x=>String(x.deadline||'')).filter(d=>!/closed|not published/i.test(d)).filter(d=>{const t=Date.parse(d.replace(/^[A-Za-z]+,\s*/,'')); return t&&t>now;}); }); T(dev+' calendario nascosto solo senza date future', fut.length===0, fut.join('; ')); }
  T(dev+' nessun errore JS', errs.length===0, errs.join(' | ').slice(0,200));
  // ROADMAP
  const r2=await ctx.newPage(); const e2=[]; r2.on('pageerror',e=>e2.push(e.message)); await open(r2, BASE+'roadmap/'); await r2.waitForTimeout(600);

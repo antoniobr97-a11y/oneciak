@@ -138,7 +138,13 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   you can apply", produttori, email da copiare; non c'è se il produttore
   c'è già), Find the money (non c'è da "Funded" in poi), Get seen
   (festival, laboratori, mercati), Find who sells it; sotto, il link alla
-  roadmap. In fondo PDF e calendario (.ics, nascosto senza date future).
+  roadmap. In fondo una griglia di bottoni, due per riga: PDF, calendario (nascosto
+  senza date future: apre la lista delle date, ognuna col link "Google
+  Calendar" già compilato, e sotto il file .ics per Apple e Outlook con
+  promemoria una settimana prima; prima scaricava solo il file e sul PC
+  "non va niente"), "Report a problem" (solo nei report veri: apre il
+  modulo per segnalare, prima un riquadro chiuso con una domanda lunga) e
+  "Analyze another project".
   Solo nel PDF: piano a fasi, rischio/opportunità, marketing, budget,
   legale, piano a 90 giorni. Antonio: "una scaletta già presentata da noi,
   non mille bottoni e mille link".

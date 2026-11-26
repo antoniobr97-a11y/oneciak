@@ -368,14 +368,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 #sec-form .card { background: transparent; box-shadow: none; border: 0; border-radius: 0; padding: 0 0 44px; margin-bottom: 44px; border-bottom: 1px solid var(--border); }
 #sec-form .card-title { display: flex; gap: 14px; align-items: baseline; font-family: var(--display); font-size: 24px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 28px; color: var(--text); }
 #sec-form label { font-weight: 500; font-size: 14px; margin-bottom: 9px; }
-#sec-form input[type="text"], #sec-form input[type="email"], #sec-form select, #sec-form textarea {
+#sec-form input[type="text"], #sec-form input[type="email"], :is(#sec-form, .issue-form) select, :is(#sec-form, .issue-form) textarea {
   background-color: var(--field); box-shadow: inset 0 0 0 1px transparent; border-radius: 10px; padding: 14px 16px; font-size: 15px;
   transition: background-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
 /* #655e57: 5.2:1 on the field tint, 4.9:1 on its hover state */
-#sec-form input::placeholder, #sec-form textarea::placeholder { color: #655e57; }
-@media (hover: hover) and (pointer: fine) { #sec-form input[type="text"]:hover, #sec-form select:hover, #sec-form textarea:hover { background-color: var(--field-hover); } }
-#sec-form input[type="text"]:focus, #sec-form select:focus, #sec-form textarea:focus { background-color: rgba(255,255,255,0.6); box-shadow: inset 0 0 0 1px rgba(214,120,76,0.6), 0 0 0 4px rgba(214,120,76,0.12); }
+#sec-form input::placeholder, :is(#sec-form, .issue-form) textarea::placeholder { color: #655e57; }
+@media (hover: hover) and (pointer: fine) { #sec-form input[type="text"]:hover, :is(#sec-form, .issue-form) select:hover, :is(#sec-form, .issue-form) textarea:hover { background-color: var(--field-hover); } }
+#sec-form input[type="text"]:focus, :is(#sec-form, .issue-form) select:focus, :is(#sec-form, .issue-form) textarea:focus { background-color: rgba(255,255,255,0.6); box-shadow: inset 0 0 0 1px rgba(214,120,76,0.6), 0 0 0 4px rgba(214,120,76,0.12); }
 #sec-form .disclaimer-box { background: none; padding: 0; margin: 0 0 24px; }
 #sec-form .btn-primary { width: auto; padding: 15px 24px; background: var(--text); }
 #sec-form .error-box { margin-top: 16px; }
@@ -431,18 +431,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .disclaimer-text { font-size: 13px; color: var(--muted); line-height: 1.7; }
 .disclaimer-text strong { color: var(--text); font-weight: 600; }
 
-/* Closed box at the end of a real report: "Found an outdated link or a mistake?" */
-.guide-box { border: 1px solid var(--border-light); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
-.guide-box summary { list-style: none; cursor: pointer; padding: 14px 17px; font-size: 14px; font-weight: 600; color: var(--text); display: flex; align-items: center; justify-content: space-between; background: var(--cream); }
-.guide-box summary::-webkit-details-marker { display: none; }
-.guide-box summary::after { content: ''; width: 6px; height: 6px; margin: 0 3px 4px 12px; flex-shrink: 0; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg); transition: transform 0.25s var(--ease); }
-.guide-box[open] summary::after { transform: translateY(4px) rotate(225deg); }
-.guide-box-body { padding: 16px 17px; font-size: 14px; color: var(--text); line-height: 1.7; }
-.guide-box-body p { margin-bottom: 10px; }
-.guide-box-body p:last-child { margin-bottom: 0; }
-.guide-box-body dt { font-weight: 600; color: var(--text); margin-top: 10px; }
-.guide-box-body dt:first-child { margin-top: 0; }
-.guide-box-body dd { color: var(--muted); margin: 2px 0 0; }
 .checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
 .checkbox-row input[type="checkbox"] { width: 17px; height: 17px; margin-top: 2px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
 .checkbox-label { font-size: 13px; font-weight: 400; color: var(--muted); line-height: 1.6; cursor: pointer; } /* a sentence, not a field name: the generic label weight (600) made the terms read heavy */
@@ -583,7 +571,22 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .pdf-card { background: var(--cream); border: none; border-radius: var(--radius-lg); padding: 24px 22px; margin-bottom: 16px; margin-top: 28px; }
 .pdf-row { display: flex; gap: 9px; }
 .pdf-row button[hidden] { display: none; }
-@media (min-width: 641px) { .pdf-card .pdf-row button { width: auto; min-width: 280px; } }
+/* Under the row of buttons, what a button opens: the calendar dates, the form
+   to report a problem (it was a closed box with a long question, Antonio:
+   "non mi piace, piuttosto un pulsante aiuto"). */
+.row-panel { margin-top: 16px; max-width: 560px; font-size: 14px; line-height: 1.6; color: var(--text); }
+.row-panel[hidden] { display: none; }
+.row-panel > p { color: var(--muted); margin: 0 0 12px; }
+.issue-form select, .issue-form textarea { display: block; width: 100%; margin-bottom: 10px; }
+.issue-send { width: auto; padding: 13px 20px; background: var(--text); font-size: 15px; }
+.issue-status { margin-top: 8px; font-size: 13px; }
+.cal-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border); }
+.cal-list li { display: flex; gap: 12px; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.cal-list .cal-when { color: var(--muted); font-size: 13px; display: block; }
+.cal-list a { flex-shrink: 0; color: var(--text); text-decoration: underline; text-underline-offset: 2px; font-size: 13px; }
+.cal-file { margin: 12px 0 0; color: var(--muted); }
+.link-btn { padding: 0; border: 0; background: none; font: inherit; color: var(--text); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+@media (min-width: 641px) { .pdf-row { display: grid; grid-template-columns: repeat(2, minmax(0, 280px)); } .pdf-card .pdf-row button { width: 100%; } } /* two per row: up to four buttons (PDF, calendar, report a problem, another project) went off the right edge in one row */
 .pdf-row button { width: 100%; padding: 13px 20px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--sf); font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background 0.2s, transform 0.15s ease-out; }
 @media (hover: hover) and (pointer: fine) { .pdf-row button:hover { background: var(--accent-hover); } }
 .success-msg { background: var(--success-wash); border: none; border-radius: var(--radius); padding: 12px 16px; font-size: 14px; color: var(--success); margin-top: 11px; display: none; text-align: center; }
@@ -639,9 +642,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 .exec-box { border-radius: 10px; }
 .exec-box.risk { background: rgba(177,50,37,0.07); }
 .exec-box.opp { background: rgba(15,122,61,0.07); }
-.guide-box { border: 0; border-top: 1px solid var(--border); border-radius: 0; margin-bottom: 0; background: transparent; }
-.guide-box summary { background: transparent; padding: 16px 0; font-weight: 500; }
-.guide-box-body { padding: 0 0 18px; }
 #accordionMenu { margin-top: 28px; }
 .accordion-wrap { margin-top: 0; border-top: 1px solid var(--text) !important; overflow: visible; }
 .accordion-item { border-bottom: 1px solid var(--border); }
@@ -810,7 +810,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 
 .r-road { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: baseline; margin: 0 0 36px; padding: 14px 2px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); color: var(--text); text-decoration: none; transition: transform 0.15s ease-out; }
 .accordion-wrap + .r-road { margin-top: 28px; }
-#upgradeSection + .guide-box { margin-top: 32px; }
 .r-road-k { font-size: 14px; color: var(--muted); }
 .r-road-t { font-size: 15px; font-weight: 700; }
 .r-road-d { grid-column: 2; font-size: 14px; line-height: 1.5; color: var(--muted); text-decoration: underline; text-decoration-color: rgba(22,22,22,0.3); text-underline-offset: 3px; }
@@ -1024,7 +1023,7 @@ details.more .prose { margin-top: 12px; }
   .l-hero, .l-nav, .menu-overlay, #sec-results, #sec-myreports, #sec-loading { --night: #ffffff; --on-night: #161616; --on-night-2: #47423e; }
   /* white means white (Antonio): no satin sheen, no grain, no cream */
   /* fields are solid, so the colour at the edges never shows through them */
-  #sec-form input[type="text"]:focus, #sec-form select:focus, #sec-form textarea:focus, .unlock-field input:focus, #sec-myreports input[type="email"]:focus { background-color: #ffffff; }
+  #sec-form input[type="text"]:focus, :is(#sec-form, .issue-form) select:focus, :is(#sec-form, .issue-form) textarea:focus, .unlock-field input:focus, #sec-myreports input[type="email"]:focus { background-color: #ffffff; }
   :root { --paper: #ffffff; --cream: #f5f5f4; --border: #e2e0dd; --border-light: #ecebe9; --field: #f4f4f3; --field-hover: #ededec; }
   body { background: #ffffff; }
   /* Small text slightly darker in light mode . */
@@ -1143,7 +1142,7 @@ details.more .prose { margin-top: 12px; }
   .tip-link { color: var(--text); }
   details.more > summary, .r-road-d { text-decoration-color: rgba(242,237,230,0.4); }
   input::placeholder, textarea::placeholder, #sec-form input::placeholder, #sec-form textarea::placeholder, #sec-myreports input[type="email"]::placeholder { color: #8f8880; }
-  #sec-form input[type="text"]:focus, #sec-form select:focus, #sec-form textarea:focus, .unlock-field input:focus, #sec-myreports input[type="email"]:focus { background-color: rgba(255,255,255,0.08); }
+  #sec-form input[type="text"]:focus, :is(#sec-form, .issue-form) select:focus, :is(#sec-form, .issue-form) textarea:focus, .unlock-field input:focus, #sec-myreports input[type="email"]:focus { background-color: rgba(255,255,255,0.08); }
   select option { color: #141210; background: #f2ede6; }
 }
 /* GLOSSARY ON THE WORD: the first time a term appears in each part of the
@@ -1472,31 +1471,30 @@ details.more .prose { margin-top: 12px; }
 
     <div id="accordionMenu" class="reveal" style="display:none"></div>
     <div id="upgradeSection"></div>
-    <div class="guide-box reveal" id="reportIssueBox" style="display:none">
-      <details>
-        <summary>Found an outdated link or a mistake in this report? Let us know</summary>
-        <div class="guide-box-body">
-          <p style="margin-top:0">We automatically check that every link in this report works before sending it, but if something still slipped through (a dead link, a festival date that's already passed, anything else), telling us helps us fix it fast.</p>
-          <select id="reportIssueCategory" style="width:100%;margin-bottom:8px;padding:8px">
-            <option value="A link doesn't work">A link doesn't work</option>
-            <option value="A date or deadline is wrong">A date or deadline is wrong</option>
-            <option value="Something else">Something else</option>
-          </select>
-          <textarea id="reportIssueMessage" rows="3" maxlength="2000" placeholder="What's wrong? (e.g. which section, what you found)" style="width:100%;box-sizing:border-box;margin-bottom:8px;padding:8px;font-family:inherit"></textarea>
-          <button type="button" class="btn-secondary" onclick="submitReportIssue()" id="reportIssueSubmitBtn">Send</button>
-          <div id="reportIssueStatus" style="margin-top:8px;font-size:13px"></div>
-        </div>
-      </details>
-    </div>
-
     <div class="pdf-card reveal">
       <div class="pdf-row">
         <button onclick="savePDF()"><span id="pdfMainLabel">Download this preview</span><small id="pdfMainSub">PDF, all sections</small></button>
-        <button onclick="saveCalendar()" id="calBtn" hidden><span>Add the deadlines to your calendar</span><small id="calSub"></small></button>
+        <button onclick="togglePanel('calPanel', this)" id="calBtn" aria-expanded="false" aria-controls="calPanel" hidden><span>Add the deadlines to your calendar</span><small id="calSub"></small></button>
+        <button onclick="togglePanel('issuePanel', this)" id="helpBtn" aria-expanded="false" aria-controls="issuePanel" hidden><span>Report a problem</span><small>A link that fails, a date that is wrong</small></button>
         <button id="againBtn" onclick="goLanding()"><span>Analyze another project</span><small>Start a new analysis</small></button>
       </div>
+      <div class="row-panel" id="calPanel" hidden>
+        <ul class="cal-list" id="calList"></ul>
+        <p class="cal-file">Apple Calendar or Outlook: <button type="button" class="link-btn" onclick="saveCalendar()">download all the dates as one file</button>, then open it. It adds a reminder a week before each date.</p>
+      </div>
+      <div class="row-panel issue-form" id="issuePanel" hidden>
+        <p>Every link is checked before the report is sent, but a page can change. Tell us what you found and we fix it.</p>
+        <select id="reportIssueCategory" aria-label="What kind of problem">
+          <option value="A link doesn't work">A link doesn't work</option>
+          <option value="A date or deadline is wrong">A date or deadline is wrong</option>
+          <option value="Something else">Something else</option>
+        </select>
+        <textarea id="reportIssueMessage" rows="3" maxlength="2000" aria-label="What's wrong" placeholder="What's wrong? (e.g. which section, what you found)"></textarea>
+        <button type="button" class="btn-unlock issue-send" onclick="submitReportIssue()" id="reportIssueSubmitBtn">Send</button>
+        <div id="reportIssueStatus" class="issue-status"></div>
+      </div>
       <div class="success-msg" id="pdfSuccess">PDF saved. Check your downloads.</div>
-      <div class="success-msg" id="calSuccess">Calendar file saved. Open it to add the dates to your calendar.</div>
+      <div class="success-msg" id="calSuccess">Calendar file saved. Open it from your downloads to add the dates.</div>
       <div class="inline-error" id="pdfError" role="alert" style="margin-top:12px"></div>
     </div>
     <div class="disclaimer-box" id="resultsDisclaimer" style="margin-top:14px">
@@ -2125,6 +2123,8 @@ function retryLastAction() {
 
 // The main PDF holds whatever is on screen: the preview, or the full report.
 function setPdfLabels() {
+  ['calPanel', 'issuePanel'].forEach(function(k){ document.getElementById(k).hidden = true; });
+  if (!isFullReport) document.getElementById('helpBtn').hidden = true;
   document.getElementById('pdfMainLabel').textContent = isFullReport ? 'Download the full report' : 'Download this preview';
   document.getElementById('pdfMainSub').textContent = isFullReport ? 'PDF, every area and the business plan page' : 'PDF, all sections';
   // the preview already says it in the box to tick above, a few lines up: once per page, never twice (Antonio)
@@ -2312,7 +2312,7 @@ function renderFull(r, title) {
 
   // Only a real, persisted full report has a session_id/token to flag an
   // issue against — hide it for the fictional sample report entirely.
-  document.getElementById('reportIssueBox').style.display = isSampleReport ? 'none' : 'block';
+  document.getElementById('helpBtn').hidden = !!isSampleReport;
   document.getElementById('reportIssueMessage').value = '';
   document.getElementById('reportIssueStatus').textContent = '';
   document.getElementById('reportIssueSubmitBtn').disabled = false;
@@ -3563,7 +3563,21 @@ function setCalendarButton(r) {
   var btn = document.getElementById('calBtn');
   var n = r ? deadlineEvents(r).length : 0;
   btn.hidden = !n;
-  if (n) document.getElementById('calSub').textContent = (n === 1 ? '1 upcoming date' : n+' upcoming dates')+', with a reminder a week before';
+  if (n) document.getElementById('calSub').textContent = (n === 1 ? '1 upcoming date' : n+' upcoming dates')+', Google, Apple or Outlook';
+  // a downloaded .ics did nothing on a computer until opened by hand (Antonio):
+  // each date also gets a Google Calendar link that opens the event filled in
+  document.getElementById('calList').innerHTML = n ? deadlineEvents(r).map(function(e){
+    var next = new Date(e.date); next.setDate(next.getDate() + 1);
+    var g = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(e.title)+'&dates='+icsDate(e.date)+'/'+icsDate(next)+
+      '&details='+encodeURIComponent('As the source states it: '+e.note+'. Check the official page before applying.'+(e.url ? ' '+e.url : ''));
+    return '<li><span>'+esc(noDash(e.title))+'<span class="cal-when">'+e.date.getDate()+' '+e.date.toLocaleString('en-GB', { month: 'long' })+' '+e.date.getFullYear()+'</span></span><a href="'+esc(g)+'" target="_blank" rel="noopener">Google Calendar</a></li>';
+  }).join('') : '';
+}
+function togglePanel(id, btn) {
+  var p = document.getElementById(id), open = p.hidden;
+  ['calPanel', 'issuePanel'].forEach(function(k){ document.getElementById(k).hidden = true; });
+  [document.getElementById('calBtn'), document.getElementById('helpBtn')].forEach(function(b){ b.setAttribute('aria-expanded', 'false'); });
+  p.hidden = !open; btn.setAttribute('aria-expanded', String(open));
 }
 function icsText(s) { return String(s).replace(/\\/g, '\\\\').replace(/[,;]/g, function(c){ return '\\'+c; }).replace(/\n/g, '\\n'); }
 function icsDate(d) { return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'); }
