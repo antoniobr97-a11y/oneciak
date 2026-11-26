@@ -152,7 +152,9 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   richiesta del report completo (una frase sola), poi due bottoni uguali,
   "Download this preview" e "Analyze another project" (prima un testo che
   "non sembrava nemmeno un tasto", più una nota ripetuta sul report
-  completo). Le frasi accanto alle caselle sono a peso normale.
+  completo). Le frasi accanto alle caselle sono a peso normale. Il riquadro
+  "Legal Disclaimer" solo nel report completo: nell'anteprima la casella da
+  spuntare dice già la stessa cosa (una volta per pagina, mai doppia).
 - **Indice** (`mountReportNav`, `REPORT_PARTS`): "Does my film stand up?"
   con le 5 aree e il voto, poi "Your path" con i passi del report (presi
   dalle righe della pagina; `goToStep` apre la riga come un tocco; la barra
