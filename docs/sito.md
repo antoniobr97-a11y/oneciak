@@ -160,9 +160,12 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   richiesta del report completo (una frase sola), poi "Download this
   preview" e "Analyze another project" come il bottone della home (prima un
   testo che "non sembrava nemmeno un tasto", più una nota ripetuta sul
-  report completo). Le frasi accanto alle caselle sono a peso normale. Il riquadro
-  "Legal Disclaimer" solo nel report completo: nell'anteprima la casella da
-  spuntare dice già la stessa cosa (una volta per pagina, mai doppia).
+  report completo). Le frasi accanto alle caselle sono a peso normale. Il report
+  finisce col piè di pagina della home (`.l-foot.r-foot`, staccato da una
+  linea, come in fondo alle pagine Apple): la frase legale in piccolo, poi
+  "OneCiak, a market report for your film" e Privacy e Terms. La frase legale
+  solo nel report completo: nell'anteprima la casella da spuntare dice già
+  la stessa cosa (una volta per pagina, mai doppia).
 - **Indice** (`mountReportNav`, `REPORT_PARTS`): "Does my film stand up?"
   con le 5 aree e il voto, poi "Your path" con i passi del report (presi
   dalle righe della pagina; `goToStep` apre la riga come un tocco; la barra
