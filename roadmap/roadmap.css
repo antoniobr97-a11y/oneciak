@@ -1,10 +1,10 @@
 /* Film roadmap: same look as the app (index.html). Tokens, satin background,
-   night header with the palette-C glow and the oklab dissolve are copied
+   night header and the oklab dissolve are copied
    from there; keep them in sync if the app's look changes. */
 :root {
-  --paper: #f4f1ec; --night: #140d10; --on-night: #f2ede6; --on-night-2: #cfc7bd;
-  --text: #161616; --muted: #5c5c5c; --border: #d9d3cb; --field: rgba(20,18,16,0.045);
-  --ember-text: #a8471f;
+  --paper: #f1f1f1; --night: #0f0f0f; --on-night: #eeeeee; --on-night-2: #c8c8c8;
+  --text: #161616; --muted: #5c5c5c; --border: #d4d4d4; --field: rgba(18,18,18,0.045);
+  --ember-text: #5f5f5f;
   --display: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
   --body: 'Carlito', Calibri, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
   --mono: 'Carlito', Calibri, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; /* small data in Carlito too (Antonio) */
@@ -16,12 +16,9 @@ body { font-family: var(--body); background: var(--paper); color: var(--text); -
 body::before {
   content: ''; position: fixed; inset: 0; z-index: -2; pointer-events: none;
   /* Satin, not paper (chosen by Antonio from his reference):
-     broad soft sheen, light top right, warm shade low left, a darker fold
-     bottom right. Lopsided on purpose. */
+     a broad soft sheen, light top right. */
   background:
-    radial-gradient(ellipse 1100px 700px at 78% 22%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.18) 45%, transparent 75%),
-    radial-gradient(ellipse 1300px 900px at 8% 70%, rgba(196,128,96,0.16) 0%, rgba(196,128,96,0.06) 45%, transparent 75%),
-    radial-gradient(ellipse 900px 600px at 100% 105%, rgba(150,96,84,0.14) 0%, rgba(150,96,84,0.04) 50%, transparent 78%);
+    radial-gradient(ellipse 1100px 700px at 78% 22%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.18) 45%, transparent 75%);
 }body::after {
   content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.22;
   /* Fine, even film grain (one octave), same family as the hero's grain. */
@@ -34,16 +31,10 @@ a { color: inherit; }
 
 /* night header, same dissolve as the app */
 .g-hero { position: relative; overflow: hidden; color: var(--on-night);
-  background: linear-gradient(180deg, var(--night) 0, var(--night) calc(100% - 240px), #4a4643 calc(100% - 130px), #d5d0ca calc(100% - 40px), var(--paper) 100%);
-  background: linear-gradient(in oklab 180deg, var(--night) 0, var(--night) calc(100% - 220px), rgb(244 241 236 / 0) 100%);
+  background: linear-gradient(180deg, var(--night) 0, var(--night) calc(100% - 240px), #474747 calc(100% - 130px), #d1d1d1 calc(100% - 40px), var(--paper) 100%);
+  background: linear-gradient(in oklab 180deg, var(--night) 0, var(--night) calc(100% - 220px), rgb(241 241 241 / 0) 100%);
   padding-bottom: 210px; }
-.g-hero::before {
-  content: ''; position: absolute; inset: 0; pointer-events: none;
-  background:
-    radial-gradient(75% 55% at 108% -6%, rgba(235,137,63,0.95) 0%, rgba(236,88,40,0.85) 22%, rgba(225,36,31,0.7) 38%, rgba(139,25,33,0.45) 52%, rgba(36,18,24,0) 70%),
-    radial-gradient(60% 38% at -12% 58%, rgba(24,43,48,0.95) 0%, rgba(24,43,48,0.6) 40%, rgba(24,43,48,0) 72%),
-    radial-gradient(55% 30% at 112% 78%, rgba(225,36,31,0.55) 0%, rgba(139,25,33,0.3) 40%, rgba(36,18,24,0) 70%);
-}.g-hero::after {
+.g-hero::after {
   content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.22; mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 1.1 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 220px;
@@ -61,11 +52,11 @@ a { color: inherit; }
 .g-cta:active { transform: scale(0.97); }
 @media (hover: hover) and (pointer: fine) { .g-cta:hover { background: #fff; } .g-nav-r a:not(.g-cta):hover { color: var(--on-night); } }
 .g-head { position: relative; z-index: 1; padding-top: 88px; max-width: 820px; }
-.g-head .mono { color: #d6cec3; }
+.g-head .mono { color: #cfcfcf; }
 /* Breadcrumb instead of a label above the title: it says where you are and links back. */
 .g-head h1 { margin-top: 18px; font-family: var(--display); font-weight: 700; font-size: clamp(36px, 5.4vw, 64px); line-height: 1.02; letter-spacing: -0.035em; }
 .g-head .lede { margin-top: 22px; max-width: 58ch; font-size: 18px; line-height: 1.55; color: var(--on-night-2); }
-.g-meta { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 8px 22px; color: #d6cec3; }
+.g-meta { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 8px 22px; color: #cfcfcf; }
 
 /* article body on the paper */
 .g-main { padding: 0 0 100px; }
@@ -86,7 +77,7 @@ a { color: inherit; }
 .rm-side a:active { transform: scale(0.97); }
 .rm-nav-n { font-family: var(--mono); font-size: 13px; color: var(--muted); }
 .rm-nav-c { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.rm-side a.is-complete .rm-nav-c { color: #2f6b45; }
+.rm-side a.is-complete .rm-nav-c { color: #555555; }
 .rm-side a.is-here .rm-nav-t { font-weight: 700; }
 @media (hover: hover) and (pointer: fine) { .rm-side a:hover .rm-nav-t { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; } }
 .rm-stage { padding-top: 56px; scroll-margin-top: 12px; }
@@ -94,7 +85,7 @@ a { color: inherit; }
 .rm-stage h2 { display: flex; align-items: baseline; gap: 14px; font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1.15; letter-spacing: -0.025em; }
 .rm-n { font-weight: 300; color: var(--ember-text); font-variant-numeric: tabular-nums; }
 .rm-count { display: block; margin-top: 6px; font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--muted); }
-.rm-here { display: inline-block; margin-bottom: 12px; padding: 5px 10px; border-radius: 6px; background: #f3dccd; color: #7a3215; font-size: 14px; font-weight: 700; }
+.rm-here { display: inline-block; margin-bottom: 12px; padding: 5px 10px; border-radius: 6px; background: #e1e1e1; color: #444444; font-size: 14px; font-weight: 700; }
 .rm-done { margin-top: 14px; font-size: 16px; line-height: 1.6; }
 .rm-done b { font-weight: 700; }
 .rm-jobs { list-style: none; margin-top: 20px; border-top: 1px solid var(--text); }
@@ -103,11 +94,11 @@ a { color: inherit; }
 .rm-jobs label b { font-weight: 700; }
 .rm-jobs label a { text-underline-offset: 3px; }
 .rm-jobs input { appearance: none; -webkit-appearance: none; width: 20px; height: 20px; margin-top: 4px; border: 1.5px solid rgba(22,22,22,0.55); border-radius: 5px; background: rgba(255,255,255,0.5); cursor: pointer; transition: background-color .15s, border-color .15s, transform .12s var(--ease); }
-.rm-jobs input:checked { background: var(--text) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 10.5l3.2 3.2L15 7' fill='none' stroke='%23f4f1ec' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 18px no-repeat; border-color: var(--text); }
+.rm-jobs input:checked { background: var(--text) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 10.5l3.2 3.2L15 7' fill='none' stroke='%23f1f1f1' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 18px no-repeat; border-color: var(--text); }
 .rm-jobs input:active { transform: scale(0.9); }
-.rm-jobs input:focus-visible { outline: 2px solid #e2622d; outline-offset: 2px; }
+.rm-jobs input:focus-visible { outline: 2px solid #828282; outline-offset: 2px; }
 .rm-jobs input:checked + span { color: var(--muted); }
-.rm-ev { margin: 12px 0 0 30px; padding-left: 14px; border-left: 1px solid #b4552b; font-size: 15px; line-height: 1.6; color: var(--text); }
+.rm-ev { margin: 12px 0 0 30px; padding-left: 14px; border-left: 1px solid #6d6d6d; font-size: 15px; line-height: 1.6; color: var(--text); }
 .rm-ev a { display: block; margin-top: 4px; font-size: 14px; color: var(--muted); text-underline-offset: 3px; }
 .rm-ev + .rm-ev { margin-top: 14px; }
 .rm-reset { margin-top: 40px; }
@@ -134,49 +125,38 @@ a { color: inherit; }
   .rm-ev { margin-left: 0; }
 }
 
-/* Light and dark, same rules as index.html: light mode is light
-   everywhere with soft glows, dark mode is the night everywhere. */
+/* Light and dark, same rules as index.html: light mode is white
+   everywhere, dark mode is the night everywhere; black and white only. */
 @media (prefers-color-scheme: light) {
-  :root { --paper: #ffffff; --border: #e2e0dd; }
+  :root { --paper: #ffffff; --border: #e0e0e0; }
   body { background: #ffffff; }
   .g-hero { background: transparent; }
-  :root { --muted: #3a3a3a; --ember-text: #8f3a17; }
-  .rm-side a.is-complete .rm-nav-c { color: #0a5c2d; }
+  :root { --muted: #3a3a3a; --ember-text: #4f4f4f; }
+  .rm-side a.is-complete .rm-nav-c { color: #3e3e3e; }
   .g-hero::before, .g-hero::after { display: none !important; }
-  /* Same harmony as dark mode (Antonio): petrol on the left,
-     red low on the right, fixed to the screen, soft on white. The petrol is
-     the dark mode's own hue (192 deg, same saturation) made lighter, since
-     the near-black #182b30 reads as a grey smudge on white. */
-  body::before { display: block; background:
-      radial-gradient(46% 40% at -10% 62%, rgba(64,115,129,0.30) 0%, rgba(64,115,129,0.13) 45%, rgba(64,115,129,0) 75%),
-      radial-gradient(30% 20% at 106% 102%, rgba(225,36,31,0.14) 0%, rgba(139,25,33,0.05) 45%, rgba(255,255,255,0) 75%); -webkit-mask-image: none; mask-image: none; }
+  body::before { display: none; }
   body::after { display: none; }
-  .g-hero { --night: #ffffff; --on-night: #161616; --on-night-2: #3a3532; padding-bottom: 72px; }
-  .g-nav { border-bottom-color: rgba(20,18,16,0.07); }
+  .g-hero { --night: #ffffff; --on-night: #161616; --on-night-2: #363636; padding-bottom: 72px; }
+  .g-nav { border-bottom-color: rgba(18,18,18,0.07); }
   .g-head .mono, .g-meta { color: var(--muted); }
   @media (hover: hover) and (pointer: fine) { .g-cta:hover { background: #000; } }
 }
 @media (prefers-color-scheme: dark) {
-  :root { --on-night-2: #d6cec3; --paper: #140d10; --text: #f2ede6; --muted: #b3aca4; --border: rgba(255,255,255,0.13); --field: rgba(255,255,255,0.06); --ember-text: #f0a07c; }
+  :root { --on-night-2: #cfcfcf; --paper: #0f0f0f; --text: #eeeeee; --muted: #adadad; --border: rgba(255,255,255,0.13); --field: rgba(255,255,255,0.06); --ember-text: #b4b4b4; }
   html { color-scheme: dark; }
   body { background: var(--night); }
-  body::before {
-    background:
-      radial-gradient(46% 40% at -10% 62%, rgba(24,43,48,0.9) 0%, rgba(24,43,48,0.45) 45%, rgba(24,43,48,0) 75%),
-      radial-gradient(40% 30% at 104% 96%, rgba(225,36,31,0.34) 0%, rgba(139,25,33,0.18) 45%, rgba(20,13,16,0) 75%);
-  }
+  body::before { display: none; }
   body::after { mix-blend-mode: overlay; }
-  /* one light everywhere, as on the app: no extra red patch in the header */
   .g-hero { background: transparent; }
   .g-hero::before, .g-hero::after { display: none; }
   .g-hero { padding-bottom: 72px; }
-  .rm-ev { border-left-color: rgba(240,160,124,0.6); }
+  .rm-ev { border-left-color: rgba(180,180,180,0.6); }
   .g-btn { background: var(--on-night); color: var(--night); }
   @media (hover: hover) and (pointer: fine) { .g-btn:hover { background: #fff; } }
-  .rm-side a.is-complete .rm-nav-c { color: #74d6a0; }
-  .rm-here { background: rgba(240,160,124,0.16); color: #f6b89a; }
-  .rm-jobs input { border-color: rgba(242,237,230,0.55); background: rgba(255,255,255,0.05); }
-  .rm-jobs input:checked { background-color: var(--text); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 10.5l3.2 3.2L15 7' fill='none' stroke='%23140d10' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+  .rm-side a.is-complete .rm-nav-c { color: #b3b3b3; }
+  .rm-here { background: rgba(180,180,180,0.16); color: #c7c7c7; }
+  .rm-jobs input { border-color: rgba(238,238,238,0.55); background: rgba(255,255,255,0.05); }
+  .rm-jobs input:checked { background-color: var(--text); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 10.5l3.2 3.2L15 7' fill='none' stroke='%230f0f0f' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
   ::selection { background: var(--on-night); color: var(--night); }
 }
 

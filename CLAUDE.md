@@ -71,9 +71,9 @@ typo quando è frustrato: non vuol dire che vuole un tono più formale.
 ## Controllare e pubblicare
 
 - **Controlli**: `tests/check.sh` lancia tutto su un server locale (regole
-  nel codice, sintassi, 171 prove di funzioni, 264 viste, regole di design,
-  pressione dei tasti, movimenti rispetto al sito vero, foto prima e dopo
-  da guardare con gli occhi). `tests/check.sh --quick`: solo il codice, in
+  nel codice, sintassi, funzioni, viste, regole di design, pressione dei
+  tasti, movimenti rispetto al sito vero, foto prima e dopo da guardare con
+  gli occhi). `tests/check.sh --quick`: solo il codice, in
   pochi secondi. Dopo ogni modifica, prima di dire che è fatta. Se cambia
   il motore: `tests/engine.js` sulla preview #81 (un'anteprima vera).
 - **Pubblicare**: `tests/publish.sh "messaggio" file...` dal branch di
@@ -88,27 +88,27 @@ typo quando è frustrato: non vuol dire che vuole un tono più formale.
 
 ## Design, in breve
 
-Chiaro e scuro seguono il dispositivo; titoli **Geist**, il resto
-**Carlito** (font in `/fonts`, niente Google Fonts). Una sola scala di
-caratteri (24, 18, 15, 14, 13; 16 per menu e roadmap), un solo segno per le
-liste, voti "X.X/10" nel colore del testo con il colore solo sulla barretta,
-una sola pressione dei tasti (0.97 bottoni, 0.99 righe, 160 ms `--ease`),
-icone disegnate. Le regole che una macchina legge stanno in `tests/lint.js`
+**Solo bianco e nero** (ogni colore un grigio esatto, anche voti, barre,
+errori, PDF e mail); chiaro e scuro seguono il dispositivo; titoli
+**Geist**, il resto **Carlito** (font in `/fonts`, niente Google Fonts). Una
+sola scala di caratteri (24, 18, 15, 14, 13; 16 per menu e roadmap), un solo
+segno per le liste, voti "X.X/10", bottoni principali tutti della misura di
+quello della home, una sola pressione dei tasti (0.97 bottoni, 0.99 righe,
+160 ms `--ease`), icone disegnate. Le regole che una macchina legge stanno in `tests/lint.js`
 e `tests/rules.js`. Tutti i dettagli (colori, movimento, pagine, flusso,
 report di esempio, roadmap): **`docs/sito.md`**, da leggere prima di toccare
 aspetto, testi o comportamento del sito.
 
-**Bocciato da Antonio, da non riproporre**: fasce grigio-azzurre/rosa da
-vetro smerigliato; "ora d'oro"; luce parassita da destra; macchia
-rossa/ambra in alto a destra; altre varianti di satinato/grana; palette
-"intensa" e "Warm Neutrals"; sito vestito da carte di produzione, ciak, foto
-d'archivio, logo gigante nel footer; più di 5 aree; il PDF di una pagina; il
-pulsante "Next" tra le aree; contatti sparsi dentro le aree; scritte rosse
-sotto le caselle; le guide; roadmap o guide in fondo alla home; un riquadro
-glossario; colori diversi per pallini e voti; serie TV; documentari;
-etichette "Tier A/B/C" sui festival; cronometro dell'attesa in una pillola;
-un caricamento che finge di avanzare; gergo da marketing ("market intelligence",
-"leverage").
+**Bocciato da Antonio, da non riproporre**: qualsiasi colore (bagliori,
+accenti, rosso e verde, toni caldi, palette, satinato o grana colorati);
+sito vestito da carte di produzione, ciak, foto d'archivio, logo gigante nel
+footer; più di 5 aree; il PDF di una pagina; il pulsante "Next" tra le
+aree; contatti sparsi dentro le aree; scritte sotto le caselle; le guide;
+roadmap o guide in fondo alla home; la riga "Your stage" verso la roadmap
+nel report; il calendario delle scadenze; un riquadro glossario; serie TV;
+documentari; etichette "Tier A/B/C" sui festival; cronometro dell'attesa;
+un caricamento che finge di avanzare; una frase-verdetto sotto il voto;
+gergo da marketing ("market intelligence", "leverage").
 
 ## Dove trovare il resto
 

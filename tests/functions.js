@@ -122,6 +122,22 @@ for (const dev of ['tel','pc']) {
   const r=await q.evaluate(()=>{const t=document.getElementById('resultTitle'); const g=document.createRange(); g.selectNodeContents(t); return [Math.round(g.getBoundingClientRect().width), t.parentNode.clientWidth];});
   T(dev+' titolo del report largo quanto la colonna ('+rm+')', r[0]>=r[1]*0.95 && r[0]<=r[1]+1, r[0]+' su '+r[1]); await c3.close();
  }
+ // every main button the size of the home's start button (Antonio, 26 Nov 2026)
+ { const q=await ctx.newPage(); await open(q, BASE); const sz=[];
+  const m=async(sel)=>sz.push(await q.evaluate(s=>{const e=document.querySelector(s); if(!e||!e.offsetParent) return s+' non visibile'; const b=e.getBoundingClientRect(); return Math.round(b.width)+'x'+Math.round(b.height)+' '+getComputedStyle(e).fontSize;},sel));
+  await m('#sec-landing .l-btn');
+  await q.evaluate(()=>{document.getElementById('termsCheck').checked=true; onStartClick();}); await q.waitForTimeout(600); await m('#sec-form .btn-primary');
+  await q.evaluate(()=>showSampleReport()); await q.waitForTimeout(800); await q.evaluate(()=>{isSampleReport=false; renderFree(JSON.parse(JSON.stringify(lastResult)), lastProject.title); document.getElementById('againBtn').style.display='';}); await q.waitForTimeout(500);
+  await m('#upgradeSection .btn-unlock'); await m('#againBtn');
+  const leads=await q.evaluate(()=>[...document.querySelectorAll('.exec-card .exec-lead')].map(e=>getComputedStyle(e).color)); const txt=await q.evaluate(()=>getComputedStyle(document.querySelector('.exec-box-text')).color);
+  T(dev+' rischio, opportunità e prossimo passo nel colore del testo', leads.length===3 && leads.every(c=>c===txt), leads.join(' | ')+' testo '+txt);
+  await q.evaluate(()=>openMyReports()); await q.waitForTimeout(400); await m('#loginSubmitBtn');
+  T(dev+' bottoni principali tutti uguali a quello della home', sz.every(x=>x===sz[0]), sz.join(' | ')); await q.close(); }
+ // the loading title on one line on a computer, also with a long film name (Antonio, 26 Nov 2026)
+ if (dev==='pc') { const c4=await b.newContext({viewport:{width:1280,height:720}}); const q4=await c4.newPage(); await open(q4, BASE);
+  await q4.evaluate(()=>{ showOnly('sec-loading'); setLoadingTitle('Reading \u201CThe Last Shift at Saint Agnes\u201D'); }); await q4.waitForTimeout(500);
+  const lt=await q4.evaluate(()=>{const t=document.getElementById('loadingTitle'); const r=document.createRange(); r.selectNodeContents(t); return [r.getClientRects().length, getComputedStyle(t).fontSize];});
+  T(dev+' titolo del caricamento su una riga', lt[0]===1, lt[0]+' righe a '+lt[1]); await c4.close(); }
  // the report's side column fits short laptop screens without a scroll bar
  if (dev==='pc') for (const [w,h] of [[1366,657],[1280,600],[1440,700]]) {
   const c2=await b.newContext({viewport:{width:w,height:h}}); const q=await c2.newPage(); await open(q, BASE); await q.evaluate(()=>showSampleReport()); await q.waitForTimeout(900);
