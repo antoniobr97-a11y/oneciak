@@ -40,6 +40,7 @@ for (const dev of ['tel','pc']) {
  const sub=p.locator('#sec-form .btn-primary').first(); await sub.scrollIntoViewIfNeeded(); await tap(sub); await W(900);
  const red=await p.evaluate(()=>document.querySelectorAll('#sec-form .is-invalid').length); T(dev+' modulo vuoto: 7 caselle rosse', red===7, 'rosse '+red);
  T(dev+' modulo vuoto: messaggio', await p.evaluate(()=>/fields are missing/.test(document.getElementById('sec-form').innerText)));
+ const pn=await p.evaluate(()=>{ const c=document.getElementById('country'), l=document.getElementById('language'), o=[c.value,l.value]; c.value='italy'; l.value='english/ arabic'; const r=getProject(); c.value=o[0]; l.value=o[1]; return r.country+' | '+r.language; }); T(dev+' paese e lingua con la maiuscola', pn==='Italy | English / Arabic', pn);
  // MY REPORTS
  await open(p, BASE); await W(500); await p.evaluate(()=>openMyReports()); await W(500);
  T(dev+' My Reports si apre con la casella email', await p.evaluate(()=>!!document.querySelector('#sec-myreports input[type=email]') && document.querySelector('#sec-myreports input[type=email]').offsetParent!==null));

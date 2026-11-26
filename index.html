@@ -1766,6 +1766,20 @@ function getGenre() {
 }
 
 /* ── PROJECT ── */
+/* Country and language as names ("italy" -> "Italy", "english/ arabic" ->
+   "English / Arabic"); words typed with capitals stay as typed. Same as
+   properName in netlify/functions/_util/project.js. */
+function properName(s) {
+  if (s === 'Not specified') return s;                       // the form's own default, compared elsewhere
+  return String(s).replace(/\s*\/\s*/g, ' / ').replace(/\s*,\s*/g, ', ').replace(/\s+/g, ' ').trim()
+    .replace(/[^\s\/,()-]+/g, function (w, i) {
+      if (w !== w.toLowerCase()) return w;                     // typed with capitals: kept (USA, McAllen)
+      if (i > 0 && /^(of|and|the|da|di|del|della|de|e|y)$/.test(w)) return w;
+      var m = /^([dl]')(.+)$/.exec(w);                          // d'ivoire -> d'Ivoire
+      if (m) return m[1] + m[2].charAt(0).toUpperCase() + m[2].slice(1);
+      return w.charAt(0).toUpperCase() + w.slice(1);
+    });
+}
 function getProject() {
   return {
     title:      document.getElementById('title').value.trim(),
@@ -1775,8 +1789,8 @@ function getProject() {
     budget:     getBudgetValue(),
     audience:   document.getElementById('audience').value,
     distrib:    document.getElementById('distrib').value,
-    country:    document.getElementById('country').value.trim() || 'Not specified',
-    language:   document.getElementById('language').value.trim() || 'Not specified',
+    country:    properName(document.getElementById('country').value) || 'Not specified',
+    language:   properName(document.getElementById('language').value) || 'Not specified',
     experience: document.getElementById('experience').value || 'Not specified',
     stage:      document.getElementById('stage').value,
     producer:   document.getElementById('producer').value || 'Not specified',

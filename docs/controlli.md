@@ -17,7 +17,7 @@ foglio di foto prima e dopo di ogni vista, da guardare con gli occhi
 animazioni). Gli
 altri, anche da soli su un server locale o sul sito vero:
 `NODE_PATH=/opt/node22/lib/node_modules node tests/functions.js [url]`
-(160 prove su telefono e computer, compresa la colonna del report su
+(161 prove su telefono e computer, compresa la colonna del report su
 schermi bassi e il titolo con "Riduci movimento": menu, modulo, ogni area, ogni blocco,
 ogni passo, ogni voce dell'indice, glossario, copia email, PDF,
 calendario, roadmap, 404) e `node tests/pages.js [url]` (264 viste: ogni
