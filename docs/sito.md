@@ -96,7 +96,10 @@ La lista dei bocciati sta in CLAUDE.md (una sola copia).
   la pagina sale al primo vuoto senza cursore, sotto il bottone "N fields
   are missing, marked in red above.". Caselle alte quanto il testo di
   esempio (`fitPlaceholders`).
-- **Caricamento** (anteprima e report completo): titolo, una frase, una
+- **Caricamento** (anteprima e report completo): titolo su una riga
+  (`setLoadingTitle`/`fitLoadingTitle`: 40px, più piccolo se il nome del
+  film non ci sta, fino a 24px; sul telefono un nome lungo va a capo;
+  colonna 720px sul computer), una frase, una
   linea sottile con un tratto che la attraversa (`.loading-line`, 1,6 s,
   `--ease`): dice "sto lavorando", mai una percentuale, perché il
   progresso vero non si conosce (una barra che si riempie fingerebbe). Prima

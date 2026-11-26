@@ -881,7 +881,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 #sec-loading .btn-primary { background: var(--on-night); color: var(--night); }
 
 /* LOADING: light display title, mono step numbers, no filled circles */
-.loading-wrap { max-width: 520px; }
+.loading-wrap { max-width: 720px; } /* room for a film's name on one line; 520 when it held the five rows */
 .loading-title { font-family: var(--display); font-size: clamp(30px, 5vw, 40px); font-weight: 700; letter-spacing: -0.03em; }
 @media (max-width: 640px) {
   #sec-results .r-hero, #sec-myreports .r-hero { padding: 108px 20px 200px; }
@@ -2060,7 +2060,7 @@ async function generateFullReport() {
   document.getElementById('sampleBanner').style.display = 'none';
   document.getElementById('againBtn').style.display = '';
   document.getElementById('loadingRetryBtn').style.display = 'none';
-  document.getElementById('loadingTitle').textContent = 'Building your full report…';
+  setLoadingTitle('Building your full report…');
   document.getElementById('loadingDesc').textContent = 'Your project is being read across the five areas, with real names and sources for each.';
   showOnly('sec-loading');
   startFullReportTimer();
@@ -2073,7 +2073,7 @@ async function generateFullReport() {
       // delivered) — the stored record will never flip to "sent", so
       // continuing to poll would just say "almost there" forever.
       stopFullReportTimer();
-      document.getElementById('loadingTitle').textContent = 'Something went wrong';
+      setLoadingTitle('Something went wrong');
       document.getElementById('loadingDesc').textContent = 'We couldn\'t finish generating your report. Please start a new analysis and double-check your email address. If this keeps happening, contact info@oneciak.com.';
       document.getElementById('loadingRetryBtn').style.display = 'none';
       return;
@@ -2084,7 +2084,7 @@ async function generateFullReport() {
         // The server has already marked this generation "sent" — polling
         // again would just return the same incomplete data, so retrying
         // client-side can't help. A fresh report is the only real fix.
-        document.getElementById('loadingTitle').textContent = 'Something went wrong';
+        setLoadingTitle('Something went wrong');
         document.getElementById('loadingDesc').textContent = 'Your report came back incomplete. Please start a new analysis. If this keeps happening, contact info@oneciak.com.';
         document.getElementById('loadingRetryBtn').style.display = 'none';
         return;
@@ -2104,7 +2104,7 @@ async function generateFullReport() {
 
   if (myGenId !== fullReportGenerationId) return;
   stopFullReportTimer();
-  document.getElementById('loadingTitle').textContent = 'Almost there';
+  setLoadingTitle('Almost there');
   document.getElementById('loadingDesc').textContent = 'Your report is taking a bit longer than usual to prepare. It\'s still being generated: we\'ll email it to you as soon as it\'s ready. Tap below to keep checking, or just close this page and check your inbox in a few minutes.';
   document.getElementById('loadingRetryBtn').style.display = 'inline-flex';
 }
@@ -2731,6 +2731,24 @@ function setHeroTitle(title, p) {
 /* The title fills the column on one line, up to 168px. A long name that
    would fall under 56px on one line wraps between words instead, in about
    three lines, never wider than its longest word allows (up to 120px). */
+/* The loading title on one line (Antonio: "il titolo deve stare su un unico
+   linea"): the CSS size, smaller when the film's name needs it, down to 24px;
+   past that (a very long name on a phone) it wraps. */
+function setLoadingTitle(text) {
+  var t = document.getElementById('loadingTitle');
+  t.textContent = text;
+  requestAnimationFrame(fitLoadingTitle);
+}
+function fitLoadingTitle() {
+  var t = document.getElementById('loadingTitle');
+  if (!t || !t.offsetParent) return;
+  t.style.fontSize = ''; t.style.whiteSpace = 'nowrap'; t.style.display = 'inline-block';
+  var max = parseFloat(getComputedStyle(t).fontSize), w = t.getBoundingClientRect().width;
+  t.style.whiteSpace = ''; t.style.display = '';
+  var room = t.parentNode.clientWidth - parseFloat(getComputedStyle(t.parentNode).paddingLeft) - parseFloat(getComputedStyle(t.parentNode).paddingRight);
+  if (w > room) t.style.fontSize = Math.max(24, Math.floor(max * room / w)) + 'px';
+}
+window.addEventListener('resize', fitLoadingTitle);
 function fitTitle() {
   var t = document.getElementById('resultTitle');
   if (!t || !t.textContent || !t.offsetParent) return;
@@ -3018,7 +3036,7 @@ async function runAnalysis() {
   document.getElementById('sampleBanner').style.display = 'none';
   document.getElementById('againBtn').style.display = '';
   showOnly('sec-loading');
-  document.getElementById('loadingTitle').textContent = 'Reading \u201C'+p.title+'\u201D';
+  setLoadingTitle('Reading \u201C'+p.title+'\u201D');
   document.getElementById('loadingDesc').textContent = 'Scoring it across the five areas.';
   try {
     var result = await callFullAPI(p);
@@ -3090,7 +3108,7 @@ async function startFreeFullReport(email) {
   track('full_report_requested');
   try {
     showOnly('sec-loading');
-    document.getElementById('loadingTitle').textContent = 'Starting your full report…';
+    setLoadingTitle('Starting your full report…');
     document.getElementById('loadingDesc').textContent = 'It also arrives by email at "'+email+'", so you can close this page.';
       var res = await fetch('/.netlify/functions/start-full-report', {
       method: 'POST',
