@@ -47,9 +47,11 @@ for (const dev of ['tel','pc']) {
  // REPORT (the sample card's bars must have the report's colours)
  await open(p, BASE); await W(500);
  const cardBars=await p.evaluate(()=>[...document.querySelectorAll('.l-sheet-row .l-bar i')].map(i=>getComputedStyle(i).backgroundColor));
+ const cardNum=await p.evaluate(()=>getComputedStyle(document.querySelector('.l-sheet-score .n')).fontSize);
  await tap(p.locator('.l-sheet')); await W(1300);
  const repBars=await p.evaluate(()=>[...document.querySelectorAll('#accordionMenu .acc-bar i')].map(i=>getComputedStyle(i).backgroundColor));
  T(dev+' barre della scheda come quelle del report', JSON.stringify(cardBars)===JSON.stringify(repBars), JSON.stringify(cardBars)+' vs '+JSON.stringify(repBars));
+ const repNum=await p.evaluate(()=>getComputedStyle(document.querySelector('#overallScore .overall-num')).fontSize); T(dev+' voto della scheda grande come quello del report', cardNum===repNum, cardNum+' vs '+repNum);
  T(dev+' scheda Northbound apre il report', await p.evaluate(()=>document.getElementById('resultTitle').textContent.trim()==='Northbound'));
  if (dev==='tel') { const more=p.locator('#heroMore'); if(await more.count()){ await tap(more); await W(300); T(dev+' Read more apre il riassunto', await p.evaluate(()=>document.getElementById('resultSubtitle').classList.contains('is-open'))); } else T(dev+' Read more presente',false); }
  // areas: tap each, in order and back

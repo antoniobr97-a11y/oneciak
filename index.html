@@ -256,8 +256,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .l-sheet-title { display: block; font-family: var(--display); font-weight: 700; font-size: clamp(28px, 8vw, 40px); line-height: 0.95; letter-spacing: -0.05em; overflow-wrap: break-word; }
 .l-sheet-credits { display: block; margin-top: 10px; font-size: 14px; color: var(--on-night-2); }
 .l-sheet-score { display: flex; align-items: baseline; gap: 12px; margin-top: 22px; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.09); }
-.l-sheet-score .n { font-family: var(--display); font-size: 40px; font-weight: 300; letter-spacing: -0.04em; line-height: 1; }
-.l-sheet-score .n small { font-size: 18px; color: var(--on-night-2); }
+.l-sheet-score .n { font-family: var(--display); font-size: 32px; font-weight: 300; letter-spacing: -0.04em; line-height: 1; }
+.l-sheet-score .n small { font-size: 15px; color: var(--on-night-2); }
 .l-sheet-rows { display: block; }
 .l-sheet-row { display: grid; grid-template-columns: 1fr 96px 26px; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.09); font-size: 14px; }
 .l-sheet-row { align-items: start; }
@@ -625,8 +625,8 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
 }
 .overall-sublabel { font-size: 15px; color: var(--on-night-2); } /* a plain fact, not the model's three-word verdict ("Promising intimate concept, underdeveloped" read as AI, Antonio) */
-.overall-num { font-family: var(--display); font-size: 48px; font-weight: 300; letter-spacing: -0.04em; color: var(--on-night) !important; }
-.overall-num .denom { font-family: var(--display); font-size: 18px; font-weight: 300; color: var(--on-night-2); }
+.overall-num { font-family: var(--display); font-size: 32px; font-weight: 300; letter-spacing: -0.04em; color: var(--on-night) !important; } /* 32px on every screen and on the home card: 48 then 40 still read too big (Antonio, 26 Nov 2026) */
+.overall-num .denom { font-family: var(--display); font-size: 15px; font-weight: 300; color: var(--on-night-2); }
 #overallScore > div:last-child:not(.overall-card) { color: var(--on-night-2) !important; font-weight: 400 !important; padding: 0 !important; margin-top: 14px !important; font-size: 13px !important; }
 /* the night hero above is the "header"; the body starts right at the dissolve */
 /* body column lines up exactly with the header text: same max width plus
@@ -893,7 +893,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
   #sec-results .r-hero, #sec-myreports .r-hero { padding: 108px 20px 200px; }
   #sec-results .r-main, #sec-myreports .r-main { padding-left: 20px; padding-right: 20px; }
   .overall-card { padding: 20px; }
-  .overall-num { font-size: 40px; }
 }
 
 /* ══════════════════════
